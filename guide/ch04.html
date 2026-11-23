@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
+<title>Chapter 4. Create the cluster | Micro-segmentation lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&family=Noto+Sans+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="ar" href="../ar/guide/ch04.html">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400&text=%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9&display=swap">
+</head>
+<body class="">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="top-in">
+<a class="brand" href="../index.html">Micro-segmentation lab</a>
+<nav aria-label="Micro-segmentation lab"><ul>
+<li><a href="../index.html">Quick path</a></li>
+<li><a href="../guide/index.html" aria-current="page">Full guide</a></li>
+<li><a href="../downloads.html">Downloads</a></li>
+<li><a href="../ar/guide/ch04.html" lang="ar" hreflang="ar" data-setlang="ar">العربية</a></li>
+</ul></nav>
+</div></header>
+<div class="layout"><details class="rail" open><summary>Chapters</summary><nav aria-label="Chapters"><ol class="toc"><li><a href="ch00.html">0. How to use this guide</a></li><li><a href="ch01.html">1. What you will build</a></li><li><a href="ch02.html">2. Before you start</a></li><li><a href="ch03.html">3. Set up the environment</a></li><li><a href="ch04.html" aria-current="page">4. Create the cluster</a><ol class="sub"><li><a href="#write-kind-configyaml-the-shape-of-the-cluster">Write kind-config.yaml, the shape of the cluster</a></li><li><a href="#write-setupsh-the-one-time-setup-script">Write setup.sh, the one-time setup script</a></li><li><a href="#run-setupsh">Run setup.sh</a></li><li><a href="#check-the-nodes-and-their-tier-labels-kubectl-get-nodes">Check the nodes and their tier labels (kubectl get nodes)</a></li><li><a href="#check-ciliums-health-and-the-cluster-dns-address">Check Cilium's health and the cluster DNS address</a></li><li><a href="#connect-the-hubble-command-to-hubble-relay-port-4245">Connect the hubble command to Hubble Relay (port 4245)</a></li><li><a href="#run-ciliums-connectivity-test">Run Cilium's connectivity test</a></li><li><a href="#clean-up-after-the-test-kubectl-delete-ns">Clean up after the test (kubectl delete ns)</a></li><li><a href="#open-the-hubble-ui-port-12000">Open the Hubble UI (port 12000)</a></li><li><a href="#checkpoint">Checkpoint</a></li></ol></li><li><a href="ch05.html">5. Write the services</a></li><li><a href="ch06.html">6. Deploy the portal</a></li><li><a href="ch07.html">7. Build your dashboard</a></li><li><a href="ch08.html">8. Attack the flat network</a></li><li><a href="ch09.html">9. Design the policy</a></li><li><a href="ch10.html">10. Apply micro-segmentation</a></li><li><a href="ch11.html">11. Read the evidence in Hubble</a></li><li><a href="ch12.html">12. Measure</a></li><li><a href="ch13.html">13. Getting unstuck alone</a></li><li><a href="ch14.html">14. Evidence for your report</a></li><li><a href="ch15.html">15. Day-by-day plan</a></li><li><a href="appendix.html">Appendices</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="chapter-4-create-the-cluster">Chapter 4. Create the cluster</h1>
+<p>At the end of this chapter you have a three-node Kubernetes cluster running inside Docker, with Cilium as its network plug-in, Hubble recording every connection, and the Hubble web page open in your Windows browser. You'll also run Cilium's own test suite against it. That test is the day-1 go/no-go: if it passes, Cilium works on your laptop and the rest of the guide can be built on top of it. Plan on about 2 hours, because the test alone can run for up to an hour.</p>
+<h2 id="write-kind-configyaml-the-shape-of-the-cluster">Write <code class="nw">kind-config.yaml</code>, the shape of the cluster</h2>
+<p>A cluster is a group of machines that Kubernetes runs as one system, and each machine in it is a node. kind makes every node a Docker container, so your "machines" are three containers inside Ubuntu. This file tells kind how many nodes to create, which Kubernetes version to put on them, and which port of your laptop leads into the cluster.</p>
+<p>Open a new file for it in VS Code from the Ubuntu terminal.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>code ~/microseg/kind-config.yaml</code></pre></figure>
+<p>As with <code class="nw">check-env.sh</code> in <a href="ch03.html">chapter 3</a>, VS Code opens an empty editor named after the file and creates the file when you save. Paste the content below. YAML, the format of this file, uses indentation to show which line belongs to which, so the spaces at the start of each line matter and tabs aren't allowed. Check that the status bar shows <code class="nw">LF</code>, then press Ctrl+S.</p>
+<figure class="code file"><figcaption><span class="lbl">File: kind-config.yaml</span><button type="button" class="copy" aria-label="Copy this file">Copy</button></figcaption><pre dir="ltr"><code># kind cluster for the lab: 1 control-plane + 2 workers.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+networking:
+  disableDefaultCNI: true       # Cilium is installed instead
+  kubeProxyMode: iptables       # kube-proxy stays, Cilium does not replace it
+nodes:
+- role: control-plane
+  image: kindest/node:v1.36.4
+- role: worker                  # will be named kind-worker
+  image: kindest/node:v1.36.4
+  labels:
+    tier: frontend
+  extraPortMappings:
+  - containerPort: 30080        # NodePort of the frontend Service
+    hostPort: 30080             # http://localhost:30080 in WSL and Windows
+    listenAddress: &quot;127.0.0.1&quot;  # not reachable from the LAN
+- role: worker                  # will be named kind-worker2
+  image: kindest/node:v1.36.4
+  labels:
+    tier: backend</code></pre></figure>
+<p>(1) <code class="nw">kind: Cluster</code> and <code>apiVersion: kind.x-k8s.io/v1alpha4</code> tell kind what kind of file this is and which version of its format it uses. Every kind config starts with these two lines.</p>
+<p>(2) <code class="nw">disableDefaultCNI: true</code> stops kind from installing its own small network plug-in, kindnet. The network plug-in (CNI) is the program that gives every pod an address and carries its traffic. kindnet knows nothing about CiliumNetworkPolicy, the policy type with HTTP rules that this project depends on, and it has no Hubble. So the cluster starts without any plug-in and you install Cilium instead.</p>
+<p>(3) <code class="nw">kubeProxyMode: iptables</code> keeps kube-proxy, the Kubernetes part that makes a Service's fixed address lead to the pods behind it, working the standard way. A pod is the smallest thing Kubernetes runs, one or more containers that share a network address, and a Service is a fixed name and address in front of a group of pods. Cilium could take over kube-proxy's job, but this lab leaves it alone.</p>
+<p>(4) <code class="nw">nodes:</code> lists the three nodes. kind names them after the cluster. The file gives no cluster name, so the cluster is called <code class="nw">kind</code> and the nodes become <code class="nw">kind-control-plane</code>, <code class="nw">kind-worker</code> and <code class="nw">kind-worker2</code>, in the order they're listed.</p>
+<p>(5) <code class="nw">role: control-plane</code> makes the first node the control plane, the part of Kubernetes that stores the state of the cluster and decides which node each pod runs on. Your portal's pods never run there.</p>
+<p>(6) <code class="nw">image: kindest/node:v1.36.4</code> is the node image, the container image kind uses for a node, with Kubernetes 1.36.4 inside. kind v0.33.0 would pick Kubernetes 1.37 by default, and Cilium 1.20 doesn't support 1.37 yet, so every node names its image explicitly.</p>
+<p>(7) <code class="nw">role: worker</code> makes a worker node, a node that runs your pods. The first worker becomes <code class="nw">kind-worker</code>.</p>
+<p>(8) <code class="nw">labels:</code> with <code class="nw">tier: frontend</code> puts a label on the <code class="nw">kind-worker</code> node. A label is a <code class="nw">key: value</code> tag that Kubernetes objects carry. In <a href="ch06.html">chapter 6</a> the frontend and news pods ask for a node with <code class="nw">tier: frontend</code>, and the other pods ask for <code class="nw">tier: backend</code>. These node labels only decide where pods run. They don't separate anything on the network, and the policies in <a href="ch10.html">chapter 10</a> use the pods' own labels instead.</p>
+<p>(9) <code class="nw">extraPortMappings:</code> opens a door from your laptop into the <code class="nw">kind-worker</code> container. <code class="nw">containerPort: 30080</code> is the port inside the container, where Kubernetes will open the frontend Service in <a href="ch06.html">chapter 6</a> as a NodePort, a Service type that opens the same port on the nodes' own addresses. <code class="nw">hostPort: 30080</code> is the port on Ubuntu's side. <code class="nw">listenAddress: "127.0.0.1"</code> makes that port listen only on <code class="nw">localhost</code>, so other computers on your Wi-Fi can't reach the portal. WSL's <code class="nw">localhostForwarding</code>, which you set in <a href="ch03.html">chapter 3</a>, then passes <code class="nw">localhost:30080</code> on to Windows.</p>
+<p>(10) The last node is the second worker, <code class="nw">kind-worker2</code>, with the label <code class="nw">tier: backend</code>. It has no port mapping because nothing outside the cluster talks to the backend directly.</p>
+<figure class="fig"><a href="../files/figures/fig03-en.png"><img src="../files/figures/web/fig03-en.png" alt="Campus Portal architecture" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>Campus Portal architecture</figcaption></figure>
+<p>Figure 3 has only one way in from outside. Your browser's request goes to <code class="nw">localhost:30080</code>, through the port mapping into <code class="nw">kind-worker</code> and on to the frontend pod, and every other service sits behind frontend.</p>
+<h2 id="write-setupsh-the-one-time-setup-script">Write <code class="nw">setup.sh</code>, the one-time setup script</h2>
+<p><code class="nw">setup.sh</code> creates the cluster, installs Cilium and Hubble, and copies two stock images into the nodes. You run it once now and again only if you ever rebuild the cluster from scratch. Open a new file with <code class="nw">code ~/microseg/setup.sh</code>, paste the content below, check that the status bar shows <code class="nw">LF</code> and save it with Ctrl+S.</p>
+<figure class="code file"><figcaption><span class="lbl">File: setup.sh</span><button type="button" class="copy" aria-label="Copy this file">Copy</button></figcaption><pre dir="ltr"><code>#!/bin/bash
+# One-time setup. Run from WSL:  bash ~/microseg/setup.sh
+set -e
+cd ~/microseg
+
+kind create cluster --config kind-config.yaml
+
+cilium install --version 1.20.5 \
+  --set kubeProxyReplacement=false \
+  --set ipam.mode=kubernetes \
+  --set hubble.relay.enabled=true \
+  --set hubble.ui.enabled=true
+cilium status --wait --wait-duration 15m
+
+docker pull nginx:1.28
+docker pull postgres:17
+mkdir -p images
+docker image save --platform linux/amd64 --output images/nginx.tar nginx:1.28
+docker image save --platform linux/amd64 --output images/postgres.tar postgres:17
+kind load image-archive images/nginx.tar
+kind load image-archive images/postgres.tar
+
+kubectl get nodes --show-labels</code></pre></figure>
+<p>(1) <code class="nw">#!/bin/bash</code> says the file is a bash script. The comment line under it says how to run it.</p>
+<p>(2) <code class="nw">set -e</code> makes the script stop at the first command that fails. Without it, a failed cluster creation would be followed by an install into a cluster that doesn't exist, and the real error would scroll out of sight.</p>
+<p>(3) <code class="nw">cd ~/microseg</code> moves into the project folder, so <code class="nw">kind-config.yaml</code> and <code class="nw">images/</code> are found wherever you start the script from.</p>
+<p>(4) <code>kind create cluster --config kind-config.yaml</code> starts three Docker containers, boots Kubernetes inside them and joins the two workers to the control plane. It also writes a kubectl context, kubectl's saved settings for reaching a cluster, named <code class="nw">kind-kind</code>, and makes it the current one, so every <code class="nw">kubectl</code> command from now on talks to this cluster. Right after this line all three nodes are <code class="nw">NotReady</code>. Kubernetes marks a node ready only once a network plug-in is running on it, and you switched kind's plug-in off in <code class="nw">kind-config.yaml</code>.</p>
+<p>(5) <code>cilium install --version 1.20.5</code> installs Cilium 1.20.5 into the cluster. Without <code class="nw">--version</code>, the cilium command would install 1.20.3, as you saw in <a href="ch03.html">chapter 3</a>. Cilium comes as a Helm chart, a package of Kubernetes objects with settings you can change, and each <code class="nw">--set</code> changes one setting. The <code class="nw">\</code> at the end of a line continues the same command on the next line, so these five lines are one command.</p>
+<p>(6) <code>--set kubeProxyReplacement=false</code> tells Cilium to leave kube-proxy in charge of Services, matching <code class="nw">kubeProxyMode: iptables</code> in the kind file.</p>
+<p>(7) <code class="nw">--set ipam.mode=kubernetes</code> sets IPAM, IP address management, the job of handing out pod addresses. In this mode Cilium uses the address range Kubernetes gave each node, which is what kind expects.</p>
+<p>(8) <code>--set hubble.relay.enabled=true</code> turns on Hubble Relay. Cilium runs on every node and records the connections that pass through that node. Hubble Relay collects those records from all three nodes into one place, so the <code class="nw">hubble</code> command and the web page see the whole cluster at once.</p>
+<p>(9) <code class="nw">--set hubble.ui.enabled=true</code> installs the Hubble web page you'll open at the end of this chapter.</p>
+<p>(10) <code class="nw">cilium status --wait</code> waits until every part of Cilium reports that it's healthy, and prints the status while it waits. <code class="nw">--wait-duration 15m</code> lets it wait up to 15 minutes instead of the default 5, because on an ordinary home or university connection the three nodes need about 10 minutes to download Cilium's images.</p>
+<p>(11) <code class="nw">docker pull nginx:1.28</code> and <code class="nw">docker pull postgres:17</code> download the two stock images the portal uses, the nginx web server for the frontend and the PostgreSQL database.</p>
+<p>(12) <code class="nw">mkdir -p images</code> creates the <code class="nw">images</code> folder for image archives. <code class="nw">-p</code> means there's no error if the folder already exists. The <code class="nw">.gitignore</code> from <a href="ch02.html">chapter 2</a> keeps this folder out of Git, because the archives are large and can always be recreated.</p>
+<p>(13) <code>docker image save --platform linux/amd64 --output images/nginx.tar nginx:1.28</code> writes the image into a single archive file, and the next line does the same for postgres. <code class="nw">--platform linux/amd64</code> saves only the variant of the image built for your processor type, amd64, which is the only variant the nodes need and the only one Docker downloaded. Without it, the archive can list variants that aren't there, and kind fails to load it.</p>
+<p>(14) <code>kind load image-archive images/nginx.tar</code> copies the image from the archive into every node. Each node keeps its own image store, separate from Ubuntu's Docker, so an image Docker has isn't automatically available inside the cluster. Loading it here means the nodes never have to download it from Docker Hub themselves. Docker Hub limits how many downloads one address may make without an account, and three nodes downloading the same images use that allowance up faster. <a href="ch06.html">Chapter 6</a> loads your own images the same way.</p>
+<p>(15) <code>kubectl get nodes --show-labels</code> lists the nodes with all their labels, as a last look at the result.</p>
+<p>Before running anything, check that both files were saved with Linux line endings.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+file kind-config.yaml setup.sh</code></pre></figure>
+<p><code class="nw">file</code> looks inside a file and names its type.</p>
+<p><strong>You should see</strong> one line per file.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>kind-config.yaml: ASCII text
+setup.sh:         Bourne-Again shell script, ASCII text executable</code></pre></figure>
+<p>Neither line may contain the words <code class="nw">with CRLF line terminators</code>. If one does, that file was saved with Windows line endings. Open it in VS Code, click <code class="nw">CRLF</code> in the status bar, choose <code class="nw">LF</code> and save again.</p>
+<h2 id="run-setupsh">Run <code class="nw">setup.sh</code></h2>
+<p>The script needs 6 to 15 minutes, most of it while the nodes download Cilium's images and Cilium starts. Run it from the Ubuntu terminal and leave the window open until the prompt comes back. For the first few minutes it prints red error lines. Those are expected, and the text under the output below shows what they look like.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+bash setup.sh</code></pre></figure>
+<p><strong>You should see</strong> the script end with the node list, one line each for <code class="nw">kind-control-plane</code>, <code class="nw">kind-worker</code> and <code class="nw">kind-worker2</code>, all <code class="nw">Ready</code>.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>NAME                 STATUS   ROLES           AGE     VERSION   LABELS
+kind-control-plane   Ready    control-plane   5m13s   v1.36.4   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=kind-control-plane,kubernetes.io/os=linux,node-role.kubernetes.io/control-plane=,node.kubernetes.io/exclude-from-external-load-balancers=
+kind-worker          Ready    &lt;none&gt;          4m59s   v1.36.4   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=kind-worker,kubernetes.io/os=linux,tier=frontend
+kind-worker2         Ready    &lt;none&gt;          4m59s   v1.36.4   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=kind-worker2,kubernetes.io/os=linux,tier=backend</code></pre></figure>
+<p>All three nodes must show <code class="nw">Ready</code>. <code class="nw">kind-worker</code> must carry <code class="nw">tier=frontend</code> at the end of its labels and <code class="nw">kind-worker2</code> must carry <code class="nw">tier=backend</code>. The ages will differ on your laptop.</p>
+<p>On the way there the output is long. kind prints its progress with small pictures, then the cilium command reports what it detected and starts waiting. While it waits, it prints a status block again and again, and for the first minutes those blocks contain red error lines like these.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code> /¯¯\__/¯¯\    Cilium:             1 errors, 3 warnings
+ \__/¯¯\__/    Operator:           1 errors, 2 warnings</code></pre></figure>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>Errors:                cilium             cilium                              3 pods of DaemonSet cilium are not ready</code></pre></figure>
+<p>That's normal while Cilium is starting. A DaemonSet is a Kubernetes object that runs one copy of a pod on every node, so Cilium's agent runs three times, once per node, and the errors only mean those copies haven't finished starting yet. Leave it alone and the blocks stop by themselves once everything is healthy. Then the image downloads and loads run, and the script ends with the node list above.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>ERROR: failed to create cluster: could not find a log line that matches &quot;Reached target .*Multi-User System.*|detected cgroup v1&quot;</code></pre></figure>
+<p>A node container started but its systemd never finished booting, almost always because the inotify limits from <a href="ch03.html">chapter 3</a> aren't active. Run <code>sysctl fs.inotify.max_user_watches fs.inotify.max_user_instances</code> and compare with <a href="ch03.html">chapter 3</a>. If the values are lower, repeat the inotify step there. Then remove the half-built cluster with <code class="nw">kind delete cluster</code> and run <code class="nw">bash setup.sh</code> again.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>ERROR: failed to create cluster: node(s) already exist for a cluster with the name &quot;kind&quot;</code></pre></figure>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>Bind for 127.0.0.1:30080 failed: port is already allocated</code></pre></figure>
+<p>A cluster from an earlier attempt still exists, or another container holds port 30080. Run <code class="nw">kind delete cluster</code>, which removes the cluster named <code class="nw">kind</code> and its containers, then run <code class="nw">bash setup.sh</code> again. If the second message comes back, run <code class="nw">docker ps</code> and look in the PORTS column for the container that holds <code class="nw">127.0.0.1:30080</code>, then remove it with <code class="nw">docker rm -f</code> followed by the name shown in its NAMES column.</p>
+<p>The red error lines never go away, and after 15 minutes the script stops. <code class="nw">cilium status --wait</code> gives up when its 15 minutes run out, and it may end with a long crash dump that starts like this, followed by many lines of <code class="nw">goroutine</code> details:</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>fatal error: all goroutines are asleep - deadlock!</code></pre></figure>
+<p>That dump only means the waiting ran out of time. Nothing is broken yet. Find out what the Cilium pods are doing.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n kube-system get pods</code></pre></figure>
+<p><code class="nw">-n kube-system</code> looks in the namespace <code class="nw">kube-system</code>. A namespace is a named group that keeps Kubernetes objects apart, and Kubernetes and Cilium keep their own pods in this one. Look at the STATUS column of the pods whose names start with <code class="nw">cilium-</code>.</p>
+<p>If it shows <code class="nw">ContainerCreating</code>, <code class="nw">PodInitializing</code> or a value starting with <code class="nw">Init:</code>, Cilium's images are still downloading, which takes longer on a slow connection. Don't delete the cluster, because that throws the finished downloads away. Run <code class="nw">cilium status --wait</code> until the four top lines end in <code class="nw">OK</code>, then run the rest of <code class="nw">setup.sh</code> by hand with this block.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+docker pull nginx:1.28
+docker pull postgres:17
+mkdir -p images
+docker image save --platform linux/amd64 --output images/nginx.tar nginx:1.28
+docker image save --platform linux/amd64 --output images/postgres.tar postgres:17
+kind load image-archive images/nginx.tar
+kind load image-archive images/postgres.tar
+kubectl get nodes --show-labels</code></pre></figure>
+<p>If the STATUS column shows <code class="nw">ImagePullBackOff</code> or <code class="nw">ErrImagePull</code>, the nodes can't download Cilium's images at all. Check that Windows is online and that no VPN is running. Once the downloads work again, the status changes by itself, and you continue as in the previous paragraph.</p>
+<p>If it shows <code class="nw">CrashLoopBackOff</code>, the pods start and crash over and over. Read the end of the log from the copy that crashed.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n kube-system logs ds/cilium --previous --tail 20</code></pre></figure>
+<p><code class="nw">ds/cilium</code> means the DaemonSet named <code class="nw">cilium</code>, and kubectl picks one of its pods. <code class="nw">--previous</code> reads the log of the container that crashed, not the fresh one that restarted a moment ago and may have written nothing yet. <code class="nw">--tail 20</code> keeps the last 20 lines. If kubectl answers that there's no previous container, run the same command without <code class="nw">--previous</code>. If the lines mention <code class="nw">TPROXY</code>, <code class="nw">xt_socket</code> or <code class="nw">iptables</code>, a kernel module is missing. Go back to <a href="ch03.html">chapter 3</a>, check the <code class="nw">loadKernelModules</code> line and the <code class="nw">lsmod</code> output, and run <code class="nw">wsl --shutdown</code> from PowerShell after fixing the file. Then reopen Ubuntu, run <code class="nw">kind delete cluster</code> and <code class="nw">bash setup.sh</code> again.</p>
+<p>Errors that say <code class="nw">Read-only file system</code> or <code class="nw">Input/output error</code>, even for simple commands such as <code class="nw">ls</code>:</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>mkdir: cannot create directory &#x27;images&#x27;: Read-only file system</code></pre></figure>
+<p>Drive C: is full. Ubuntu's virtual disk could not grow, so Linux switched its disk to read-only to protect your files, and nothing can be written until you restart it. Check it with <code class="nw">mount | grep " / "</code>. If the line contains <code class="nw">emergency_ro</code>, this is the cause. On Windows, free at least 15 GB on C: as in <a href="ch03.html">chapter 3</a>'s free-space step. Then run <code class="nw">wsl --shutdown</code> in PowerShell, open Ubuntu again, and check that <code class="nw">mount | grep " / "</code> no longer shows <code class="nw">emergency_ro</code>. Finish with <code class="nw">cd ~/microseg</code>, <code class="nw">kind delete cluster</code> and <code class="nw">bash setup.sh</code>.</p>
+<p>An error from <code class="nw">docker pull</code> that contains this word:</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>toomanyrequests</code></pre></figure>
+<p>Docker Hub limits how many images one internet address may download without an account, and a university network shares one address among many people. The cluster already exists and Cilium is running, so don't delete anything. Wait an hour or connect the laptop to a phone hotspot, then run the block from the previous failure, which repeats the rest of <code class="nw">setup.sh</code> from <code class="nw">docker pull</code> onward.</p>
+<h2 id="check-the-nodes-and-their-tier-labels-kubectl-get-nodes">Check the nodes and their tier labels (<code class="nw">kubectl get nodes</code>)</h2>
+<p>Each node's tier label decides which pods it runs in <a href="ch06.html">chapter 6</a>, so check both the state and the label of every node.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl get nodes -L tier</code></pre></figure>
+<p><code class="nw">kubectl get nodes</code> lists the nodes. <code class="nw">-L tier</code> adds a column showing each node's <code class="nw">tier</code> label.</p>
+<p><strong>You should see</strong> three nodes, all <code class="nw">Ready</code>.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>NAME                 STATUS   ROLES           AGE     VERSION   TIER
+kind-control-plane   Ready    control-plane   5m14s   v1.36.4   
+kind-worker          Ready    &lt;none&gt;          5m      v1.36.4   frontend
+kind-worker2         Ready    &lt;none&gt;          5m      v1.36.4   backend</code></pre></figure>
+<p>The TIER column must be empty for <code class="nw">kind-control-plane</code>, <code class="nw">frontend</code> for <code class="nw">kind-worker</code> and <code class="nw">backend</code> for <code class="nw">kind-worker2</code>. VERSION must read <code class="nw">v1.36.4</code> on all three.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>The connection to the server localhost:8080 was refused - did you specify the right host or port?</code></pre></figure>
+<p>kubectl has no cluster to talk to, because <code class="nw">kind create cluster</code> never finished. Scroll up through the <code class="nw">setup.sh</code> output to its first <code class="nw">ERROR</code> line and use the failures listed in the previous step.</p>
+<p>One or more nodes show <code class="nw">NotReady</code>. Cilium hasn't started on that node yet. Wait two minutes and run the command again. If it stays <code class="nw">NotReady</code>, follow the <code class="nw">CrashLoopBackOff</code> failure in the previous step.</p>
+<p>The TIER column is empty for the workers too. The cluster was created from a <code class="nw">kind-config.yaml</code> without the <code class="nw">labels:</code> lines, usually because the file wasn't saved before <code class="nw">setup.sh</code> ran, or because the indentation is wrong and kind read the labels as part of something else. Compare the file with the one above, save it, then run <code class="nw">kind delete cluster</code> and <code class="nw">bash setup.sh</code>.</p>
+<h2 id="check-ciliums-health-and-the-cluster-dns-address">Check Cilium's health and the cluster DNS address</h2>
+<p><code class="nw">cilium status</code> gives a one-screen report on every part of Cilium. Read it now, while the cluster is healthy, so you have a known-good report to compare against when something breaks later.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cilium status</code></pre></figure>
+<p><strong>You should see</strong> a status block followed by a table of Cilium's parts.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>    /¯¯\
+ /¯¯\__/¯¯\    Cilium:             OK
+ \__/¯¯\__/    Operator:           OK
+ /¯¯\__/¯¯\    Envoy DaemonSet:    OK
+ \__/¯¯\__/    Hubble Relay:       OK
+    \__/       ClusterMesh:        disabled
+
+DaemonSet              cilium                   Desired: 3, Ready: 3/3, Available: 3/3
+DaemonSet              cilium-envoy             Desired: 3, Ready: 3/3, Available: 3/3
+Deployment             cilium-operator          Desired: 1, Ready: 1/1, Available: 1/1
+Deployment             hubble-relay             Desired: 1, Ready: 1/1, Available: 1/1
+Deployment             hubble-ui                Desired: 1, Ready: 1/1, Available: 1/1
+Containers:            cilium                   Running: 3
+                       cilium-envoy             Running: 3
+                       cilium-operator          Running: 1
+                       clustermesh-apiserver    
+                       hubble-relay             Running: 1
+                       hubble-ui                Running: 1
+Cluster Pods:          5/5 managed by Cilium
+Helm chart version:    1.20.5
+Image versions         cilium             quay.io/cilium/cilium:v1.20.5@sha256:aa72499f075ad729947ea91b026218aceba24f1a8e4534bf36b8368c7c561526: 3
+                       cilium-envoy       quay.io/cilium/cilium-envoy:v1.39.6-1794557904-dee711ff0e84b106edd0abcdd71961af1b870359@sha256:bdef13043ebaa7b9dcd8e3a86be41080bb5369e017cd759a12daf89e2b8fafe7: 3
+                       cilium-operator    quay.io/cilium/operator-generic:v1.20.5@sha256:c6e7de6665aa9701db86c4fe46828a75a0d167afe084a9ffb5bce34b2c4fa8c4: 1
+                       hubble-relay       quay.io/cilium/hubble-relay:v1.20.5@sha256:d0b3f5b944adc4a79f82ac51bcdc2d723b734c2c97872d8551626ad48b3c5538: 1
+                       hubble-ui          quay.io/cilium/hubble-ui-backend:v0.13.6@sha256:83b3fc763f3d49948c306bf49b08277383e195904b9ca5c0c0022b2112628787: 1
+                       hubble-ui          quay.io/cilium/hubble-ui:v0.13.6@sha256:049a80a03585c043d0c3121bdc518c72b0fd42bae07e4bcce0fdb8f1e88041d0: 1</code></pre></figure>
+<p>In the block at the top, the lines for Cilium, Operator, Envoy DaemonSet and Hubble Relay must each end in <code class="nw">OK</code>, and <code class="nw">disabled</code> on the ClusterMesh line is expected. In the five rows that start with <code class="nw">DaemonSet</code> or <code class="nw">Deployment</code>, the count after <code class="nw">Ready:</code> must be full, such as <code class="nw">3/3</code>, and its numbers must match the number after <code class="nw">Desired:</code>. A Deployment, the kind of object in the <code class="nw">cilium-operator</code> and <code class="nw">hubble-relay</code> rows, keeps a set number of copies of a pod running. <code class="nw">Helm chart version:</code> must read <code class="nw">1.20.5</code>. The long <code class="nw">sha256:</code> codes after the image names are fingerprints of the exact images and may differ.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p><code class="nw">Helm chart version:</code> reads <code class="nw">1.20.3</code>. Cilium was installed without <code class="nw">--version 1.20.5</code>, usually because that part of <code class="nw">setup.sh</code> was changed. Compare the file with the one in this chapter, save it, then run <code class="nw">kind delete cluster</code> and <code class="nw">bash setup.sh</code>.</p>
+<p>One of the four top lines still shows errors. Wait two minutes and run <code class="nw">cilium status</code> again. If the errors stay, follow the <code class="nw">CrashLoopBackOff</code> failure in the <code class="nw">setup.sh</code> step.</p>
+<p>Next, read the address of the cluster's DNS service, the service that turns names such as <code class="nw">db</code>, your database Service from <a href="ch06.html">chapter 6</a>, into addresses. The nginx settings you write in <a href="ch05.html">chapter 5</a> contain this address.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n kube-system get svc kube-dns</code></pre></figure>
+<p><code class="nw">get svc kube-dns</code> shows the Service named <code class="nw">kube-dns</code>.</p>
+<p><strong>You should see</strong> one row for <code class="nw">kube-dns</code>.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>NAME       TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)                  AGE
+kube-dns   ClusterIP   10.96.0.10   &lt;none&gt;        53/UDP,53/TCP,9153/TCP   5m11s</code></pre></figure>
+<p>CLUSTER-IP must read <code class="nw">10.96.0.10</code>. kind always gives the DNS service this address, so if yours differs, your <code class="nw">kind-config.yaml</code> has extra lines. Compare it with the file above and rebuild with <code class="nw">kind delete cluster</code> and <code class="nw">bash setup.sh</code>.</p>
+<h2 id="connect-the-hubble-command-to-hubble-relay-port-4245">Connect the hubble command to Hubble Relay (port 4245)</h2>
+<p>Hubble Relay runs inside the cluster, and the <code class="nw">hubble</code> command in Ubuntu can't reach it on its own. A port-forward fixes that. It's a tunnel that kubectl or the cilium command opens through the Kubernetes control plane, from a port on your laptop to a port inside the cluster.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cilium hubble port-forward &amp;
+sleep 5
+hubble status</code></pre></figure>
+<p><code class="nw">cilium hubble port-forward</code> opens the tunnel to Hubble Relay on port 4245 of your laptop, where the <code class="nw">hubble</code> command looks by default. The <code class="nw">&amp;</code> at the end runs it in the background, so it keeps running while you type other commands. <code class="nw">sleep 5</code> waits five seconds for the tunnel to open, and <code class="nw">hubble status</code> asks Hubble Relay for its state.</p>
+<p><strong>You should see</strong> Hubble's report on its own state.</p>
+<p>A line such as <code class="nw">[1] 2817</code> may come first. That's bash telling you the job number and process number it gave the background command, and yours will differ. In Hubble's report, the line that must match is <code class="nw">Connected Nodes: 3/3</code>, which means Relay is collecting records from all three nodes. The <code class="nw">Current/Max Flows</code> count fills up to its maximum within minutes and then stays there, and <code class="nw">Flows/s</code> changes all the time. The port-forward may also print a line of its own, now or later. If the prompt seems to disappear after that, press Enter to get it back.</p>
+<p>A background command belongs to the terminal that started it. When you close this terminal, the port-forward stops, and you run the same <code>cilium hubble port-forward &amp;</code> line again in the next session that needs Hubble. This tunnel is only for reading Hubble's records. Never use a port-forward for the attack in <a href="ch08.html">chapter 8</a>, because its traffic skips the point where Cilium checks policy and the attack would always succeed.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>A long error from <code class="nw">hubble status</code> that ends in this text:</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>connect: connection refused</code></pre></figure>
+<p>The tunnel wasn't open yet, or it failed to start. Run <code class="nw">jobs</code>, which lists this terminal's background commands. If the port-forward isn't listed as <code class="nw">Running</code>, start it again with <code>cilium hubble port-forward &amp;</code>, wait a few seconds and run <code class="nw">hubble status</code> again.</p>
+<p>An error from the port-forward containing this text:</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>bind: address already in use</code></pre></figure>
+<p>A port-forward is already running, probably in another terminal window. That's fine, since one is enough. Run <code class="nw">hubble status</code> and check for <code class="nw">Connected Nodes: 3/3</code>.</p>
+<h2 id="run-ciliums-connectivity-test">Run Cilium's connectivity test</h2>
+<p>The connectivity test is Cilium's own test suite. It deploys test pods into three namespaces of its own, <code class="nw">cilium-test-1</code>, <code class="nw">cilium-test-ccnp1</code> and <code class="nw">cilium-test-ccnp2</code>, and then works through a list of 138 tests: pods reaching pods on the same node and on the other node, pods reaching Services, DNS, network policies that must allow or block traffic, HTTP rules enforced by Envoy, and pods reaching the internet. About 83 of them run on this setup, and the rest are skipped because they don't apply. If it passes on your laptop, the Cilium features this guide relies on work here too. You also save its output, because <a href="ch14.html">chapter 14</a> uses it as evidence in your thesis.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>mkdir -p ~/microseg/evidence
+cilium connectivity test --flow-validation=disabled 2&gt;&amp;1 | tee ~/microseg/evidence/E05-connectivity-test.txt
+echo &quot;exit code ${PIPESTATUS[0]}&quot; | tee -a ~/microseg/evidence/E05-connectivity-test.txt</code></pre></figure>
+<p>(1) <code class="nw">mkdir -p ~/microseg/evidence</code> creates the folder where you keep outputs for your thesis.</p>
+<p>(2) <code class="nw">cilium connectivity test</code> runs the whole suite and prints every test as it goes. Normally it also compares each connection with Hubble's records of it. On this setup Cilium sums those records up to save work, so the comparison can't find every record it expects and fails tests whose connections worked. <code class="nw">--flow-validation=disabled</code> switches that comparison off. Each test still passes or fails on whether its connections succeeded or were blocked as the test expects. <code class="nw">2&gt;&amp;1</code> sends error messages into the same stream as normal output, and <code class="nw">tee</code> shows everything on the screen and also saves it in the file named after it.</p>
+<p>(3) An exit code is a number every program leaves behind when it finishes: 0 means success, anything else means failure. <code class="nw">${PIPESTATUS[0]}</code> holds the exit code of the first command in the line before, here <code class="nw">cilium connectivity test</code>. The usual <code class="nw">$?</code> would give you the exit code of <code class="nw">tee</code>, which is 0 even when the test failed. <code class="nw">tee -a</code> adds the line to the end of the file instead of replacing the file.</p>
+<p>The test runs its tests one after another, and each one prints a line ending in a counter such as <code class="nw">[42/138]</code>, so you can see how far it has got. It can take up to an hour. Leave the terminal open and let it run to the end.</p>
+<p><strong>You should see</strong> the summary of the run, then the exit code.</p>
+<p>The last line must read <code class="nw">exit code 0</code>, and the summary above it must say the tests were successful, with no failed test named. The numbers of tests that ran and were skipped can differ from the ones shown.</p>
+<p>Lines on the way saying a test is skipped, such as <code>Skipping test ... requires Cilium version &gt;=1.21.0</code> or <code class="nw">(skipped by condition)</code>, are normal. They mean the test doesn't apply to this setup. A line that starts with <code class="nw">❌</code> is a real failure. A run with failures ends with a summary that counts the failed tests and lists each one by name below that count, and the exit code is a number other than 0.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>The output stays on a line like this one for more than 5 minutes.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>⌛ [kind-kind] Waiting for deployment cilium-test-1/client to become ready...</code></pre></figure>
+<p>The test pods can't start, usually because their images can't download. Open a second Ubuntu window and run <code>kubectl -n cilium-test-1 get pods</code>. <code class="nw">ImagePullBackOff</code> or <code class="nw">ErrImagePull</code> in the STATUS column means the downloads fail. Fix the connection or switch to a phone hotspot, press Ctrl+C in the first window, delete the test namespaces with the command in the next step and run the test again.</p>
+<p>The summary lists failed tests, and every one of them is a test that reaches outside the cluster. Their names contain <code class="nw">to-fqdns</code>, <code class="nw">pod-to-world</code> or <code class="nw">pod-to-cidr</code>, or they target <code class="nw">1.1.1.1</code> or <code class="nw">one.one.one.one</code>. Your network blocks those addresses, which is common on university and office networks. Cilium is fine, and nothing in this project needs the internet from inside the cluster. To get a clean result for your records, connect the laptop to a phone hotspot, delete the test namespaces as in the next step and run the test again.</p>
+<p>One or two tests fail and they aren't internet tests. Delete the test namespaces and run the test once more. If the same tests fail again and <code class="nw">cilium status</code> still shows the four top lines ending in <code class="nw">OK</code>, write the names of those tests in your progress tracker and go on. <a href="ch10.html">Chapter 10</a> tests the features this project depends on directly.</p>
+<p>Many different tests fail, including tests between pods. Something in Cilium isn't healthy. Run <code class="nw">cilium status</code>, fix what it reports using the steps earlier in this chapter, delete the test namespaces and run the test again. If it still fails after that, switch to appendix A, which builds the same lab in an Ubuntu virtual machine instead of WSL. Do it the same evening, while the rest of the schedule can still absorb it.</p>
+<p>The test stopped halfway because the terminal closed or you pressed Ctrl+C. Delete the test namespaces and start it again. It always starts from the beginning.</p>
+<h2 id="clean-up-after-the-test-kubectl-delete-ns">Clean up after the test (<code class="nw">kubectl delete ns</code>)</h2>
+<p>The test leaves its namespaces behind. Delete them so they don't use memory for the rest of the project.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl delete ns cilium-test-1 cilium-test-ccnp1 cilium-test-ccnp2 --ignore-not-found</code></pre></figure>
+<p><code class="nw">kubectl delete ns</code> deletes the namespaces named after it, with everything inside them. <code class="nw">--ignore-not-found</code> stops kubectl from complaining about a name that doesn't exist.</p>
+<p><strong>You should see</strong> one line per deleted namespace. The command can take a minute, because Kubernetes stops every pod inside first.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>The prompt comes back with no output at all. The namespaces were already gone, which is fine, and <code class="nw">--ignore-not-found</code> kept kubectl quiet about it.</p>
+<h2 id="open-the-hubble-ui-port-12000">Open the Hubble UI (port 12000)</h2>
+<p>The Hubble UI is a web page that draws the connections Hubble records as a map, with every allowed and dropped flow listed under it. You'll use it in chapters 8 and 11 to show the attack moving through the network and then being stopped.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cilium hubble ui --open-browser=false &amp;
+sleep 5
+curl -s -o /dev/null -w &quot;%{http_code}\n&quot; http://localhost:12000/</code></pre></figure>
+<p><code class="nw">cilium hubble ui</code> opens a port-forward from port 12000 on your laptop to the Hubble UI inside the cluster. It would also try to open a browser, but Ubuntu in WSL has none, so <code class="nw">--open-browser=false</code> switches that off and you open the page from Windows. <code class="nw">&amp;</code> runs it in the background again. The <code class="nw">curl</code> line asks for the page and prints only the HTTP status code: <code class="nw">-s</code> hides progress, <code class="nw">-o /dev/null</code> throws the page itself away, and <code class="nw">-w "%{http_code}\n"</code> prints the code followed by a line break.</p>
+<p><strong>You should see</strong> a status code on the last line.</p>
+<p>The last line must be <code class="nw">200</code>, the HTTP code for "OK, here is the page". Any line before it, such as <code class="nw">[2] 2954</code>, comes from bash or from the cilium command starting in the background, and differs on every run.</p>
+<p>Now open Edge or Chrome on Windows and go to <code class="nw">http://localhost:12000</code>. The Hubble page loads and asks you to choose a namespace. Choose <code class="nw">kube-system</code>. After a few seconds, boxes appear for the programs that talk to each other there, joined by lines, and the list of flows under the map fills up. Your own portal appears here from <a href="ch06.html">chapter 6</a> on, in the namespace <code class="nw">campus</code>.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>000</code></pre></figure>
+<p>curl couldn't connect at all, because the UI's port-forward wasn't ready yet. Wait ten seconds and run the <code class="nw">curl</code> line again. If it still prints <code class="nw">000</code>, run <code class="nw">jobs</code>, and if <code class="nw">cilium hubble ui</code> isn't listed as running, start it again.</p>
+<p>The <code class="nw">curl</code> line prints <code class="nw">200</code> in Ubuntu, but the Windows browser says it can't reach <code class="nw">localhost</code>. Windows isn't receiving WSL's ports, so check that <code class="nw">localhostForwarding=true</code> is in your <code class="nw">.wslconfig</code> (<a href="ch03.html">chapter 3</a>). WSL reads that file only when it starts, so after fixing it, run <code class="nw">wsl --shutdown</code> in PowerShell and reopen Ubuntu. The cluster comes back by itself, because its nodes are Docker containers that start again with Docker. Wait until <code class="nw">kubectl get nodes</code> shows all three nodes <code class="nw">Ready</code>, which can take two minutes, then open both tunnels again.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cilium hubble port-forward &amp;
+cilium hubble ui --open-browser=false &amp;</code></pre></figure>
+<p>Open <code class="nw">http://localhost:12000</code> in the Windows browser once more.</p>
+<h2 id="checkpoint">Checkpoint</h2>
+<p>Run these two commands. The first lists the nodes again, and the second prints the last line of the connectivity test you saved.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl get nodes -L tier
+tail -n 1 ~/microseg/evidence/E05-connectivity-test.txt</code></pre></figure>
+<p>Three nodes must be <code class="nw">Ready</code>, with <code class="nw">frontend</code> in the TIER column for <code class="nw">kind-worker</code> and <code class="nw">backend</code> for <code class="nw">kind-worker2</code>. The last line must read <code class="nw">exit code 0</code>. A different exit code is only acceptable if the failed tests were the internet tests or the repeated one or two described in the connectivity test step. Write both results in your progress tracker. Don't start <a href="ch05.html">chapter 5</a> until both hold.</p>
+<p>Save this state in Git.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+git add -A
+git commit -m &quot;ch04: kind cluster with Cilium and Hubble&quot;</code></pre></figure>
+<p>The commit saves <code class="nw">kind-config.yaml</code>, <code class="nw">setup.sh</code> and the saved test output in <code class="nw">evidence/</code>. The <code class="nw">images/</code> folder stays out of it, because <code class="nw">.gitignore</code> names it. Git answers with a line that contains <code class="nw">main</code>, a short commit code and your message, followed by <code class="nw">3 files changed</code>.</p>
+<!-- OUT ids: ch06-file-check, ch06-setup, ch06-nodes, ch06-cilium-status, ch06-kube-dns, ch06-hubble-status, ch06-connectivity-test, ch06-delete-test-ns, ch06-hubble-ui, ch06-checkpoint --><nav class="pager" aria-label="Chapters"><a rel="prev" href="ch03.html"><span>Previous chapter</span>Chapter 3. Set up the environment</a><a rel="next" href="ch05.html"><span>Next chapter</span>Chapter 5. Write the services</a></nav></main></div>
+<footer class="foot"><div class="foot-in"><p>Kubernetes 1.36, Cilium 1.20.5 and kind 0.33.0 on Windows 11 with WSL 2. Every command was run on a real laptop in November 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">Source on GitHub</a></p></div></footer>
+<p class="vh" aria-live="polite" id="live"></p>
+<script type="application/json" id="i18n">{"copied": "Copied", "copyFail": "Press Ctrl+C to copy the selected text", "doneOf": "{d} of {t} steps done", "next": "Next step: {s}", "allDone": "All {t} steps done.", "sumCount": "{d} of {t} done", "cleared": "All ticks cleared.", "confirm": "Clear every tick on this page? Your files and your cluster stay as they are.", "stageCount": "{d} of {t}"}</script>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

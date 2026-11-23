@@ -1,0 +1,48 @@
+# 1) default-deny: selects every pod in campus. The empty ingress rule and the empty
+#    egress rule switch both directions to "deny unless another policy allows it".
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default-deny
+  namespace: campus
+spec:
+  endpointSelector: {}
+  ingress:
+  - {}
+  egress:
+  - {}
+---
+# 2) allow-dns: every pod may ask kube-dns (in kube-system) on port 53, for any name.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-dns
+  namespace: campus
+spec:
+  endpointSelector: {}
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        "k8s:io.kubernetes.pod.namespace": kube-system
+        "k8s:k8s-app": kube-dns
+    toPorts:
+    - ports:
+      - port: "53"
+        protocol: ANY
+      rules:
+        dns:
+        - matchPattern: "*"
+---
+# 3) allow-kubelet-probes: readiness probes come from the node itself (entity "host").
+#    Cilium already allows this by default. Writing it down makes the rule visible
+#    and keeps probes working if that default is ever changed.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-kubelet-probes
+  namespace: campus
+spec:
+  endpointSelector: {}
+  ingress:
+  - fromEntities:
+    - host

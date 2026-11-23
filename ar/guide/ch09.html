@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
+<title>الفصل 9. تصميم السياسة | مختبر التجزئة الدقيقة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;700&family=Public+Sans:wght@400;600;700&family=Noto+Sans+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="en" href="../../guide/ch09.html">
+
+</head>
+<body class="">
+<a class="skip" href="#main">الانتقال إلى المحتوى</a>
+<header class="top"><div class="top-in">
+<a class="brand" href="../../ar/index.html">مختبر التجزئة الدقيقة</a>
+<nav aria-label="مختبر التجزئة الدقيقة"><ul>
+<li><a href="../../ar/index.html">المسار السريع</a></li>
+<li><a href="../../ar/guide/index.html" aria-current="page">الدليل الكامل</a></li>
+<li><a href="../../ar/downloads.html">التنزيلات</a></li>
+<li><a href="../../guide/ch09.html" lang="en" hreflang="en" data-setlang="en">English</a></li>
+</ul></nav>
+</div></header>
+<div class="layout"><details class="rail" open><summary>الفصول</summary><nav aria-label="الفصول"><ol class="toc"><li><a href="ch00.html">0. كيف نستخدم هذا الدليل</a></li><li><a href="ch01.html">1. ما الذي سنبنيه</a></li><li><a href="ch02.html">2. قبل أن نبدأ</a></li><li><a href="ch03.html">3. تجهيز بيئة العمل</a></li><li><a href="ch04.html">4. إنشاء العنقود</a></li><li><a href="ch05.html">5. كتابة الخدمات</a></li><li><a href="ch06.html">6. نشر البوابة</a></li><li><a href="ch07.html">7. بناء لوحة التحكم</a></li><li><a href="ch08.html">8. مهاجمة الشبكة المسطحة</a></li><li><a href="ch09.html" aria-current="page">9. تصميم السياسة</a><ol class="sub"><li><a href="#هل-الشبكة-مسطحة-وهل-hubble-متصل">هل الشبكة مسطحة، وهل Hubble متصل؟</a></li><li><a href="#تشغيل-البوابة-بكل-وظائفها-مرتين">تشغيل البوابة بكل وظائفها، مرتين</a></li><li><a href="#من-اتصل-بمن-في-hubble">من اتصل بمن، في Hubble</a></li><li><a href="#مسارات-http-في-سجل-nginx">مسارات HTTP في سجل nginx</a></li><li><a href="#كتابة-جدول-التدفقات-ما-يبقى-مفتوحا">كتابة جدول التدفقات (ما يبقى مفتوحاً)</a></li><li><a href="#كتابة-جدول-المنع-ما-يبقى-مغلقا">كتابة جدول المنع (ما يبقى مغلقاً)</a></li><li><a href="#إذنان-لكل-اتصال-تأشيرة-الخروج-وتأشيرة-الدخول">إذنان لكل اتصال: تأشيرة الخروج وتأشيرة الدخول</a></li><li><a href="#نقطة-التحقق">نقطة التحقق</a></li></ol></li><li><a href="ch10.html">10. تطبيق التجزئة الدقيقة للشبكة</a></li><li><a href="ch11.html">11. قراءة الأدلة في Hubble</a></li><li><a href="ch12.html">12. القياس</a></li><li><a href="ch13.html">13. تجاوز الأعطال دون مساعدة</a></li><li><a href="ch14.html">14. أدلة بحث التخرج</a></li><li><a href="ch15.html">15. خطة العمل يوماً بيوم</a></li><li><a href="appendix.html">الملاحق</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="الفصل-9-تصميم-السياسة">الفصل 9. تصميم السياسة</h1>
+<p>قبل أن نكتب سطراً واحداً من أي سياسة، نعرف بالضبط ما الاتصالات التي تحتاجها البوابة. نجعل البوابة تؤدي عملها كاملاً بينما يسجّل Hubble كل اتصال، ثم نقرأ مسارات HTTP من سجل frontend، ونحوّل المصدرين إلى جدولين: جدول تدفقات يسرد الاتصالات الثمانية التي يجب أن تبقى مفتوحة، وجدول منع يسرد ما يجب أن يبقى مغلقاً وخطوة الهجوم التي يوقفها كل مسار مغلق. في نهاية الفصل يكون الجدولان محفوظين في المجلد <code class="nw">~/microseg/evidence/</code> ويطابق جدول التدفقات الجدول الذي رأيناه في <a href="ch01.html">الفصل 1</a>، ونعرف أي سياسة يجب أن تحمل كل إذن. يستغرق العمل نحو ساعة ونصف.</p>
+<h2 id="هل-الشبكة-مسطحة-وهل-hubble-متصل">هل الشبكة مسطحة، وهل Hubble متصل؟</h2>
+<p>لا تصف التدفقات البوابة وصفاً صحيحاً إلا إذا كانت الشبكة ما زالت مسطحة، وكانت أداة Hubble لسطر الأوامر قادرة على الوصول إلى Hubble Relay. بدأ <a href="ch04.html">الفصل 4</a> هذا الربط بالأمر <code>cilium hubble port-forward &amp;</code> وإعادة تشغيل الحاسوب تقطعه.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>kubectl -n campus get ciliumnetworkpolicies
+hubble status</code></pre></figure>
+<p>يجب ألا يجد الأمر الأول أي سياسة. أما <code class="nw">hubble status</code> فيسأل Hubble Relay، عبر port-forward على المنفذ 4245، عن عدد العقد (nodes) التي يجمع منها التدفقات.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> لا سياسات، وHubble بحالة سليمة.</p>
+<p>يجب أن يكون السطر الأول <code>No resources found in campus namespace.</code> وفي جزء <code class="nw">hubble status</code> السطر المهم هو <code class="nw">Connected Nodes: 3/3</code> أي أن العقد الثلاث كلها متصلة. أعداد التدفقات في الأسطر الأخرى تتغير كل ثانية.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<p>إذا أعطى <code class="nw">hubble status</code> خطأً طويلاً يحتوي هذا النص:</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>4245: connect: connection refused</code></pre></figure>
+<p>تختلف بقية الرسالة من تشغيل لآخر. المنفذ 4245 هو المنفذ الذي يستمع عليه port-forward، والعبارة «connection refused» (رُفض الاتصال) تعني أن لا شيء يستمع هناك، أي أن port-forward لا يعمل. فإعادة التشغيل أو إغلاق نافذة Ubuntu تنهيه. الحل تشغيله من جديد في الخلفية، والانتظار خمس ثوانٍ، ثم إعادة الفحص.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>cilium hubble port-forward &amp;
+sleep 5
+hubble status</code></pre></figure>
+<p>الرمز <code class="nw">&amp;</code> في آخر السطر الأول يشغّل port-forward في الخلفية، فيعود موجّه الأوامر بينما يستمر هو في العمل، ويتوقف عند إغلاق نافذة Ubuntu هذه. يشبه الناتج ناتج <a href="ch04.html">الفصل 4</a>. يظهر أولاً سطر مثل <code class="nw">[1] 2817</code> وهو رقم المهمة ورقم العملية اللذان يعطيهما bash للأمر الخلفي، ويختلفان من جهاز لآخر. ثم يجب أن يعرض <code class="nw">hubble status</code> السطر <code class="nw">Connected Nodes: 3/3</code> كما سبق. قد يطبع port-forward رسائل خاصة به فوق موجّه الأوامر، الآن أو لاحقاً. وإذا ظهر نص ولم يتبعه الموجّه، يكفي الضغط على Enter للحصول على موجّه نظيف.</p>
+<p>إذا أعطى port-forward خطأً يحتوي هذا النص:</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>bind: address already in use</code></pre></figure>
+<p>معنى هذا الخطأ أن نسخة من port-forward تعمل أصلاً في نافذة Ubuntu أخرى، لكن <code class="nw">hubble status</code> ما زال لا يصل إليها. تُغلق عندها كل نوافذ Ubuntu إلا النافذة التي تشغّل لوحة التحكم، ثم تُفتح نافذة Ubuntu جديدة وتُشغَّل فيها الأسطر الثلاثة أعلاه. وإذا بقي <code class="nw">hubble status</code> يفشل يُشغَّل <code class="nw">cilium status</code> ويُتحقق من أن Hubble Relay يقول <code class="nw">OK</code> في سطره. وإن لم يقل ذلك فالمرجع نهاية <a href="ch04.html">الفصل 4</a>.</p>
+<p>إذا عرض فحص السياسات أسماء بدلاً من <code class="nw">No resources found</code> فالسياسات طُبّقت قبل أوانها. تُحذف بالأمر <code>kubectl delete -f ~/microseg/k8s/policies/</code> ثم يُعاد الفحصان.</p>
+<h2 id="تشغيل-البوابة-بكل-وظائفها-مرتين">تشغيل البوابة بكل وظائفها، مرتين</h2>
+<p>يفعل <code class="nw">check-portal.sh</code> من <a href="ch06.html">الفصل 6</a> كل ما يفعله المستخدم العادي وفريق تقنية المعلومات: يحمّل الصفحة، ويقرأ الأخبار، ويسجّل الدخول باسم سارة، ويقرأ ملفها الشخصي ودرجاتها، ويفتح لوحة الإدارة من ops. وتشغيله أوثق طريقة لإنتاج كل اتصال مسموح تحتاجه البوابة، متى أردنا.</p>
+<p>لا نلمس لوحة التحكم طوال هذا الفصل. فمجسّات المصفوفة (probes) وزر الهجوم تفتح اتصالات من كل Pod إلى كل خدمة، وهذه الاتصالات ستدخل أدلتنا كأن البوابة تحتاج إليها. ولا نعيد تحميل صفحتها أيضاً، لأن فتح الصفحة يشغّل المصفوفة مرة واحدة. كما أن نقطة التحقق في نهاية <a href="ch08.html">الفصل 8</a> استدعت المصفوفة من الطرفية. إذا نقرنا أي شيء في لوحة التحكم، أو أعدنا تحميلها، أو شغّلنا أي أمر <code class="nw">curl</code> نحو <code class="nw">localhost:5050</code> في آخر ثلاث دقائق، ننتظر ثلاث دقائق أولاً. ثم نشغّل الفحص مرتين.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>bash ~/microseg/check-portal.sh
+bash ~/microseg/check-portal.sh</code></pre></figure>
+<p>يعطي التشغيلان كل اتصال سجلين على الأقل، فنميّز الحركة التي تكررها البوابة في كل مرة من حركة شاردة حدثت مرة واحدة.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> تشغيلان، في كل منهما ستة فحوص.</p>
+<p>يجب أن ينتهي التشغيلان كلاهما بالسطر <code class="nw">PORTAL: 6/6 OK</code>.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>FAIL  portal page loads (expected &#x27;200&#x27;, got &#x27;000&#x27;)</code></pre></figure>
+<p>معنى هذا أن البوابة لا تجيب على المنفذ 30080. المرجع الخطوة الأولى في <a href="ch08.html">الفصل 8</a>، وهي تشرح إعادة المختبر إلى العمل بعد إعادة تشغيل الحاسوب.</p>
+<p>إذا فشل فحص واحد آخر، مثل <code>FAIL  ops can open the admin panel (expected '4', got '')</code> فإحدى الخدمات متوقفة. الحل تشغيل <code class="nw">kubectl -n campus get pods</code> وإيجاد الـ Pod الذي ليس بحالة <code class="nw">1/1 Running</code> ثم إصلاحه بمساعدة أقسام الأعطال في <a href="ch06.html">الفصل 6</a>.</p>
+<h2 id="من-اتصل-بمن-في-hubble">من اتصل بمن، في Hubble</h2>
+<p>نسأل Hubble الآن عن الاتصالات التي فتحها التشغيلان. يعود الأمر ثلاث دقائق إلى الوراء فقط، لذلك نشغّله خلال ثلاث دقائق من فحص البوابة.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>hubble observe --namespace campus --since 3m --protocol tcp | grep &quot;TCP Flags: SYN)&quot; | grep -v &quot;(host)&quot; | tee ~/microseg/evidence/ch11-flows.txt</code></pre></figure>
+<p>يطبع <code class="nw">hubble observe</code> التدفقات المسجلة. ويُبقي <code class="nw">--namespace campus</code> التدفقات التي تبدأ أو تنتهي في مساحة الأسماء (namespace) الخاصة بنا، ويُبقي <code class="nw">--since 3m</code> آخر ثلاث دقائق، ويُبقي <code class="nw">--protocol tcp</code> حركة TCP ويستبعد استعلامات الأسماء، لأنها تستخدم UDP.</p>
+<p>يُبقي أول <code class="nw">grep</code> الأسطر التي تحتوي <code class="nw">TCP Flags: SYN)</code> فقط. كل اتصال TCP يبدأ بحزمة SYN، وهي طرقة «هل لي أن أتصل؟»، فيُبقي هذا المرشّح بداية كل اتصال ويستبعد بقية حزمه (packets). وللقوس الختامي في النمط دور أساسي. فالحزمة التي تجيب تحمل العلامة <code class="nw">SYN, ACK</code> والقوس يستبعد هذه الردود. ثم يحذف <code class="nw">grep -v "(host)"</code> الأسطر التي مصدرها العقدة نفسها. هذه هي فحوص الجاهزية (readiness probes) التي يرسلها kubelet ليتحقق كل بضع ثوانٍ من سلامة كل Pod، وهي ليست جزءاً من البوابة. وأخيراً يعرض <code class="nw">tee</code> النتيجة ويحفظها في <code class="nw">evidence/ch11-flows.txt</code>.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> قائمة أسطر، كل سطر منها اتصال فُتح.</p>
+<p>الطوابع الزمنية، ونهايات أسماء الـ Pods، وأرقام المنافذ على الجهة اليسرى، وأرقام <code class="nw">ID:</code> كلها تختلف عندنا. وهذا سطر من التشغيل الذي اختُبر فيه هذا المختبر، سُجّل بعد ذلك بقليل والسياسات مفعّلة. أسطر شبكتنا المسطحة لها الصيغة نفسها.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>Nov 19 20:43:45.283: campus/api-65c5c7d5fd-2qtsk:55286 (ID:6935) -&gt; campus/db-887596757-wzmtj:5432 (ID:13907) to-endpoint FORWARDED (TCP Flags: SYN)</code></pre></figure>
+<p>نقرأ السطر من اليسار إلى اليمين. بعد الوقت يأتي المصدر، وهو الـ Pod ‏<code class="nw">campus/api-...</code> الذي يستخدم من جهته منفذاً عشوائياً هو 55286. والرقم بعد <code class="nw">ID:</code> هو الهوية الأمنية (security identity) للمصدر. ويشير السهم <code class="nw">-&gt;</code> إلى الوجهة، وهي Pod خدمة db على المنفذ 5432 بهويتها الخاصة. أما <code class="nw">to-endpoint FORWARDED</code> فتعني أن Cilium سلّم الحزمة إلى الـ Pod الوجهة. واسم الخدمة هو الجزء من اسم الـ Pod الواقع بين <code class="nw">campus/</code> وأول شرطة.</p>
+<p>نمرّ على الأسطر المحفوظة بقلم ونكتب كل تركيبة مختلفة من المصدر والوجهة ومنفذ الوجهة، ونتجاهل المكرر. الاتصال بين Pods على عقدتين مختلفتين قد يظهر في سطرين، مرة عند خروجه من عقدة ومرة عند وصوله إلى الأخرى، ويُحسب الاثنان اتصالاً واحداً. والسطر المكتوب عند الخروج يحمل قبل <code class="nw">FORWARDED</code> كلمة غير <code class="nw">to-endpoint</code> مثل <code class="nw">to-overlay</code>. ومصدر واحد ليس له اسم Pod. إنه عنوان IP يتبعه <code class="nw">(world)</code> وهو اسم Cilium لأي شيء خارج العنقود (cluster). هذا هو أمر <code class="nw">curl</code> الذي أرسلناه من Ubuntu داخلاً عبر المنفذ 30080، ومتصفح كل زائر سيبدو بالشكل نفسه.</p>
+<p>يجب أن نصل إلى ثماني تركيبات مختلفة بالضبط.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<p>إذا انتهت أسطر كثيرة بـ <code class="nw">(TCP Flags: SYN, ACK)</code> وبدا كل اتصال في الاتجاهين، فالقوس الختامي ناقص من نمط أول <code class="nw">grep</code> فمرّت الحزم المجيبة من المرشّح. يُعاد الأمر مع كتابة النمط <code class="nw">"TCP Flags: SYN)"</code> بقوسه.</p>
+<p>إذا عرضت القائمة اتصالات من news أو من db، أو أزواجاً مثل frontend إلى auth، فمصفوفة لوحة التحكم أو زر الهجوم شُغّل خلال الدقائق الثلاث الأخيرة واختلطت مجسّاته بالحركة. الحل انتظار ثلاث دقائق من دون لمس لوحة التحكم، وتشغيل <code class="nw">check-portal.sh</code> مرتين من جديد، ثم إعادة أمر <code class="nw">hubble observe</code> نفسه.</p>
+<p>إذا كانت القائمة فارغة فإما أن port-forward توقف، وإما أن أكثر من ثلاث دقائق مرّت بين فحص البوابة و<code class="nw">hubble observe</code>. يُشغَّل عندها <code class="nw">hubble status</code> ثم فحص البوابة ثم <code class="nw">hubble observe</code> من جديد، الواحد بعد الآخر مباشرة.</p>
+<h2 id="مسارات-http-في-سجل-nginx">مسارات HTTP في سجل nginx</h2>
+<p>أظهر Hubble أن frontend يتصل بـ api على المنفذ 8080، لكنه لم يُظهر الطلبات التي تمر عبر هذا الاتصال. ولا ينظر Cilium داخل HTTP أبداً في الشبكة المسطحة. فوكيله (proxy) الخاص بـ HTTP، أي Envoy، لا يرى الطلب إلا إذا أرسلته إليه قاعدة من الطبقة السابعة (L7)، ولا قواعد لدينا بعد. ويسد سجل الوصول في frontend هذه الفجوة. وسجل الوصول هو الملف الذي يكتب فيه خادم الويب سطراً لكل طلب يعالجه.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>kubectl -n campus logs deploy/frontend --since=15m | grep -v healthz | tee ~/microseg/evidence/ch11-nginx-log.txt</code></pre></figure>
+<p>يطبع <code>kubectl -n campus logs deploy/frontend</code> ما كتبه Pod خدمة frontend، وصورة nginx ترسل سجل الوصول إلى هناك. يُبقي <code class="nw">--since=15m</code> آخر خمس عشرة دقيقة، وهذا يترك لنا وقتاً لقراءة أسطر Hubble أولاً. ويخفي <code class="nw">grep -v healthz</code> طلبات فحوص الجاهزية إلى <code class="nw">/healthz</code> التي تصل كل بضع ثوانٍ. ويحفظ <code class="nw">tee</code> نسخة في <code class="nw">evidence/</code>.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> سطر لكل طلب أرسله <code class="nw">check-portal.sh</code> عبر frontend.</p>
+<p>الجزء الذي بين علامتي التنصيص المزدوجتين في كل سطر هو الطريقة والمسار وإصدار HTTP، مثل <code class="nw">"POST /api/login HTTP/1.1"</code> والرقم بعده هو رمز الحالة، ويجب أن يكون <code class="nw">200</code>. نبحث عن الطلبات الخمسة التالية، كل واحد منها مرتين على الأقل: <code class="nw">GET /</code> و<code class="nw">GET /news</code> و<code class="nw">POST /api/login</code> و<code class="nw">GET /api/profile</code> و<code class="nw">GET /api/grades</code>. لا يظهر هنا فحص لوحة الإدارة، لأن ops تكلّم admin مباشرة من دون المرور عبر frontend.</p>
+<p>وللسجل فائدة أيضاً فيما لا يذكره. فالمسار <code class="nw">/api/export</code> لا يظهر أبداً، لأنه لا شيء في صفحة البوابة يستدعيه.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<p>إذا كان الناتج فارغاً، أو ظهر كل طلب مرة واحدة فقط، فقد مرت أكثر من خمس عشرة دقيقة منذ فحص البوابة. الحل تشغيل <code>bash ~/microseg/check-portal.sh</code> مرتين ثم إعادة هذا الأمر.</p>
+<p>إذا ظهرت أسطر فيها <code class="nw">/news/check-image</code> فهي طلبات هجوم من <a href="ch08.html">الفصل 8</a> أو من زر الهجوم في لوحة التحكم، وما زالت داخل نافذة الدقائق الخمس عشرة. مدقق الصور ميزة تقدمها البوابة، فلا تستطيع قاعدة HTTP أن تحجب هذه الطلبات من دون أن تعطّل الميزة نفسها. واحتواء هذه الثغرة مهمة التجزئة. تُتجاهل هذه الأسطر في جدول التدفقات، ومعها أي سطر آخر مساره ليس واحداً من المسارات الخمسة أعلاه.</p>
+<h2 id="كتابة-جدول-التدفقات-ما-يبقى-مفتوحا">كتابة جدول التدفقات (ما يبقى مفتوحاً)</h2>
+<p>جدول التدفقات قائمة الاتصالات المسموح للبوابة بإجرائها، صف لكل اتصال، مع السبب. إنه التصميم الذي تحوّله سياساتنا في <a href="ch10.html">الفصل 10</a> إلى شيفرة، ويدخل فصل التصميم في بحث التخرج.</p>
+<p>ننشئ الملف في VS Code.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>code ~/microseg/evidence/flow-table.md</code></pre></figure>
+<p class="see"><strong>ما يجب أن نراه:</strong> يفتح VS Code ملفاً فارغاً اسمه <code class="nw">flow-table.md</code> في تبويب جديد داخل نافذة المشروع، أو في نافذة VS Code جديدة إذا كانت تلك النافذة مغلقة. لا يُطبع شيء في الطرفية، ويعود موجّه الأوامر فوراً.</p>
+<p>نكتب سطر الترويسة وسطر الفاصل والصف الأول كما تظهر هنا تماماً. الصف الأول هو الاتصال القادم من العالم الخارجي.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>| Source | Destination | Port | L7 detail | Why it&#x27;s needed |
+|---|---|---|---|---|
+| world | frontend | 80 | none | students and visitors open the portal through NodePort 30080 |</code></pre></figure>
+<p>ثم نضيف صفاً لكل تركيبة من التركيبات السبع الأخرى التي وجدناها في Hubble. نكتب أسماء الخدمات بأحرف صغيرة كما يكتبها Kubernetes، ونبدأ كل صف بـ <code class="nw">|</code> ثم اسم المصدر، ونكتب المنفذ رقماً مجرداً، لأن نقطة التحقق تقرأ الصفوف بهذا الشكل.</p>
+<p>نملأ عمود L7 detail لصف واحد فقط، صف frontend إلى api، بالطلبات الثلاثة التي وجدناها في سجل nginx: <code>GET /api/grades, GET /api/profile, POST /api/login</code>. ونكتب <code class="nw">none</code> في كل مكان آخر. اتصال frontend إلى api هو الاتصال الوحيد الذي يستطيع فيه متصل لا بد لنا من الثقة به أن يرسل طلباً لا نريده، فالاتصال نفسه الذي يحمل تسجيل الدخول قد يحمل <code class="nw">/api/export</code> أيضاً. ولا يأخذ اتصال frontend إلى news أي تفصيل من الطبقة السابعة، لأن مساريه كليهما، قائمة الأخبار ومدقق الصور، ميزتان تقدمهما البوابة، فقاعدة HTTP هناك لا تزيل شيئاً. أما الاتصالات إلى db فليست HTTP أصلاً، لأن PostgreSQL يتكلم بروتوكوله الخاص.</p>
+<p>وفي العمود الأخير نكتب بكلمات قليلة ما الذي يتعطل إذا غاب ذلك الصف. ثم نحفظ الملف بـ Ctrl+S.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>code: command not found</code></pre></figure>
+<p>تُغلق في هذه الحالة كل نوافذ Ubuntu ثم يُفتح Ubuntu من جديد، فهذا يعيد تحميل المسار الذي ضبطته إضافة WSL في VS Code. وإذا استمر الفشل فالمرجع قسم VS Code في <a href="ch02.html">الفصل 2</a>.</p>
+<p>إذا وُجد أكثر من ثماني تركيبات أو أقل، فلا يُملأ الجدول من <a href="ch01.html">الفصل 1</a> لتتوافق الأرقام. الحل العودة إلى خطوة Hubble، وقراءة قسم أعطالها، وجمع التدفقات من جديد. فالاتصال الناقص هنا يصير بوابة معطلة في <a href="ch10.html">الفصل 10</a>.</p>
+<figure class="fig"><a href="../../files/figures/fig04-ar.png"><img src="../../files/figures/web/fig04-ar.png" alt="خريطة التدفقات المسموح بها" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>خريطة التدفقات المسموح بها</figcaption></figure>
+<p>يرسم الشكل 4 صفوفنا الثمانية أسهماً بين الخدمات. لا يخرج أي سهم من news أو db، وops هي الخدمة الوحيدة التي يدخل منها سهم إلى admin.</p>
+<h2 id="كتابة-جدول-المنع-ما-يبقى-مغلقا">كتابة جدول المنع (ما يبقى مغلقاً)</h2>
+<p>جدول المنع هو النصف الآخر من التصميم: ما يبقى مغلقاً، ولماذا. يغلق الرفض الافتراضي هذه المسارات من دون قاعدة تذكرها بالاسم، فلا تظهر في أي ملف سياسة. يكتبها هذا الجدول، وكل صف فيه مربوط بخطوة الهجوم التي يوقفها.</p>
+<p>ننشئ ملفاً ثانياً.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>code ~/microseg/evidence/deny-table.md</code></pre></figure>
+<p class="see"><strong>ما يجب أن نراه:</strong> يفتح VS Code ملفاً فارغاً ثانياً اسمه <code class="nw">deny-table.md</code> في النافذة نفسها التي فيها الأول. ولا تطبع الطرفية شيئاً، كما في المرة السابقة.</p>
+<p>نكتب فيه هذا الجدول، ونقرأ كل صف ونحن نكتبه. كل صف ينتج عن جدول التدفقات: ما لا يسمح به أي صف فهو ممنوع.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>| Source | Destination | Why it stays closed | What it stops |
+|---|---|---|---|
+| news | anything except DNS | news serves announcements and calls no other service | attack steps 2, 3, 4 and 5 |
+| db | anything | a database answers queries and never starts a connection | a break-in at db reaching other services |
+| frontend | auth, db, admin | frontend only passes requests to api and news | a break-in at frontend going around api |
+| every pod except ops | admin | only the IT helper needs the admin panel | attack step 5 |
+| every pod | the internet | no service downloads anything while it runs | fetching attack tools (T1105) and sending data out |
+| frontend | api paths other than the three in the flow table | /api/export is a forgotten debug route | the grade export from chapter 10 |</code></pre></figure>
+<p>نحفظه بـ Ctrl+S.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<p>إذا ظهر الجدول سطراً واحداً طويلاً عند فتحه لاحقاً، فقد كُتب في برنامج حفظه بنهايات أسطر Windows أو لفّ أسطره. الحل فتحه في VS Code، والتأكد من أن شريط الحالة في أسفل اليمين يعرض <code class="nw">LF</code> ثم وضع كل صف في سطر مستقل.</p>
+<h2 id="إذنان-لكل-اتصال-تأشيرة-الخروج-وتأشيرة-الدخول">إذنان لكل اتصال: تأشيرة الخروج وتأشيرة الدخول</h2>
+<p>الرفض الافتراضي (default deny) الذي نكتبه في <a href="ch10.html">الفصل 10</a> يسري في الاتجاهين على كل Pod في <code class="nw">campus</code>. فلا يحق للـ Pod أن يفتح اتصالاً صادراً إلا إذا سمحت به قواعد الحركة الصادرة (egress) الخاصة به، ولا أن يقبل اتصالاً وارداً إلا إذا سمحت به قواعد الحركة الواردة (ingress) الخاصة به. لذلك يحتاج كل صف في جدول التدفقات إلى إذنين، واحد عند كل طرف.</p>
+<p>نتخيل رحلة إلى الخارج. يحتاج المسافر إلى تأشيرة خروج من البلد الذي يغادره وتأشيرة دخول من البلد الذي يدخله، وأيّ منهما وحدها لا توصله إلى أي مكان. فلكي يصل frontend إلى api على المنفذ 8080، يجب أن تمنح سياسة frontend تأشيرة الخروج، أي قاعدة حركة صادرة نحو api على 8080. ويجب أن تمنح سياسة api تأشيرة الدخول، أي قاعدة حركة واردة من frontend على 8080. وإذا غابت إحداهما يُسقط Cilium الاتصال، ويبقى المتصل ينتظر حتى ييأس.</p>
+<p>صف world هو الاستثناء الوحيد. فالعالم الخارجي ليس Pod وليست له سياسة خاصة به، لذلك تكفي هذا الصف تأشيرة الدخول التي يمنحها frontend للكيان <code class="nw">world</code> وحدها. وبهذا يصبح المجموع 8 تأشيرات دخول و7 تأشيرات خروج لصفوفنا الثمانية.</p>
+<p>ترتيب جدول التدفقات بحسب حمل العمل (workload) يعطينا خطة <a href="ch10.html">الفصل 10</a>، بسياسة واحدة لكل حمل عمل. سيعيدنا <a href="ch10.html">الفصل 10</a> إلى هذا الجدول. نتحقق من أن كل صف في جدول التدفقات يظهر في هذه الخطة مرتين بالضبط، مرة في عمود الحركة الصادرة للمصدر ومرة في عمود الحركة الواردة للوجهة، ما عدا صف world الذي يظهر مرة واحدة.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="جدول"><table>
+<thead>
+<tr>
+<th>حمل العمل</th>
+<th>الحركة الواردة، من يحق له الاتصال به</th>
+<th>الحركة الصادرة، ما يحق له الاتصال به</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>frontend</td>
+<td>world على 80</td>
+<td>api على 8080، news على 5000</td>
+</tr>
+<tr>
+<td>news</td>
+<td>frontend على 5000</td>
+<td>لا شيء</td>
+</tr>
+<tr>
+<td>api</td>
+<td>frontend على 8080، ثلاثة طلبات HTTP فقط</td>
+<td>auth على 5001، db على 5432</td>
+</tr>
+<tr>
+<td>auth</td>
+<td>api على 5001</td>
+<td>db على 5432</td>
+</tr>
+<tr>
+<td>db</td>
+<td>api وauth وadmin على 5432</td>
+<td>لا شيء</td>
+</tr>
+<tr>
+<td>admin</td>
+<td>ops على 5002</td>
+<td>db على 5432</td>
+</tr>
+<tr>
+<td>ops</td>
+<td>لا أحد</td>
+<td>admin على 5002</td>
+</tr>
+</tbody>
+</table></div>
+<p>ويحتفظ كل Pod أيضاً بتأشيرة خروج إضافية، إلى kube-dns على المنفذ 53، لتبقى أسماء الخدمات قابلة للتحويل إلى عناوين. هذه القاعدة تغطي كل الـ Pods دفعة واحدة، وسنكتبها في ملف الأساس (baseline).</p>
+<figure class="fig"><a href="../../files/figures/fig07-ar.png"><img src="../../files/figures/web/fig07-ar.png" alt="من جدول التدفقات إلى السياسة" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>من جدول التدفقات إلى السياسة</figcaption></figure>
+<p>يتتبع الشكل 7 صفاً واحداً من جدول التدفقات وهو يتحول إلى قاعدتين. نصف الحركة الصادرة يذهب إلى سياسة المتصل، ونصف الحركة الواردة إلى سياسة الطرف الذي يُتصل به.</p>
+<h2 id="نقطة-التحقق">نقطة التحقق</h2>
+<p>نستخرج المصدر والوجهة والمنفذ من كل صف في جدول التدفقات ونرتبها، لنقارنها بمفتاح الإجابة حرفاً بحرف.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>grep &quot;^| [a-z]&quot; ~/microseg/evidence/flow-table.md | cut -d &quot;|&quot; -f 2-4 | tr -d &quot; &quot; | sort</code></pre></figure>
+<p>يُبقي النمط <code class="nw">^| [a-z]</code> الأسطر التي تبدأ بـ <code class="nw">|</code> يتبعها حرف صغير، وهي صفوف البيانات. فصف الترويسة يبدأ بحرف S كبير، وصف الفاصل لا مسافة فيه بعد أول <code class="nw">|</code> فلا يمر أي منهما. ويقسم <code class="nw">cut -d "|" -f 2-4</code> كل صف عند كل <code class="nw">|</code> ويُبقي القطع من 2 إلى 4، وهي المصدر والوجهة والمنفذ، أما القطعة 1 فهي النص الفارغ قبل أول <code class="nw">|</code> في السطر. ويحذف <code class="nw">tr -d " "</code> كل مسافة، فلا تهم المسافات الإضافية التي كتبناها لترتيب الأعمدة. ويرتب <code class="nw">sort</code> الأسطر أبجدياً، فلا يهم ترتيب صفوفنا أيضاً.</p>
+<p><strong>نقطة التحقق.</strong> يجب أن يكون الناتج الأسطر الثمانية أدناه تماماً.</p>
+<p>إنها التدفقات الثمانية المسموح بها في <a href="ch01.html">الفصل 1</a>، مكتوبة بالصيغة المختصرة نفسها ومرتبة.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>admin|db|5432
+api|auth|5001
+api|db|5432
+auth|db|5432
+frontend|api|8080
+frontend|news|5000
+ops|admin|5002
+world|frontend|80</code></pre></figure>
+<p>إذا كان سطر ناقصاً أو زائداً أو مختلفاً، لا نصحح الصف المقابل في <code class="nw">flow-table.md</code> إلا بعد أن نجد الاتصال المطابق في أسطر Hubble. فالصف الذي لا نجده في Hubble يدل على خطأ في الأدلة، والعلاج العودة إلى خطوة Hubble وجمع التدفقات من جديد.</p>
+<p>نحفظ عملنا في Git.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; git add -A &amp;&amp; git commit -m &quot;ch09: flow table and deny table&quot;</code></pre></figure>
+<p>يحفظ هذا الجدولين وملفي الأدلة من Hubble وnginx.</p>
+<!-- OUT ids: ch11-start, ch11-portal-traffic, ch11-flows, ch11-nginx-log, ch11-checkpoint --><nav class="pager" aria-label="الفصول"><a rel="prev" href="ch08.html"><span>الفصل السابق</span>الفصل 8. مهاجمة الشبكة المسطحة</a><a rel="next" href="ch10.html"><span>الفصل التالي</span>الفصل 10. تطبيق التجزئة الدقيقة للشبكة</a></nav></main></div>
+<footer class="foot"><div class="foot-in"><p>Kubernetes 1.36 و Cilium 1.20.5 و kind 0.33.0 على Windows 11 مع WSL 2. شغّلنا كل أمر على حاسوب حقيقي في تشرين الثاني 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">المصدر على GitHub</a></p></div></footer>
+<p class="vh" aria-live="polite" id="live"></p>
+<script type="application/json" id="i18n">{"copied": "نُسخ", "copyFail": "نضغط Ctrl+C لنسخ النص المحدد", "doneOf": "الخطوات المنجزة: {d} من {t}", "next": "الخطوة التالية: {s}", "allDone": "اكتمل المسار وأُنجزت الخطوات كلها.", "sumCount": "المنجز {d} من {t}", "cleared": "مُسحت كل العلامات.", "confirm": "هل نمسح كل العلامات في هذه الصفحة؟ تبقى الملفات والعنقود كما هي.", "stageCount": "{d} من {t}"}</script>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

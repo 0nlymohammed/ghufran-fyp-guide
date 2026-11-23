@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
+<title>Chapter 13. Getting unstuck alone | Micro-segmentation lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&family=Noto+Sans+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="ar" href="../ar/guide/ch13.html">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400&text=%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9&display=swap">
+</head>
+<body class="">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="top-in">
+<a class="brand" href="../index.html">Micro-segmentation lab</a>
+<nav aria-label="Micro-segmentation lab"><ul>
+<li><a href="../index.html">Quick path</a></li>
+<li><a href="../guide/index.html" aria-current="page">Full guide</a></li>
+<li><a href="../downloads.html">Downloads</a></li>
+<li><a href="../ar/guide/ch13.html" lang="ar" hreflang="ar" data-setlang="ar">العربية</a></li>
+</ul></nav>
+</div></header>
+<div class="layout"><details class="rail" open><summary>Chapters</summary><nav aria-label="Chapters"><ol class="toc"><li><a href="ch00.html">0. How to use this guide</a></li><li><a href="ch01.html">1. What you will build</a></li><li><a href="ch02.html">2. Before you start</a></li><li><a href="ch03.html">3. Set up the environment</a></li><li><a href="ch04.html">4. Create the cluster</a></li><li><a href="ch05.html">5. Write the services</a></li><li><a href="ch06.html">6. Deploy the portal</a></li><li><a href="ch07.html">7. Build your dashboard</a></li><li><a href="ch08.html">8. Attack the flat network</a></li><li><a href="ch09.html">9. Design the policy</a></li><li><a href="ch10.html">10. Apply micro-segmentation</a></li><li><a href="ch11.html">11. Read the evidence in Hubble</a></li><li><a href="ch12.html">12. Measure</a></li><li><a href="ch13.html" aria-current="page">13. Getting unstuck alone</a><ol class="sub"><li><a href="#the-method-in-five-moves">The method, in five moves</a></li><li><a href="#how-to-read-the-tools-output">How to read the tools' output</a></li><li><a href="#the-four-question-ladder">The four-question ladder</a></li><li><a href="#symptom-to-fix-table">Symptom-to-fix table</a></li><li><a href="#before-the-drills-a-health-check">Before the drills, a health check</a></li><li><a href="#drill-1-auth-stops-accepting-api">Drill 1: auth stops accepting api</a></li><li><a href="#drill-2-no-more-name-lookups">Drill 2: no more name lookups</a></li><li><a href="#drill-3-an-image-that-doesnt-exist">Drill 3: an image that doesn't exist</a></li><li><a href="#after-a-windows-restart">After a Windows restart</a></li><li><a href="#rebuild-from-scratch-the-last-resort">Rebuild from scratch, the last resort</a></li><li><a href="#checkpoint">Checkpoint</a></li></ol></li><li><a href="ch14.html">14. Evidence for your report</a></li><li><a href="ch15.html">15. Day-by-day plan</a></li><li><a href="appendix.html">Appendices</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="chapter-13-getting-unstuck-alone">Chapter 13. Getting unstuck alone</h1>
+<p>Sooner or later your screen will show something this guide didn't, and this is the chapter to open when it does. It has a method for finding the cause, notes on reading what <code class="nw">kubectl</code>, <code class="nw">cilium</code> and <code class="nw">hubble</code> print, a ladder of four questions for the most common problem in this lab, one service that can't reach another, and a table of every failure met while the guide was tested. Then you break the lab three times on purpose and repair it, so the first time you meet these errors is on a day when you know the answer. The chapter ends with a full rebuild from nothing. Plan about 1.5 hours for reading and another 1.5 hours for the drills and the rebuild.</p>
+<h2 id="the-method-in-five-moves">The method, in five moves</h2>
+<p>Follow these in order every time. Most problems end at the first or second move.</p>
+<ol>
+<li>Read the exact error. Copy the whole message instead of going from memory. A Python program puts the real error on the last line of its message. <code class="nw">kubectl</code> usually starts its message with <code class="nw">error:</code> or <code class="nw">Error from server</code>. When you have the text, look for it first in the failure block of the step you were on, then in the table further down this chapter.</li>
+<li>Find the layer. A layer is one level of the stack the lab is built from. From the bottom up those are Windows and WSL, then Docker, then Kubernetes, then your apps, and on top of everything your policies. The program that printed the message tells you the layer. A message from <code class="nw">wsl</code> or about memory belongs to the bottom. One starting with <code class="nw">docker:</code> belongs to Docker. A pod stuck in a strange STATUS belongs to Kubernetes, a Python traceback to an app, and a <code class="nw">Policy denied</code> line in Hubble to your policies. Fix the lowest broken layer first, because everything above it depends on it.</li>
+<li>Compare with the last state that worked. <code class="nw">git status</code> lists the files you changed since your last commit, and <code class="nw">git diff</code> shows exactly which lines changed. <code class="nw">git log --oneline</code> lists your commits, newest first, and <code>git diff &lt;commit&gt; -- &lt;file&gt;</code> shows how a file differs from the version in that commit. <code class="nw">git restore &lt;file&gt;</code> throws away your unstaged changes to that file. If you already ran <code class="nw">git add</code>, use <code>git restore --staged --worktree &lt;file&gt;</code> to return it to the last commit. This can't be undone, so if the changes might be worth keeping, copy the file first, for example <code class="nw">cp k8s/app.yaml ~/app.yaml.bak</code>. If the output of <code class="nw">git diff</code> or <code class="nw">git log</code> fills the screen and a <code class="nw">:</code> or <code class="nw">(END)</code> appears at the bottom, use the arrow keys to scroll and press q to return to the prompt.</li>
+<li>Change one thing, then run the same check again. Two changes at once leave you not knowing which one helped, or which one broke something else.</li>
+<li>Rebuild from scratch as the last resort. The last part of this chapter shows how, and it takes about 15 minutes.</li>
+</ol>
+<h2 id="how-to-read-the-tools-output">How to read the tools' output</h2>
+<p>Each tool puts the part you need in a different place.</p>
+<h3 id="pods-kubectl-get-pods">Pods: <code class="nw">kubectl get pods</code></h3>
+<p><code class="nw">kubectl -n campus get pods</code> prints one line per pod. The READY column shows how many of the pod's containers passed their readiness probe, the regular check Kubernetes makes to see whether a container can take traffic. <code class="nw">1/1</code> is healthy. <code class="nw">0/1</code> means the container exists but isn't ready, even if STATUS says Running, and then the pod gets no traffic. The STATUS column should say <code class="nw">Running</code>. <code class="nw">ContainerCreating</code> is normal for a few seconds after a start, <code class="nw">Pending</code> means no node has accepted the pod, and <code class="nw">CrashLoopBackOff</code> means the program keeps crashing and Kubernetes waits longer before each new attempt. <code class="nw">ErrImageNeverPull</code> means the image isn't on the node. RESTARTS counts how often the container was restarted, and a number that keeps rising is a crash you need to read in the logs. Add <code class="nw">-o wide</code> to see which node each pod runs on.</p>
+<h3 id="events-kubectl-describe-pod-and-kubectl-get-events">Events: <code class="nw">kubectl describe pod</code> and <code class="nw">kubectl get events</code></h3>
+<p>An event is a short note Kubernetes writes when something happens to an object, such as a pod being placed on a node or an image failing to load. <code>kubectl -n campus describe pod &lt;pod-name&gt;</code> prints everything about one pod and ends with its events. Read that list from the bottom up, because the newest event is at the bottom and usually names the problem. The reasons you'll meet most are <code class="nw">FailedScheduling</code>, where no node fits the pod, <code class="nw">BackOff</code>, where a container keeps crashing, <code class="nw">Unhealthy</code>, where the readiness probe failed, and <code class="nw">Failed</code>, often with the image name in the message. <code>kubectl -n campus get events --sort-by=.lastTimestamp</code> shows the events of the whole namespace in time order, newest at the bottom. Kubernetes deletes events after about an hour, so an old problem may have no events left.</p>
+<h3 id="logs-kubectl-logs">Logs: <code class="nw">kubectl logs</code></h3>
+<p><code>kubectl -n campus logs deploy/api</code> prints what the api program wrote while it ran. If the container crashed and was restarted, the interesting log belongs to the container that died, and <code class="nw">--previous</code> shows that one. A Python error appears as a traceback, the list of function calls that led to the error. Read it from the last line up. The last line names the error type and its message, for example a <code class="nw">KeyError</code> or a connection error. Above it, find the lowest line that starts with <code class="nw">File "/app/</code> and names one of your own files. That's the line of your code where things went wrong.</p>
+<h3 id="cilium-cilium-status">Cilium: <code class="nw">cilium status</code></h3>
+<p><code class="nw">cilium status</code> prints a block at the top with one line each for Cilium, the Operator, Envoy and Hubble Relay. All of them must say <code class="nw">OK</code>. Below that, any line with <code class="nw">errors</code> or <code class="nw">not ready</code> names a pod. While Cilium is starting, for example during <code class="nw">setup.sh</code>, red error lines and <code>pods of DaemonSet cilium are not ready</code> appear for a minute or two, and that's normal. Judge only the final block.</p>
+<h3 id="hubble-hubble-observe">Hubble: <code class="nw">hubble observe</code></h3>
+<p><a href="ch11.html">Chapter 11</a> covers Hubble line by line. When you're hunting a problem, read the verdict first, <code class="nw">FORWARDED</code> or <code class="nw">DROPPED</code>. Then read the drop reason. <code class="nw">Policy denied</code> points at your policies, and any other reason points lower down the stack. On the decision line, <code class="nw">EGRESS</code> or <code class="nw">INGRESS</code> tells you whether the sender's policy or the receiver's said no.</p>
+<h2 id="the-four-question-ladder">The four-question ladder</h2>
+<p>Most trouble in this lab looks the same: some service X can't reach some service Y. The portal shows an error, or <code class="nw">check-portal.sh</code> prints FAIL.</p>
+<p>Each portal check travels a chain of services. <code class="nw">portal page loads</code> goes from outside the cluster to frontend. <code class="nw">news list has 3 items</code> goes from frontend to news. <code class="nw">sara can log in</code> goes from frontend to api, then from api to auth and from auth to db. <code class="nw">sara sees her profile</code> and <code class="nw">sara sees her 2 grades</code> go from frontend to api, then from api to auth and from api to db. <code class="nw">ops can open the admin panel</code> goes from ops to admin and from admin to db. Climb the ladder for each hop in the chain, the first hop first, with X as the sender and Y as the receiver. The sender of the first hop of <code class="nw">portal page loads</code> sits outside the cluster, so only questions 1 and 2 apply to it.</p>
+<p>Start with question 1 and work down the list. Stop at the first question whose answer is no.</p>
+<ol>
+<li>Is Y running and ready? Run <code>kubectl -n campus get pods -l app=&lt;Y&gt;</code>. The pod must be <code class="nw">1/1 Running</code>. If it isn't, the problem is in Kubernetes or in Y's program, so read its events and its logs.</li>
+<li>Does Y answer inside its own pod? Run <code>kubectl -n campus exec deploy/&lt;Y&gt; -- bash -c "timeout 2 bash -c 'echo &gt; /dev/tcp/127.0.0.1/&lt;port&gt;' &amp;&amp; echo answers"</code>. This opens a connection from Y to itself, which never crosses a pod boundary, so no policy can block it. Replace <code class="nw">&lt;port&gt;</code> with Y's port from the <a href="ch01.html">chapter 1</a> services table: frontend 80, news 5000, api 8080, auth 5001, db 5432, admin 5002. If <code class="nw">answers</code> doesn't appear, Y's program isn't listening on that port, and the fix is in Y's code or its settings.</li>
+<li>Does the name resolve from X? Run <code>kubectl -n campus exec deploy/&lt;X&gt; -- timeout 10 getent hosts &lt;Y&gt;</code>. <code class="nw">getent hosts</code> looks a name up the same way programs do and prints the address it found, and <code class="nw">timeout 10</code> stops it after 10 seconds. If DNS is blocked, the command waits the full 10 seconds and then prints nothing. No output means DNS failed, and in this lab that almost always means the <code class="nw">allow-dns</code> policy is missing or broken.</li>
+<li>Is the path from X to Y free of drops? Run <code>hubble observe --to-pod campus/&lt;Y&gt; --verdict DROPPED --last 10</code>. If you see <code class="nw">Policy denied</code> lines from X, the answer is no, and the decision line tells you which policy to open. <code class="nw">EGRESS DENIED</code> means X's own policy has no egress rule toward Y. <code class="nw">INGRESS DENIED</code> means Y's policy has no ingress rule from X.</li>
+</ol>
+<p>If all four answers are yes and it still fails, compare the port X uses with the Service's port in <code class="nw">k8s/app.yaml</code>. Drill 1 below climbs the whole ladder on a real failure.</p>
+<h2 id="symptom-to-fix-table">Symptom-to-fix table</h2>
+<p>Find the line that matches your symptom. The last column names the chapter where the step that fails lives.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>What you see</th>
+<th>Cause</th>
+<th>Fix</th>
+<th>Ch.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code class="nw">0x80370102</code> from <code class="nw">wsl --install</code></td>
+<td>virtualization is off, or Virtual Machine Platform is missing</td>
+<td>switch virtualization on in the firmware settings, run <code>wsl --install --no-distribution</code> in an admin PowerShell, restart Windows</td>
+<td>2</td>
+</tr>
+<tr>
+<td><code class="nw">code: command not found</code></td>
+<td>the Ubuntu window was open before VS Code was installed</td>
+<td>close every Ubuntu window and open Ubuntu again</td>
+<td>2</td>
+</tr>
+<tr>
+<td><code class="nw">Read-only file system</code> or <code class="nw">Input/output error</code> on any command, and <code class="nw">mount \| grep " / "</code> shows <code class="nw">emergency_ro</code></td>
+<td>drive C: filled up and Ubuntu protected its disk</td>
+<td>free at least 15 GB on C:, run <code class="nw">wsl --shutdown</code> in PowerShell, reopen Ubuntu, check <code class="nw">mount \| grep " / "</code> again, then <code>kind delete cluster &amp;&amp; bash setup.sh</code></td>
+<td>3, 4</td>
+</tr>
+<tr>
+<td><code class="nw">$'\r': command not found</code> or <code class="nw">/bin/bash^M: bad interpreter</code></td>
+<td>the file has Windows line endings, CRLF instead of LF</td>
+<td>run <code class="nw">sed -i 's/\r$//' &lt;file&gt;</code>, and check that VS Code's status bar shows <code class="nw">LF</code></td>
+<td>2</td>
+</tr>
+<tr>
+<td><code class="nw">free -h</code> shows about 7.8Gi</td>
+<td><code class="nw">.wslconfig</code> was saved under another name, or WSL was not fully stopped</td>
+<td>save it with "All files" as the type, run <code class="nw">wsl --shutdown</code>, wait 10 seconds, reopen Ubuntu</td>
+<td>3</td>
+</tr>
+<tr>
+<td><code class="nw">permission denied</code> together with <code class="nw">/var/run/docker.sock</code></td>
+<td>your membership of the docker group isn't active yet</td>
+<td>close Ubuntu, run <code class="nw">wsl --terminate Ubuntu-24.04</code> in PowerShell, open Ubuntu again</td>
+<td>3</td>
+</tr>
+<tr>
+<td><code>docker info --format "{{.OperatingSystem}}"</code> prints <code class="nw">Docker Desktop</code> instead of <code class="nw">Ubuntu 24.04</code></td>
+<td>Docker Desktop's WSL integration is on for this distro</td>
+<td>in Docker Desktop's settings, switch off WSL integration for Ubuntu-24.04 and the default-distro box, then run <code class="nw">wsl --terminate Ubuntu-24.04</code> in PowerShell</td>
+<td>3</td>
+</tr>
+<tr>
+<td><code>error: externally-managed-environment</code></td>
+<td><code class="nw">pip</code> ran outside your virtual environment</td>
+<td>use <code class="nw">~/microseg/.venv/bin/pip</code></td>
+<td>3</td>
+</tr>
+<tr>
+<td><code>computed checksum did NOT match</code></td>
+<td>the download was cut short</td>
+<td>delete the file and download it again</td>
+<td>3</td>
+</tr>
+<tr>
+<td><code>could not find a log line that matches</code> during <code class="nw">kind create cluster</code></td>
+<td>the inotify limits are missing</td>
+<td>redo the inotify step of <a href="ch03.html">chapter 3</a>, then <code class="nw">kind delete cluster</code> and <code class="nw">bash setup.sh</code></td>
+<td>4</td>
+</tr>
+<tr>
+<td><code class="nw">port is already allocated</code></td>
+<td>an old cluster still holds port 30080</td>
+<td><code class="nw">kind delete cluster</code>, then <code class="nw">bash setup.sh</code></td>
+<td>4</td>
+</tr>
+<tr>
+<td>Cilium pods in <code class="nw">CrashLoopBackOff</code> with TPROXY or iptables in their logs</td>
+<td>the kernel modules from <code class="nw">.wslconfig</code> aren't loaded</td>
+<td>check the <code class="nw">lsmod</code> lines from <a href="ch03.html">chapter 3</a>, fix <code class="nw">.wslconfig</code>, run <code class="nw">wsl --shutdown</code></td>
+<td>4</td>
+</tr>
+<tr>
+<td>red <code class="nw">errors</code> lines while <code class="nw">cilium status --wait</code> runs</td>
+<td>Cilium is still starting</td>
+<td>wait until the command ends and judge only its last block</td>
+<td>4</td>
+</tr>
+<tr>
+<td>only the connectivity tests that reach the internet fail</td>
+<td>your network blocks or intercepts traffic to the internet, for example addresses such as 1.1.1.1 or DNS on port 53</td>
+<td>run the test again on a phone hotspot</td>
+<td>4</td>
+</tr>
+<tr>
+<td><code class="nw">toomanyrequests</code> while pulling an image</td>
+<td>Docker Hub's limit for anonymous downloads</td>
+<td>wait an hour or two, or create a free Docker Hub account and run <code class="nw">docker login</code></td>
+<td>4</td>
+</tr>
+<tr>
+<td><code>IndentationError: unexpected indent</code></td>
+<td>a pasted line has extra or missing spaces</td>
+<td>align the line with its neighbors, or paste the whole file again</td>
+<td>5</td>
+</tr>
+<tr>
+<td><code>TabError: inconsistent use of tabs and spaces in indentation</code></td>
+<td>tabs mixed with spaces in a Python file</td>
+<td>switch on Render Whitespace, then run Convert Indentation to Spaces in VS Code and save</td>
+<td>5</td>
+</tr>
+<tr>
+<td>a container exits right after <code class="nw">docker run</code></td>
+<td>the program crashed while starting</td>
+<td><code class="nw">docker logs &lt;name&gt;</code>, then read the last line</td>
+<td>5</td>
+</tr>
+<tr>
+<td><code class="nw">Connection refused</code> in the local <code class="nw">docker run</code> test</td>
+<td><code class="nw">-p 5000:5000</code> is missing, or the app listens only on 127.0.0.1</td>
+<td>start the container again with <code class="nw">-p 5000:5000</code> and <code class="nw">--bind 0.0.0.0:5000</code></td>
+<td>5</td>
+</tr>
+<tr>
+<td><code class="nw">pip</code> errors inside <code class="nw">docker build</code> that mention names it can't resolve</td>
+<td>Docker's DNS doesn't work on your network</td>
+<td>try once more, then give Docker its own DNS servers as in the note under this table</td>
+<td>5</td>
+</tr>
+<tr>
+<td><code class="nw">ErrImageNeverPull</code></td>
+<td>the image tag in the Deployment was never loaded into kind</td>
+<td>run <code class="nw">bash deploy.sh</code>, or correct the tag, as in drill 3</td>
+<td>6</td>
+</tr>
+<tr>
+<td>pod <code class="nw">Pending</code>, with <code>didn't match Pod's node affinity/selector</code> in its events</td>
+<td>a node lost its <code class="nw">tier</code> label</td>
+<td><code class="nw">kubectl get nodes -L tier</code>, and if a tier is empty, rebuild the cluster from <code class="nw">kind-config.yaml</code></td>
+<td>6</td>
+</tr>
+<tr>
+<td>frontend in <code class="nw">CrashLoopBackOff</code></td>
+<td>an error in <code class="nw">frontend/default.conf</code></td>
+<td><code>kubectl -n campus logs deploy/frontend --previous</code> names the line, fix it, <code class="nw">bash deploy.sh</code></td>
+<td>6</td>
+</tr>
+<tr>
+<td><code class="nw">FAIL  sara sees her 2 grades</code> while login works</td>
+<td>db isn't ready, or api has a wrong environment setting</td>
+<td><code>kubectl -n campus logs deploy/api</code>, read the traceback from the bottom</td>
+<td>6</td>
+</tr>
+<tr>
+<td>the dashboard matrix stays empty</td>
+<td>the dashboard can't run <code class="nw">kubectl</code></td>
+<td>start the dashboard from a terminal where <code class="nw">kubectl get nodes</code> works</td>
+<td>7</td>
+</tr>
+<tr>
+<td>the dashboard's drops panel shows an error</td>
+<td>the Hubble port-forward isn't running</td>
+<td><code>cilium hubble port-forward &amp;</code></td>
+<td>7</td>
+</tr>
+<tr>
+<td>an attack command prints nothing and the prompt comes straight back, and <code>curl.exe -s -o NUL -w "%{http_code}\n" http://localhost:30080/</code> prints <code class="nw">000</code></td>
+<td>the portal is down</td>
+<td>go back to the checkpoint of <a href="ch06.html">chapter 6</a></td>
+<td>8</td>
+</tr>
+<tr>
+<td><code class="nw">/bin/sh: 1: psql: not found</code> in attack step 3</td>
+<td>the news image was built without <code class="nw">postgresql-client</code></td>
+<td>compare <code class="nw">apps/Dockerfile.news</code> with <a href="ch05.html">chapter 5</a>, then <code class="nw">bash deploy.sh</code></td>
+<td>8</td>
+</tr>
+<tr>
+<td>flat mode shows fewer than 36 open paths</td>
+<td>old policies are still applied</td>
+<td><code>kubectl delete -f k8s/policies/</code>, then <code class="nw">kubectl -n campus get cnp</code> must print <code>No resources found in campus namespace.</code></td>
+<td>8</td>
+</tr>
+<tr>
+<td><code>found character that cannot start any token</code></td>
+<td>a tab or a curly quote in a YAML file</td>
+<td>switch on Render Whitespace, replace tabs with spaces, retype the quotes</td>
+<td>10</td>
+</tr>
+<tr>
+<td>portal checks below 6/6 with policies applied</td>
+<td>a legitimate flow is blocked</td>
+<td>climb the four-question ladder, starting with <code>hubble observe --namespace campus --verdict DROPPED --last 20</code></td>
+<td>10</td>
+</tr>
+<tr>
+<td><code class="nw">Could not resolve host</code> almost everywhere</td>
+<td><code class="nw">allow-dns</code> is missing or its labels are wrong</td>
+<td><code>kubectl apply -f k8s/policies/1-baseline.yaml</code>, as in drill 2</td>
+<td>10</td>
+</tr>
+<tr>
+<td>the attack still succeeds 5 of 5 with policies applied</td>
+<td>the policies are in another namespace, or their labels don't match the pods</td>
+<td><code>kubectl -n campus get pods --show-labels</code> and compare with the <code class="nw">app:</code> values in your policies</td>
+<td>10</td>
+</tr>
+<tr>
+<td>login answers 403</td>
+<td>the method or path in the api policy's L7 rule doesn't match the request</td>
+<td>compare the three <code class="nw">method:</code> and <code class="nw">path:</code> lines with <a href="ch10.html">chapter 10</a></td>
+<td>10</td>
+</tr>
+<tr>
+<td><code>filters --from-pod and --namespace cannot be combined</code></td>
+<td>both filters in one <code class="nw">hubble observe</code></td>
+<td>remove <code class="nw">--namespace</code></td>
+<td>11</td>
+</tr>
+<tr>
+<td><code>4245: connect: connection refused</code> from <code class="nw">hubble</code></td>
+<td>the Hubble port-forward isn't running</td>
+<td><code>cilium hubble port-forward &amp;</code></td>
+<td>11</td>
+</tr>
+<tr>
+<td>nothing answers after Windows restarted</td>
+<td>the background helpers stopped</td>
+<td>see "After a Windows restart" below</td>
+<td>any</td>
+</tr>
+<tr>
+<td>Windows itself feels slow</td>
+<td>WSL keeps up to 10 GB of memory while it runs</td>
+<td>run <code class="nw">wsl --shutdown</code> in PowerShell when you finish for the day</td>
+<td>any</td>
+</tr>
+</tbody>
+</table></div>
+<p>Two words in the table need a sentence each. A line ending is the invisible character at the end of every line of a text file. Linux uses one, called LF, and Windows uses two, CR followed by LF. Bash reads the extra CR as part of the command, and that's where the <code class="nw">\r</code> and <code class="nw">^M</code> in those messages come from. A rate limit is a cap on how many requests a service accepts from one sender in a period of time.</p>
+<p>The Docker DNS fix from <a href="ch05.html">chapter 5</a> is two commands in Ubuntu. Run <code>echo '{"dns": ["8.8.8.8", "1.1.1.1"]}' | sudo tee /etc/docker/daemon.json</code>, which creates the file, or replaces it if it exists, since <code class="nw">/etc/docker</code> belongs to root and only <code class="nw">sudo</code> may write there. A fresh Docker Engine doesn't have this file, so nothing is lost. Then run <code class="nw">sudo systemctl restart docker</code>. The restart also stops the three cluster containers, so wait a few minutes until <code class="nw">kubectl get nodes</code> shows all three nodes <code class="nw">Ready</code>.</p>
+<h2 id="before-the-drills-a-health-check">Before the drills, a health check</h2>
+<p>Each drill breaks one thing on purpose, so the lab has to be healthy when you start, or a break you didn't make will pass for the one you did. If Windows restarted since <a href="ch12.html">chapter 12</a>, follow "After a Windows restart" near the end of this chapter first. Then run this.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; hubble status | grep Connected &amp;&amp; bash check-portal.sh | tail -1 &amp;&amp; kubectl -n campus get cnp --no-headers | wc -l</code></pre></figure>
+<p><code class="nw">hubble status | grep Connected</code> keeps only the line about connected nodes. The <code class="nw">&amp;&amp;</code> between the parts runs each one only if the one before it succeeded.</p>
+<p><strong>You should see</strong> three lines.</p>
+<p>They must read <code class="nw">Connected Nodes: 3/3</code>, then <code class="nw">PORTAL: 6/6 OK</code>, then <code class="nw">10</code>.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>4245: connect: connection refused</code></pre></figure>
+<p>The Hubble port-forward isn't running. Start it with <code>cilium hubble port-forward &amp;</code>, wait five seconds and run the check again.</p>
+<p>The portal line reads less than <code class="nw">6/6 OK</code>. The lab is already broken. Climb the four-question ladder for the failing check before you start any drill.</p>
+<p>The last number isn't <code class="nw">10</code>. Apply your policies with <code class="nw">kubectl apply -f k8s/policies/</code>, wait ten seconds and run the check again.</p>
+<h2 id="drill-1-auth-stops-accepting-api">Drill 1: auth stops accepting api</h2>
+<p>This drill breaks one label in one policy and makes you find it with the ladder, as if you didn't know what you'd changed. It needs a clean state, so finish <a href="ch12.html">chapter 12</a>'s commit first.</p>
+<p>The <code class="nw">auth</code> policy selects its pod with <code class="nw">app: auth</code>. Change that one value, and the policy no longer applies to the auth pod. Default deny then covers auth on its own. No other pod may connect to it, only the node's readiness probes through <code class="nw">allow-kubelet-probes</code>, and auth may no longer reach db.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+sed -i &#x27;s/^      app: auth$/      app: auth-broken/&#x27; k8s/policies/2-allow.yaml
+git diff</code></pre></figure>
+<p><code class="nw">sed -i</code> edits the file in place. The part between the quotes says "replace this with that". <code class="nw">^</code> means the start of a line and <code class="nw">$</code> its end, so the pattern only matches a line holding exactly six spaces and <code class="nw">app: auth</code>. Only the auth policy's own <code class="nw">endpointSelector</code> has six spaces there. The two other <code class="nw">app: auth</code> lines, in the api policy's egress and in the db policy's ingress, have eight spaces and stay as they are. <code class="nw">git diff</code> then shows what changed.</p>
+<p><strong>You should see</strong> a short diff of <code class="nw">k8s/policies/2-allow.yaml</code>.</p>
+<p>It shows one line removed, marked with <code class="nw">-</code>, holding <code class="nw">app: auth</code>, and one line added, marked with <code class="nw">+</code>, holding <code class="nw">app: auth-broken</code>. Nothing else may be listed.</p>
+<p>Apply the broken file.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl apply -f k8s/policies/2-allow.yaml</code></pre></figure>
+<p><strong>You should see</strong> one line per policy in the file.</p>
+<p>The <code class="nw">auth</code> line must say <code class="nw">configured</code> and the other six <code class="nw">unchanged</code>.</p>
+<p>Run the checks a real user would make. The <code class="nw">sleep 8</code> gives Cilium a few seconds to update every pod first.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>sleep 8
+bash check-portal.sh</code></pre></figure>
+<p>Three checks fail.</p>
+<p><code class="nw">sara can log in</code>, <code class="nw">sara sees her profile</code> and <code class="nw">sara sees her 2 grades</code> say FAIL, and the last line reads <code class="nw">PORTAL: 3/6 OK</code>. Lines starting with <code class="nw">jq:</code> may appear between them. They come from the script trying to read an error page as JSON, and they're part of the same failure. All three go through auth, which api asks to check the password or the token. Here is the symptom a user would report: "the portal page loads but I can't log in". Pretend you don't know the cause, and climb the ladder with X as api and Y as auth.</p>
+<p>Question 1, is auth running and ready?</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus get pods -l app=auth</code></pre></figure>
+<p><code class="nw">-l app=auth</code> keeps only pods carrying that label.</p>
+<p>There's one auth pod and it's <code class="nw">1/1 Running</code>, so go on to question 2.</p>
+<p>Question 2, does auth answer inside its own pod?</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus exec deploy/auth -- bash -c &quot;timeout 2 bash -c &#x27;echo &gt; /dev/tcp/127.0.0.1/5001&#x27; &amp;&amp; echo auth answers&quot;</code></pre></figure>
+<p><code class="nw">kubectl exec deploy/auth --</code> runs the command after <code class="nw">--</code> inside the auth pod. <code class="nw">/dev/tcp/127.0.0.1/5001</code> is a bash feature that opens a TCP connection when you write to it, here to port 5001 on the pod itself. <code class="nw">timeout 2</code> gives up after two seconds. If the connection opens, <code class="nw">&amp;&amp;</code> runs the <code class="nw">echo</code>.</p>
+<p>It prints <code class="nw">auth answers</code>, so the auth program is listening on 5001.</p>
+<p>Question 3, does the name <code class="nw">auth</code> resolve inside api?</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus exec deploy/api -- getent hosts auth</code></pre></figure>
+<p>You get one line with an address starting with <code class="nw">10.96.</code> and the full name <code class="nw">auth.campus.svc.cluster.local</code>, so DNS works.</p>
+<p>Question 4, is the path from api to auth free of drops? Save the answer, since it makes a good example for your report.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>hubble observe --to-pod campus/auth --verdict DROPPED --last 6 | tee ~/microseg/evidence/ch15-drill1-drops.txt</code></pre></figure>
+<p>The answer is no. Here's the cause. The lines run from <code class="nw">campus/api-</code> to <code class="nw">campus/auth-</code> on port <code class="nw">5001</code>, in pairs, with <code class="nw">Policy denied DROPPED</code>. Look at the decision line of a pair. It says <code>policy-verdict:none INGRESS DENIED</code>. Api was allowed to send, since its own policy has egress to <code class="nw">app: auth</code>. Auth was not allowed to receive, because no policy selects the auth pod with an ingress rule any more. The word INGRESS sent you to the receiver's policy, and there you find <code class="nw">auth-broken</code>. If you'd checked the labels with <code>kubectl -n campus get pods --show-labels</code>, you'd have seen that no pod carries <code class="nw">app=auth-broken</code>.</p>
+<p>Repair it from Git and check the portal.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>git restore k8s/policies/2-allow.yaml
+kubectl apply -f k8s/policies/2-allow.yaml
+sleep 8
+bash check-portal.sh | tail -1</code></pre></figure>
+<p><code class="nw">git restore</code> puts the file back exactly as it was in your last commit. Applying it again changes the auth policy back.</p>
+<p>The <code class="nw">auth</code> line says <code class="nw">configured</code> again, and the last line must read <code class="nw">PORTAL: 6/6 OK</code>.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p><code class="nw">git diff</code> prints nothing after the <code class="nw">sed</code> command. Run <code class="nw">git status</code> first. If <code class="nw">k8s/policies/2-allow.yaml</code> is listed under Untracked files, it was never committed. Open it, change <code class="nw">auth-broken</code> back to <code class="nw">auth</code>, commit it with <code>git add -A &amp;&amp; git commit -m "add policies"</code> and start the drill again. Otherwise the pattern matched no line, which means your file's spacing differs from the tested one. Open <code class="nw">k8s/policies/2-allow.yaml</code> in VS Code, find the policy named <code class="nw">auth</code>, change <code class="nw">app: auth</code> under its <code class="nw">endpointSelector</code> to <code class="nw">app: auth-broken</code> by hand and save. Then compare the rest of that file with <a href="ch10.html">chapter 10</a>, because a spacing difference elsewhere may hide a real mistake.</p>
+<p>The portal still shows <code class="nw">PORTAL: 6/6 OK</code> after the broken file was applied. Either the apply didn't say <code class="nw">configured</code>, or Cilium needed a little longer. Run the apply and the check again.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>error: pathspec &#x27;k8s/policies/2-allow.yaml&#x27; did not match any file(s) known to git</code></pre></figure>
+<p>The file was never committed, so Git has nothing to restore it from. Edit <code class="nw">auth-broken</code> back to <code class="nw">auth</code> by hand, apply the file, and then commit it with <code>git add -A &amp;&amp; git commit -m "add policies"</code> so this can't happen again.</p>
+<h2 id="drill-2-no-more-name-lookups">Drill 2: no more name lookups</h2>
+<p>Every pod needs DNS to find the others by name. This drill deletes the <code class="nw">allow-dns</code> policy and shows how widely that one deletion breaks the portal, and how Hubble names the cause at once.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus delete cnp allow-dns</code></pre></figure>
+<p><code class="nw">kubectl delete cnp allow-dns</code> removes one policy by name. Default deny now blocks every DNS question from every pod in <code class="nw">campus</code>.</p>
+<p><strong>You should see</strong> one line confirming the deletion.</p>
+<p>It reads <code>ciliumnetworkpolicy.cilium.io "allow-dns" deleted from campus namespace</code>.</p>
+<p>Wait a little longer this time before checking, because nginx remembers each answer it got for 10 seconds.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>sleep 15
+bash check-portal.sh</code></pre></figure>
+<p>The checks take longer than usual, since each one waits up to five seconds for a name that never resolves.</p>
+<p>Only the first check, <code class="nw">portal page loads</code>, still passes, so the last line reads <code class="nw">PORTAL: 1/6 OK</code>. The page itself is a file nginx serves without looking up any name. The ops check may also print <code>command terminated with exit code 28</code>, which is curl inside the ops pod giving up after its time limit. Five checks broke from one cause, so go straight to question 4 of the ladder and look for drops on port 53, the DNS port.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>hubble observe --namespace campus --verdict DROPPED --port 53 --last 10 | tee ~/microseg/evidence/ch15-drill2-drops.txt</code></pre></figure>
+<p><code class="nw">--port 53</code> keeps flows where either end uses port 53.</p>
+<p>Every line goes from a campus pod to a <code class="nw">kube-system/coredns-</code> pod on port 53, with <code class="nw">EGRESS DENIED</code> on the decision lines and <code class="nw">Policy denied DROPPED</code> on the drop lines. The senders differ, frontend and ops among them, but the destination is always the same. When many pods fail at once and all their drops go to one place, look for a policy every pod shares.</p>
+<p>Put the policy back and check.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl apply -f k8s/policies/1-baseline.yaml
+sleep 15
+bash check-portal.sh | tail -1</code></pre></figure>
+<p><code class="nw">allow-dns</code> says <code class="nw">created</code>, the other two say <code class="nw">unchanged</code>, and the last line must read <code class="nw">PORTAL: 6/6 OK</code>.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>Error from server (NotFound): ciliumnetworkpolicies.cilium.io &quot;allow-dns&quot; not found</code></pre></figure>
+<p><code class="nw">allow-dns</code> was already gone before you started, so your lab was broken before the drill. Apply <code class="nw">k8s/policies/1-baseline.yaml</code>, check for <code class="nw">PORTAL: 6/6 OK</code>, and start the drill again.</p>
+<p>The portal checks still say <code class="nw">PORTAL: 6/6 OK</code> after the deletion. You checked within nginx's 10 seconds, or the deletion failed. Wait 15 seconds and run <code class="nw">bash check-portal.sh</code> again.</p>
+<p>After the repair the count is below 6. Some programs wait a few seconds before they try a failed lookup again. Wait 15 seconds and run the check again before you look further.</p>
+<h2 id="drill-3-an-image-that-doesnt-exist">Drill 3: an image that doesn't exist</h2>
+<p>A typing mistake in an image tag is common, and when it happens Kubernetes can't start the new pod, so the error only shows up in the pod's STATUS and its events. It also shows that Kubernetes keeps the old pod serving while a broken update fails.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus set image deployment/auth auth=campus-app:1.1</code></pre></figure>
+<p><code class="nw">kubectl set image</code> changes the image of one container in a Deployment, here the container named <code class="nw">auth</code>, to <code class="nw">campus-app:1.1</code>. That tag was never built, and the Deployment uses <code class="nw">imagePullPolicy: Never</code>, so Kubernetes won't try to download it either. The change starts a rollout, the way Kubernetes replaces a Deployment's pods with new ones.</p>
+<p><strong>You should see</strong> a single line.</p>
+<p>It reads <code>deployment.apps/auth image updated</code>.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>sleep 10
+kubectl -n campus get pods -l app=auth</code></pre></figure>
+<p>There are two auth pods now. The old one is still <code class="nw">1/1 Running</code>, while the new one shows <code class="nw">0/1</code> and <code class="nw">ErrImageNeverPull</code>. Its name has a different middle part, because it belongs to the new version of the Deployment.</p>
+<p>Find the reason in the events.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus get events --sort-by=.lastTimestamp | tail -5</code></pre></figure>
+<p><code class="nw">--sort-by=.lastTimestamp</code> orders the events by time, and <code class="nw">tail -5</code> keeps the five newest.</p>
+<p>Look for a <code class="nw">Warning</code> line about the new auth pod whose message reads <code>Container image "campus-app:1.1" is not present with pull policy of Never</code>. That names the problem exactly, an image tag the node doesn't have.</p>
+<p>Check the portal while the broken pod sits there.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>bash check-portal.sh | tail -1</code></pre></figure>
+<p>It still reads <code class="nw">PORTAL: 6/6 OK</code>. A rollout keeps the old pod running until a new one is ready, and this new one never gets ready, so the old one keeps serving. Your users wouldn't notice. Undo the change.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus rollout undo deployment/auth
+kubectl -n campus rollout status deployment/auth
+kubectl -n campus get pods -l app=auth</code></pre></figure>
+<p><code class="nw">rollout undo</code> returns the Deployment to its previous version, the one with <code class="nw">campus-app:1.0</code>. <code class="nw">rollout status</code> waits until the Deployment is back in order.</p>
+<p>You see <code>deployment.apps/auth rolled back</code>, then <code>deployment "auth" successfully rolled out</code>, then one auth pod, <code class="nw">1/1 Running</code>.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>The new pod shows <code class="nw">ContainerCreating</code> instead of <code class="nw">ErrImageNeverPull</code>. Kubernetes hasn't tried the image yet. Wait a few seconds and list the pods again.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>error: unable to find container named</code></pre></figure>
+<p>The name before the <code class="nw">=</code> in the <code class="nw">set image</code> command must be the container's name, <code class="nw">auth</code>. Check for a typo and run it again.</p>
+<p>After the undo, two auth pods are still listed. The broken one is shutting down. Wait a few seconds and list the pods again.</p>
+<h2 id="after-a-windows-restart">After a Windows restart</h2>
+<p>Restarting Windows stops WSL, and with it everything you started by hand. Docker starts again with Ubuntu, and the cluster's three containers come back up with it. The Hubble port-forward, the Hubble UI and your dashboard don't. Open Ubuntu and check the cluster first.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>docker ps --format &quot;{{.Names}}: {{.Status}}&quot;</code></pre></figure>
+<p><code class="nw">--format</code> prints only each container's name and status, one per line.</p>
+<p><strong>You should see</strong> three lines, one for each node.</p>
+<p><code class="nw">kind-control-plane</code>, <code class="nw">kind-worker</code> and <code class="nw">kind-worker2</code> must each say <code class="nw">Up</code>, followed by how long they've been running. Run <code class="nw">cd ~/microseg</code>, then <code class="nw">kubectl -n campus get pods</code> every half minute until all seven pods show <code class="nw">1/1 Running</code>. Then start the helpers again. Run <code>cilium hubble port-forward &amp;</code> for Hubble. Start the dashboard in a second terminal with <code>cd ~/microseg/dashboard &amp;&amp; ../.venv/bin/python app.py</code>, and the Hubble UI, if you need it, with <code>cilium hubble ui --open-browser=false &amp;</code>. Finish with <code class="nw">bash check-portal.sh</code>, whose last line must read <code class="nw">PORTAL: 6/6 OK</code>.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>The list is empty, or a node says <code class="nw">Exited</code>. Start them with <code>docker start kind-control-plane kind-worker kind-worker2</code> and wait two minutes. If the portal still fails after that, rebuild from scratch as described next.</p>
+<h2 id="rebuild-from-scratch-the-last-resort">Rebuild from scratch, the last resort</h2>
+<p>When nothing else helps, or you can't tell any more what you've changed, rebuild. Your files in <code class="nw">~/microseg</code> are untouched by this. Only the cluster is thrown away and built again from them. Do it once now as a drill, so you know it works and how long it takes on your laptop before you need it in an emergency.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+kind delete cluster &amp;&amp; bash setup.sh &amp;&amp; bash deploy.sh</code></pre></figure>
+<p><code class="nw">kind delete cluster</code> removes the three node containers and everything inside them. <code class="nw">bash setup.sh</code> creates the cluster and installs Cilium as in <a href="ch04.html">chapter 4</a>, and <code class="nw">bash deploy.sh</code> builds and loads your images and deploys the portal as in <a href="ch06.html">chapter 6</a>. <code class="nw">&amp;&amp;</code> starts each command only if the one before it succeeded, so a failure stops the chain where it happened. Expect about 15 minutes. While <code class="nw">cilium status --wait</code> runs, red error lines appear for a while, and that's normal.</p>
+<p><strong>You should see</strong> the output of all three scripts, ending with the pod list from <code class="nw">deploy.sh</code>.</p>
+<p>The last lines show seven pods, all <code class="nw">1/1 Running</code>, with frontend and news on <code class="nw">kind-worker</code> and the rest on <code class="nw">kind-worker2</code>. The rebuilt portal is a flat network with a fresh database, because <code class="nw">deploy.sh</code> never applies policies. Apply them, and restart the Hubble port-forward, since the old one died with the old cluster.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl apply -f k8s/policies/
+pkill -f &quot;hubble port-forward&quot;
+cilium hubble port-forward &amp;
+sleep 5
+hubble status</code></pre></figure>
+<p><code class="nw">pkill -f "hubble port-forward"</code> stops any port-forward still left from before. It prints nothing, whether or not it found one. If the old port-forward was started in this terminal, bash prints a line ending in <code class="nw">Terminated</code> for it, which is expected. The next line starts a new one in the background, and <code class="nw">hubble status</code> checks it. The Hubble UI stopped with the old cluster too, so start it again with <code>cilium hubble ui --open-browser=false &amp;</code> when you need it.</p>
+<p>Ten policies say <code class="nw">created</code>, and the Hubble part must show <code class="nw">Connected Nodes: 3/3</code>. The line starting with <code class="nw">[1]</code> is bash telling you the job number and process number of the background port-forward, and yours will differ.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>ERROR: failed to create cluster: node(s) already exist for a cluster with the name &quot;kind&quot;</code></pre></figure>
+<p><code class="nw">kind delete cluster</code> didn't run or didn't finish. Run <code class="nw">kind delete cluster</code> on its own, wait for the prompt, then run the full rebuild line again.</p>
+<p><code class="nw">setup.sh</code> stops after <code class="nw">cilium status --wait</code> has waited 15 minutes and still reports errors. It may end with a long crash dump that starts with <code>fatal error: all goroutines are asleep - deadlock!</code>, which only means the waiting ran out of time. Usually Cilium's images are still downloading. Don't repeat the rebuild, because <code class="nw">kind delete cluster</code> throws the finished downloads away. Follow the same failure in <a href="ch04.html">chapter 4</a>'s <code class="nw">setup.sh</code> step, which checks the pods with <code>kubectl -n kube-system get pods</code> and finishes the setup by hand. Then run <code class="nw">bash deploy.sh</code>, which the stopped chain never reached. If it fails the same way twice, go to appendix A that same day.</p>
+<p><code class="nw">toomanyrequests</code> appears while <code class="nw">setup.sh</code> pulls <code class="nw">nginx:1.28</code> or <code class="nw">postgres:17</code>. Docker Hub is limiting downloads from your address. See its line in the table above.</p>
+<h2 id="checkpoint">Checkpoint</h2>
+<p><strong>Checkpoint.</strong> After the three drills and the rebuild, run this.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>bash check-portal.sh | tail -1 &amp;&amp; kubectl -n campus get cnp --no-headers | wc -l</code></pre></figure>
+<p>The output must be exactly two lines, <code class="nw">PORTAL: 6/6 OK</code> and then <code class="nw">10</code>.</p>
+<p>Save the drill evidence.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>git add -A &amp;&amp; git commit -m &quot;ch13: drills and rebuild&quot;</code></pre></figure>
+<p>The first line starts with <code class="nw">[main</code>. Below the count of changed files, two <code class="nw">create mode</code> lines name <code class="nw">evidence/ch15-drill1-drops.txt</code> and <code class="nw">evidence/ch15-drill2-drops.txt</code>.</p>
+<!-- OUT ids: ch15-before-drills, ch15-d1-diff, ch15-d1-apply, ch15-d1-portal, ch15-d1-q1, ch15-d1-q2, ch15-d1-q3, ch15-d1-q4, ch15-d1-fixed, ch15-d2-delete, ch15-d2-portal, ch15-d2-hubble, ch15-d2-fixed, ch15-d3-set, ch15-d3-pods, ch15-d3-events, ch15-d3-portal, ch15-d3-undo, ch15-docker-ps, ch15-rebuild, ch15-rebuild-after, ch15-checkpoint, ch15-commit --><nav class="pager" aria-label="Chapters"><a rel="prev" href="ch12.html"><span>Previous chapter</span>Chapter 12. Measure</a><a rel="next" href="ch14.html"><span>Next chapter</span>Chapter 14. Evidence for your report</a></nav></main></div>
+<footer class="foot"><div class="foot-in"><p>Kubernetes 1.36, Cilium 1.20.5 and kind 0.33.0 on Windows 11 with WSL 2. Every command was run on a real laptop in November 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">Source on GitHub</a></p></div></footer>
+<p class="vh" aria-live="polite" id="live"></p>
+<script type="application/json" id="i18n">{"copied": "Copied", "copyFail": "Press Ctrl+C to copy the selected text", "doneOf": "{d} of {t} steps done", "next": "Next step: {s}", "allDone": "All {t} steps done.", "sumCount": "{d} of {t} done", "cleared": "All ticks cleared.", "confirm": "Clear every tick on this page? Your files and your cluster stay as they are.", "stageCount": "{d} of {t}"}</script>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

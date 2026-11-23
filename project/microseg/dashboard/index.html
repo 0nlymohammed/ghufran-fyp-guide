@@ -1,0 +1,153 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Micro-segmentation dashboard</title>
+<style>
+  body { font-family: "Segoe UI", Arial, sans-serif; margin: 24px; max-width: 1000px; color: #13233F; }
+  section { margin-bottom: 28px; }
+  table { border-collapse: collapse; }
+  th, td { border: 1px solid #D5DAE2; padding: 4px 10px; text-align: center; }
+  .open { background: #E1EEF7; color: #0B4F7A; }
+  .blocked { background: #FBE7D9; color: #8A3B00; }
+  .refused { background: #F3F0D6; }
+  pre { background: #F4F6F9; padding: 8px; max-height: 320px; overflow: auto; white-space: pre-wrap; }
+  svg text { font-size: 13px; }
+</style>
+</head>
+<body>
+<h1>Campus Portal: micro-segmentation dashboard</h1>
+
+<section>
+  <h2>Policies: <span id="policy-status">loading...</span></h2>
+  <button onclick="setPolicies('apply')">Apply policies</button>
+  <button onclick="setPolicies('remove')">Remove policies</button>
+  <pre id="policy-output"></pre>
+</section>
+
+<section>
+  <h2>Topology</h2>
+  <svg width="760" height="320">
+    <rect x="150" y="30" width="170" height="275" fill="#F4F6F9" stroke="#56627A"/>
+    <text x="158" y="50">kind-worker</text>
+    <text x="158" y="66">tier=frontend</text>
+    <rect x="360" y="30" width="370" height="275" fill="#F4F6F9" stroke="#56627A"/>
+    <text x="368" y="50">kind-worker2</text>
+    <text x="368" y="66">tier=backend</text>
+
+    <line x1="60" y1="160" x2="235" y2="100" stroke="#56627A" stroke-width="3"/>
+    <line data-src="frontend" data-dst="api" x1="235" y1="100" x2="440" y2="90" stroke="#56627A" stroke-width="3"/>
+    <line data-src="frontend" data-dst="news" x1="235" y1="100" x2="235" y2="230" stroke="#56627A" stroke-width="3"/>
+    <line data-src="api" data-dst="auth" x1="440" y1="90" x2="440" y2="180" stroke="#56627A" stroke-width="3"/>
+    <line data-src="api" data-dst="db" x1="440" y1="90" x2="640" y2="130" stroke="#56627A" stroke-width="3"/>
+    <line data-src="auth" data-dst="db" x1="440" y1="180" x2="640" y2="130" stroke="#56627A" stroke-width="3"/>
+    <line data-src="admin" data-dst="db" x1="640" y1="240" x2="640" y2="130" stroke="#56627A" stroke-width="3"/>
+    <line data-src="ops" data-dst="admin" x1="440" y1="280" x2="640" y2="240" stroke="#56627A" stroke-width="3"/>
+    <line data-src="news" data-dst="api" x1="235" y1="230" x2="440" y2="90" stroke="#56627A" stroke-width="2" stroke-dasharray="6"/>
+    <path data-src="news" data-dst="db" d="M 275 236 Q 560 250 618 144" fill="none" stroke="#56627A" stroke-width="2" stroke-dasharray="6"/>
+    <line data-src="news" data-dst="admin" x1="235" y1="230" x2="640" y2="240" stroke="#56627A" stroke-width="2" stroke-dasharray="6"/>
+
+    <rect x="15" y="146" width="90" height="28" fill="white" stroke="#13233F"/><text x="60" y="165" text-anchor="middle">Windows</text>
+    <rect x="195" y="86" width="80" height="28" fill="white" stroke="#13233F"/><text x="235" y="105" text-anchor="middle">frontend</text>
+    <rect x="195" y="216" width="80" height="28" fill="white" stroke="#13233F"/><text x="235" y="235" text-anchor="middle">news</text>
+    <rect x="400" y="76" width="80" height="28" fill="white" stroke="#13233F"/><text x="440" y="95" text-anchor="middle">api</text>
+    <rect x="400" y="166" width="80" height="28" fill="white" stroke="#13233F"/><text x="440" y="185" text-anchor="middle">auth</text>
+    <rect x="400" y="266" width="80" height="28" fill="white" stroke="#13233F"/><text x="440" y="285" text-anchor="middle">ops</text>
+    <rect x="600" y="116" width="80" height="28" fill="white" stroke="#13233F"/><text x="640" y="135" text-anchor="middle">db</text>
+    <rect x="600" y="226" width="80" height="28" fill="white" stroke="#13233F"/><text x="640" y="245" text-anchor="middle">admin</text>
+  </svg>
+  <p>Solid lines are the paths the portal needs. Dashed lines are attacker paths from news. Blue means reachable, orange means blocked.</p>
+  <pre id="pods"></pre>
+</section>
+
+<section>
+  <h2>Reachability matrix <button onclick="loadMatrix()">Refresh</button></h2>
+  <p id="matrix-summary"></p>
+  <table id="matrix"></table>
+</section>
+
+<section>
+  <h2>Attack from the news pod <button onclick="runAttack()">Run attack</button></h2>
+  <p id="attack-summary"></p>
+  <pre id="attack-log"></pre>
+</section>
+
+<section>
+  <h2>Recent Hubble drops <button onclick="loadDrops()">Refresh</button></h2>
+  <pre id="drops"></pre>
+</section>
+
+<script>
+async function getJSON(url, options) {
+  const answer = await fetch(url, options);
+  return answer.json();
+}
+
+async function loadStatus() {
+  const data = await getJSON("/api/status");
+  let text = "OFF";
+  if (data.policies.length > 0) {
+    text = "ON (" + data.policies.length + " policies)";
+  }
+  document.getElementById("policy-status").textContent = text;
+  document.getElementById("pods").textContent = data.pods;
+}
+
+async function setPolicies(action) {
+  document.getElementById("policy-output").textContent = "Working...";
+  const data = await getJSON("/api/policies/" + action, {method: "POST"});
+  document.getElementById("policy-output").textContent = data.output;
+  await loadStatus();
+  setTimeout(loadMatrix, 5000);   // give Cilium a few seconds to update every pod
+}
+
+async function loadMatrix() {
+  document.getElementById("matrix-summary").textContent = "Probing (a few seconds)...";
+  const data = await getJSON("/api/matrix");
+  let html = "<tr><th>from \\ to</th>";
+  for (const target of data.targets) {
+    html += "<th>" + target + "</th>";
+  }
+  html += "</tr>";
+  for (const source of data.sources) {
+    html += "<tr><th>" + source + "</th>";
+    for (const target of data.targets) {
+      const state = data.matrix[source][target] || "self";
+      html += '<td class="' + state + '">' + state + "</td>";
+    }
+    html += "</tr>";
+  }
+  document.getElementById("matrix").innerHTML = html;
+  document.getElementById("matrix-summary").textContent = data.open + " of " + data.total + " paths reachable";
+  for (const line of document.querySelectorAll("[data-src]")) {
+    const state = data.matrix[line.dataset.src][line.dataset.dst];
+    line.style.stroke = (state === "open") ? "#0072B2" : "#D55E00";
+  }
+}
+
+async function runAttack() {
+  document.getElementById("attack-summary").textContent = "Running 5 steps (up to 30 seconds)...";
+  const steps = await getJSON("/api/attack", {method: "POST"});
+  let log = "";
+  let succeeded = 0;
+  for (const step of steps) {
+    if (step.success) {
+      succeeded += 1;
+    }
+    log += (step.success ? "[SUCCESS] " : "[FAILED]  ") + step.step + "\n" + step.output + "\n\n";
+  }
+  document.getElementById("attack-summary").textContent = succeeded + " of " + steps.length + " attack steps succeeded";
+  document.getElementById("attack-log").textContent = log;
+}
+
+async function loadDrops() {
+  document.getElementById("drops").textContent = "Loading...";
+  const data = await getJSON("/api/drops");
+  document.getElementById("drops").textContent = data.output || "(no drops)";
+}
+
+loadStatus();
+loadMatrix();
+</script>
+</body>
+</html>

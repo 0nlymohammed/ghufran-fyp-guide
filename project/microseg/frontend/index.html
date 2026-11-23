@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Campus Portal</title>
+</head>
+<body>
+  <h1>Campus Portal</h1>
+
+  <h2>Announcements</h2>
+  <ul id="news"></ul>
+
+  <h2>Student login</h2>
+  <input id="username" placeholder="username">
+  <input id="password" type="password" placeholder="password">
+  <button onclick="login()">Log in</button>
+  <pre id="result"></pre>
+
+  <h2>Image link checker (for news editors)</h2>
+  <form method="post" action="/news/check-image">
+    <input name="url" size="50" placeholder="http://example.com/picture.png">
+    <button>Check</button>
+  </form>
+
+  <script>
+    async function loadNews() {
+      const answer = await fetch("/news");
+      const items = await answer.json();
+      for (const item of items) {
+        const li = document.createElement("li");
+        li.textContent = item.date + "  " + item.title;
+        document.getElementById("news").appendChild(li);
+      }
+    }
+
+    async function login() {
+      const answer = await fetch("/api/login", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          username: document.getElementById("username").value,
+          password: document.getElementById("password").value
+        })
+      });
+      const data = await answer.json();
+      if (!data.token) {
+        document.getElementById("result").textContent = "Login failed";
+        return;
+      }
+      const headers = {"Authorization": "Bearer " + data.token};
+      const profileAnswer = await fetch("/api/profile", {headers: headers});
+      const profile = await profileAnswer.json();
+      const gradesAnswer = await fetch("/api/grades", {headers: headers});
+      const grades = await gradesAnswer.json();
+      document.getElementById("result").textContent = JSON.stringify({profile: profile, grades: grades}, null, 2);
+    }
+
+    loadNews();
+  </script>
+</body>
+</html>

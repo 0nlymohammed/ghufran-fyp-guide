@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
+<title>الفصل 6. نشر البوابة | مختبر التجزئة الدقيقة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;700&family=Public+Sans:wght@400;600;700&family=Noto+Sans+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="en" href="../../guide/ch06.html">
+
+</head>
+<body class="">
+<a class="skip" href="#main">الانتقال إلى المحتوى</a>
+<header class="top"><div class="top-in">
+<a class="brand" href="../../ar/index.html">مختبر التجزئة الدقيقة</a>
+<nav aria-label="مختبر التجزئة الدقيقة"><ul>
+<li><a href="../../ar/index.html">المسار السريع</a></li>
+<li><a href="../../ar/guide/index.html" aria-current="page">الدليل الكامل</a></li>
+<li><a href="../../ar/downloads.html">التنزيلات</a></li>
+<li><a href="../../guide/ch06.html" lang="en" hreflang="en" data-setlang="en">English</a></li>
+</ul></nav>
+</div></header>
+<div class="layout"><details class="rail" open><summary>الفصول</summary><nav aria-label="الفصول"><ol class="toc"><li><a href="ch00.html">0. كيف نستخدم هذا الدليل</a></li><li><a href="ch01.html">1. ما الذي سنبنيه</a></li><li><a href="ch02.html">2. قبل أن نبدأ</a></li><li><a href="ch03.html">3. تجهيز بيئة العمل</a></li><li><a href="ch04.html">4. إنشاء العنقود</a></li><li><a href="ch05.html">5. كتابة الخدمات</a></li><li><a href="ch06.html" aria-current="page">6. نشر البوابة</a><ol class="sub"><li><a href="#الخطوة-1-التأكد-من-أن-العنقود-ما-زال-يعمل">الخطوة 1. التأكد من أن العنقود ما زال يعمل</a></li><li><a href="#الخطوة-2-كتابة-k8sappyaml">الخطوة 2. كتابة k8s/app.yaml</a></li><li><a href="#الخطوة-3-فحص-الملف-قبل-النشر">الخطوة 3. فحص الملف قبل النشر</a></li><li><a href="#الخطوة-4-كتابة-deploysh">الخطوة 4. كتابة deploy.sh</a></li><li><a href="#الخطوة-5-نشر-البوابة">الخطوة 5. نشر البوابة</a></li><li><a href="#الخطوة-6-نظرة-على-الـ-pods">الخطوة 6. نظرة على الـ Pods</a></li><li><a href="#الخطوة-7-نظرة-على-كائنات-service-ومتغيرات-البيئة">الخطوة 7. نظرة على كائنات Service ومتغيرات البيئة</a></li><li><a href="#الخطوة-8-كتابة-check-portalsh">الخطوة 8. كتابة check-portal.sh</a></li><li><a href="#الخطوة-9-فتح-البوابة-من-windows">الخطوة 9. فتح البوابة من Windows</a></li><li><a href="#نقطة-التحقق">نقطة التحقق</a></li></ol></li><li><a href="ch07.html">7. بناء لوحة التحكم</a></li><li><a href="ch08.html">8. مهاجمة الشبكة المسطحة</a></li><li><a href="ch09.html">9. تصميم السياسة</a></li><li><a href="ch10.html">10. تطبيق التجزئة الدقيقة للشبكة</a></li><li><a href="ch11.html">11. قراءة الأدلة في Hubble</a></li><li><a href="ch12.html">12. القياس</a></li><li><a href="ch13.html">13. تجاوز الأعطال دون مساعدة</a></li><li><a href="ch14.html">14. أدلة بحث التخرج</a></li><li><a href="ch15.html">15. خطة العمل يوماً بيوم</a></li><li><a href="appendix.html">الملاحق</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="الفصل-6-نشر-البوابة">الفصل 6. نشر البوابة</h1>
+<p>في نهاية هذا الفصل ستعمل بوابة الحرم الجامعي (Campus Portal) على العنقود (Cluster) الذي بنيناه، بسبعة Pods موزعة على العقدتين العاملتين (Worker nodes). وسيؤكد لنا سكربت (Script) أن الطلاب الحقيقيين ما زالوا قادرين على تسجيل الدخول وقراءة درجاتهم، ثم ندخل بأنفسنا باسم سارة من المتصفح في Windows. نخصص لهذا الفصل ساعتين إلى ثلاث ساعات. يذهب معظم هذا الوقت إلى قراءة ملف طويل واحد هو <code class="nw">k8s/app.yaml</code>، لأن كل فصل لاحق يعود إليه.</p>
+<h2 id="الخطوة-1-التأكد-من-أن-العنقود-ما-زال-يعمل">الخطوة 1. التأكد من أن العنقود ما زال يعمل</h2>
+<p>لا بد أن يكون العنقود الذي بنيناه في <a href="ch04.html">الفصل 4</a> قيد التشغيل قبل أن نضع عليه أي شيء. وقد يكون متوقفاً بعد إعادة تشغيل Windows، وأمر واحد يكشف لنا حاله.</p>
+<p>نفتح الطرفية (Terminal) في Ubuntu.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>kubectl get nodes -L tier</code></pre></figure>
+<p>يعرض <code class="nw">kubectl get nodes</code> عقد (Nodes) العنقود. ويضيف <code class="nw">-L tier</code> عموداً يُظهر قيمة الوسم (Label) <code class="nw">tier</code> لكل عقدة، وهو الوسم الذي يحدد العقد التي يُسمح للـ Pods أن تعمل عليها.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> ثلاث عقد.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>NAME                 STATUS   ROLES           AGE     VERSION   TIER
+kind-control-plane   Ready    control-plane   5m14s   v1.36.4   
+kind-worker          Ready    &lt;none&gt;          5m      v1.36.4   frontend
+kind-worker2         Ready    &lt;none&gt;          5m      v1.36.4   backend</code></pre></figure>
+<p>يجب أن تظهر الكلمة <code class="nw">Ready</code> في عمود STATUS في كل سطر. وفي عمود TIER يجب أن تظهر القيمة <code class="nw">frontend</code> أمام kind-worker والقيمة <code class="nw">backend</code> أمام kind-worker2، أمّا kind-control-plane فليست لها فئة (Tier) ويبقى حقلها فارغاً. ويعرض عمود AGE المدة التي مضت منذ بناء العنقود، لذلك ستختلف قيمته على حاسوبنا عن المثال.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>The connection to the server 127.0.0.1:37645 was refused - did you specify the right host or port?</code></pre></figure>
+<p>إذا ظهرت هذه الرسالة فالسبب أن حاويات (Containers) العقد الثلاث متوقفة. يحدث هذا بعد إعادة تشغيل Windows أو بعد إغلاق Ubuntu، وسيختلف رقم المنفذ (Port) على الشاشة عن المثال. نشغّل العقد من جديد بالأمر <code>docker start kind-control-plane kind-worker kind-worker2</code>، وننتظر دقيقة واحدة، ثم نعيد تشغيل <code class="nw">kubectl get nodes -L tier</code>.</p>
+<p>إذا ظهرت إحدى العقد بالحالة <code class="nw">NotReady</code> فالسبب أن Cilium لم يكتمل تشغيله على تلك العقدة بعد. نشغّل <code class="nw">cilium status --wait</code>، وهو ينتظر حتى تظهر OK أمام كل جزء من Cilium، ثم نفحص العقد مرة أخرى.</p>
+<p>إذا كان عمود TIER فارغاً أمام kind-worker أو kind-worker2 فالسبب أن العنقود أُنشئ من دون الوسوم الموجودة في <code class="nw">kind-config.yaml</code>، وعندها سينتظر كل Pod في هذا الفصل إلى الأبد لأنه لا يجد مكاناً يذهب إليه. نضيف الوسوم يدوياً بالأمر <code>kubectl label node kind-worker tier=frontend</code> ثم <code>kubectl label node kind-worker2 tier=backend</code>.</p>
+<h2 id="الخطوة-2-كتابة-k8sappyaml">الخطوة 2. كتابة k8s/app.yaml</h2>
+<p>الملف <code class="nw">k8s/app.yaml</code> ملف توصيف (Manifest)، وهو ملف نصي يصف الكائنات التي نريد وجودها، ويظل Kubernetes يعمل حتى يطابق ما يجري في العنقود محتوى الملف. ويصف البوابة كلها في 14 كائناً: كائن Secret واحد، وستة كائنات Service، وسبعة كائنات Deployment.</p>
+<p>الملف مكتوب بصيغة YAML، وهي صيغة نصية تدل فيها الإزاحة على تبعية كل سطر لما فوقه. كل مستوى يُزاح بمسافتين، ولا يُسمح بمحرف الجدولة (Tab) إطلاقاً، فمحرف جدولة واحد في أي مكان يُفسد الملف كله. والسطر الذي يبدأ بـ <code class="nw">-</code> عنصر واحد من قائمة. وفي هذا الملف تقف عناصر القائمة على مستوى إزاحة المفتاح الذي فوقها، كما في <code class="nw">ports:</code> يليه <code class="nw">- port: 5000</code>، وهذا صحيح. أمّا السطر الذي لا يحوي إلا <code class="nw">---</code> فيُنهي كائناً ويبدأ الذي بعده، وبهذا يتسع ملف واحد لـ 14 كائناً.</p>
+<p>في طرفية Ubuntu ننشئ المجلد ونفتح ملفاً جديداً فارغاً في VS Code.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>mkdir -p ~/microseg/k8s
+code ~/microseg/k8s/app.yaml</code></pre></figure>
+<p>ينشئ <code class="nw">mkdir -p ~/microseg/k8s</code> المجلد <code class="nw">k8s</code> داخل مشروعنا، ويجعله الخيار <code class="nw">-p</code> يمضي بصمت إذا كان المجلد موجوداً أصلاً. ويفتح <code class="nw">code</code> الملف في VS Code، فيُنشأ الملف عند أول حفظ.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> يفتح VS Code تبويباً فارغاً اسمه <code class="nw">app.yaml</code>، ولا يظهر أي ناتج في الطرفية. نلصق فيه الملف الآتي ونحفظه بـ Ctrl+S. ثم نتأكد أن شريط الحالة أسفل يمين نافذة VS Code يُظهر <code class="nw">LF</code>، كما في <a href="ch02.html">الفصل 2</a>.</p>
+<figure class="code file"><figcaption><span class="lbl">الملف: k8s/app.yaml</span><button type="button" class="copy" aria-label="نسخ هذا الملف">نسخ</button></figcaption><pre dir="ltr"><code># Campus Portal. Order: Secret, then all Services, then all Deployments.
+# Services come first so every pod gets the *_SERVICE_PORT env vars (used in attack step 2).
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-credentials
+  namespace: campus
+type: Opaque
+stringData:
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: postgres      # vendor default ON PURPOSE (attack step 3)
+  POSTGRES_DB: campus
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: campus
+spec:
+  type: NodePort
+  externalTrafficPolicy: Local     # keep the client IP, so Cilium sees it as &quot;world&quot;
+  selector:
+    app: frontend
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 30080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: news
+  namespace: campus
+spec:
+  selector:
+    app: news
+  ports:
+  - port: 5000
+    targetPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+  namespace: campus
+spec:
+  selector:
+    app: api
+  ports:
+  - port: 8080
+    targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth
+  namespace: campus
+spec:
+  selector:
+    app: auth
+  ports:
+  - port: 5001
+    targetPort: 5001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+  namespace: campus
+spec:
+  selector:
+    app: db
+  ports:
+  - port: 5432
+    targetPort: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin
+  namespace: campus
+spec:
+  selector:
+    app: admin
+  ports:
+  - port: 5002
+    targetPort: 5002
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: campus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      nodeSelector:
+        tier: frontend
+      containers:
+      - name: frontend
+        image: nginx:1.28
+        ports:
+        - containerPort: 80
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 80
+        volumeMounts:
+        - name: files
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: default.conf
+        - name: files
+          mountPath: /usr/share/nginx/html/index.html
+          subPath: index.html
+      volumes:
+      - name: files
+        configMap:
+          name: frontend-files
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: news
+  namespace: campus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: news
+  template:
+    metadata:
+      labels:
+        app: news
+    spec:
+      nodeSelector:
+        tier: frontend
+      automountServiceAccountToken: false   # the attacker gets no Kubernetes API token
+      containers:
+      - name: news
+        image: campus-news:1.0
+        imagePullPolicy: Never
+        command: [&quot;gunicorn&quot;, &quot;--bind&quot;, &quot;0.0.0.0:5000&quot;, &quot;--workers&quot;, &quot;2&quot;, &quot;news:app&quot;]
+        ports:
+        - containerPort: 5000
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 5000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: campus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      nodeSelector:
+        tier: backend
+      containers:
+      - name: api
+        image: campus-app:1.0
+        imagePullPolicy: Never
+        command: [&quot;gunicorn&quot;, &quot;--bind&quot;, &quot;0.0.0.0:8080&quot;, &quot;--workers&quot;, &quot;2&quot;, &quot;api:app&quot;]
+        envFrom:
+        - secretRef:
+            name: db-credentials
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth
+  namespace: campus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth
+  template:
+    metadata:
+      labels:
+        app: auth
+    spec:
+      nodeSelector:
+        tier: backend
+      containers:
+      - name: auth
+        image: campus-app:1.0
+        imagePullPolicy: Never
+        command: [&quot;gunicorn&quot;, &quot;--bind&quot;, &quot;0.0.0.0:5001&quot;, &quot;--workers&quot;, &quot;2&quot;, &quot;auth:app&quot;]
+        envFrom:
+        - secretRef:
+            name: db-credentials
+        ports:
+        - containerPort: 5001
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 5001
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+  namespace: campus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      nodeSelector:
+        tier: backend
+      containers:
+      - name: db
+        image: postgres:17
+        envFrom:
+        - secretRef:
+            name: db-credentials
+        ports:
+        - containerPort: 5432
+        readinessProbe:
+          exec:
+            command: [&quot;pg_isready&quot;, &quot;-h&quot;, &quot;127.0.0.1&quot;, &quot;-U&quot;, &quot;postgres&quot;]
+        volumeMounts:
+        - name: init
+          mountPath: /docker-entrypoint-initdb.d
+      volumes:
+      - name: init
+        configMap:
+          name: db-init
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin
+  namespace: campus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: admin
+  template:
+    metadata:
+      labels:
+        app: admin
+    spec:
+      nodeSelector:
+        tier: backend
+      containers:
+      - name: admin
+        image: campus-app:1.0
+        imagePullPolicy: Never
+        command: [&quot;gunicorn&quot;, &quot;--bind&quot;, &quot;0.0.0.0:5002&quot;, &quot;--workers&quot;, &quot;2&quot;, &quot;admin:app&quot;]
+        envFrom:
+        - secretRef:
+            name: db-credentials
+        ports:
+        - containerPort: 5002
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 5002
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ops
+  namespace: campus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ops
+  template:
+    metadata:
+      labels:
+        app: ops
+    spec:
+      nodeSelector:
+        tier: backend
+      terminationGracePeriodSeconds: 1      # sleep ignores the stop signal, don&#x27;t wait 30 s
+      containers:
+      - name: ops
+        image: campus-app:1.0
+        imagePullPolicy: Never
+        command: [&quot;sleep&quot;, &quot;infinity&quot;]</code></pre></figure>
+<p>تمر بقية الخطوة على الملف كائناً كائناً. نُبقي الملف مفتوحاً بجانبنا.</p>
+<h3 id="كائن-secret">كائن Secret</h3>
+<p>كائن Secret مخصص في Kubernetes لكلمات المرور والمفاتيح. تستطيع الـ Pods أن تقرأ قيمه على شكل متغيرات بيئة (Environment variables)، من دون أن تُكتب كلمة المرور في كل Deployment.</p>
+<figure class="code file excerpt"><figcaption><span class="lbl">من k8s/app.yaml</span></figcaption><pre dir="ltr"><code>stringData:
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: postgres      # vendor default ON PURPOSE (attack step 3)
+  POSTGRES_DB: campus</code></pre></figure>
+<p>(1) تحت <code class="nw">stringData</code> نكتب القيم نصاً عادياً. يعرضها Kubernetes بترميز base64، وهو ترميز يستطيع أي شخص عكسه، ويحفظها افتراضياً غير مشفرة في قاعدة بياناته. فالـ Secret يُبعد كلمة المرور عن ملفاتنا الأخرى، لكنه لا يوفر أي تشفير على الإطلاق.</p>
+<p>(2) الأسماء الثلاثة هي التي تقرؤها صورة الحاوية (Container image) الرسمية <code class="nw">postgres:17</code> عند تشغيلها أول مرة. فتنشئ المستخدم <code class="nw">postgres</code> بكلمة المرور <code class="nw">postgres</code>، وقاعدة بيانات فارغة اسمها <code class="nw">campus</code>.</p>
+<p>(3) كلمة المرور هي كلمة المرور الافتراضية المعروفة لـ PostgreSQL، واخترناها عن قصد. ففي <a href="ch08.html">الفصل 8</a> يخمّنها المهاجم في الخطوة 3. ولا يصل هذا الـ Secret إلى Pod الخدمة news أبداً، لذلك يضطر المهاجم إلى التخمين.</p>
+<h3 id="كائنات-service">كائنات Service</h3>
+<p>يمنح كائن Service مجموعةً من الـ Pods اسماً واحداً وعنواناً ثابتاً. ومن دونه يحتاج كل طرف يتصل بها إلى معرفة عنوان IP الحالي للـ Pod، وهذا العنوان يتغير كلما استُبدل الـ Pod. خمسة من كائنات Service الستة متشابهة ما عدا الاسم والمنفذ، لذلك نقرأ كائن <code class="nw">news</code> مرة واحدة فنفهم الأربعة الباقية.</p>
+<figure class="code file excerpt"><figcaption><span class="lbl">من k8s/app.yaml</span></figcaption><pre dir="ltr"><code>spec:
+  selector:
+    app: news
+  ports:
+  - port: 5000
+    targetPort: 5000</code></pre></figure>
+<p>(1) غياب سطر <code class="nw">type</code> يعني أن النوع هو ClusterIP، النوع المعتمد حين لا نحدد غيره، وهو عنوان افتراضي (Virtual IP) لا وجود له إلا داخل العنقود. لا شيء في Windows أو في WSL يستطيع الوصول إليه مباشرة.</p>
+<p>(2) يختار <code class="nw">selector: app: news</code> الـ Pods التي يرسل إليها هذا الـ Service حركة المرور، وهي كل Pod في مساحة الأسماء (Namespace) يحمل الوسم <code class="nw">app: news</code>. لكل Pod عندنا وسم واحد فقط من هذا الشكل، وسياسات الشبكة (Network policies) في <a href="ch10.html">الفصل 10</a> تختار الـ Pods بالوسم نفسه.</p>
+<p>(3) <code class="nw">port</code> هو المنفذ الذي يتصل به الآخرون على الـ Service، و<code class="nw">targetPort</code> هو المنفذ الذي يستمع عليه البرنامج داخل الـ Pod. كلاهما هنا 5000، فلا تحويل بينهما.</p>
+<p>أمّا الـ Service الخاص بـ <code class="nw">frontend</code> فمختلف، لأنه الباب الوحيد إلى البوابة من الخارج.</p>
+<figure class="code file excerpt"><figcaption><span class="lbl">من k8s/app.yaml</span></figcaption><pre dir="ltr"><code>spec:
+  type: NodePort
+  externalTrafficPolicy: Local     # keep the client IP, so Cilium sees it as &quot;world&quot;
+  selector:
+    app: frontend
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 30080</code></pre></figure>
+<p>(1) يفتح <code class="nw">type: NodePort</code> أيضاً المنفذ 30080 على العقد. وفي <a href="ch04.html">الفصل 4</a> ربط <code class="nw">kind-config.yaml</code> المنفذ 30080 في حاوية kind-worker بالعنوان 127.0.0.1:30080 على حاسوبنا المحمول، لذلك يصل <code class="nw">http://localhost:30080</code> إلى nginx في Pod الخدمة frontend من WSL ومن Windows على السواء.</p>
+<p>(2) يطلب <code class="nw">externalTrafficPolicy: Local</code> من Kubernetes أن يسلّم الطلبات القادمة من الخارج إلى Pod خاص بـ frontend على العقدة التي وصلت إليها فقط، وأن يُبقي عنوان مصدرها كما هو. ومن دونه يضع Kubernetes عنوان العقدة نفسها مكان عنوان المتصل في كل طلب خارجي، حتى لو كان الـ Pod على العقدة ذاتها، وعندها يرى Cilium العقدة بدلاً من <code class="nw">world</code>. أمّا معه فيستطيع Cilium أن يميّز أن الطلب جاء من خارج العنقود، فيمنحه الهوية <code class="nw">world</code>، وهو الاسم الذي تسمح به سياسة frontend في <a href="ch10.html">الفصل 10</a>.</p>
+<p>لا يوجد Service لـ <code class="nw">ops</code>. فهي لا تتصل إلا بـ admin، ولا شيء يتصل بها، لذلك لا تحتاج إلى اسم Service.</p>
+<h3 id="كائنات-deployment">كائنات Deployment</h3>
+<p>يخبر كائن Deployment نظام Kubernetes بعدد نسخ الـ Pod التي يجب أن تبقى عاملة، وبشكل كل نسخة. ونسمي النسخة الواحدة التي تعمل نسخة متماثلة، وكل Deployment هنا يطلب نسخة واحدة. فإذا توقف الـ Pod شغّل الـ Deployment بديلاً له باسم جديد وعنوان IP جديد.</p>
+<p>يُظهر Deployment الخدمة frontend الأجزاء الموجودة في كل Deployment.</p>
+<figure class="code file excerpt"><figcaption><span class="lbl">من k8s/app.yaml</span></figcaption><pre dir="ltr"><code>spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      nodeSelector:
+        tier: frontend</code></pre></figure>
+<p>(1) <code class="nw">template</code> هو القالب الذي يُصنع منه كل Pod، و<code class="nw">template.metadata.labels</code> هو الوسم الذي يحمله كل Pod مصنوع منه. يجب أن يحوي <code class="nw">selector.matchLabels</code> الوسم نفسه، فبه يتعرف الـ Deployment على الـ Pods التابعة له. وإذا اختلف الاثنان يرفض <code class="nw">kubectl apply</code> الـ Deployment.</p>
+<p>(2) يسمح <code class="nw">nodeSelector: tier: frontend</code> بوضع الـ Pod على عقدة تحمل الوسم <code class="nw">tier=frontend</code> فقط، وهي kind-worker. هذا تحديد للمكان لا أكثر. وسم العقدة يقرر أين يعمل الـ Pod، أمّا وسم الـ Pod فيقرر من يكون هذا الـ Pod في نظر السياسة.</p>
+<p>تشغّل frontend الصورة الجاهزة <code class="nw">nginx:1.28</code>، وتأخذ ملفيها من الـ ConfigMap المسمى <code class="nw">frontend-files</code>، الذي ينشئه <code class="nw">deploy.sh</code> من مجلد <code class="nw">frontend/</code> عندنا. والـ ConfigMap كائن في Kubernetes يحفظ ملفات عادية أو إعدادات لتقرأها الـ Pods.</p>
+<figure class="code file excerpt"><figcaption><span class="lbl">من k8s/app.yaml</span></figcaption><pre dir="ltr"><code>        volumeMounts:
+        - name: files
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: default.conf
+        - name: files
+          mountPath: /usr/share/nginx/html/index.html
+          subPath: index.html
+      volumes:
+      - name: files
+        configMap:
+          name: frontend-files</code></pre></figure>
+<p>(1) وحدة التخزين مساحة يربطها Kubernetes بالـ Pod. يعلن <code class="nw">volumes</code> في الأسفل وحدة تخزين واحدة اسمها <code class="nw">files</code>، ومحتواها هو الـ ConfigMap.</p>
+<p>(2) كل مدخل في <code class="nw">volumeMounts</code> يضع شيئاً من وحدة التخزين تلك في مسار داخل الحاوية. ويختار <code class="nw">subPath</code> ملفاً واحداً من الـ ConfigMap، فلا يُستبدل إلا ذلك الملف، وتبقى بقية مجلدات nginx كما تركتها الصورة. الربط الأول يضع ملفنا <code class="nw">default.conf</code> في المكان الذي يبحث فيه nginx عن إعداداته، والثاني يضع ملفنا <code class="nw">index.html</code> في المكان الذي يبحث فيه nginx عن صفحة الويب.</p>
+<p>ولكل Deployment ما عدا ops فحص جاهزية. والـ kubelet برنامج من Kubernetes يعمل على كل عقدة ويشغّل الحاويات عليها. أمّا فحص الجاهزية فاختبار يجريه الـ kubelet على الـ Pod كل 10 ثوانٍ، وإلى أن ينجح يعرض kubectl الـ Pod بالحالة <code class="nw">0/1</code> ولا ترسل إليه كائنات Service أي حركة مرور. فحص frontend يطلب من nginx المسار <code class="nw">/healthz</code>. هذه الفحوص تأتي من العقدة نفسها، ولذلك يخصص لها أول ملف سياسات في <a href="ch10.html">الفصل 10</a> قاعدة مستقلة.</p>
+<p>ويضيف Deployment الخدمة news ثلاثة أسطر مهمة.</p>
+<figure class="code file excerpt"><figcaption><span class="lbl">من k8s/app.yaml</span></figcaption><pre dir="ltr"><code>      nodeSelector:
+        tier: frontend
+      automountServiceAccountToken: false   # the attacker gets no Kubernetes API token
+      containers:
+      - name: news
+        image: campus-news:1.0
+        imagePullPolicy: Never
+        command: [&quot;gunicorn&quot;, &quot;--bind&quot;, &quot;0.0.0.0:5000&quot;, &quot;--workers&quot;, &quot;2&quot;, &quot;news:app&quot;]</code></pre></figure>
+<p>(1) تعمل news على kind-worker بجانب frontend، لأن الاثنتين تواجهان الجمهور. الفئتان تحددان مكان التشغيل وطريقة رسم الشكل 3 في الخطوة 6 فقط، ولا توقفان أي حركة مرور.</p>
+<p>(2) يعطي Kubernetes في العادة كل Pod رمز حساب خدمة، وهو كلمة مرور يستطيع الـ Pod أن يخاطب بها واجهة Kubernetes API. يمنع <code>automountServiceAccountToken: false</code> وضع هذا الرمز داخل الـ Pod، فالمهاجم الذي يسيطر على news لا يجد رمزاً يسرقه، ولا يستطيع أن يطلب من Kubernetes تغيير أي شيء.</p>
+<p>(3) يطلب <code class="nw">imagePullPolicy: Never</code> من الـ kubelet ألا يستخدم إلا صورة موجودة على العقدة، وألا ينزّل أي صورة أبداً. فالصورتان اللتان بنيناهما لا توجدان إلا على حاسوبنا المحمول. ولو بقيت سياسة السحب الافتراضية لحاول الـ kubelet تنزيل الصورة المفقودة من Docker Hub، مكتبة الصور العامة، وهناك إمّا ألا توجد صورة اسمها <code class="nw">campus-news</code> وإمّا أن تكون لشخص غريب. أمّا مع <code class="nw">Never</code> فتفشل الصورة المفقودة فوراً برسالة خطأ واضحة، وسنلتقي بها في قائمة الأعطال أدناه. ولا يوجد هذا السطر مع الصورتين الجاهزتين <code class="nw">nginx:1.28</code> و<code class="nw">postgres:17</code>، فهما تستخدمان النسختين اللتين حمّلهما <code class="nw">setup.sh</code> على العقد في <a href="ch04.html">الفصل 4</a>.</p>
+<p>(4) يحل <code class="nw">command</code> محل أمر التشغيل الأصلي في الصورة. وGunicorn برنامج يشغّل تطبيق ويب مكتوباً بلغة Python ويعالج طلبات كثيرة في الوقت نفسه. يجعله <code class="nw">--bind 0.0.0.0:5000</code> يستمع على المنفذ 5000 في كل واجهات الشبكة (Network interfaces) داخل الـ Pod، ويشغّل <code class="nw">--workers 2</code> نسختين من التطبيق، ويعني <code class="nw">news:app</code> المتغير <code class="nw">app</code> داخل الملف <code class="nw">news.py</code>.</p>
+<p>وتتبع كائنات Deployment لـ api وauth وadmin نمط news نفسه على فئة backend، ولكل منها منفذه ووحدته البرمجية (Module). وهي تقرأ الـ Secret أيضاً.</p>
+<figure class="code file excerpt"><figcaption><span class="lbl">من k8s/app.yaml</span></figcaption><pre dir="ltr"><code>        envFrom:
+        - secretRef:
+            name: db-credentials</code></pre></figure>
+<p>يحوّل <code class="nw">envFrom</code> كل مفتاح في الـ Secret المسمى <code class="nw">db-credentials</code> إلى متغير بيئة، فيستطيع كود Python أن يقرأ <code>os.environ["POSTGRES_PASSWORD"]</code>. وليس في news سطر <code class="nw">envFrom</code>، لأن news لا تتصل بقاعدة البيانات أبداً.</p>
+<p>ويشغّل Deployment قاعدة البيانات db الصورة الجاهزة <code class="nw">postgres:17</code>.</p>
+<figure class="code file excerpt"><figcaption><span class="lbl">من k8s/app.yaml</span></figcaption><pre dir="ltr"><code>        readinessProbe:
+          exec:
+            command: [&quot;pg_isready&quot;, &quot;-h&quot;, &quot;127.0.0.1&quot;, &quot;-U&quot;, &quot;postgres&quot;]
+        volumeMounts:
+        - name: init
+          mountPath: /docker-entrypoint-initdb.d
+      volumes:
+      - name: init
+        configMap:
+          name: db-init</code></pre></figure>
+<p>(1) فحص <code class="nw">exec</code> يشغّل أمراً داخل الحاوية، ويعدّ رمز الخروج (Exit code) 0 علامة على الجاهزية. يسأل <code class="nw">pg_isready</code> خادم PostgreSQL هل يقبل الاتصالات. وما دامت قاعدة البيانات تحمّل بياناتها الأولى فهي لا تقبل إلا اتصالات من داخل حاويتها عبر ملف محلي، لا عبر الشبكة، لذلك لا ينجح هذا الفحص عبر 127.0.0.1 إلا بعد انتهاء التحميل.</p>
+<p>(2) تشغّل صورة <code class="nw">postgres</code> كل ملف <code class="nw">.sql</code> تجده في <code class="nw">/docker-entrypoint-initdb.d</code> في أول تشغيل لها بمجلد بيانات فارغ. وربط الـ ConfigMap المسمى <code class="nw">db-init</code> في ذلك المسار يجعلها تشغّل ملفنا <code class="nw">db/init.sql</code>، الذي ينشئ الجداول والطلاب الأربعة.</p>
+<p>(3) لا توجد وحدة تخزين للبيانات نفسها. فالبيانات لا توجد إلا داخل الحاوية، وتختفي حين يُستبدل الـ Pod. ويعتمد <a href="ch08.html">الفصل 8</a> على ذلك، فإعادة تشغيل الـ Deployment الخاص بـ db تُرجع درجة عمر إلى 58.</p>
+<p>وأصغرها الـ Deployment الخاص بـ ops.</p>
+<figure class="code file excerpt"><figcaption><span class="lbl">من k8s/app.yaml</span></figcaption><pre dir="ltr"><code>      terminationGracePeriodSeconds: 1      # sleep ignores the stop signal, don&#x27;t wait 30 s
+      containers:
+      - name: ops
+        image: campus-app:1.0
+        imagePullPolicy: Never
+        command: [&quot;sleep&quot;, &quot;infinity&quot;]</code></pre></figure>
+<p>يُبقي <code class="nw">sleep infinity</code> الحاوية عاملة وهي لا تفعل شيئاً. تمثل ops جهاز الصيانة لدى فريق تقنية المعلومات، ونشغّل الأوامر داخلها بـ <code class="nw">kubectl exec</code>. وحين يوقف Kubernetes أي Pod يطلب منه التوقف بلطف أولاً، وينتظر 30 ثانية قبل أن يجبره على ذلك. والبرنامج <code class="nw">sleep</code> يعمل بوصفه أول عملية في الحاوية، وليس لديه معالج لهذا الطلب اللطيف، لذلك لا يوصله Linux إليه أصلاً. يقلّص <code>terminationGracePeriodSeconds: 1</code> الانتظار إلى ثانية واحدة، فلا يبقى <code class="nw">deploy.sh</code> معلّقاً ينتظر في كل مرة يحذف فيها مساحة الأسماء.</p>
+<h2 id="الخطوة-3-فحص-الملف-قبل-النشر">الخطوة 3. فحص الملف قبل النشر</h2>
+<p>إذا ضاعت مسافة واحدة أثناء اللصق انتقل السطر إلى مستوى خاطئ، ومن الأفضل أن نكتشف ذلك الآن لا بعد بناء يستغرق خمس دقائق. والتشغيل التجريبي يمرر الملف على فحوص kubectl من دون أن ينشئ أي شيء.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; kubectl apply --dry-run=client -f k8s/app.yaml</code></pre></figure>
+<p>الأمر <code class="nw">kubectl apply -f k8s/app.yaml</code> وحده كان سينشئ كل كائن في الملف. أمّا <code class="nw">--dry-run=client</code> فيجعل kubectl يقرأ الملف ويفحصه على جهازنا ويطبع ما كان سيفعله، من دون أن يغيّر شيئاً في العنقود.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> 14 سطراً، سطر لكل كائن، وكل منها ينتهي بـ <code class="nw">created (dry run)</code>.</p>
+<p>الترتيب هو ترتيب الملف نفسه، الـ Secret أولاً، ثم كائنات Service الستة، ثم كائنات Deployment السبعة. وإذا كنا قد نشرنا سابقاً فستنتهي الأسطر بـ <code class="nw">unchanged (dry run)</code> أو <code class="nw">configured (dry run)</code>. وهذا مقبول أيضاً ما دام لا يظهر <code class="nw">error</code> في أي سطر.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>error: error parsing k8s/app.yaml: error converting YAML to JSON: yaml: line 12: found character that cannot start any token</code></pre></figure>
+<p>إذا ظهرت هذه الرسالة فهناك محرف جدولة في السطر المذكور أو قريباً منه. وفي ملف يضم عدة كائنات قد يعدّ kubectl رقم السطر ابتداءً من <code class="nw">---</code> الذي فوق الكائن، لذلك نبحث في الكائن الذي يبدأ فوق ذلك السطر، ونتوقع أن يختلف الرقم على شاشتنا عن هذا المثال. محرف الجدولة يبدو على الشاشة مثل المسافات. وقد ضبطنا VS Code في <a href="ch02.html">الفصل 2</a> ليرسم المسافات نقاطاً باهتة ومحارف الجدولة أسهماً صغيرة، فنبحث عن سهم في ذلك السطر. وإذا لم تظهر أي نقاط إطلاقاً نفتح Settings ونبحث عن <code class="nw">render whitespace</code> ونعيد ضبطه إلى <code class="nw">all</code>. ثم نضع مسافات مكان محرف الجدولة ونحفظ.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>error: error parsing k8s/app.yaml: error converting YAML to JSON: yaml: line 9: mapping values are not allowed in this context</code></pre></figure>
+<p>إذا ظهرت هذه الرسالة فأحد الأسطر مُزاح بعدد خاطئ من المسافات، فتقرؤه YAML جزءاً من السطر الذي فوقه. ويشير رقم السطر إلى موضع المشكلة أو إلى ما تحتها مباشرة، ويُعدّ بالطريقة التي وصفناها أعلاه. نقارن إزاحة ذلك الجزء بالملف في هذا الدليل، مسافتان لكل مستوى، ونتذكر أن عنصر القائمة الذي يبدأ بـ <code class="nw">-</code> يقف على مستوى المفتاح الذي فوقه.</p>
+<h2 id="الخطوة-4-كتابة-deploysh">الخطوة 4. كتابة deploy.sh</h2>
+<p>يحتاج النشر إلى 14 أمراً بترتيب ثابت، وسنكرره كلما أردنا بداية نظيفة. ويجمع <code class="nw">deploy.sh</code> هذه الأوامر كي لا نكتبها يدوياً أبداً.</p>
+<p>نفتح ملفاً جديداً في VS Code.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>code ~/microseg/deploy.sh</code></pre></figure>
+<p class="see"><strong>ما يجب أن نراه:</strong> يفتح VS Code تبويباً فارغاً اسمه <code class="nw">deploy.sh</code>. نلصق السكربت الآتي، ونحفظه، ونتأكد مرة أخرى من ظهور <code class="nw">LF</code> في شريط الحالة.</p>
+<figure class="code file"><figcaption><span class="lbl">الملف: deploy.sh</span><button type="button" class="copy" aria-label="نسخ هذا الملف">نسخ</button></figcaption><pre dir="ltr"><code>#!/bin/bash
+# Build, load and (re)deploy the app. Deletes namespace campus first, so the DB is reset
+# and all policies are gone (flat network). Run:  bash ~/microseg/deploy.sh
+set -e
+cd ~/microseg
+
+docker build -t campus-app:1.0 apps/
+docker build -t campus-news:1.0 -f apps/Dockerfile.news apps/
+mkdir -p images
+docker image save --platform linux/amd64 --output images/campus-app.tar campus-app:1.0
+docker image save --platform linux/amd64 --output images/campus-news.tar campus-news:1.0
+kind load image-archive images/campus-app.tar
+kind load image-archive images/campus-news.tar
+
+kubectl delete namespace campus --ignore-not-found
+kubectl create namespace campus
+kubectl -n campus create configmap frontend-files --from-file=frontend/
+kubectl -n campus create configmap db-init --from-file=db/init.sql
+kubectl apply -f k8s/app.yaml
+kubectl -n campus wait --for=condition=Available deployment --all --timeout=180s
+kubectl -n campus get pods -o wide</code></pre></figure>
+<p>يسمّي <code class="nw">#!/bin/bash</code> البرنامج الذي يشغّل الملف. ونحن نشغّله دائماً بـ <code class="nw">bash deploy.sh</code>، لذلك هو عندنا علامة توضيحية أكثر منه أمراً. أمّا سطرا التعليق فيقولان ما يفعله السكربت.</p>
+<p>يوقف <code class="nw">set -e</code> السكربت عند أول أمر يفشل. ومن دونه قد يفشل بناء الصورة ثم يمضي السكربت إلى نشر الصورة القديمة، فنختبر شيئاً غير الذي كتبناه.</p>
+<p>ينقلنا <code class="nw">cd ~/microseg</code> إلى مجلد المشروع، فيعمل كل مسار بعده أيّاً كان المكان الذي شغّلنا منه السكربت.</p>
+<p>يبني <code>docker build -t campus-app:1.0 apps/</code> الصورة من <code class="nw">apps/Dockerfile</code>، كما فعلنا يدوياً في <a href="ch05.html">الفصل 5</a>. يعطي <code class="nw">-t</code> الصورة اسمها وعلامة إصدارها (Tag)، و<code class="nw">apps/</code> هو المجلد الذي يُسمح لـ Docker أن ينسخ الملفات منه. ويستخدم البناء الثاني <code class="nw">-f apps/Dockerfile.news</code> ليختار ملف Dockerfile الآخر. ولا بد أن يأتي ثانياً، لأن صورة news تبدأ من <code class="nw">campus-app:1.0</code>.</p>
+<p>ينشئ <code class="nw">mkdir -p images</code> المجلد <code class="nw">images</code>، ويجعله <code class="nw">-p</code> يمضي بصمت إذا كان المجلد موجوداً. وملف <code class="nw">.gitignore</code> الذي كتبناه في <a href="ch02.html">الفصل 2</a> يُبقي هذا المجلد خارج Git، لأن ملفاته كبيرة.</p>
+<p>يكتب <code>docker image save --platform linux/amd64 --output images/campus-app.tar campus-app:1.0</code> الصورة في ملف واحد يسمى أرشيف الصورة. ويُبقي <code class="nw">--platform linux/amd64</code> النسخة المناسبة لنوع معالج حاسوبنا فقط. فالإصدار 29 من Docker يخزّن مع كل صورة قطعاً إضافية بجانبها، تظهر في ناتج البناء بعبارة <code class="nw">exporting attestation manifest</code>، والطريق المختصر الذي توفره أداة kind لنسخ الصورة من Docker مباشرة يتعثر بها. وحفظ نسخة واحدة بسيطة في ملف ثم تحميل الملف يتجنب هذه المشكلة.</p>
+<p>ينسخ <code>kind load image-archive images/campus-app.tar</code> الصورة إلى كل عقدة. فكل عقدة حاوية مستقلة لها مخزن صور خاص بها، ولا ترى عقدنا الصور الموجودة في Docker على حاسوبنا حتى نحمّلها بهذه الطريقة.</p>
+<p>يحذف <code>kubectl delete namespace campus --ignore-not-found</code> مساحة الأسماء <code class="nw">campus</code> وكل ما فيها، بما في ذلك قاعدة البيانات وأي سياسات. وبهذا يعطينا كل تشغيل لـ <code class="nw">deploy.sh</code> شبكة مسطحة (Flat network) جديدة تعود فيها درجة عمر إلى 58. ويمنع <code class="nw">--ignore-not-found</code> فشل التشغيل الأول، حين لا يكون هناك ما يُحذف. وفي المرات اللاحقة قد يستغرق هذا السطر نصف دقيقة ريثما تتوقف الـ Pods القديمة.</p>
+<p>ويعيد <code>kubectl create namespace campus</code> إنشاء مساحة الأسماء فارغة.</p>
+<p>ينشئ <code>kubectl -n campus create configmap frontend-files --from-file=frontend/</code> الـ ConfigMap الذي تربطه frontend. وحين نعطي <code class="nw">--from-file</code> مجلداً يضيف مدخلاً لكل ملف باسم ذلك الملف، فيحوي الـ ConfigMap الملفين <code class="nw">default.conf</code> و<code class="nw">index.html</code>. والسطر التالي ينشئ <code class="nw">db-init</code> من <code class="nw">db/init.sql</code> بالطريقة نفسها.</p>
+<p>ينشئ <code class="nw">kubectl apply -f k8s/app.yaml</code> الكائنات الـ 14 بترتيب ظهورها في الملف. ولتقديم كائنات Service على كائنات Deployment سبب. فحين يبدأ أي Pod يعطيه Kubernetes متغير بيئة مثل <code class="nw">DB_SERVICE_PORT=5432</code> لكل Service موجود مسبقاً في مساحة الأسماء نفسها، أمّا الـ Service الذي يُنشأ بعده فلا يظهر في قائمة ذلك الـ Pod. والخطوة 2 من الهجوم تقرأ هذه المتغيرات لتعرف أهدافها، لذلك يضمن هذا الترتيب أن يعطي كل تشغيل للمختبر النتيجة نفسها.</p>
+<p>ينتظر <code>kubectl -n campus wait --for=condition=Available deployment --all --timeout=180s</code> حتى يصبح Pod كل Deployment جاهزاً، أو يتوقف عن الانتظار بعد 180 ثانية. والـ Pod جاهز حين ينجح فحص جاهزيته. وليس لـ ops فحص، فهي جاهزة بمجرد أن تعمل.</p>
+<p>ويطبع <code>kubectl -n campus get pods -o wide</code> الـ Pods وعقدها.</p>
+<h2 id="الخطوة-5-نشر-البوابة">الخطوة 5. نشر البوابة</h2>
+<p>نشغّل السكربت، ويستغرق بضع دقائق. يذهب معظمها إلى خطوات الصور، مع أن البناء يعيد استخدام الطبقات الجاهزة من <a href="ch05.html">الفصل 5</a>.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>bash ~/microseg/deploy.sh</code></pre></figure>
+<p>يشغّل <code class="nw">bash</code> السكربت، والمسار صالح من أي مجلد.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> شاشة البناء في Docker، وهي تعيد رسم نفسها في مكانها وتنتهي بأسطر تبدأ بـ <code class="nw">=&gt;</code>، ثم الأسطر الآتية، وهي آخر 32 سطراً من الناتج.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>namespace/campus created
+configmap/frontend-files created
+configmap/db-init created
+secret/db-credentials created
+service/frontend created
+service/news created
+service/api created
+service/auth created
+service/db created
+service/admin created
+deployment.apps/frontend created
+deployment.apps/news created
+deployment.apps/api created
+deployment.apps/auth created
+deployment.apps/db created
+deployment.apps/admin created
+deployment.apps/ops created
+deployment.apps/admin condition met
+deployment.apps/api condition met
+deployment.apps/auth condition met
+deployment.apps/db condition met
+deployment.apps/frontend condition met
+deployment.apps/news condition met
+deployment.apps/ops condition met
+NAME                        READY   STATUS    RESTARTS   AGE   IP             NODE           NOMINATED NODE   READINESS GATES
+admin-766cddb668-gr2k8      1/1     Running   0          21s   10.244.1.190   kind-worker2   &lt;none&gt;           &lt;none&gt;
+api-65c5c7d5fd-2qtsk        1/1     Running   0          21s   10.244.1.228   kind-worker2   &lt;none&gt;           &lt;none&gt;
+auth-7fd575594b-2q5bd       1/1     Running   0          21s   10.244.1.61    kind-worker2   &lt;none&gt;           &lt;none&gt;
+db-d7c884fbf-9jdvd          1/1     Running   0          21s   10.244.1.111   kind-worker2   &lt;none&gt;           &lt;none&gt;
+frontend-6d755c977c-rzsg7   1/1     Running   0          21s   10.244.2.64    kind-worker    &lt;none&gt;           &lt;none&gt;
+news-545758c8c6-2jp4n       1/1     Running   0          21s   10.244.2.131   kind-worker    &lt;none&gt;           &lt;none&gt;
+ops-56f8b77f6d-hs2zr        1/1     Running   0          21s   10.244.1.140   kind-worker2   &lt;none&gt;           &lt;none&gt;</code></pre></figure>
+<p>يجب أن تظهر <code class="nw">created</code> أمام مساحة الأسماء وكائني ConfigMap والكائنات الـ 14 من <code class="nw">app.yaml</code>، أي 17 سطراً في المجموع، ويجب أن تظهر <code class="nw">condition met</code> أمام كائنات Deployment السبعة كلها. والجدول في النهاية يجب أن يعرض سبعة Pods، كل منها <code class="nw">1/1</code> و<code class="nw">Running</code>. تنتهي أسماء الـ Pods بأحرف عشوائية تتغير في كل تشغيل، وستختلف عناوين IP على حاسوبنا أيضاً.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>$&#x27;\r&#x27;: command not found</code></pre></figure>
+<p>إذا ظهرت أسطر تنتهي بهذا النص فوراً، قبل أن يُبنى أي شيء، فالسبب أن نهايات الأسطر في الملف بصيغة Windows، وهي نهايات يقرؤها bash محرفاً زائداً في آخر كل سطر. ننقر <code class="nw">CRLF</code> في شريط الحالة في VS Code، ونختار <code class="nw">LF</code>، ونحفظ، ثم نشغّل السكربت مرة أخرى.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>ERROR: no nodes found for cluster &quot;kind&quot;</code></pre></figure>
+<p>إذا ظهرت هذه الرسالة فلا يوجد عنقود تُحمّل فيه الصور، وغالباً لأنه حُذف. نعود إلى <a href="ch04.html">الفصل 4</a> ونشغّل <code class="nw">bash ~/microseg/setup.sh</code>، ثم نشغّل <code class="nw">deploy.sh</code> من جديد.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>error: timed out waiting for the condition on deployments/frontend</code></pre></figure>
+<p>إذا ظهرت هذه الرسالة فأحد الـ Pods لم يصبح جاهزاً خلال 180 ثانية، والاسم في آخر السطر يدل عليه. نطّلع على حالته بـ <code class="nw">kubectl -n campus get pods</code>، ثم نبحث عن تلك الحالة في قائمة الأعطال في الخطوة 6.</p>
+<p>إذا توقف السكربت أثناء أحد أسطر <code class="nw">docker build</code> فهذا هو البناء نفسه الذي شغّلناه في <a href="ch05.html">الفصل 5</a>، لذلك نجد الخطأ وحله في قائمة الأعطال في ذلك الفصل.</p>
+<h2 id="الخطوة-6-نظرة-على-الـ-pods">الخطوة 6. نظرة على الـ Pods</h2>
+<p>الجدول الذي طبعه السكربت لقطة من لحظة انتهائه. لذلك نطلب الـ Pods مرة أخرى لنتأكد أنها بقيت تعمل.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>kubectl -n campus get pods</code></pre></figure>
+<p>يجعل <code class="nw">-n campus</code> البحث داخل مساحة الأسماء <code class="nw">campus</code>. ومن دونه يبحث kubectl في <code class="nw">default</code>، وهي فارغة.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> سبعة Pods.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>NAME                        READY   STATUS    RESTARTS   AGE
+admin-766cddb668-gr2k8      1/1     Running   0          22s
+api-65c5c7d5fd-2qtsk        1/1     Running   0          22s
+auth-7fd575594b-2q5bd       1/1     Running   0          22s
+db-d7c884fbf-9jdvd          1/1     Running   0          22s
+frontend-6d755c977c-rzsg7   1/1     Running   0          22s
+news-545758c8c6-2jp4n       1/1     Running   0          22s
+ops-56f8b77f6d-hs2zr        1/1     Running   0          22s</code></pre></figure>
+<p>يبيّن عمود READY عدد الحاويات الجاهزة في الـ Pod من مجموع حاوياته، ويجب أن يكون <code class="nw">1/1</code> للسبعة كلها. ويجب أن يكون STATUS هو <code class="nw">Running</code>. والمفترض أن يكون RESTARTS هو <code class="nw">0</code>. أمّا الرقم الذي يظل يكبر فيعني مشكلة، فالبرنامج في الداخل ينهار ويظل Kubernetes يعيد تشغيله.</p>
+<p>ننظر الآن إلى مكان عمل كل Pod.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>kubectl -n campus get pods -o wide</code></pre></figure>
+<p>يضيف <code class="nw">-o wide</code> عنوان IP للـ Pod والعقدة التي يعمل عليها.</p>
+<p>يجب أن نرى الـ Pods السبعة نفسها، ومعها عمودان إضافيان يهماننا.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>NAME                        READY   STATUS    RESTARTS   AGE   IP             NODE           NOMINATED NODE   READINESS GATES
+admin-766cddb668-gr2k8      1/1     Running   0          22s   10.244.1.190   kind-worker2   &lt;none&gt;           &lt;none&gt;
+api-65c5c7d5fd-2qtsk        1/1     Running   0          22s   10.244.1.228   kind-worker2   &lt;none&gt;           &lt;none&gt;
+auth-7fd575594b-2q5bd       1/1     Running   0          22s   10.244.1.61    kind-worker2   &lt;none&gt;           &lt;none&gt;
+db-d7c884fbf-9jdvd          1/1     Running   0          22s   10.244.1.111   kind-worker2   &lt;none&gt;           &lt;none&gt;
+frontend-6d755c977c-rzsg7   1/1     Running   0          22s   10.244.2.64    kind-worker    &lt;none&gt;           &lt;none&gt;
+news-545758c8c6-2jp4n       1/1     Running   0          22s   10.244.2.131   kind-worker    &lt;none&gt;           &lt;none&gt;
+ops-56f8b77f6d-hs2zr        1/1     Running   0          22s   10.244.1.140   kind-worker2   &lt;none&gt;           &lt;none&gt;</code></pre></figure>
+<p>في عمود NODE يجب أن تكون frontend وnews على <code class="nw">kind-worker</code>، وأن تكون admin وapi وauth وdb وops كلها على <code class="nw">kind-worker2</code>. وتبدأ عناوين IP على kind-worker ببادئة وعلى kind-worker2 ببادئة أخرى، لأن كل عقدة توزع العناوين من نطاقها الخاص.</p>
+<figure class="fig"><a href="../../files/figures/fig03-ar.png"><img src="../../files/figures/web/fig03-ar.png" alt="بنية بوابة الحرم الجامعي" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>بنية بوابة الحرم الجامعي</figcaption></figure>
+<p>الشكل 3 هو الصورة نفسها مرسومة على هيئة صناديق. نلاحظ أن الطريق الوحيد للدخول من Windows هو المنفذ 30080 على kind-worker، وهو يقود إلى frontend ولا يقود إلى أي مكان آخر.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<p>إذا ظهرت <code class="nw">ErrImageNeverPull</code> في عمود STATUS لأحد الـ Pods نشغّل <code class="nw">kubectl -n campus describe pod</code> متبوعاً باسم ذلك الـ Pod، فنجد في قائمة Events في الأسفل سطراً مثل هذا.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>Container image &quot;campus-news:1.0&quot; is not present with pull policy of Never</code></pre></figure>
+<p>السبب أن الصورة غير موجودة على العقدة، و<code class="nw">imagePullPolicy: Never</code> يمنع تنزيلها. يحدث هذا حين يُعاد بناء العنقود بعد تحميل الصور، أو حين لا تطابق علامة الإصدار في <code class="nw">app.yaml</code> علامة الإصدار في <code class="nw">deploy.sh</code>. فإذا كان العنقود قد أُعيد بناؤه نشغّل <code class="nw">bash ~/microseg/deploy.sh</code> مرة أخرى، وهو يحمّل الصور ويبدأ من جديد. وإذا اختلفت علامات الإصدار نجعل أسطر <code class="nw">image:</code> في <code class="nw">app.yaml</code> تطابق حرفياً <code class="nw">campus-app:1.0</code> و<code class="nw">campus-news:1.0</code>، كما في أسطر <code class="nw">docker build -t</code> داخل <code class="nw">deploy.sh</code>، ثم نشغّل <code class="nw">deploy.sh</code>.</p>
+<p>إذا بقي أحد الـ Pods في حالة <code class="nw">Pending</code> فالسبب أن Kubernetes لم يجد عقدة يُسمح له باستخدامها. وفي ناتج <code class="nw">kubectl -n campus describe pod</code> متبوعاً باسم الـ Pod نجد في قائمة Events سطر <code class="nw">FailedScheduling</code> يتضمن النص الآتي.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>2 node(s) didn&#x27;t match Pod&#x27;s node affinity/selector</code></pre></figure>
+<p>معنى ذلك أن وسوم <code class="nw">tier</code> مفقودة من العقد العاملة. نضيفها كما في الخطوة 1. وستبدأ الـ Pods المنتظرة خلال ثوانٍ، من دون حاجة إلى إعادة النشر.</p>
+<p>إذا ظهر Pod الخدمة frontend بالحالة <code class="nw">CrashLoopBackOff</code>، أو بقي عند <code class="nw">0/1</code>، نشغّل <code>kubectl -n campus logs deploy/frontend</code> لنقرأ ما طبعه nginx. فإذا ظهر سطر مثل <code>nginx: [emerg] unknown directive "proxy_pas" in /etc/nginx/conf.d/default.conf:19</code> فالسبب خطأ إملائي في <code class="nw">frontend/default.conf</code>، والكلمة ورقم السطر يدلان عليه. نصلح الملف، ثم نشغّل <code class="nw">deploy.sh</code> من جديد، لأن <code class="nw">deploy.sh</code> وحده يعيد بناء الـ ConfigMap من ملفاتنا.</p>
+<h2 id="الخطوة-7-نظرة-على-كائنات-service-ومتغيرات-البيئة">الخطوة 7. نظرة على كائنات Service ومتغيرات البيئة</h2>
+<p>بكائنات Service تجد الـ Pods بعضها بعضاً، والمهاجم يستخدمها كذلك.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>kubectl -n campus get svc</code></pre></figure>
+<p>الكلمة <code class="nw">svc</code> اختصار لـ services.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> ستة كائنات Service.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>NAME       TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+admin      ClusterIP   10.96.110.73    &lt;none&gt;        5002/TCP       22s
+api        ClusterIP   10.96.122.235   &lt;none&gt;        8080/TCP       22s
+auth       ClusterIP   10.96.108.176   &lt;none&gt;        5001/TCP       22s
+db         ClusterIP   10.96.126.23    &lt;none&gt;        5432/TCP       22s
+frontend   NodePort    10.96.181.104   &lt;none&gt;        80:30080/TCP   22s
+news       ClusterIP   10.96.176.161   &lt;none&gt;        5000/TCP       22s</code></pre></figure>
+<p>خمسة منها من النوع <code class="nw">ClusterIP</code> في عمود TYPE، ولكل منها منفذ واحد. أمّا frontend فنوعها <code class="nw">NodePort</code>، ويظهر في عمود PORT(S) أمامها <code class="nw">80:30080/TCP</code>، أي المنفذ 80 داخل العنقود و30080 على العقدة. تبدأ عناوين CLUSTER-IP بـ <code class="nw">10.96.</code> ويختلف باقيها على حاسوبنا.</p>
+<p>بعد ذلك ننظر إلى المتغيرات التي وضعها Kubernetes داخل Pod الخدمة news، وهي التي يقرؤها المهاجم في <a href="ch08.html">الفصل 8</a>.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>kubectl -n campus exec deploy/news -- env | grep SERVICE_PORT= | sort</code></pre></figure>
+<p>يشغّل <code>kubectl -n campus exec deploy/news --</code> الأمر الذي يليه داخل Pod تابع لـ news. ويطبع <code class="nw">env</code> كل متغيرات البيئة في ذلك الـ Pod. ثم في WSL يُبقي <code class="nw">grep SERVICE_PORT=</code> الأسطر التي تحمل منفذ Service، ويرتبها <code class="nw">sort</code> ترتيباً أبجدياً.</p>
+<p>يجب أن نرى سبعة أسطر.</p>
+<p>هناك سطر لكل Service من الستة، من <code class="nw">ADMIN_SERVICE_PORT=5002</code> إلى <code class="nw">NEWS_SERVICE_PORT=5000</code>، وسطر لـ <code class="nw">KUBERNETES_SERVICE_PORT=443</code>، وهو واجهة Kubernetes API للعنقود نفسه. فإذا غاب أحد كائنات Service الستة فمعنى ذلك أنها أُنشئت بعد الـ Pods. نشغّل <code class="nw">deploy.sh</code> مرة أخرى، من دون تغيير ترتيب الكائنات في <code class="nw">app.yaml</code>.</p>
+<p>وأخيراً نتأكد أن الشبكة ما زالت مسطحة، ولا سياسات في مساحة الأسماء.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>kubectl -n campus get ciliumnetworkpolicies</code></pre></figure>
+<p class="see"><strong>ما يجب أن نراه:</strong> سطر واحد.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>No resources found in campus namespace.</code></pre></figure>
+<p>تعني <code>No resources found in campus namespace.</code> أنه لا يوجد أي كائن سياسة، وهذه هي الشبكة المسطحة التي سنهاجمها في <a href="ch08.html">الفصل 8</a>. وقد حذف <code class="nw">deploy.sh</code> مساحة الأسماء، لذلك اختفت أيضاً أي سياسة ربما جرّبناها مبكراً.</p>
+<h2 id="الخطوة-8-كتابة-check-portalsh">الخطوة 8. كتابة check-portal.sh</h2>
+<p>نحتاج إلى طريقة سريعة نثبت بها أن البوابة ما زالت تعمل للمستخدمين الحقيقيين. ففي <a href="ch10.html">الفصل 10</a> سنضيف السياسات، والسياسة التي تحجب المهاجم يجب ألا تحجب سارة. ويُجري هذا السكربت العمليات الست نفسها التي يؤديها مستخدم حقيقي وفريق تقنية المعلومات، ويعدّ كم منها نجح.</p>
+<p>نفتح ملفاً جديداً في VS Code.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>code ~/microseg/check-portal.sh</code></pre></figure>
+<p class="see"><strong>ما يجب أن نراه:</strong> يفتح VS Code تبويباً فارغاً اسمه <code class="nw">check-portal.sh</code>. نلصق السكربت الآتي ونحفظه.</p>
+<figure class="code file"><figcaption><span class="lbl">الملف: check-portal.sh</span><button type="button" class="copy" aria-label="نسخ هذا الملف">نسخ</button></figcaption><pre dir="ltr"><code>#!/bin/bash
+# Checks that the portal still works for real users. Run from WSL:  bash ~/microseg/check-portal.sh
+# Each check prints OK or FAIL. The last line counts the OKs.
+PORTAL=http://127.0.0.1:30080
+passed=0
+
+check() {
+  if [ &quot;$2&quot; = &quot;$3&quot; ]; then
+    echo &quot;OK    $1&quot;
+    passed=$((passed + 1))
+  else
+    echo &quot;FAIL  $1 (expected &#x27;$3&#x27;, got &#x27;$2&#x27;)&quot;
+  fi
+}
+
+check &quot;portal page loads&quot; &quot;$(curl -s -o /dev/null -w &#x27;%{http_code}&#x27; --max-time 5 $PORTAL/)&quot; &quot;200&quot;
+check &quot;news list has 3 items&quot; &quot;$(curl -s --max-time 5 $PORTAL/news | jq length)&quot; &quot;3&quot;
+
+TOKEN=$(curl -s --max-time 5 -H &#x27;Content-Type: application/json&#x27; -d &#x27;{&quot;username&quot;:&quot;sara&quot;,&quot;password&quot;:&quot;sara2026&quot;}&#x27; $PORTAL/api/login | jq -r .token)
+check &quot;sara can log in&quot; &quot;${#TOKEN}&quot; &quot;32&quot;
+check &quot;sara sees her profile&quot; &quot;$(curl -s --max-time 5 -H &quot;Authorization: Bearer $TOKEN&quot; $PORTAL/api/profile | jq -r .full_name)&quot; &quot;Sara Ahmed&quot;
+check &quot;sara sees her 2 grades&quot; &quot;$(curl -s --max-time 5 -H &quot;Authorization: Bearer $TOKEN&quot; $PORTAL/api/grades | jq length)&quot; &quot;2&quot;
+check &quot;ops can open the admin panel&quot; &quot;$(kubectl -n campus exec deploy/ops -- curl -s --max-time 5 http://admin:5002/users | jq length)&quot; &quot;4&quot;
+
+echo &quot;PORTAL: $passed/6 OK&quot;</code></pre></figure>
+<p>(1) <code class="nw">PORTAL=http://127.0.0.1:30080</code> هو منفذ NodePort، المنفذ نفسه الذي يستخدمه المتصفح. والعنوان 127.0.0.1 يعني دائماً «هذا الحاسوب»، مثل <code class="nw">localhost</code> تماماً.</p>
+<p>(2) <code class="nw">check()</code> دالة صغيرة تأخذ ثلاثة أشياء: وصفاً، والقيمة التي أعادتها البوابة، والقيمة المتوقعة. تطبع <code class="nw">OK</code> إذا تطابقت القيمتان وتضيفها إلى العدد، أو تطبع <code class="nw">FAIL</code> مع القيمتين لنرى الفرق. وداخل الدالة تمثل <code class="nw">$1</code> و<code class="nw">$2</code> و<code class="nw">$3</code> هذه الأشياء الثلاثة بالترتيب، ويقارن <code class="nw">[ "$2" = "$3" ]</code> بين نصين، ويضيف <code class="nw">$((passed + 1))</code> واحداً إلى العدد.</p>
+<p>(3) يشغّل <code class="nw">$(...)</code> الأمر الذي بداخله ويضع ناتجه في مكانه. وكل سطر <code class="nw">check</code> يستخدمه ليجلب شيئاً من البوابة.</p>
+<p>(4) الفحص الأول يطلب صفحة البوابة. يتخلّص <code class="nw">-o /dev/null</code> من الصفحة، ويطبع <code class="nw">-w '%{http_code}'</code> رمز حالة HTTP وحده، وهو 200 إذا حُمّلت الصفحة. ويتوقف <code class="nw">--max-time 5</code> عن الانتظار بعد 5 ثوانٍ، فلا يستطيع اتصال محجوب أن يعلّق السكربت.</p>
+<p>(5) الفحص الثاني يجلب <code class="nw">/news</code>، الذي تمرره frontend إلى news. ويعدّ <code class="nw">jq length</code> العناصر في قائمة JSON، ويجب أن تكون 3.</p>
+<p>(6) يسجّل سطر <code class="nw">TOKEN=</code> الدخول باسم سارة عبر <code class="nw">/api/login</code>، وهو الطلب نفسه الذي ترسله صفحة البوابة. يضيف <code class="nw">-H</code> ترويسة (Header) تقول إن جسم الطلب بصيغة JSON، ويرسل <code class="nw">-d</code> اسم المستخدم وكلمة المرور على أنهما ذلك الجسم، وهذا يجعل الطلب من نوع POST أيضاً. ويستخرج <code class="nw">jq -r .token</code> رمز الدخول (Token) من الإجابة. أمّا <code class="nw">${#TOKEN}</code> فهو طول رمز الدخول، ويكون 32 محرفاً إذا نجح تسجيل الدخول.</p>
+<p>(7) يرسل الفحصان التاليان رمز الدخول هذا في ترويسة <code class="nw">Authorization</code>، ويطلبان الملف الشخصي لسارة ودرجاتها. يجب أن يكون اسمها الكامل <code class="nw">Sara Ahmed</code>، وأن تكون لها درجتان.</p>
+<p>(8) الفحص الأخير يشغّل <code class="nw">curl</code> داخل ops ويطلب من لوحة الإدارة قائمة مستخدميها، ويجب أن تضم 4 مستخدمين. لا شيء خارج العنقود يستطيع الوصول إلى admin، لذلك يدخل الفحص عبر ops، وهو الـ Pod الوحيد الذي يُفترض أن يصل إليها.</p>
+<p>والآن نشغّله.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>bash ~/microseg/check-portal.sh</code></pre></figure>
+<p class="see"><strong>ما يجب أن نراه:</strong> ستة أسطر تبدأ بـ <code class="nw">OK</code>، ثم العدد في النهاية.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>OK    portal page loads
+OK    news list has 3 items
+OK    sara can log in
+OK    sara sees her profile
+OK    sara sees her 2 grades
+OK    ops can open the admin panel
+PORTAL: 6/6 OK</code></pre></figure>
+<p>يجب أن يكون السطر الأخير <code class="nw">PORTAL: 6/6 OK</code>، وأن يبدأ كل وصف من الأوصاف الستة بـ <code class="nw">OK</code>.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>FAIL  portal page loads (expected &#x27;200&#x27;, got &#x27;000&#x27;)</code></pre></figure>
+<p>إذا ظهر هذا السطر فلم يُجب أحد على المنفذ 30080، فالقيمة <code class="nw">000</code> هي ما يطبعه curl حين يعجز عن الاتصال أصلاً. نتأكد أن Pod الخدمة frontend بالحالة <code class="nw">1/1 Running</code>. فإن كان كذلك نشغّل <code class="nw">docker ps</code> وننظر في سطر kind-worker، ويجب أن يتضمن عمود PORTS فيه <code class="nw">127.0.0.1:30080-&gt;30080/tcp</code>. وإن لم يتضمنه فالعنقود بُني من ملف <code class="nw">kind-config.yaml</code> مختلف، ولا بد من إعادة بنائه بالملف الذي كتبناه في <a href="ch04.html">الفصل 4</a>. وإن كان الربط موجوداً أيضاً نشغّل <code>kubectl -n campus get pods -o wide</code> ونتأكد أن قيمة NODE لـ frontend هي <code class="nw">kind-worker</code>. فإن لم تكن كذلك نصلح وسوم الفئات على العقد كما في الخطوة 1 ونشغّل <code class="nw">deploy.sh</code> من جديد.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>FAIL  sara can log in (expected &#x27;32&#x27;, got &#x27;4&#x27;)</code></pre></figure>
+<p>إذا ظهر هذا السطر فقد أجاب تسجيل الدخول من دون رمز دخول، فطبع jq الكلمة <code class="nw">null</code>، وطولها 4 محارف. لم تجد auth طالبة اسمها <code class="nw">sara</code> بكلمة المرور تلك، وهذا يشير إلى البيانات الأولية في <code class="nw">db/init.sql</code>. نقارن ملفنا بما في <a href="ch05.html">الفصل 5</a>، ثم نشغّل <code class="nw">deploy.sh</code> مرة أخرى لتُنشأ قاعدة البيانات من جديد.</p>
+<p>إذا فشل فحصا الملف الشخصي والدرجات بالعبارة <code class="nw">got ''</code>، وظهر فوقهما سطر خطأ من jq، فالسبب أن api أجابت بصفحة خطأ بدلاً من JSON. نشغّل <code>kubectl -n campus logs deploy/api</code>، وإن لم يُظهر شيئاً مفيداً نشغّل <code>kubectl -n campus logs deploy/auth</code>. وآخر سطر في رسالة Python يسمّي المشكلة. فظهور <code class="nw">KeyError: 'POSTGRES_DB'</code> يعني أن أسطر <code class="nw">envFrom</code> مفقودة من ذلك الـ Deployment في <code class="nw">app.yaml</code>.</p>
+<h2 id="الخطوة-9-فتح-البوابة-من-windows">الخطوة 9. فتح البوابة من Windows</h2>
+<p>كل ما شغّلناه حتى الآن جرى داخل WSL. لكن المهاجم في <a href="ch08.html">الفصل 8</a> يرسل طلباته من Windows PowerShell. فنتأكد أن Windows يصل إلى المنفذ نفسه.</p>
+<p>نفتح PowerShell ونشغّل الأمر الآتي.</p>
+<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>curl.exe -s -o NUL -w &quot;%{http_code}\n&quot; http://localhost:30080/</code></pre></figure>
+<p><code class="nw">curl.exe</code> هو برنامج curl الذي يأتي مع Windows 11. ففي Windows PowerShell يشغّل <code class="nw">curl</code> من دون <code class="nw">.exe</code> أمراً آخر من أوامر PowerShell له خيارات مختلفة، لذلك نكتب <code class="nw">.exe</code> دائماً. ويتخلّص <code class="nw">-o NUL</code> من الصفحة، فالاسم <code class="nw">NUL</code> في Windows يعني «لا مكان». ويطبع <code class="nw">-w "%{http_code}\n"</code> رمز الحالة، ويحوّل curl نفسه <code class="nw">\n</code> إلى سطر جديد، فيبدأ موجّه الأوامر (Prompt) التالي في سطر مستقل.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> رقم واحد.</p>
+<p>يجب أن يكون <code class="nw">200</code>. ويعمل <code class="nw">localhost</code> في الجهتين لأن WSL يجعل المنفذ 30080 الذي في Ubuntu متاحاً في Windows أيضاً.</p>
+<p>نفتح الآن Microsoft Edge أو Chrome في Windows ونذهب إلى <code class="nw">http://localhost:30080</code>. الصفحة بسيطة عن قصد. تحت العنوان Campus Portal نرى قائمة Announcements وفيها ثلاثة عناصر، لكل منها تاريخه: <code class="nw">Spring registration is open</code> و<code>Library opens 24/7 during finals</code> و<code>Graduation project fair on 10 December</code>.</p>
+<p>ثم ندخل باسم سارة. نكتب <code class="nw">sara</code> في خانة اسم المستخدم و<code class="nw">sara2026</code> في خانة كلمة المرور، ثم ننقر <strong>Log in</strong>. تحت الزر تطبع الصفحة الملف الشخصي لسارة ودرجاتها بصيغة JSON. اسمها الكامل Sara Ahmed وتخصصها Computer Science. ولها درجتان، 88 في Cloud Computing و91 في Network Security. نلتقط صورة للشاشة تظهر فيها الساعة، لأن <a href="ch14.html">الفصل 14</a> يطلب دليلاً على عمل البوابة قبل الهجوم. نضغط Windows+PrtScn، فتُحفظ الشاشة كاملة، ومعها ساعة شريط المهام، في المجلد <code class="nw">Pictures\Screenshots</code>. ثم نغيّر اسم الملف إلى <code class="nw">ch08-portal-sara.png</code>.</p>
+<p>لا نلمس أداة فحص روابط الصور في أسفل الصفحة. فهي في <a href="ch08.html">الفصل 8</a> الطريق الذي يدخل منه المهاجم.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<p>إذا ظهرت <code class="nw">Login failed</code> تحت الزر فاسم المستخدم أو كلمة المرور غير صحيح. كلمة المرور هي <code class="nw">sara2026</code> بأحرف صغيرة كلها، وربما ملأ مدير كلمات المرور في المتصفح شيئاً آخر.</p>
+<p>إذا قال المتصفح إنه لا يستطيع الوصول إلى الصفحة، أو إن localhost رفض الاتصال، بينما ينجح <code class="nw">check-portal.sh</code> في WSL، نشغّل أمر <code class="nw">curl.exe</code> السابق مرة أخرى. فإن طبع <code class="nw">000</code> فمعنى ذلك أن WSL لا يجعل المنفذ متاحاً في Windows. نفتح <code class="nw">.wslconfig</code> من PowerShell ونتأكد أنه ما زال يحوي السطر <code class="nw">localhostForwarding=true</code>، كما في <a href="ch03.html">الفصل 3</a>.</p>
+<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>notepad &quot;$env:USERPROFILE\.wslconfig&quot;</code></pre></figure>
+<p>إذا اضطررنا إلى إضافة ذلك السطر أو إصلاحه نحفظ الملف. وسواءٌ غيّرناه أم لم نغيّره، نعيد تشغيل WSL ليُقرأ الإعداد من جديد.</p>
+<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>wsl --shutdown</code></pre></figure>
+<p>يوقف <code class="nw">wsl --shutdown</code> نظام Ubuntu والعنقود معه. نفتح Ubuntu مرة أخرى، ونعود إلى الخطوة 1 من هذا الفصل لتشغيل العقد، ثم نشغّل أمر <code class="nw">curl.exe</code> مرة أخرى.</p>
+<p>وإذا كنا قد أغلقنا كل نوافذ Ubuntu فربما أوقف Windows نظام Ubuntu والعنقود معه. نفتح Ubuntu مرة أخرى، وننتظر دقيقة، ثم نفحص الـ Pods. فإن قال kubectl إن الاتصال رُفض نشغّل العقد كما في الخطوة 1.</p>
+<p>إذا كانت قائمة الإعلانات فارغة لكن تسجيل الدخول يعمل فالسبب أن Pod الخدمة news ليس جاهزاً. نفحصه بـ <code class="nw">kubectl -n campus get pods</code>، ونمر على أعطال الـ Pods في الخطوة 6.</p>
+<h2 id="نقطة-التحقق">نقطة التحقق</h2>
+<p>نشغّل فحص البوابة مرة أخرى ونكتفي بسطره الأخير.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>bash ~/microseg/check-portal.sh | tail -n 1</code></pre></figure>
+<p>يطبع <code class="nw">tail -n 1</code> السطر الأخير فقط مما يأتي قبل <code class="nw">|</code>.</p>
+<p>يجب أن يكون السطر <code class="nw">PORTAL: 6/6 OK</code> بالضبط. وهذا السطر وقائمة الـ Pods السابقة، التي أظهرت سبعة Pods بالحالة <code class="nw">1/1 Running</code> وfrontend وnews على kind-worker، يشكلان معاً نقطة التحقق في هذا الفصل. لا نبدأ <a href="ch07.html">الفصل 7</a> قبل تطابقهما.</p>
+<p>نسجّل عملنا في Git بإيداع (Commit).</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; git add -A &amp;&amp; git commit -m &quot;ch06: deploy the portal&quot;</code></pre></figure>
+<p>يجهّز <code class="nw">git add -A</code> كل ملف جديد أو معدّل للإيداع، ويسجّلها <code class="nw">git commit -m</code> لقطةً واحدة في إيداع جديد مع الرسالة التي تلي <code class="nw">-m</code>.</p>
+<p>يبدأ السطر الأول بـ <code class="nw">[main</code> ورمز قصير يختلف على حاسوبنا، تليه رسالتنا. ويعدّ السطر التالي الملفات التي تغيّرت، وعددها 3 إذا كان آخر إيداع لنا في نهاية <a href="ch05.html">الفصل 5</a>، وهي <code class="nw">k8s/app.yaml</code> و<code class="nw">deploy.sh</code> و<code class="nw">check-portal.sh</code>. ولا يدخل فيها مجلد <code class="nw">images</code>، لأن <code class="nw">.gitignore</code> يستبعده.</p>
+<!-- OUT ids: ch08-nodes, ch08-dryrun, ch08-deploy, ch08-pods, ch08-pods-wide, ch08-svc, ch08-env-ports, ch08-cnp-none, ch08-check-portal, ch08-curl-portal-windows, ch08-checkpoint, ch08-commit --><nav class="pager" aria-label="الفصول"><a rel="prev" href="ch05.html"><span>الفصل السابق</span>الفصل 5. كتابة الخدمات</a><a rel="next" href="ch07.html"><span>الفصل التالي</span>الفصل 7. بناء لوحة التحكم</a></nav></main></div>
+<footer class="foot"><div class="foot-in"><p>Kubernetes 1.36 و Cilium 1.20.5 و kind 0.33.0 على Windows 11 مع WSL 2. شغّلنا كل أمر على حاسوب حقيقي في تشرين الثاني 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">المصدر على GitHub</a></p></div></footer>
+<p class="vh" aria-live="polite" id="live"></p>
+<script type="application/json" id="i18n">{"copied": "نُسخ", "copyFail": "نضغط Ctrl+C لنسخ النص المحدد", "doneOf": "الخطوات المنجزة: {d} من {t}", "next": "الخطوة التالية: {s}", "allDone": "اكتمل المسار وأُنجزت الخطوات كلها.", "sumCount": "المنجز {d} من {t}", "cleared": "مُسحت كل العلامات.", "confirm": "هل نمسح كل العلامات في هذه الصفحة؟ تبقى الملفات والعنقود كما هي.", "stageCount": "{d} من {t}"}</script>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

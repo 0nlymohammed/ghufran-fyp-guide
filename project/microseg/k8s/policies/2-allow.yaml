@@ -1,0 +1,186 @@
+# One policy per workload. Every allowed connection needs BOTH
+# egress in the caller's policy AND ingress in the callee's policy.
+# Ports are container ports (equal to the Service ports in app.yaml).
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: frontend
+  namespace: campus
+spec:
+  endpointSelector:
+    matchLabels:
+      app: frontend
+  ingress:
+  - fromEntities:
+    - world                       # Windows / WSL through NodePort 30080
+    toPorts:
+    - ports:
+      - port: "80"
+        protocol: TCP
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        app: api
+    toPorts:
+    - ports:
+      - port: "8080"
+        protocol: TCP
+  - toEndpoints:
+    - matchLabels:
+        app: news
+    toPorts:
+    - ports:
+      - port: "5000"
+        protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: news
+  namespace: campus
+spec:
+  endpointSelector:
+    matchLabels:
+      app: news
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: frontend
+    toPorts:
+    - ports:
+      - port: "5000"
+        protocol: TCP
+  # No egress section: news keeps default-deny egress (only DNS, from allow-dns).
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: api
+  namespace: campus
+spec:
+  endpointSelector:
+    matchLabels:
+      app: api
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: frontend
+    toPorts:
+    - ports:
+      - port: "8080"
+        protocol: TCP
+      rules:
+        http:                     # L7: only these three calls, everything else gets 403
+        - method: "GET"
+          path: "/api/grades"
+        - method: "GET"
+          path: "/api/profile"
+        - method: "POST"
+          path: "/api/login"
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        app: auth
+    toPorts:
+    - ports:
+      - port: "5001"
+        protocol: TCP
+  - toEndpoints:
+    - matchLabels:
+        app: db
+    toPorts:
+    - ports:
+      - port: "5432"
+        protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: auth
+  namespace: campus
+spec:
+  endpointSelector:
+    matchLabels:
+      app: auth
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: api
+    toPorts:
+    - ports:
+      - port: "5001"
+        protocol: TCP
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        app: db
+    toPorts:
+    - ports:
+      - port: "5432"
+        protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: db
+  namespace: campus
+spec:
+  endpointSelector:
+    matchLabels:
+      app: db
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: api
+    - matchLabels:
+        app: auth
+    - matchLabels:
+        app: admin
+    toPorts:
+    - ports:
+      - port: "5432"
+        protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: admin
+  namespace: campus
+spec:
+  endpointSelector:
+    matchLabels:
+      app: admin
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: ops
+    toPorts:
+    - ports:
+      - port: "5002"
+        protocol: TCP
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        app: db
+    toPorts:
+    - ports:
+      - port: "5432"
+        protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: ops
+  namespace: campus
+spec:
+  endpointSelector:
+    matchLabels:
+      app: ops
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        app: admin
+    toPorts:
+    - ports:
+      - port: "5002"
+        protocol: TCP

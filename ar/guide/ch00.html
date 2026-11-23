@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
+<title>الفصل 0. كيف نستخدم هذا الدليل | مختبر التجزئة الدقيقة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;700&family=Public+Sans:wght@400;600;700&family=Noto+Sans+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="en" href="../../guide/ch00.html">
+
+</head>
+<body class="">
+<a class="skip" href="#main">الانتقال إلى المحتوى</a>
+<header class="top"><div class="top-in">
+<a class="brand" href="../../ar/index.html">مختبر التجزئة الدقيقة</a>
+<nav aria-label="مختبر التجزئة الدقيقة"><ul>
+<li><a href="../../ar/index.html">المسار السريع</a></li>
+<li><a href="../../ar/guide/index.html" aria-current="page">الدليل الكامل</a></li>
+<li><a href="../../ar/downloads.html">التنزيلات</a></li>
+<li><a href="../../guide/ch00.html" lang="en" hreflang="en" data-setlang="en">English</a></li>
+</ul></nav>
+</div></header>
+<div class="layout"><details class="rail" open><summary>الفصول</summary><nav aria-label="الفصول"><ol class="toc"><li><a href="ch00.html" aria-current="page">0. كيف نستخدم هذا الدليل</a><ol class="sub"><li><a href="#ماذا-نبني-وبأي-ترتيب">ماذا نبني، وبأي ترتيب</a></li><li><a href="#windows-وubuntu-ونوعا-الأوامر">Windows وUbuntu ونوعا الأوامر</a></li><li><a href="#كيف-تعرض-الخطوة">كيف تُعرض الخطوة</a></li><li><a href="#حين-لا-تطابق-المخرجات-ما-في-الدليل">حين لا تطابق المخرجات ما في الدليل</a></li><li><a href="#قاعدة-واحدة">قاعدة واحدة</a></li><li><a href="#خطوة-تدريبية-نتحقق-من-أن-الحاسوب-قادر-على-تشغيل-المختبر">خطوة تدريبية: نتحقق من أنّ الحاسوب قادر على تشغيل المختبر</a></li><li><a href="#الإصدارات-المختبرة">الإصدارات المختبَرة</a></li><li><a href="#مجلد-المشروع-microseg-في-شكله-النهائي">مجلد المشروع ~/microseg في شكله النهائي</a></li><li><a href="#متابعة-التقدم">متابعة التقدم</a></li></ol></li><li><a href="ch01.html">1. ما الذي سنبنيه</a></li><li><a href="ch02.html">2. قبل أن نبدأ</a></li><li><a href="ch03.html">3. تجهيز بيئة العمل</a></li><li><a href="ch04.html">4. إنشاء العنقود</a></li><li><a href="ch05.html">5. كتابة الخدمات</a></li><li><a href="ch06.html">6. نشر البوابة</a></li><li><a href="ch07.html">7. بناء لوحة التحكم</a></li><li><a href="ch08.html">8. مهاجمة الشبكة المسطحة</a></li><li><a href="ch09.html">9. تصميم السياسة</a></li><li><a href="ch10.html">10. تطبيق التجزئة الدقيقة للشبكة</a></li><li><a href="ch11.html">11. قراءة الأدلة في Hubble</a></li><li><a href="ch12.html">12. القياس</a></li><li><a href="ch13.html">13. تجاوز الأعطال دون مساعدة</a></li><li><a href="ch14.html">14. أدلة بحث التخرج</a></li><li><a href="ch15.html">15. خطة العمل يوماً بيوم</a></li><li><a href="appendix.html">الملاحق</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="الفصل-0-كيف-نستخدم-هذا-الدليل">الفصل 0. كيف نستخدم هذا الدليل</h1>
+<p>ينقلنا هذا الدليل من حاسوب محمول عادي يعمل بنظام Windows إلى مختبر عامل للتجزئة الدقيقة للشبكة (Micro-segmentation)، مع نتائج مقيسة والأدلة التي يحتاجها بحث التخرج. سنبني المختبر من دون أحد نرجع إليه، لذلك تذكر كل خطوة ما نكتبه وما يجب أن يظهر على الشاشة، وتعطي الحل للأخطاء التي يُرجَّح أن نصادفها. نقرأ هذا الفصل قبل غيره. يستغرق نحو 15 دقيقة، وينتهي بخطوة حقيقية نتحقق فيها من أنّ الحاسوب يتسع للمختبر.</p>
+<h2 id="ماذا-نبني-وبأي-ترتيب">ماذا نبني، وبأي ترتيب</h2>
+<p>نبني موقعاً جامعياً اسمه «بوابة الحرم الجامعي» (Campus Portal) من ست خدمات صغيرة تعمل على Kubernetes، وهو نظام يشغّل البرامج على عدة أجهزة ويُبقيها عاملة. وكل هذه الأجهزة محاكاة داخل الحاسوب المحمول نفسه. نهاجم البوابة أولاً كما يفعل متسلل حقيقي، فيصل الهجوم إلى قاعدة بيانات الدرجات وإلى لوحة الإدارة. ثم نضيف سياسات الشبكة (network policies) في Cilium، وهي قواعد تحدد من يحق له أن يتحدث إلى من، ونعيد الهجوم نفسه. هذه المرة يتوقف بعد الخطوة الأولى. ونتيجة بحث التخرج هي الفرق المقيس بين هاتين المحاولتين.</p>
+<figure class="fig"><a href="../../files/figures/fig08-ar.png"><img src="../../files/figures/web/fig08-ar.png" alt="خطة البناء" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>خطة البناء</figcaption></figure>
+<p>يعرض الشكل 8 خطة البناء. نهاجم الشبكة المسطحة (flat network) في <a href="ch08.html">الفصل 8</a>، قبل أن يضيف <a href="ch10.html">الفصل 10</a> أي سياسة، فتبقى لدينا دائماً نتيجة «قبل» نقارن بها.</p>
+<p>يستغرق البناء كله نحو 33 إلى 41 ساعة. بمعدل 6 إلى 8 ساعات يومياً يعني ذلك سبعة أيام عمل ويوماً احتياطياً، أما بمعدل 3 إلى 4 ساعات يومياً فيستغرق قرابة الضعف. والخطة يوماً بيوم في <a href="ch15.html">الفصل 15</a>.</p>
+<p>لن نقرأ الفصول بترتيبها الحرفي. في اليوم الأول نقرأ هذا الفصل، ثم ننجز الفصول 2 و3 و4. <a href="ch04.html">الفصل 4</a> هو الذي يخبرنا هل يعمل Cilium على هذا الحاسوب، وهذا أهم ما نحتاج إلى معرفته في أبكر وقت ممكن. بمعدل 6 إلى 8 ساعات يومياً نعرف الجواب مساء اليوم الأول، وبمعدل 3 إلى 4 ساعات نعرفه في نهاية اليوم الثاني. وإذا رفض Cilium العمل فالملحق A ينقل المختبر إلى آلة افتراضية تعمل بنظام Ubuntu، أي حاسوب مُحاكى يعمل داخل الحاسوب الحقيقي، ويبقى باقي الدليل صالحاً. أما <a href="ch01.html">الفصل 1</a>، وهو المختبر على الورق، فموعده اليوم الثاني. وإذا أوقفتنا كلمة في الفصول 2 إلى 4 نبحث عنها في المسرد في الملحق D.</p>
+<p>يتألف الدليل من الفصول 0 إلى 15، وهي مسرودة في جدول متابعة التقدم قرب آخر هذا الفصل، ومن الملاحق A إلى D. الملحق A هو خطة الآلة الافتراضية، والملحق B بطاقة الأوامر في صفحة واحدة، والملحق C فهرس لكل ملفات المشروع مع الفصل الذي يبني كل ملف، والملحق D مسرد المصطلحات.</p>
+<h2 id="windows-وubuntu-ونوعا-الأوامر">Windows وUbuntu ونوعا الأوامر</h2>
+<p>الطرفية نافذة نكتب فيها الأوامر بدل النقر بالفأرة. تعرض موجّه الأوامر، وهو سطر قصير معناه «جاهز، اكتب الأمر التالي». سنستخدم طرفيتين اثنتين.</p>
+<p>طرفية Windows هي PowerShell. لفتحها نضغط مفتاح Windows ونكتب <code class="nw">powershell</code> ثم ننقر <strong>Windows PowerShell</strong>. ينتهي موجّهها بالرمز <code class="nw">&gt;</code> ويبدو هكذا، ويظهر فيه اسم مجلد المستخدم على حاسوبنا مكان <code class="nw">Sara</code>.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>PS C:\Users\Sara&gt;</code></pre></figure>
+<p>أما Ubuntu فإصدار من Linux، وWSL (Windows Subsystem for Linux) هو الجزء من Windows الذي يشغّله إلى جانب برامج Windows. نثبّت الاثنين في <a href="ch02.html">الفصل 2</a>، وهو يبيّن أيضاً كيف نفتح طرفية Ubuntu. ينتهي موجّهها بالرمز <code class="nw">$</code> ويبدو هكذا، وفيه اسم مستخدم Linux واسم الحاسوب.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>sara@LAPTOP-1234:~$</code></pre></figure>
+<p>يعمل المشروع كله تقريباً داخل Ubuntu، لأنّ كلاً من Docker والعنقود (cluster) المُحاكى وCilium يحتاج إلى نواة Linux (kernel)، أي قلب نظام التشغيل، لتعمل عليها.</p>
+<p>كل أمر في هذا الدليل يذكر مرتين النافذة التي يُكتب فيها. الجملة التي تسبقه تسمّي النافذة، مثل «في PowerShell نشغّل» أو «في طرفية Ubuntu نشغّل»، وتحمل كتلة الشيفرة كلمة صغيرة في زاويتها العليا. الكتلة التي تحمل الكلمة <code class="nw">powershell</code> تُكتب في PowerShell. والتي تحمل <code class="nw">bash</code> تُكتب في طرفية Ubuntu، لأنّ bash هو البرنامج الذي يقرأ ما نكتبه هناك. أما الكتلة التي تحمل <code class="nw">text</code> فليست أمراً أبداً. فيها شيء نقرؤه أو نقارن به، كالمخرجات، أو ملف أو رسالة تطلب الخطوة نسخها إلى مكان ما.</p>
+<p>نلصق كتلة واحدة في كل مرة. في PowerShell نلصق بالمفتاحين Ctrl+V. أما في طرفية Ubuntu فنلصق بالمفاتيح Ctrl+Shift+V، لأنّ Ctrl+V تعني شيئاً آخر في طرفيات Linux. بعد اللصق نضغط Enter إذا لم يبدأ الأمر من تلقاء نفسه. وإذا ظهر تحذير يقول إنّ النص يحتوي على عدة أسطر ننقر <strong>Paste anyway</strong>. ثم ننتظر حتى يعود موجّه الأوامر قبل أن نلصق الكتلة التالية. بعض الأوامر يبقى يعمل حتى نوقفه، والخطوة تنبّه إلى ذلك حين يحدث. ولإيقاف أمر كهذا واستعادة موجّه الأوامر نضغط Ctrl+C في تلك النافذة.</p>
+<h2 id="كيف-تعرض-الخطوة">كيف تُعرض الخطوة</h2>
+<p>لكل خطوة في الفصول 2 إلى 14 الأجزاء الخمسة نفسها، وبالترتيب نفسه دائماً.</p>
+<ol>
+<li>الغرض من الخطوة، في جملة أو جملتين. نقرأ هذا الجزء حتى حين نكون مستعجلين، لأنّ معرفة الغرض من الخطوة تدلّنا على مكان البحث حين يتعطل شيء لاحقاً.</li>
+<li>الأمر أو الملف، داخل كتلة شيفرة رمادية. وحين تعطينا الخطوة ملفاً كاملاً، تذكر الجملة التي قبل الكتلة مسار الملف داخل مجلد المشروع.</li>
+<li>عمل كل جزء. في الأمر يُشرح كل جزء منه تحت الكتلة. وفي الملف تشرح ملاحظات مرقّمة مثل (1) و(2) تحت الكتلة الأسطرَ التي تحتاج إلى شرح.</li>
+<li>كتلة بعنوان <strong>ما يجب أن نراه</strong>، فيها المخرجات الحقيقية التي طبعها الأمر حين اختُبر هذا الدليل، وبعدها جملة تسمّي السطر الذي يجب أن يطابق ما على الشاشة تماماً.</li>
+<li>كتلة بعنوان <strong>إذا ظهر شيء آخر</strong>، فيها الإخفاقان أو الإخفاقات الثلاثة الأكثر احتمالاً في تلك الخطوة. يعرض كل إخفاق نص الخطأ كما هو، ويذكر سببه وطريقة إصلاحه.</li>
+</ol>
+<p>ينتهي كل فصل من فصول البناء بنقطة تحقق وأمر <code class="nw">git commit</code>. نقطة التحقق فحص قصير، وغالباً ما تكون أمراً واحداً. السطر أو الأسطر التي تسمّيها يجب أن تطابق الدليل تماماً، أما الأجزاء التي يقول الدليل إنها ستتغير، مثل أسماء Pods وأعمارها وعناوين IP، فلا تُحسب. وGit برنامج يحتفظ بلقطات من مجلد المشروع، والإيداع لقطة واحدة محفوظة، فنستطيع بعد كل فصل أن نرجع دائماً إلى آخر حالة كانت تعمل. نُعدّ Git في <a href="ch02.html">الفصل 2</a>.</p>
+<h3 id="العناصر-النائبة-كلمات-بين-قوسين-زاويين">العناصر النائبة: كلمات بين قوسين زاويين</h3>
+<p>تحتوي بعض الأوامر على عنصر نائب، وهو كلمة بين قوسين زاويين مثل <code class="nw">&lt;WinUser&gt;</code>، تنوب عن قيمة لا يعرفها غيرنا. نستبدل العنصر النائب كله، مع القوسين، بقيمتنا. وكل ما خارج القوسين الزاويين يُكتب كما هو تماماً، بما في ذلك المسافات والأحرف الكبيرة.</p>
+<p>يعني العنصر <code class="nw">&lt;WinUser&gt;</code> اسم مجلد المستخدم تحت <code class="nw">C:\Users</code>، وهو ليس دائماً الاسم الذي يرحّب بنا به Windows. فإذا أُعدّ Windows بحساب Microsoft يأخذ المجلد غالباً اسماً مختصراً. لمعرفته نشغّل هذا الأمر في PowerShell.</p>
+<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>$env:USERPROFILE</code></pre></figure>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>C:\Users\ASUS</code></pre></figure>
+<p>هذا هو المجلد على الحاسوب الذي اختُبر عليه الدليل. على حاسوبنا يُطبع سطر مثل <code class="nw">C:\Users\sarak</code>، والجزء الذي بعد آخر شرطة مائلة عكسية، وهو هنا <code class="nw">sarak</code>، هو قيمة <code class="nw">&lt;WinUser&gt;</code> لدينا. فيصبح المسار <code>/mnt/c/Users/&lt;WinUser&gt;/Downloads</code> عندها <code class="nw">/mnt/c/Users/sarak/Downloads</code>.</p>
+<h3 id="ملفات-نلصقها-وملفات-نكتبها">ملفات نلصقها وملفات نكتبها</h3>
+<p>نلصق معظم ملفات المشروع كاملة ثم نراجعها. لكنّ ثلاث قطع نكتبها بأيدينا، لأنّ الكتابة تجبرنا على قراءة كل سطر. هذه القطع هي الملف <code class="nw">k8s/policies/1-baseline.yaml</code>، وسياسة api داخل <code class="nw">k8s/policies/2-allow.yaml</code>، والدالة <code class="nw">check_image</code> في <code class="nw">apps/news.py</code>. والفصل الذي يبني كل واحدة منها يخبرنا متى نبدأ الكتابة.</p>
+<h3 id="ننسخ-من-صفحة-docs-لا-من-ملف-pdf">ننسخ من صفحة Docs لا من ملف PDF</h3>
+<p>ننسخ الأوامر والملفات من صفحة Docs الخاصة بهذا الدليل على الإنترنت، أي الصفحة التي وصلنا رابطها، أو من نسخة .docx ننزّلها عبر خيار التصدير في تلك الصفحة. لا ننسخ من ملف PDF أبداً. كثيراً ما يحوّل ملف PDF علامات الاقتباس المستقيمة إلى علامات منحنية، ويُسقط المسافات أو يدمجها، فيفشل الأمر المنسوخ منه بخطأ يبدو بلا أي علاقة بما لصقناه. وإذا لم يكن لدينا إلا ملف PDF فنطلب رابط الصفحة ممن أعطانا الدليل قبل أن نبدأ <a href="ch02.html">الفصل 2</a>.</p>
+<h2 id="حين-لا-تطابق-المخرجات-ما-في-الدليل">حين لا تطابق المخرجات ما في الدليل</h2>
+<p>لن تطابق شاشتنا الدليل حرفاً بحرف، وهذا غير مطلوب أصلاً. بعض الأجزاء يتغير في كل تشغيل، والنص الذي تحت المخرجات في كل خطوة يسمّيها. فأسماء Pods تنتهي بأحرف عشوائية مختلفة، وعناوين IP والتواريخ والأوقات عندنا ستختلف عمّا في الدليل. وحين لا يتطابق شيء نمرّ على هذه القائمة بالترتيب.</p>
+<ol>
+<li>نتجاهل الأجزاء التي يقول الدليل إنها ستتغير. ونقارن كل ما سواها، وأهمها السطر الذي يسمّيه نص «ما يجب أن نراه»، مثل <code class="nw">PORTAL: 6/6 OK</code>.</li>
+<li>إذا اختلف ذلك السطر، أو ظهر خطأ، نبحث عن السطر الذي يسمّي الخطأ. تضعه Python في آخر سطر من رسالتها، أما معظم الأدوات الأخرى فتضعه قرب البداية. ثم نبحث عن ذلك النص بعينه في كتلة «إذا ظهر شيء آخر» في تلك الخطوة.</li>
+<li>إذا لم نجده هناك ننتقل إلى <a href="ch13.html">الفصل 13</a>. فيه جدول للأعراض وحلولها بُني من كل خطأ ظهر أثناء اختبار هذا الدليل، ومعه طريقة لتحديد الطبقة المعطّلة.</li>
+<li>إذا غيّرنا ملفات منذ آخر إيداع، يعرض <code class="nw">git diff</code> ما تغيّر في الملفات التي يتتبعها Git أصلاً، ويعيد <code class="nw">git restore &lt;file&gt;</code> مثل هذا الملف إلى حاله عند آخر إيداع، بشرط ألا نكون قد شغّلنا <code class="nw">git add</code> بعد ذلك. يشرح <a href="ch02.html">الفصل 2</a> الأمرين.</li>
+<li>لا نعيد البناء من الصفر إلا في آخر المطاف. يبيّن <a href="ch13.html">الفصل 13</a> طريقة ذلك.</li>
+</ol>
+<h2 id="قاعدة-واحدة">قاعدة واحدة</h2>
+<p>لا نبدأ الفصل التالي في ترتيب قراءتنا قبل أن تتطابق نقطة التحقق في الفصل الحالي. كل فصل يُبنى على الذي قبله، والمشكلة التي نحملها معنا كثيراً ما تظهر بعد فصلين على هيئة خطأ يشير إلى مكان آخر تماماً. فإذا اكتُشف الاختلاف عند نقطة التحقق فإصلاحه يستغرق عادة بضع دقائق، لكنه إذا لم يظهر إلا في <a href="ch10.html">الفصل 10</a> فقد يكلّفنا يوماً كاملاً.</p>
+<h2 id="خطوة-تدريبية-نتحقق-من-أن-الحاسوب-قادر-على-تشغيل-المختبر">خطوة تدريبية: نتحقق من أنّ الحاسوب قادر على تشغيل المختبر</h2>
+<p>يشغّل المختبر في وقت واحد ثلاثة أجهزة مُحاكاة، والبرامج السبعة التي تتكون منها البوابة (الخدمات الست وبرنامجاً مساعداً صغيراً)، وCilium. في <a href="ch03.html">الفصل 3</a> نعطي WSL، وهو الآلة الافتراضية التي يعمل فيها Ubuntu، نحو 10 GB من الذاكرة و4 معالجات. الحاسوب الأصغر من ذلك لا يقدر على تشغيله، ومن الأفضل أن نكتشف ذلك اليوم لا في منتصف اليوم الثاني. وهذه أيضاً أول خطوة مكتوبة بالأجزاء الخمسة، لذلك نقرؤها كاملة مرة واحدة قبل أن نكتب أي شيء.</p>
+<p>في PowerShell نشغّل هذا الأمر لنعرف حجم الذاكرة في الحاسوب.</p>
+<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>[math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 1)</code></pre></figure>
+<p>الجزء <code>Get-CimInstance Win32_ComputerSystem</code> يطلب من Windows معلومات عن الحاسوب. والجزء <code class="nw">.TotalPhysicalMemory</code> يختار منها حجم الذاكرة، ويعطيه Windows بالبايت. أما <code class="nw">/ 1GB</code> فيحوّل البايتات إلى غيغابايت. ويقرّب الجزء <code class="nw">[math]::Round(</code> مع <code class="nw">, 1)</code> الذي يختم الأمر الجوابَ إلى منزلة عشرية واحدة.</p>
+<p><strong>ما يجب أن نراه</strong> رقم واحد في سطر واحد.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>15.9</code></pre></figure>
+<p>هذه القيمة من الحاسوب الذي اختُبر عليه الدليل. يجب أن يكون الرقم عندنا 13.5 أو أكثر. والحاسوب الذي يُباع بذاكرة 16 GB يطبع رقماً أقل من 16 بقليل، لأنّ شريحة الرسوميات والبرنامج الثابت (firmware) يحجزان جزءاً من الذاكرة لنفسيهما.</p>
+<p>نعدّ الآن المعالجات. في PowerShell نشغّل هذا الأمر.</p>
+<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>(Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors</code></pre></figure>
+<p>يعدّ <code class="nw">NumberOfLogicalProcessors</code> خيوط المعالجة التي يستطيع Windows أن يوزّع العمل عليها. ويرى Ubuntu عدداً من النوع نفسه على أنه عدد وحدات المعالجة (CPUs) لديه.</p>
+<p><strong>ما يجب أن نراه</strong> عدد صحيح واحد.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>12</code></pre></figure>
+<p>الأرجح أن يختلف العدد عندنا عن عدد حاسوب الاختبار. يجب أن يكون 4 أو أكثر.</p>
+<p>وأخيراً نتحقق من المساحة الحرة على القرص، وهذا لا يحتاج إلى أمر. نضغط Windows+E لفتح مستكشف الملفات (File Explorer) وننقر <strong>This PC</strong> في اللوحة اليسرى. تحت «Devices and drives» يعرض القرص المعلَّم (C:) سطراً مثل «120 GB free of 476 GB». نحتاج إلى 30 GB حرة على الأقل. فنظام Ubuntu وDocker والأجهزة المُحاكاة الثلاثة وكل صورة حاوية (أي البرامج المعبّأة التي ينزّلها المختبر ويبنيها) تقيم كلها على القرص C:، والملف الذي يحمل قرص Ubuntu كله يكبر مع العمل لكنه لا يصغر من تلقاء نفسه.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>&#x27;[math]::Round&#x27; is not recognized as an internal or external command,
+operable program or batch file.</code></pre></figure>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>.NumberOfLogicalProcessors was unexpected at this time.</code></pre></figure>
+<p>إذا ظهرت إحدى هاتين الرسالتين فقد كتبنا الأمر في Command Prompt، وهي طرفية Windows السوداء الأقدم التي لا تفهم أوامر PowerShell. الرسالة الأولى من أمر الذاكرة، والثانية من أمر المعالجات. نغلق Command Prompt، ونفتح <strong>Windows PowerShell</strong> كما وصفنا سابقاً، ثم نشغّل الأمر من جديد.</p>
+<p>إذا كان رقم الذاكرة أقل من 13.5، مثل 7.9 أو 11.8، فمعناه أنّ في الحاسوب 8 GB أو 12 GB من الذاكرة، ولن يتسع العنقود إلى جانب Windows. نستخدم حاسوباً فيه 16 GB أو أكثر، أو نضيف إليه ذاكرة، قبل أن نمضي أبعد من ذلك.</p>
+<p>إذا كانت المساحة الحرة على القرص C: أقل من 30 GB، نفرغ سلة المحذوفات (Recycle Bin) أولاً. ثم نفتح <strong>Settings &gt; System &gt; Storage &gt; Temporary files</strong>، ونحدد كل شيء ما عدا Downloads، وننقر <strong>Remove files</strong>. وإن لم يكفِ ذلك ننقل الملفات الشخصية الكبيرة، كمقاطع الفيديو، إلى قرص آخر أو إلى ذاكرة USB، ثم نفحص This PC من جديد.</p>
+<p>وإذا كان عدد المعالجات أقل من 4 فلا يمكن تشغيل المختبر على هذا الحاسوب أصلاً. عندها نحتاج إلى جهاز آخر.</p>
+<p>أما الشرط الأخير، وهو أن تكون المحاكاة الافتراضية (virtualization) مفعّلة، فيفحصه <a href="ch02.html">الفصل 2</a>.</p>
+<h2 id="الإصدارات-المختبرة">الإصدارات المختبَرة</h2>
+<p>اختُبر الدليل في 19 تشرين الثاني 2026 بالإصدارات الواردة أدناه. يواصل WSL وUbuntu وDocker Engine إصدار التحديثات، فقد نحصل على إصدار أحدث قليلاً مما في الجدول، ولا بأس بذلك ما دام <code class="nw">check-env.sh</code> في <a href="ch03.html">الفصل 3</a> ينجح. أما كل شيء من kind نزولاً إلى أداة hubble، ومعه حزم Python، فيُثبَّت برقم إصدار محدد. وأداة سطر الأوامر (CLI) برنامج نشغّله بكتابة اسمه في الطرفية. يجب أن تطابق هذه الإصدارات الجدول حتى لو صدر ما هو أحدث منها، لأنّ الإصدار الأحدث يعطّل هذا المختبر. تشغّل kind كل جهاز مُحاكى انطلاقاً من صورة عقدة، وهي النظام المعبّأ الذي يُقلع منه الجهاز. وصورة العقدة التي تستخدمها kind تلقائياً، ما لم نحدد غيرها، تحمل Kubernetes 1.37، وهو إصدار لا يدعمه Cilium 1.20. كذلك تثبّت أداة cilium الإصدار 1.20.3 من Cilium ما لم نطلب 1.20.5. والأوامر في الفصلين 3 و4 تذكر الإصدار الدقيق في كل مرة.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="جدول"><table>
+<thead>
+<tr>
+<th>المكوّن</th>
+<th>الإصدار</th>
+<th>ما هو</th>
+<th>أين يُثبَّت</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Windows</td>
+<td>11 (استُخدم إصدار Pro في الاختبار، ويعمل WSL على Home أيضاً)</td>
+<td>نظام تشغيل الحاسوب</td>
+<td>موجود مسبقاً</td>
+</tr>
+<tr>
+<td>WSL</td>
+<td>3.0.5، والنواة 6.18.58.1-microsoft-standard-WSL2</td>
+<td>يشغّل Linux داخل Windows</td>
+<td><a href="ch02.html">الفصل 2</a></td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>24.04.5 LTS</td>
+<td>نظام Linux الذي نعمل فيه</td>
+<td><a href="ch02.html">الفصل 2</a></td>
+</tr>
+<tr>
+<td>Docker Engine</td>
+<td>29.10.0 (من مستودع apt التابع لشركة Docker، لا Docker Desktop)</td>
+<td>يبني الصور ويشغّل الحاويات</td>
+<td><a href="ch03.html">الفصل 3</a></td>
+</tr>
+<tr>
+<td>kind</td>
+<td>v0.33.0، وصورة العقدة <code class="nw">kindest/node:v1.36.4</code></td>
+<td>تشغّل عنقود Kubernetes على هيئة حاويات Docker</td>
+<td><a href="ch03.html">الفصل 3</a></td>
+</tr>
+<tr>
+<td>kubectl</td>
+<td>v1.36.6</td>
+<td>الأمر الذي نخاطب به Kubernetes</td>
+<td><a href="ch03.html">الفصل 3</a></td>
+</tr>
+<tr>
+<td>cilium CLI</td>
+<td>v0.20.3 (إصدار Cilium الافتراضي فيها 1.20.3، لذلك نمرّر دائماً <code class="nw">--version 1.20.5</code>)</td>
+<td>تثبّت Cilium وتفحصه</td>
+<td><a href="ch03.html">الفصل 3</a></td>
+</tr>
+<tr>
+<td>Cilium</td>
+<td>1.20.5</td>
+<td>إضافة الشبكة التي تفرض سياساتنا</td>
+<td><a href="ch04.html">الفصل 4</a></td>
+</tr>
+<tr>
+<td>hubble CLI</td>
+<td>v1.20.4</td>
+<td>تقرأ سجل Cilium لكل اتصال</td>
+<td><a href="ch03.html">الفصل 3</a></td>
+</tr>
+<tr>
+<td>Python (WSL)</td>
+<td>3.12.3</td>
+<td>تشغّل لوحة التحكم واختبار زمن الاستجابة</td>
+<td>تأتي مع Ubuntu</td>
+</tr>
+<tr>
+<td>حزم Python</td>
+<td>flask 3.1.0، gunicorn 23.0.0، psycopg2-binary 2.9.10، requests 2.32.3</td>
+<td>إطار ويب، وخادم ويب، ومشغّل PostgreSQL، وعميل HTTP</td>
+<td>flask وrequests في <a href="ch03.html">الفصل 3</a>، والأربع كلها داخل الصور في <a href="ch05.html">الفصل 5</a></td>
+</tr>
+</tbody>
+</table></div>
+<p>مستودع apt التابع لشركة Docker هو مصدر التنزيل الذي تديره الشركة لأداة apt، مثبّت الحزم في Ubuntu. أما Docker Desktop فتطبيق منفصل على Windows لا يستخدمه هذا الدليل. ولأداة hubble ترقيم مستقل عن Cilium، والإصدار 1.20.4 هو الذي اختُبر مع Cilium 1.20.5، فاختلاف الرقم الأخير متوقع.</p>
+<h2 id="مجلد-المشروع-microseg-في-شكله-النهائي">مجلد المشروع <code class="nw">~/microseg</code> في شكله النهائي</h2>
+<p>كل ما نبنيه يقيم في مجلد واحد داخل Ubuntu هو <code class="nw">~/microseg</code>. والرمز <code class="nw">~</code> اختصار في Linux للمجلد المنزلي <code class="nw">/home/&lt;user&gt;</code>، و<code class="nw">&lt;user&gt;</code> فيه هو اسم مستخدم Linux الذي ننشئه في <a href="ch02.html">الفصل 2</a>. تعرض الخريطة أدناه المجلد كما يبدو بعد <a href="ch14.html">الفصل 14</a>، مرتّبةً حسب الفصل الذي يضيف كل عنصر. أما الأمر <code class="nw">ls -a</code> فيسرد أسماء المستوى الأعلى بالترتيب الأبجدي بدلاً من ذلك. والأمر <code class="nw">ls</code> وحده يخفي الأسماء التي تبدأ بنقطة، مثل <code class="nw">.git</code>.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>~/microseg/
+    .git/                     Git&#x27;s saved snapshots (chapter 2)
+    .gitignore                folders Git should skip (chapter 2)
+    hello.txt                 the file-copy drill (chapter 2)
+    .venv/                    Python with flask and requests (chapter 3)
+    check-env.sh              environment checkpoint (chapter 3)
+    kind-config.yaml          shape of the cluster (chapter 4)
+    setup.sh                  one-time cluster, Cilium and Hubble setup (chapter 4)
+    images/                   image archives made by setup.sh and deploy.sh (chapter 4)
+    apps/                     the Python services (chapter 5)
+        requirements.txt      Python packages baked into the images
+        Dockerfile            builds campus-app:1.0
+        Dockerfile.news       builds campus-news:1.0
+        news.py               announcements and the vulnerable image checker
+        api.py                login, profile, grades, forgotten /api/export
+        auth.py               password check and tokens
+        admin.py              admin panel with no login
+    frontend/                 the portal&#x27;s web server files (chapter 5)
+        default.conf          nginx settings
+        index.html            the portal page
+    db/
+        init.sql              tables and seed data (chapter 5)
+    k8s/
+        app.yaml              Secret, 6 Services, 7 Deployments (chapter 6)
+        policies/
+            1-baseline.yaml   default deny, DNS, health checks (chapter 10)
+            2-allow.yaml      one policy per workload (chapter 10)
+    deploy.sh                 builds and deploys the portal (chapter 6)
+    check-portal.sh           checks that real users still get through (chapter 6)
+    dashboard/
+        app.py                dashboard back end (chapter 7)
+        index.html            dashboard page (chapter 7)
+    measure.py                latency test (chapter 12)
+    results/
+        latency.csv           written by measure.py (chapter 12)
+    evidence/                 outputs and screenshots for your report (chapters 11 to 14)</code></pre></figure>
+<p>تظهر أيضاً مجلدات باسم <code class="nw">__pycache__</code> بعد تشغيل ملفات Python. تنشئها Python ويتجاهلها Git، لذلك نتركها كما هي.</p>
+<h2 id="متابعة-التقدم">متابعة التقدم</h2>
+<p>ننسخ هذا الجدول إلى دفتر أو إلى مستند على Windows. وكلما تطابقت نقطة تحقق نكتب التاريخ. وفي الفصول التي تنتهي بإيداع نكتب أيضاً الرمز الذي يبدأ به أول سطر يطبعه <code class="nw">git log --oneline</code>، مثل <code class="nw">3f2a9c1</code>. السطر الأول هو دائماً أحدث إيداع. ويستخدم <a href="ch13.html">الفصل 13</a> هذا الرمز لمقارنة ملفاتنا بآخر حالة كانت تعمل.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="جدول"><table>
+<thead>
+<tr>
+<th>الفصل</th>
+<th>نقطة التحقق التي يجب أن تتطابق</th>
+<th>التاريخ</th>
+<th>الإيداع</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0 كيف نستخدم هذا الدليل</td>
+<td>لا توجد</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>1 ما الذي سنبنيه</td>
+<td>جدول التدفقات بأسطره الثمانية، مكتوباً من الذاكرة، مطابق</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>2 قبل أن نبدأ</td>
+<td>نسخ <code class="nw">hello.txt</code> إلى المشروع وإنشاء أول إيداع</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>3 تجهيز بيئة العمل</td>
+<td><code class="nw">14 of 14 checks passed</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>4 إنشاء العنقود</td>
+<td>3 عقد بحالة Ready ولكل منها وسم <code class="nw">tier</code> الصحيح، واختبار الاتصال ينجح</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>5 كتابة الخدمات</td>
+<td><code class="nw">py_compile</code> ينجح، واختبار الحقن يُظهر <code class="nw">uid=1000(app)</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>6 نشر البوابة</td>
+<td>7 Pods بحالة <code class="nw">1/1 Running</code>، و<code class="nw">PORTAL: 6/6 OK</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>7 بناء لوحة التحكم</td>
+<td>المصفوفة تعرض 36 من 36 مساراً قابلاً للوصول</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>8 مهاجمة الشبكة المسطحة</td>
+<td>5 من 5 خطوات تنجح، ودرجة عمر 95</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>9 تصميم السياسة</td>
+<td>التدفقات الثمانية لدينا تطابق الجدول في <a href="ch01.html">الفصل 1</a></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>10 تطبيق التجزئة الدقيقة للشبكة</td>
+<td>0 من 36، ثم 7 من 36، والهجوم 1 من 5، و<code class="nw">/api/export</code> يعطي 403، و<code class="nw">PORTAL: 6/6 OK</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>11 قراءة الأدلة في Hubble</td>
+<td>حزم مُسقطة بسبب <code class="nw">Policy denied</code> صادرة من news، واتصال api إلى db بحالة FORWARDED</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>12 القياس</td>
+<td><code class="nw">results/latency.csv</code> فيه 20 صفاً</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>13 تجاوز الأعطال دون مساعدة</td>
+<td>كل تمرين ينتهي بالسطر <code class="nw">PORTAL: 6/6 OK</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>14 أدلة بحث التخرج</td>
+<td>الملفات كلها موجودة</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>15 خطة العمل يوماً بيوم</td>
+<td>لا توجد</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p>موعد <a href="ch01.html">الفصل 1</a> هو اليوم الثاني، لذلك نملأ سطره حينها.</p>
+<!-- OUT ids: ch00-userprofile, ch00-ram-gb, ch00-logical-cpus --><nav class="pager" aria-label="الفصول"><a rel="next" href="ch01.html"><span>الفصل التالي</span>الفصل 1. ما الذي سنبنيه</a></nav></main></div>
+<footer class="foot"><div class="foot-in"><p>Kubernetes 1.36 و Cilium 1.20.5 و kind 0.33.0 على Windows 11 مع WSL 2. شغّلنا كل أمر على حاسوب حقيقي في تشرين الثاني 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">المصدر على GitHub</a></p></div></footer>
+<p class="vh" aria-live="polite" id="live"></p>
+<script type="application/json" id="i18n">{"copied": "نُسخ", "copyFail": "نضغط Ctrl+C لنسخ النص المحدد", "doneOf": "الخطوات المنجزة: {d} من {t}", "next": "الخطوة التالية: {s}", "allDone": "اكتمل المسار وأُنجزت الخطوات كلها.", "sumCount": "المنجز {d} من {t}", "cleared": "مُسحت كل العلامات.", "confirm": "هل نمسح كل العلامات في هذه الصفحة؟ تبقى الملفات والعنقود كما هي.", "stageCount": "{d} من {t}"}</script>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

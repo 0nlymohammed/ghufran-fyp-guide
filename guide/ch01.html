@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
+<title>Chapter 1. What you will build | Micro-segmentation lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&family=Noto+Sans+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="ar" href="../ar/guide/ch01.html">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400&text=%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9&display=swap">
+</head>
+<body class="">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="top-in">
+<a class="brand" href="../index.html">Micro-segmentation lab</a>
+<nav aria-label="Micro-segmentation lab"><ul>
+<li><a href="../index.html">Quick path</a></li>
+<li><a href="../guide/index.html" aria-current="page">Full guide</a></li>
+<li><a href="../downloads.html">Downloads</a></li>
+<li><a href="../ar/guide/ch01.html" lang="ar" hreflang="ar" data-setlang="ar">العربية</a></li>
+</ul></nav>
+</div></header>
+<div class="layout"><details class="rail" open><summary>Chapters</summary><nav aria-label="Chapters"><ol class="toc"><li><a href="ch00.html">0. How to use this guide</a></li><li><a href="ch01.html" aria-current="page">1. What you will build</a><ol class="sub"><li><a href="#where-everything-runs-layer-by-layer">Where everything runs, layer by layer</a></li><li><a href="#the-portals-architecture">The portal's architecture</a></li><li><a href="#the-7-programs">The 7 programs</a></li><li><a href="#the-8-allowed-flows">The 8 allowed flows</a></li><li><a href="#the-database">The database</a></li><li><a href="#the-api-endpoint-by-endpoint">The API, endpoint by endpoint</a></li><li><a href="#the-portals-six-checks">The portal's six checks</a></li><li><a href="#checkpoint-write-the-flow-table-from-memory">Checkpoint: write the flow table from memory</a></li></ol></li><li><a href="ch02.html">2. Before you start</a></li><li><a href="ch03.html">3. Set up the environment</a></li><li><a href="ch04.html">4. Create the cluster</a></li><li><a href="ch05.html">5. Write the services</a></li><li><a href="ch06.html">6. Deploy the portal</a></li><li><a href="ch07.html">7. Build your dashboard</a></li><li><a href="ch08.html">8. Attack the flat network</a></li><li><a href="ch09.html">9. Design the policy</a></li><li><a href="ch10.html">10. Apply micro-segmentation</a></li><li><a href="ch11.html">11. Read the evidence in Hubble</a></li><li><a href="ch12.html">12. Measure</a></li><li><a href="ch13.html">13. Getting unstuck alone</a></li><li><a href="ch14.html">14. Evidence for your report</a></li><li><a href="ch15.html">15. Day-by-day plan</a></li><li><a href="appendix.html">Appendices</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="chapter-1-what-you-will-build">Chapter 1. What you will build</h1>
+<p>You type no commands in this chapter. It's the lab on paper, and by the end you should be able to sketch the portal's 7 programs on their nodes and write down, without looking, the 8 flows between them that stay open once segmentation is on. That sketch is the checkpoint. Plan on about 45 minutes.</p>
+<h2 id="where-everything-runs-layer-by-layer">Where everything runs, layer by layer</h2>
+<p>Everything in the lab runs on your one laptop, stacked in layers. Windows 11 runs WSL 2, a light virtual machine with a real Linux kernel, and Ubuntu 24.04 lives inside it. Ubuntu runs Docker Engine, which holds three containers that each pretend to be a whole machine. Those containers are your three Kubernetes nodes, <code class="nw">kind-control-plane</code>, <code class="nw">kind-worker</code> and <code class="nw">kind-worker2</code>, and they run the pods of the portal in the namespace <code class="nw">campus</code>, next to Cilium's own pods in the namespace <code class="nw">kube-system</code>.</p>
+<figure class="fig"><a href="../files/figures/fig02-en.png"><img src="../files/figures/web/fig02-en.png" alt="Where everything runs" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>Where everything runs</figcaption></figure>
+<p>In Figure 2, look at where <code class="nw">kubectl</code>, <code class="nw">cilium</code> and <code class="nw">hubble</code> sit. They run in Ubuntu itself, outside the cluster, and reach into it from there.</p>
+<p>Not every program in this project lives inside the cluster. The table lists what you'll open or run and where it lives.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>What</th>
+<th>Where it runs</th>
+<th>How you reach it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>the Campus Portal</td>
+<td>seven pods in the namespace <code class="nw">campus</code></td>
+<td><code class="nw">http://localhost:30080</code> in your Windows browser, or from the Ubuntu terminal</td>
+</tr>
+<tr>
+<td>the Hubble UI</td>
+<td>Cilium's pods, opened by <code class="nw">cilium hubble ui</code> in the Ubuntu terminal</td>
+<td><code class="nw">http://localhost:12000</code></td>
+</tr>
+<tr>
+<td>your dashboard (<a href="ch07.html">chapter 7</a>)</td>
+<td>a Python program in Ubuntu, outside the cluster</td>
+<td><code class="nw">http://localhost:5050</code></td>
+</tr>
+<tr>
+<td><code class="nw">kubectl</code>, <code class="nw">cilium</code>, <code class="nw">hubble</code></td>
+<td>Ubuntu</td>
+<td>the Ubuntu terminal</td>
+</tr>
+<tr>
+<td>the five attack commands (<a href="ch08.html">chapter 8</a>)</td>
+<td>Windows PowerShell, using <code class="nw">curl.exe</code></td>
+<td>they go in through <code class="nw">localhost:30080</code>, like any visitor</td>
+</tr>
+</tbody>
+</table></div>
+<p>Your Windows browser can open <code class="nw">localhost:30080</code> because of two forwarding steps. A port mapping is a rule that passes connections arriving on a port of one machine to a port of another. Docker holds a port mapping that passes port 30080 in Ubuntu on to port 30080 of the <code class="nw">kind-worker</code> container, and WSL passes <code class="nw">localhost</code> ports from Windows into Ubuntu. Follow one request from your browser to the portal and it goes like this.</p>
+<ol>
+<li>The browser connects to <code class="nw">localhost:30080</code> on Windows.</li>
+<li>WSL hands the connection to Ubuntu, still on port 30080.</li>
+<li>Docker's port mapping, which <code class="nw">kind-config.yaml</code> asks for, passes it to port 30080 on the node <code class="nw">kind-worker</code>.</li>
+<li>On <code class="nw">kind-worker</code>, port 30080 is the NodePort of the Service <code class="nw">frontend</code>, so Kubernetes passes it to the frontend pod on port 80.</li>
+</ol>
+<p>The port mapping listens on <code class="nw">127.0.0.1</code> only, the address a machine uses for itself, so other people on your Wi-Fi can't open your portal.</p>
+<h2 id="the-portals-architecture">The portal's architecture</h2>
+<p>The portal has exactly one door from the outside, NodePort 30080 on <code class="nw">kind-worker</code>. Every other program has a name and a port that work only inside the cluster.</p>
+<figure class="fig"><a href="../files/figures/fig03-en.png"><img src="../files/figures/web/fig03-en.png" alt="Campus Portal architecture" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>Campus Portal architecture</figcaption></figure>
+<p>Figure 3 puts the seven pods on their two worker nodes, with one arrow coming in at NodePort 30080. The node <code class="nw">kind-control-plane</code> runs none of them.</p>
+<p>The frontend and news pods, the public-facing part of the portal, run on <code class="nw">kind-worker</code>, and the other five (api, auth, db, admin and ops) run on <code class="nw">kind-worker2</code>. The node labels <code class="nw">tier=frontend</code> and <code class="nw">tier=backend</code> decide that placement. Placement alone neither grants nor blocks any connection.</p>
+<p>All of the portal's Kubernetes objects live in the namespace <code class="nw">campus</code>, and there are four kinds of them.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>Object</th>
+<th>How many</th>
+<th>Names</th>
+<th>What it's for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Secret</td>
+<td>1</td>
+<td><code class="nw">db-credentials</code></td>
+<td>the database user, password and database name</td>
+</tr>
+<tr>
+<td>ConfigMap</td>
+<td>2</td>
+<td><code class="nw">frontend-files</code>, <code class="nw">db-init</code></td>
+<td>the nginx settings and portal page, and the SQL that fills the database</td>
+</tr>
+<tr>
+<td>Service</td>
+<td>6</td>
+<td>frontend, news, api, auth, db, admin</td>
+<td>a fixed name and port for each program that something calls</td>
+</tr>
+<tr>
+<td>Deployment</td>
+<td>7</td>
+<td>frontend, news, api, auth, db, admin, ops</td>
+<td>keeps one pod of each program running</td>
+</tr>
+</tbody>
+</table></div>
+<p>A ConfigMap is a Kubernetes object that holds files or settings and hands them to a pod, which sees them as ordinary files. That lets nginx and PostgreSQL run from stock images while your own files are slipped in from outside. A Secret is the same idea for passwords.</p>
+<p>The Secret <code class="nw">db-credentials</code> holds <code class="nw">POSTGRES_USER=postgres</code>, <code class="nw">POSTGRES_PASSWORD=postgres</code> and <code class="nw">POSTGRES_DB=campus</code>. The db pod reads the Secret to set itself up, and api, auth and admin read it to log in. News never gets it. The common password <code class="nw">postgres</code> is there on purpose, because in step 3 of the attack the intruder guesses it.</p>
+<p><code class="nw">k8s/app.yaml</code> holds the Secret, the Services and the Deployments. <code class="nw">deploy.sh</code> creates the two ConfigMaps straight from the files in <code class="nw">frontend/</code> and <code class="nw">db/</code>. You write <code class="nw">k8s/app.yaml</code> and <code class="nw">deploy.sh</code> in <a href="ch06.html">chapter 6</a>, and the files in <code class="nw">frontend/</code> and <code class="nw">db/</code> in <a href="ch05.html">chapter 5</a>.</p>
+<h2 id="the-7-programs">The 7 programs</h2>
+<p>Four of the programs are written in Python with Flask, a small Python library for building web services. Each one is started by gunicorn, a program that runs a Flask service as a web server and keeps two copies of it ready for requests. The image <code class="nw">campus-app:1.0</code> holds all four programs. Api, auth and admin run from it, and each of their Deployments picks which program to start. Ops uses it too, as a place to run commands. News gets its own image, <code class="nw">campus-news:1.0</code>, which is <code class="nw">campus-app:1.0</code> plus the attacker's tools <code class="nw">psql</code> and <code class="nw">nc</code>. Frontend and db use stock images.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>Program</th>
+<th>Image</th>
+<th>Port</th>
+<th>Node</th>
+<th>What it does</th>
+<th>Called by, after segmentation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>frontend</td>
+<td><code class="nw">nginx:1.28</code></td>
+<td>80, NodePort 30080</td>
+<td>kind-worker</td>
+<td>sends the portal page to the browser and passes <code class="nw">/api/</code> requests to api and <code class="nw">/news</code> requests to news</td>
+<td>your browser (<code class="nw">world</code>)</td>
+</tr>
+<tr>
+<td>news</td>
+<td><code class="nw">campus-news:1.0</code></td>
+<td>5000</td>
+<td>kind-worker</td>
+<td>lists 3 announcements and runs the image link checker, which has the command injection bug</td>
+<td>frontend</td>
+</tr>
+<tr>
+<td>api</td>
+<td><code class="nw">campus-app:1.0</code></td>
+<td>8080</td>
+<td>kind-worker2</td>
+<td>login, profile and grades for logged-in students, plus the forgotten <code class="nw">/api/export</code></td>
+<td>frontend</td>
+</tr>
+<tr>
+<td>auth</td>
+<td><code class="nw">campus-app:1.0</code></td>
+<td>5001</td>
+<td>kind-worker2</td>
+<td>checks passwords, hands out login tokens and says which student owns a token</td>
+<td>api</td>
+</tr>
+<tr>
+<td>db</td>
+<td><code class="nw">postgres:17</code></td>
+<td>5432</td>
+<td>kind-worker2</td>
+<td>the PostgreSQL database <code class="nw">campus</code>, with students, grades and sessions</td>
+<td>api, auth, admin</td>
+</tr>
+<tr>
+<td>admin</td>
+<td><code class="nw">campus-app:1.0</code></td>
+<td>5002</td>
+<td>kind-worker2</td>
+<td>internal admin panel that lists every user, with no login</td>
+<td>ops</td>
+</tr>
+<tr>
+<td>ops</td>
+<td><code class="nw">campus-app:1.0</code></td>
+<td>none</td>
+<td>kind-worker2</td>
+<td>stands in for the IT team's maintenance machine. It runs <code class="nw">sleep infinity</code>, which waits forever, so there's a pod you can run commands in</td>
+<td>nobody</td>
+</tr>
+</tbody>
+</table></div>
+<p>Ops has a Deployment but no Service, because nothing ever calls it. It only makes calls.</p>
+<h2 id="the-8-allowed-flows">The 8 allowed flows</h2>
+<p>A flow is one kind of connection the lab allows, from one program to another on one port. Once segmentation is on, the lab allows exactly the 8 flows below and refuses everything else. You'll use this table twice more. <a href="ch09.html">Chapter 9</a> rebuilds it from what Hubble records, and <a href="ch10.html">chapter 10</a> turns each row into policy rules.</p>
+<figure class="fig"><a href="../files/figures/fig04-en.png"><img src="../files/figures/web/fig04-en.png" alt="Allowed-flow map" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>Allowed-flow map</figcaption></figure>
+<p>In Figure 4 each arrow is one allowed flow, and no arrow starts at news or at db.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>From</th>
+<th>To</th>
+<th>Port</th>
+<th>Extra rule</th>
+<th>Why the portal needs it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>your browser (<code class="nw">world</code>)</td>
+<td>frontend</td>
+<td>80, through NodePort 30080</td>
+<td></td>
+<td>students open the portal</td>
+</tr>
+<tr>
+<td>2</td>
+<td>frontend</td>
+<td>api</td>
+<td>8080</td>
+<td>only GET <code class="nw">/api/grades</code>, GET <code class="nw">/api/profile</code> and POST <code class="nw">/api/login</code></td>
+<td>the page logs students in and shows their profile and grades</td>
+</tr>
+<tr>
+<td>3</td>
+<td>frontend</td>
+<td>news</td>
+<td>5000</td>
+<td></td>
+<td>the page shows the announcements, and editors use the image checker</td>
+</tr>
+<tr>
+<td>4</td>
+<td>api</td>
+<td>auth</td>
+<td>5001</td>
+<td></td>
+<td>api passes each login to auth, and asks auth who owns the token on every profile and grades request</td>
+</tr>
+<tr>
+<td>5</td>
+<td>api</td>
+<td>db</td>
+<td>5432</td>
+<td></td>
+<td>api reads the profile and grades rows</td>
+</tr>
+<tr>
+<td>6</td>
+<td>auth</td>
+<td>db</td>
+<td>5432</td>
+<td></td>
+<td>auth checks passwords and stores and looks up tokens</td>
+</tr>
+<tr>
+<td>7</td>
+<td>admin</td>
+<td>db</td>
+<td>5432</td>
+<td></td>
+<td>the admin panel reads the user list</td>
+</tr>
+<tr>
+<td>8</td>
+<td>ops</td>
+<td>admin</td>
+<td>5002</td>
+<td></td>
+<td>IT staff open the admin panel</td>
+</tr>
+</tbody>
+</table></div>
+<p>Flow 2 is the only one with an L7 rule, the one in the Extra rule column. Envoy reads every request on it and lets three kinds through. Anything else, <code class="nw">/api/export</code> included, comes back as <code class="nw">403 Forbidden</code>.</p>
+<p>Two more kinds of traffic are allowed, and they don't count among the 8. Every pod may ask kube-dns, the cluster's DNS service, for addresses on port 53, because the programs find each other by name, such as <code class="nw">api.campus.svc.cluster.local</code>. That's the full name Kubernetes gives the Service: its name, its namespace, then <code class="nw">svc.cluster.local</code>. Inside the namespace the short name <code class="nw">api</code> works too, and that's the one the project files use, so you never type the long form. The node may also reach every pod for the readiness checks explained after the API table. Both are set in <code class="nw">k8s/policies/1-baseline.yaml</code>.</p>
+<p>Rows 2 to 8 each need two rules, egress in the caller's policy and ingress in the callee's policy. Row 1 needs only one, the ingress rule in frontend's policy, because <code class="nw">world</code> isn't a pod and has no policy of its own. Row 1 starts at your browser, outside the cluster. The dashboard's matrix in <a href="ch07.html">chapter 7</a> only counts paths that start at a pod, so it covers flows 2 to 8 and shows 7 of its 36 paths open after segmentation.</p>
+<p>Everything not in the table is refused. News opens no connection except DNS lookups, and neither does the database. Frontend reaches api but not auth, db or admin, only ops may open the admin panel, and no pod can reach the internet. <a href="ch09.html">Chapter 9</a> writes these refusals down in the deny table.</p>
+<h2 id="the-database">The database</h2>
+<p>The database <code class="nw">campus</code> has three tables. SQL is the language you use to create tables and ask a database questions. A table is a grid of data, a column is one named field in it, such as <code class="nw">username</code>, and a row is one record, such as one student. A primary key is the column whose value is different on every row, so it picks out exactly one row. A foreign key is a column that holds another table's primary key, and that's how a grade points to the student it belongs to. <code class="nw">SERIAL</code> means the database numbers new rows for you, 1, 2, 3 and so on.</p>
+<p>Here's the grades table, copied from <code class="nw">db/init.sql</code>. You'll paste the whole file in <a href="ch05.html">chapter 5</a>.</p>
+<figure class="code file excerpt"><figcaption><span class="lbl">From db/init.sql</span></figcaption><pre dir="ltr"><code>CREATE TABLE grades (
+    id         SERIAL PRIMARY KEY,
+    student_id INT REFERENCES students(id),
+    course     TEXT NOT NULL,
+    grade      INT NOT NULL
+);</code></pre></figure>
+<p><code class="nw">REFERENCES students(id)</code> makes <code class="nw">student_id</code> a foreign key. <code class="nw">TEXT</code> holds words, <code class="nw">INT</code> holds whole numbers, and <code class="nw">NOT NULL</code> means the column can never be left empty.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Columns</th>
+<th>What a row is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code class="nw">students</code></td>
+<td><code class="nw">id</code> (primary key), <code class="nw">username</code> (unique), <code class="nw">full_name</code>, <code class="nw">email</code>, <code class="nw">major</code>, <code class="nw">year</code>, <code class="nw">password_hash</code></td>
+<td>one student</td>
+</tr>
+<tr>
+<td><code class="nw">grades</code></td>
+<td><code class="nw">id</code> (primary key), <code class="nw">student_id</code> (foreign key to <code class="nw">students</code>), <code class="nw">course</code>, <code class="nw">grade</code></td>
+<td>one grade in one course</td>
+</tr>
+<tr>
+<td><code class="nw">sessions</code></td>
+<td><code class="nw">token</code> (primary key), <code class="nw">student_id</code> (foreign key to <code class="nw">students</code>), <code class="nw">created_at</code></td>
+<td>one login</td>
+</tr>
+</tbody>
+</table></div>
+<p>A hash is a fixed-length fingerprint computed from a piece of text, made so the text can't be worked back out of it. The column <code class="nw">password_hash</code> holds the SHA-256 hash of each password, written as 64 hexadecimal characters, which means each one is a digit from 0 to 9 or a letter from a to f. The plain password is never stored. The same password always gives the same hash, and that's how auth checks a login. It hashes the password you typed and looks for a row with your username and that hash.</p>
+<p><code class="nw">db/init.sql</code> fills the tables with four students. Each password is the user name followed by 2026.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th><code class="nw">id</code></th>
+<th><code class="nw">username</code></th>
+<th><code class="nw">full_name</code></th>
+<th><code class="nw">major</code></th>
+<th><code class="nw">year</code></th>
+<th>password</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>sara</td>
+<td>Sara Ahmed</td>
+<td>Computer Science</td>
+<td>4</td>
+<td><code class="nw">sara2026</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>omar</td>
+<td>Omar Khalid</td>
+<td>Information Security</td>
+<td>3</td>
+<td><code class="nw">omar2026</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>lina</td>
+<td>Lina Hassan</td>
+<td>Software Engineering</td>
+<td>2</td>
+<td><code class="nw">lina2026</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>yousef</td>
+<td>Yousef Ali</td>
+<td>Computer Networks</td>
+<td>4</td>
+<td><code class="nw">yousef2026</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>It also adds 8 grades, two per student.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th><code class="nw">id</code></th>
+<th><code class="nw">student_id</code></th>
+<th><code class="nw">course</code></th>
+<th><code class="nw">grade</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>Network Security</td>
+<td>91</td>
+</tr>
+<tr>
+<td>2</td>
+<td>1</td>
+<td>Cloud Computing</td>
+<td>88</td>
+</tr>
+<tr>
+<td>3</td>
+<td>2</td>
+<td>Network Security</td>
+<td>58</td>
+</tr>
+<tr>
+<td>4</td>
+<td>2</td>
+<td>Databases</td>
+<td>64</td>
+</tr>
+<tr>
+<td>5</td>
+<td>3</td>
+<td>Network Security</td>
+<td>77</td>
+</tr>
+<tr>
+<td>6</td>
+<td>3</td>
+<td>Operating Systems</td>
+<td>82</td>
+</tr>
+<tr>
+<td>7</td>
+<td>4</td>
+<td>Network Security</td>
+<td>69</td>
+</tr>
+<tr>
+<td>8</td>
+<td>4</td>
+<td>Cloud Computing</td>
+<td>73</td>
+</tr>
+</tbody>
+</table></div>
+<p>Look at grade row 3. Its <code class="nw">id</code> is 3, its <code class="nw">student_id</code> is 2, and student 2 is Omar, so this is his Network Security grade of 58. Step 4 of the attack runs <code>UPDATE grades SET grade = 95 WHERE id = 3</code>, which picks the grade row with <code class="nw">id</code> 3. It doesn't touch student 3, Lina. Two different tables each have an <code class="nw">id</code> 3, so keep them apart.</p>
+<p>The <code class="nw">sessions</code> table starts empty. Each login adds a row to it. The db pod keeps its data inside its own container, with no persistent volume to survive a restart. Restarting the db pod therefore puts every grade back to its starting value and throws away every login. <a href="ch08.html">Chapter 8</a> uses that to reset the lab after an attack.</p>
+<h2 id="the-api-endpoint-by-endpoint">The API, endpoint by endpoint</h2>
+<p>An endpoint is one method and path that a program answers, such as GET <code class="nw">/api/grades</code>. Most endpoints here answer with JSON, a plain-text format for data that looks like <code class="nw">{"token": "..."}</code>, with names in quotes and values after the colons. A token is a long random string that auth hands you when your password is right. You send it back with each later request in a header, a named line of extra information sent with an HTTP request before its body. This one reads <code>Authorization: Bearer &lt;token&gt;</code>, and it proves you already logged in. Auth's tokens are 32 hexadecimal characters long. A 401 is the HTTP status code for "you haven't proved who you are", and several endpoints in the table answer with it.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>Program</th>
+<th>Endpoint</th>
+<th>What it needs</th>
+<th>What it answers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>frontend</td>
+<td>GET <code class="nw">/</code></td>
+<td>nothing</td>
+<td>the portal page, <code class="nw">index.html</code></td>
+</tr>
+<tr>
+<td>frontend</td>
+<td>any path starting <code class="nw">/api/</code></td>
+<td>whatever api needs</td>
+<td>passes the request to api unchanged and returns api's answer</td>
+</tr>
+<tr>
+<td>frontend</td>
+<td>any path starting <code class="nw">/news</code></td>
+<td>whatever news needs</td>
+<td>passes the request to news unchanged and returns news's answer</td>
+</tr>
+<tr>
+<td>news</td>
+<td>GET <code class="nw">/news</code></td>
+<td>nothing</td>
+<td>a JSON list of the 3 announcements</td>
+</tr>
+<tr>
+<td>news</td>
+<td>POST <code class="nw">/news/check-image</code></td>
+<td>a form field <code class="nw">url</code></td>
+<td>plain text starting <code class="nw">HTTP status of image:</code>. This is the endpoint with the command injection bug</td>
+</tr>
+<tr>
+<td>api</td>
+<td>POST <code class="nw">/api/login</code></td>
+<td>JSON with <code class="nw">username</code> and <code class="nw">password</code></td>
+<td>passes it to auth and returns auth's answer, <code class="nw">{"token": ...}</code> or a 401 error</td>
+</tr>
+<tr>
+<td>api</td>
+<td>GET <code class="nw">/api/profile</code></td>
+<td>a token</td>
+<td>your <code class="nw">id</code>, <code class="nw">full_name</code>, <code class="nw">email</code>, <code class="nw">major</code> and <code class="nw">year</code>, or 401 <code class="nw">not logged in</code></td>
+</tr>
+<tr>
+<td>api</td>
+<td>GET <code class="nw">/api/grades</code></td>
+<td>a token</td>
+<td>a list of your grades, each with <code class="nw">course</code> and <code class="nw">grade</code></td>
+</tr>
+<tr>
+<td>api</td>
+<td>GET <code class="nw">/api/export</code></td>
+<td>nothing at all</td>
+<td>every grade of every student with their full name. An old debug endpoint that nobody removed</td>
+</tr>
+<tr>
+<td>auth</td>
+<td>POST <code class="nw">/login</code></td>
+<td>JSON with <code class="nw">username</code> and <code class="nw">password</code></td>
+<td><code class="nw">{"token": ...}</code>, or 401 <code class="nw">wrong username or password</code></td>
+</tr>
+<tr>
+<td>auth</td>
+<td>GET <code class="nw">/verify</code></td>
+<td>a token</td>
+<td><code class="nw">{"student_id": ...}</code>, or 401 <code class="nw">invalid token</code></td>
+</tr>
+<tr>
+<td>admin</td>
+<td>GET <code class="nw">/</code></td>
+<td>nothing</td>
+<td>one line of text naming the <code class="nw">/users</code> endpoint</td>
+</tr>
+<tr>
+<td>admin</td>
+<td>GET <code class="nw">/users</code></td>
+<td>nothing at all</td>
+<td>every student with <code class="nw">id</code>, <code class="nw">username</code>, <code class="nw">full_name</code>, <code class="nw">email</code> and <code class="nw">password_hash</code></td>
+</tr>
+<tr>
+<td>db</td>
+<td>port 5432</td>
+<td>user name and password</td>
+<td>PostgreSQL's own protocol, which <code class="nw">psql</code> and the Python programs speak</td>
+</tr>
+</tbody>
+</table></div>
+<p>News, api, auth, admin and frontend also answer GET <code class="nw">/healthz</code> with the text <code class="nw">ok</code>. That endpoint is for the readiness probe, a check that Kubernetes repeats from the node to decide whether a pod is ready to receive traffic. Until the check passes, the pod shows <code class="nw">0/1</code> in the READY column and its Service sends it nothing. The db pod runs PostgreSQL's own check, <code class="nw">pg_isready</code>, instead of an HTTP request.</p>
+<p>Three endpoints in that table are the weak spots the attack in <a href="ch08.html">chapter 8</a> uses. POST <code class="nw">/news/check-image</code> is the attacker's way in. GET <code class="nw">/api/export</code> gives away every grade to anyone who asks. GET <code class="nw">/users</code> on admin hands out every password hash, because the panel trusts that only insiders can reach it.</p>
+<h2 id="the-portals-six-checks">The portal's six checks</h2>
+<p><code class="nw">check-portal.sh</code>, which you write in <a href="ch06.html">chapter 6</a>, tests the portal the way a student uses it, with six checks. It checks that the page loads, that the news list has 3 items, that sara can log in and gets a 32-character token, that her profile says Sara Ahmed and that she sees 2 grades. The sixth check runs a request from ops to the admin panel and expects 4 users. When all six pass it prints <code class="nw">PORTAL: 6/6 OK</code>, and you run it after every change to the policies, to prove real users still get through.</p>
+<h2 id="checkpoint-write-the-flow-table-from-memory">Checkpoint: write the flow table from memory</h2>
+<p><strong>Checkpoint.</strong> Close this guide or turn the page over. In your notebook, draw a table with the columns From, To, Port and Extra rule, then write down every flow the lab allows after segmentation. Leave out DNS and health checks. Then compare your table with the one in "The 8 allowed flows". Your table matches when it has exactly 8 rows with the same From, To and Port. For row 1, 80 counts as a match, and so does 80 through 30080, but 30080 alone doesn't, because the policy is written for port 80 on the pod. The Extra rule column stays empty in every row except frontend to api, which names the three allowed requests, GET <code class="nw">/api/grades</code>, GET <code class="nw">/api/profile</code> and POST <code class="nw">/api/login</code>. If any row differs, find out why that flow is or isn't needed, using the "Why the portal needs it" column. Then take a ten-minute break and try again until you get all 8 without looking.</p>
+<p>You haven't changed any files in this chapter, so there's nothing to commit.</p>
+<!-- OUT ids: none --><nav class="pager" aria-label="Chapters"><a rel="prev" href="ch00.html"><span>Previous chapter</span>Chapter 0. How to use this guide</a><a rel="next" href="ch02.html"><span>Next chapter</span>Chapter 2. Before you start</a></nav></main></div>
+<footer class="foot"><div class="foot-in"><p>Kubernetes 1.36, Cilium 1.20.5 and kind 0.33.0 on Windows 11 with WSL 2. Every command was run on a real laptop in November 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">Source on GitHub</a></p></div></footer>
+<p class="vh" aria-live="polite" id="live"></p>
+<script type="application/json" id="i18n">{"copied": "Copied", "copyFail": "Press Ctrl+C to copy the selected text", "doneOf": "{d} of {t} steps done", "next": "Next step: {s}", "allDone": "All {t} steps done.", "sumCount": "{d} of {t} done", "cleared": "All ticks cleared.", "confirm": "Clear every tick on this page? Your files and your cluster stay as they are.", "stageCount": "{d} of {t}"}</script>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

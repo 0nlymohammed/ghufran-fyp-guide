@@ -1,0 +1,6 @@
+# campus-news:1.0 = campus-app + tools an attacker downloads after the exploit (MITRE T1105).
+# They are pre-installed so the lab is reproducible and works offline.
+FROM campus-app:1.0
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends netcat-openbsd postgresql-client && rm -rf /var/lib/apt/lists/*
+USER app

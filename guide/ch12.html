@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
+<title>Chapter 12. Measure | Micro-segmentation lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&family=Noto+Sans+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="ar" href="../ar/guide/ch12.html">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400&text=%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9&display=swap">
+</head>
+<body class="">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="top-in">
+<a class="brand" href="../index.html">Micro-segmentation lab</a>
+<nav aria-label="Micro-segmentation lab"><ul>
+<li><a href="../index.html">Quick path</a></li>
+<li><a href="../guide/index.html" aria-current="page">Full guide</a></li>
+<li><a href="../downloads.html">Downloads</a></li>
+<li><a href="../ar/guide/ch12.html" lang="ar" hreflang="ar" data-setlang="ar">العربية</a></li>
+</ul></nav>
+</div></header>
+<div class="layout"><details class="rail" open><summary>Chapters</summary><nav aria-label="Chapters"><ol class="toc"><li><a href="ch00.html">0. How to use this guide</a></li><li><a href="ch01.html">1. What you will build</a></li><li><a href="ch02.html">2. Before you start</a></li><li><a href="ch03.html">3. Set up the environment</a></li><li><a href="ch04.html">4. Create the cluster</a></li><li><a href="ch05.html">5. Write the services</a></li><li><a href="ch06.html">6. Deploy the portal</a></li><li><a href="ch07.html">7. Build your dashboard</a></li><li><a href="ch08.html">8. Attack the flat network</a></li><li><a href="ch09.html">9. Design the policy</a></li><li><a href="ch10.html">10. Apply micro-segmentation</a></li><li><a href="ch11.html">11. Read the evidence in Hubble</a></li><li><a href="ch12.html" aria-current="page">12. Measure</a><ol class="sub"><li><a href="#what-median-p95-and-stdev-mean">What median, p95 and stdev mean</a></li><li><a href="#write-measurepy">Write measure.py</a></li><li><a href="#run-measurepy">Run measure.py</a></li><li><a href="#the-results-file-row-by-row">The results file, row by row</a></li><li><a href="#noise-when-a-difference-is-real">Noise: when a difference is real</a></li><li><a href="#count-the-policies-and-l7-rules">Count the policies and L7 rules</a></li><li><a href="#what-to-report-and-where-it-comes-from">What to report, and where it comes from</a></li><li><a href="#charts-for-figures-9-to-12">Charts for figures 9 to 12</a></li><li><a href="#checkpoint">Checkpoint</a></li></ol></li><li><a href="ch13.html">13. Getting unstuck alone</a></li><li><a href="ch14.html">14. Evidence for your report</a></li><li><a href="ch15.html">15. Day-by-day plan</a></li><li><a href="appendix.html">Appendices</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="chapter-12-measure">Chapter 12. Measure</h1>
+<p>This chapter measures what segmentation costs. The numbers all come from your own laptop. You'll write <code class="nw">measure.py</code>, a script that times 21,000 requests to the portal with and without your policies, and you'll learn which differences you may report as real and which are noise. At the end you'll have a 21-line results file and the charts for your results chapter. Plan about 2 hours, and the script itself runs for about 10 minutes.</p>
+<h2 id="what-median-p95-and-stdev-mean">What median, p95 and stdev mean</h2>
+<p>Latency is the time from sending a request until the whole answer has arrived. The script prints four numbers for each batch. The median is the middle time after sorting. It's the number for a normal request. The mean is the ordinary average. A few slow requests pull it up. The p95 and p99 are the times that 95 and 99 percent of the requests beat, so they describe the slow end, the few requests that ran into a moment when the laptop was busy with something else. The script repeats the whole test five times. The stdev says how far one run's median typically lands from the others. That spread is the noise. The overhead is the difference between the mean of the run medians with policies and without them.</p>
+<h2 id="write-measurepy">Write <code class="nw">measure.py</code></h2>
+<p><code class="nw">measure.py</code> sets the network to one condition, logs in as sara, sends a burst of requests to two pages of the portal and times each one. Then it switches to the other condition and does the same, five times over, and writes everything into a file.</p>
+<p>Create <code class="nw">~/microseg/measure.py</code> in VS Code the same way as in <a href="ch05.html">chapter 5</a>, paste this file into it and press Ctrl+S until the tab shows no round dot.</p>
+<figure class="code file"><figcaption><span class="lbl">File: measure.py</span><button type="button" class="copy" aria-label="Copy this file">Copy</button></figcaption><pre dir="ltr"><code># Latency with vs. without policies. Run from ~/microseg with:  .venv/bin/python measure.py
+import csv
+import os
+import statistics
+import subprocess
+import time
+
+import requests
+
+PORTAL = &quot;http://127.0.0.1:30080&quot;
+RUNS = 5
+REQUESTS = 1000          # timed requests per endpoint per run
+WARMUP = 50              # requests sent first and thrown away
+ENDPOINTS = [&quot;/news&quot;, &quot;/api/grades&quot;]
+CONDITIONS = [&quot;no-policies&quot;, &quot;policies&quot;]
+
+
+def set_policies(condition):
+    if condition == &quot;policies&quot;:
+        subprocess.run([&quot;kubectl&quot;, &quot;apply&quot;, &quot;-f&quot;, &quot;k8s/policies/&quot;], check=True)
+    else:
+        subprocess.run([&quot;kubectl&quot;, &quot;delete&quot;, &quot;-f&quot;, &quot;k8s/policies/&quot;, &quot;--ignore-not-found&quot;], check=True)
+    time.sleep(15)       # give Cilium time to update every pod
+
+
+def login(session):
+    answer = session.post(PORTAL + &quot;/api/login&quot;, json={&quot;username&quot;: &quot;sara&quot;, &quot;password&quot;: &quot;sara2026&quot;}, timeout=10)
+    return answer.json()[&quot;token&quot;]
+
+
+def measure(session, path, token):
+    times = []
+    for i in range(WARMUP + REQUESTS):
+        start = time.perf_counter()
+        answer = session.get(PORTAL + path, headers={&quot;Authorization&quot;: &quot;Bearer &quot; + token}, timeout=10)
+        elapsed_ms = (time.perf_counter() - start) * 1000
+        answer.raise_for_status()          # stop on any error, never time a failed request
+        if i &gt;= WARMUP:
+            times.append(elapsed_ms)
+    cuts = statistics.quantiles(times, n=100)   # cuts[94] = p95, cuts[98] = p99
+    return [round(statistics.median(times), 2), round(cuts[94], 2), round(cuts[98], 2),
+            round(statistics.mean(times), 2)]
+
+
+os.makedirs(&quot;results&quot;, exist_ok=True)
+session = requests.Session()
+
+rows = []
+for run_number in range(1, RUNS + 1):
+    for condition in CONDITIONS:
+        set_policies(condition)
+        token = login(session)
+        for path in ENDPOINTS:
+            numbers = measure(session, path, token)
+            print(run_number, condition, path, &quot;median/p95/p99/mean ms:&quot;, numbers)
+            rows.append([condition, path, run_number] + numbers)
+
+with open(&quot;results/latency.csv&quot;, &quot;w&quot;, newline=&quot;&quot;) as f:
+    writer = csv.writer(f)
+    writer.writerow([&quot;condition&quot;, &quot;endpoint&quot;, &quot;run&quot;, &quot;median_ms&quot;, &quot;p95_ms&quot;, &quot;p99_ms&quot;, &quot;mean_ms&quot;])
+    writer.writerows(rows)
+
+print(&quot;\nMean of the run medians:&quot;)
+for path in ENDPOINTS:
+    result = {}
+    for condition in CONDITIONS:
+        medians = [row[3] for row in rows if row[0] == condition and row[1] == path]
+        result[condition] = statistics.mean(medians)
+        print(f&quot;  {path:12} {condition:12} {result[condition]:7.2f} ms  (stdev {statistics.stdev(medians):.2f})&quot;)
+    overhead = result[&quot;policies&quot;] - result[&quot;no-policies&quot;]
+    print(f&quot;  {path:12} overhead     {overhead:7.2f} ms  ({100 * overhead / result[&#x27;no-policies&#x27;]:.1f} %)&quot;)</code></pre></figure>
+<p>(1) <code>PORTAL = "http://127.0.0.1:30080"</code> sends every request through the NodePort, the same door real students and the attacker use.</p>
+<p>(2) <code class="nw">RUNS = 5</code>, <code class="nw">REQUESTS = 1000</code> and <code class="nw">WARMUP = 50</code> set the size of the test. Each run sends 1,050 requests to each page in each condition and throws away the first 50 of each batch, 21,000 requests in all. Those first 50 are the warm-up. The first requests after a policy change are slower, because connections are being opened and caches filled, and they would make the policies look more expensive than they are.</p>
+<p>(3) <code class="nw">ENDPOINTS</code> names the two pages. <code class="nw">/news</code> goes from frontend to news, a path covered only by address-and-port rules. <code class="nw">/api/grades</code> goes from frontend to api through the L7 rule and Envoy, then from api to auth to check the token and from api to db for the grades. So <code class="nw">/news</code> shows what the L3/L4 rules cost on their own, and <code class="nw">/api/grades</code> adds the L7 rule.</p>
+<p>(4) <code class="nw">set_policies</code> runs <code class="nw">kubectl apply</code> or <code class="nw">kubectl delete</code> on the whole <code class="nw">k8s/policies/</code> folder, then waits 15 seconds so Cilium can update every pod. <code class="nw">check=True</code> makes the script stop if kubectl reports an error.</p>
+<p>(5) <code class="nw">login</code> signs in as sara and returns her token, the same way <code class="nw">check-portal.sh</code> does.</p>
+<p>(6) <code class="nw">measure</code> does the timing. <code class="nw">time.perf_counter()</code> is Python's most precise clock. <code class="nw">answer.raise_for_status()</code> stops the script on any error status, so a failed request is never timed as if it were a fast one. <code class="nw">if i &gt;= WARMUP</code> keeps a time only after the warm-up. <code>statistics.quantiles(times, n=100)</code> cuts the sorted times into 100 equal groups and returns the 99 cut points between them. Python counts list positions from 0, so <code class="nw">cuts[94]</code> is the 95th cut point, the p95, and <code class="nw">cuts[98]</code> is the p99.</p>
+<p>(7) The main loop runs both conditions inside each run, one after the other. If the laptop has a slow minute, it lands on both conditions instead of hurting only one of them.</p>
+<p>(8) The <code class="nw">with open(...)</code> block writes <code class="nw">results/latency.csv</code>, one row per run, condition and page. Five runs times two conditions times two pages gives 20 rows, and with the header the file has 21 lines. The file is written once, at the very end, so a run that stops halfway leaves no new file.</p>
+<p>(9) The last part prints, for each page and condition, the mean of the five run medians with their stdev, then the overhead in milliseconds and in percent.</p>
+<p>(10) <code class="nw">CONDITIONS</code> ends with <code class="nw">"policies"</code>, so the script always finishes with your policies applied.</p>
+<p>CSV, short for comma-separated values, is a plain text table where each line is one row and commas separate the columns. Excel opens it directly.</p>
+<p>Check that the whole file landed on disk. VS Code can show text that isn't saved yet, while the commands below read only what's on disk.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+wc -l measure.py</code></pre></figure>
+<p><code class="nw">wc -l</code> counts the lines in the file.</p>
+<p><strong>You should see</strong> one line.</p>
+<p>It must read <code class="nw">71 measure.py</code>. A smaller number means the paste was cut short or the file wasn't saved. Paste the whole file again, press Ctrl+S and run <code class="nw">wc -l measure.py</code> once more.</p>
+<p>Then check that the file is valid Python.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+.venv/bin/python -m py_compile measure.py &amp;&amp; echo &quot;measure.py compiles&quot;</code></pre></figure>
+<p><code class="nw">-m py_compile</code> reads the file and reports any syntax error without running it. The <code class="nw">&amp;&amp;</code> runs the <code class="nw">echo</code> only if that check passed.</p>
+<p><strong>You should see</strong> one line.</p>
+<p>It must read <code class="nw">measure.py compiles</code>.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>IndentationError: unexpected indent</code></pre></figure>
+<p>Some lines lost or gained spaces during pasting. The message names the line. Open the file in VS Code, delete everything, paste the file again with Ctrl+V and save.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>[Errno 2] No such file or directory: &#x27;measure.py&#x27;</code></pre></figure>
+<p>The file isn't in <code class="nw">~/microseg</code>, or it has a different name. Check the name in VS Code's file list, then run the command again from <code class="nw">~/microseg</code>.</p>
+<h2 id="run-measurepy">Run <code class="nw">measure.py</code></h2>
+<p>The run takes about 10 minutes, 9 minutes 38 seconds on the test laptop. Every program that uses the processor during that time adds noise. Plug the laptop in. Close the Hubble UI tab, the dashboard tab and any other browser windows, and leave the laptop alone until the prompt comes back. The dashboard program itself can keep running in its terminal, because it does nothing unless a page asks it to.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+time .venv/bin/python -u measure.py | tee ~/microseg/evidence/ch14-measure.txt</code></pre></figure>
+<p><code class="nw">time</code> runs the command after it and prints how long it took when it ends. <code class="nw">.venv/bin/python</code> is the Python inside your project's virtual environment, the one that has <code class="nw">requests</code> installed. <code class="nw">-u</code> makes Python print each line the moment it's ready. Without it, Python holds back its own lines whenever its output goes into a pipe, and you'd see only kubectl's lines until the very end. <code>| tee ~/microseg/evidence/ch14-measure.txt</code> shows the output and saves a copy for your report.</p>
+<p><strong>You should see</strong> <code class="nw">kubectl</code> lines saying the ten policies were deleted or created, and between them one line for each run, condition and page. At the end comes a short summary.</p>
+<p>The output above keeps only the measurement lines and the summary, and on your screen they sit between the <code class="nw">kubectl</code> lines. Each measurement line starts with the run number, the condition and the page, followed by four numbers in milliseconds in the order median, p95, p99 and mean. The last six lines are the summary. For each page they give the mean of the five run medians without and with policies, each with its stdev, and then the overhead. On the test laptop, <code class="nw">/news</code> gave 2.66 ms without policies and 2.19 ms with them, and <code class="nw">/api/grades</code> gave 29.08 ms and 32.23 ms. Your numbers will be different, since they depend on your laptop and on what else it was doing. The last thing printed is the <code class="nw">time</code> result, where <code class="nw">real</code> is the time that passed on the clock.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>The run ends after a second with no output. The file on disk is empty or incomplete. Save it in VS Code and check <code class="nw">wc -l measure.py</code> again.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>error: the path &quot;k8s/policies/&quot; does not exist</code></pre></figure>
+<p>You started the script from another folder, so the relative path <code class="nw">k8s/policies/</code> points nowhere. Python then stops with a <code class="nw">CalledProcessError</code>. Run <code class="nw">cd ~/microseg</code> and start the measurement again.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>ModuleNotFoundError: No module named &#x27;requests&#x27;</code></pre></figure>
+<p>You ran the script with <code class="nw">python3</code> instead of <code class="nw">.venv/bin/python</code>. The system Python doesn't have <code class="nw">requests</code>. Use the command exactly as shown.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>requests.exceptions.HTTPError: 403 Client Error: Forbidden for url: http://127.0.0.1:30080/api/grades</code></pre></figure>
+<p>A request failed and the script stopped on purpose. First run <code class="nw">kubectl apply -f k8s/policies/</code>, because the script may have stopped with the policies removed. A 403 on <code class="nw">/api/grades</code> means the L7 rule in your api policy doesn't list <code class="nw">GET /api/grades</code> exactly. A <code class="nw">500 Server Error</code> or a <code class="nw">KeyError: 'token'</code> points at a portal that isn't healthy. Run <code class="nw">bash check-portal.sh</code>, fix whatever it reports with the help of <a href="ch13.html">chapter 13</a>, and run the measurement again.</p>
+<h2 id="the-results-file-row-by-row">The results file, row by row</h2>
+<p>The summary gives you the headline numbers. The CSV holds every run, and it shows you how much the numbers wander from one run to the next.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cat results/latency.csv</code></pre></figure>
+<p><code class="nw">cat</code> prints a file's contents to the screen.</p>
+<p><strong>You should see</strong> a header line and then 20 rows, four for each run.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>condition,endpoint,run,median_ms,p95_ms,p99_ms,mean_ms
+no-policies,/news,1,2.03,3.07,4.69,2.19
+no-policies,/api/grades,1,34.49,161.73,330.42,55.05
+policies,/news,1,2.04,2.79,3.78,2.15
+policies,/api/grades,1,29.9,69.29,202.17,37.44
+no-policies,/news,2,4.41,16.15,33.11,6.2
+no-policies,/api/grades,2,29.04,161.78,325.87,50.4
+policies,/news,2,1.83,2.72,3.72,1.97
+policies,/api/grades,2,31.06,99.76,214.31,42.44
+no-policies,/news,3,2.29,4.44,8.41,2.65
+no-policies,/api/grades,3,26.98,47.75,71.21,30.15
+policies,/news,3,2.3,3.05,4.17,2.4
+policies,/api/grades,3,36.0,115.6,230.79,48.44
+no-policies,/news,4,2.36,3.02,4.1,2.43
+no-policies,/api/grades,4,27.57,33.66,38.38,28.17
+policies,/news,4,2.23,2.69,3.15,2.27
+policies,/api/grades,4,32.51,48.21,74.71,34.76
+no-policies,/news,5,2.23,2.73,3.03,2.28
+no-policies,/api/grades,5,27.32,30.98,34.44,27.67
+policies,/news,5,2.56,3.56,5.77,2.7
+policies,/api/grades,5,31.68,37.55,44.58,32.47</code></pre></figure>
+<p>The columns are the condition, the page, the run number, then median, p95, p99 and mean in milliseconds. Look down the <code class="nw">p95_ms</code> column for <code class="nw">/api/grades</code> without policies. In runs 1 and 2 of the test it was about 161 ms, in run 5 it was 30.98 ms, and nothing in the cluster changed between those runs. The laptop was busy with something else for a while. The medians stayed between about 27 and 36 ms through all of it. That's the reason the script repeats everything five times and reports medians first.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>cat: results/latency.csv: No such file or directory</code></pre></figure>
+<p>The script stopped before its end, and the file is written only after the last run. Scroll up in the previous step's output to find the error, fix it and run the measurement again.</p>
+<h2 id="noise-when-a-difference-is-real">Noise: when a difference is real</h2>
+<p>Two medians are never exactly equal. Before you call a difference a cost, compare it with the noise. This guide uses a deliberately cautious rule of thumb, and it isn't a formal significance test. Take the larger of the two stdev values for that page and double it. When the overhead is smaller than that, report it as within noise.</p>
+<p>Work through it with the test laptop's numbers. For <code class="nw">/api/grades</code> the overhead was 3.15 ms, and the larger of the two stdev values was 3.12 ms. Twice the spread is 6.24 ms, and 3.15 ms is less than that, so the difference is within noise. For <code class="nw">/news</code> the overhead came out negative, minus 0.47 ms, with a spread of 0.98 ms. Policies can't make a request faster, and the negative sign is one more hint that you're looking at noise. On this laptop, then, the policies had no cost that could be measured.</p>
+<p>Do the same with your own numbers, and write it into your results chapter in this shape: "With policies, the median for <code class="nw">/api/grades</code> went from 29.08 ms to 32.23 ms. The run-to-run spread was 3.12 ms, so any difference under about 6.24 ms is within noise. The measured 3.15 ms is well under that, so no latency cost could be measured at this scale." If one of your differences does come out larger than twice its spread, report it as a measured overhead, in milliseconds and in percent.</p>
+<p>Report the p95 too, with a warning about its noise. This command averages the p95 column of the CSV for each condition and page.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>awk -F, &#x27;NR &gt; 1 {sum[$1 &quot; &quot; $2] += $5; n[$1 &quot; &quot; $2]++} END {for (k in sum) printf &quot;%-24s mean p95 %6.2f ms\n&quot;, k, sum[k] / n[k]}&#x27; results/latency.csv | sort</code></pre></figure>
+<p><code class="nw">awk</code> reads a file line by line and runs a small program on each line. <code class="nw">-F,</code> tells it the columns are separated by commas. <code class="nw">NR &gt; 1</code> skips line 1, the header. For every other line, <code class="nw">sum[...] += $5</code> adds column 5, the p95, to a running total for that condition and page, and <code class="nw">n[...]++</code> counts the rows. <code class="nw">END</code> runs once after the last line, and its <code class="nw">printf</code> prints each total divided by its count. <code class="nw">| sort</code> puts the four lines in alphabetical order, since awk prints them in no fixed order.</p>
+<p><strong>You should see</strong> four lines, one per condition and page.</p>
+<p>On the test laptop the p95 was lower with policies for both pages, 74.08 against 87.18 ms for <code class="nw">/api/grades</code>. The two slow runs without policies, which you saw in the CSV, pulled that average up. That's noise too, so report the p95 next to the median and say that its run-to-run spread was larger than the difference.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>awk: cannot open results/latency.csv (No such file or directory)</code></pre></figure>
+<p>You're not in <code class="nw">~/microseg</code>, or the measurement didn't finish. Run <code class="nw">cd ~/microseg</code> and check that the previous step printed the file.</p>
+<h2 id="count-the-policies-and-l7-rules">Count the policies and L7 rules</h2>
+<p>The cost of segmentation also includes the rules someone has to write and maintain. Count them.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus get cnp --no-headers | wc -l</code></pre></figure>
+<p><code class="nw">--no-headers</code> leaves out the NAME, AGE and VALID heading line. <code class="nw">wc -l</code> counts the lines it receives, one per policy.</p>
+<p><strong>You should see</strong> one number.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>10</code></pre></figure>
+<p>It must be <code class="nw">10</code>, three from <code class="nw">1-baseline.yaml</code> and seven from <code class="nw">2-allow.yaml</code>.</p>
+<p>The L7 rules sit in the api policy, and <code class="nw">grep</code> can count them.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>grep -c &quot;method:&quot; k8s/policies/2-allow.yaml</code></pre></figure>
+<p>Every HTTP rule in the api policy has exactly one <code class="nw">method:</code> line, and <code class="nw">grep -c</code> counts the lines that contain the text.</p>
+<p>It must be <code class="nw">3</code>, for <code class="nw">GET /api/grades</code>, <code class="nw">GET /api/profile</code> and <code class="nw">POST /api/login</code>.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>The policy count is <code class="nw">0</code>. Your policies are missing. Either the measurement stopped, from an error or Ctrl+C, during a no-policies phase, or something deleted them afterwards. Apply them with <code class="nw">kubectl apply -f k8s/policies/</code> and count again.</p>
+<p>The L7 count is not <code class="nw">3</code>. Your api policy differs from the one in <a href="ch10.html">chapter 10</a>. Compare the file line by line before you go further, because every result in your thesis depends on it.</p>
+<h2 id="what-to-report-and-where-it-comes-from">What to report, and where it comes from</h2>
+<p>These are the numbers for your results chapter. The latency rows hold your own values.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>Measure</th>
+<th>Flat network</th>
+<th>Segmented</th>
+<th>Where it comes from</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Reachable service paths</td>
+<td>36 of 36</td>
+<td>7 of 36, 80.6% fewer</td>
+<td>dashboard matrix, chapters 7 and 10</td>
+</tr>
+<tr>
+<td>Attack steps that succeeded</td>
+<td>5 of 5</td>
+<td>1 of 5</td>
+<td>chapters 8 and 10</td>
+</tr>
+<tr>
+<td><code class="nw">/api/export</code> from outside</td>
+<td>200 with every grade</td>
+<td>403 <code class="nw">Access denied</code></td>
+<td><a href="ch10.html">chapter 10</a></td>
+</tr>
+<tr>
+<td>Portal checks</td>
+<td><code class="nw">PORTAL: 6/6 OK</code></td>
+<td><code class="nw">PORTAL: 6/6 OK</code></td>
+<td><code class="nw">check-portal.sh</code></td>
+</tr>
+<tr>
+<td>Policy objects</td>
+<td>0</td>
+<td>10, in 2 files, with 3 L7 rules</td>
+<td>this chapter</td>
+</tr>
+<tr>
+<td><code class="nw">Policy denied</code> drops from news after the attack</td>
+<td>none</td>
+<td>your count from <a href="ch11.html">chapter 11</a></td>
+<td><a href="ch11.html">chapter 11</a></td>
+</tr>
+<tr>
+<td>Median latency <code class="nw">/news</code></td>
+<td>your value</td>
+<td>your value</td>
+<td><code class="nw">measure.py</code></td>
+</tr>
+<tr>
+<td>Median latency <code class="nw">/api/grades</code></td>
+<td>your value</td>
+<td>your value</td>
+<td><code class="nw">measure.py</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>The 80.6% comes from (36 minus 7) divided by 36, which is 0.806. Report the reachable paths and the attack steps as your main result. The portal checks prove the policies didn't break the service for real users, and the latency rows show what that protection cost.</p>
+<h2 id="charts-for-figures-9-to-12">Charts for figures 9 to 12</h2>
+<p>Your results chapter needs figures 9 to 12. Draw figures 10, 11 and 12 in Excel on Windows from a few typed numbers, and take figure 9 as two screenshots of your dashboard. If you don't have Excel, LibreOffice Calc, which is free, or Google Sheets have the same Clustered Column chart and custom error bars under similar menu names.</p>
+<figure class="fig"><a href="../files/figures/fig12-en.png"><img src="../files/figures/web/fig12-en.png" alt="Request latency with and without policies" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>Request latency with and without policies</figcaption></figure>
+<p>Figure 12 is the latency chart. Notice that each pair of bars stands almost level and that the error bars of each pair overlap, which is what "within noise" looks like.</p>
+<p>For your latency chart, open a new Excel sheet and type a small table. In A2 type <code class="nw">/news</code> and in A3 <code class="nw">/api/grades</code>. In B1 type <code class="nw">No policies</code> and in C1 <code class="nw">Policies</code>, then type the four medians from your summary under them, each in the row of its page. In D1 type <code class="nw">stdev no policies</code> and in E1 <code class="nw">stdev policies</code>, then type the matching stdev values in D2 to E3.</p>
+<p>Select A1 to C3, open the "Insert" tab, click the column-chart icon in the Charts group and choose "Clustered Column". Look at the legend under the chart. If it lists <code class="nw">/news</code> and <code class="nw">/api/grades</code> instead of <code class="nw">No policies</code> and <code class="nw">Policies</code>, the bars are grouped by condition. Click the chart, then click "Switch Row/Column" on the "Chart Design" tab, so the two pages form the groups and each condition gets its own color.</p>
+<p>Click the chart, click the plus sign beside it and tick "Error Bars". Click the small arrow next to Error Bars and choose "More Options". In the pane that opens, pick one series at a time from the list at its top, choose "Custom" under Error Amount and click "Specify Value". In the Custom Error Bars window, delete everything in the Positive Error Value box, including <code class="nw">={1}</code>, then select D2 to D3 for the <code class="nw">No policies</code> series, or E2 to E3 for the <code class="nw">Policies</code> series. Do the same for the Negative Error Value box and click "OK". Finally, tick "Axis Titles" in the plus-sign list and type <code class="nw">Median latency (ms)</code> into the vertical axis title.</p>
+<figure class="fig"><a href="../files/figures/fig10-en.png"><img src="../files/figures/web/fig10-en.png" alt="Attack steps that succeeded" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>Attack steps that succeeded</figcaption></figure>
+<p>Figure 10 compares attack steps that succeeded, 5 against 1. Notice that the one remaining step is the bug itself, which segmentation was never meant to fix.</p>
+<figure class="fig"><a href="../files/figures/fig11-en.png"><img src="../files/figures/web/fig11-en.png" alt="Reachable service paths" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>Reachable service paths</figcaption></figure>
+<p>Figure 11 compares reachable service paths, 36 against 7.</p>
+<p>For figure 10, type <code class="nw">Flat network</code> in A1 and <code class="nw">Segmented</code> in B1, then <code class="nw">5</code> in A2 and <code class="nw">1</code> in B2. For figure 11 use a new sheet with the same two labels and <code class="nw">36</code> and <code class="nw">7</code> below them. Select A1 to B2 and insert a Clustered Column chart the same way. These two charts need no error bars.</p>
+<p>Figure 9 is the reachability matrix in both modes, and the colored grid already shows it best, so take it as two screenshots of your dashboard's matrix. The "before" picture is the one you took in <a href="ch07.html">chapter 7</a> at 36 of 36. For the "after" picture, open the dashboard now and capture it at 7 of 36. Don't remove the policies for this. <a href="ch14.html">Chapter 14</a>'s capture session recreates the flat network properly if you need a new "before" picture.</p>
+<figure class="fig"><a href="../files/figures/fig09-en.png"><img src="../files/figures/web/fig09-en.png" alt="Reachability matrix before and after" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>Reachability matrix before and after</figcaption></figure>
+<p>In figure 9, notice that every open cell in the segmented matrix is one of the flows in your <a href="ch01.html">chapter 1</a> flow table.</p>
+<p><strong>You should see</strong> in your latency chart two pairs of bars of almost the same height with overlapping error bars, unless one of your differences passed the noise rule.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>Excel shows an error when you close the Custom Error Bars window. The <code class="nw">={1}</code> was still in the box, so your cells were added after it. Open the window again, empty both boxes completely and select the cells once more.</p>
+<p>The numbers you typed sit at the left edge of their cells and the chart stays empty. Excel read them as text because of the decimal separator. Retype them with the decimal separator your Windows uses.</p>
+<h2 id="checkpoint">Checkpoint</h2>
+<p><strong>Checkpoint.</strong> Run this and compare.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>wc -l results/latency.csv</code></pre></figure>
+<p>The output must be exactly <code class="nw">21 results/latency.csv</code>, the header plus 20 rows. If you ran the measurement more than once, check that <code class="nw">evidence/ch14-measure.txt</code> ends with the summary, the six lines under <code class="nw">Mean of the run medians:</code>. <code class="nw">tee</code> rewrites that file on every run, and the <code class="nw">time</code> result and any error go only to the screen, never into the file. If the summary is missing, that run stopped early and <code class="nw">results/latency.csv</code> is still from an older run, so run the measurement again before you trust it.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>21 results/latency.csv</code></pre></figure>
+<p>Save your work. The <code class="nw">results/</code> folder is listed in <code class="nw">.gitignore</code>, so Git skips it, and the first line copies the CSV into <code class="nw">evidence/</code>, which Git keeps.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+cp results/latency.csv evidence/latency.csv
+git add -A &amp;&amp; git commit -m &quot;ch12: latency measurement&quot;</code></pre></figure>
+<p>The first line starts with <code class="nw">[main</code>. Below the count of changed files, three <code class="nw">create mode</code> lines name <code class="nw">evidence/ch14-measure.txt</code>, <code class="nw">evidence/latency.csv</code> and <code class="nw">measure.py</code>.</p>
+<!-- OUT ids: ch14-lines, ch14-compile, ch14-measure, ch14-csv, ch14-p95, ch14-policy-count, ch14-l7-rules, ch14-csv-lines, ch14-commit --><nav class="pager" aria-label="Chapters"><a rel="prev" href="ch11.html"><span>Previous chapter</span>Chapter 11. Read the evidence in Hubble</a><a rel="next" href="ch13.html"><span>Next chapter</span>Chapter 13. Getting unstuck alone</a></nav></main></div>
+<footer class="foot"><div class="foot-in"><p>Kubernetes 1.36, Cilium 1.20.5 and kind 0.33.0 on Windows 11 with WSL 2. Every command was run on a real laptop in November 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">Source on GitHub</a></p></div></footer>
+<p class="vh" aria-live="polite" id="live"></p>
+<script type="application/json" id="i18n">{"copied": "Copied", "copyFail": "Press Ctrl+C to copy the selected text", "doneOf": "{d} of {t} steps done", "next": "Next step: {s}", "allDone": "All {t} steps done.", "sumCount": "{d} of {t} done", "cleared": "All ticks cleared.", "confirm": "Clear every tick on this page? Your files and your cluster stay as they are.", "stageCount": "{d} of {t}"}</script>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

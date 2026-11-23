@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
+<title>الفصل 2. قبل أن نبدأ | مختبر التجزئة الدقيقة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;700&family=Public+Sans:wght@400;600;700&family=Noto+Sans+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="en" href="../../guide/ch02.html">
+
+</head>
+<body class="">
+<a class="skip" href="#main">الانتقال إلى المحتوى</a>
+<header class="top"><div class="top-in">
+<a class="brand" href="../../ar/index.html">مختبر التجزئة الدقيقة</a>
+<nav aria-label="مختبر التجزئة الدقيقة"><ul>
+<li><a href="../../ar/index.html">المسار السريع</a></li>
+<li><a href="../../ar/guide/index.html" aria-current="page">الدليل الكامل</a></li>
+<li><a href="../../ar/downloads.html">التنزيلات</a></li>
+<li><a href="../../guide/ch02.html" lang="en" hreflang="en" data-setlang="en">English</a></li>
+</ul></nav>
+</div></header>
+<div class="layout"><details class="rail" open><summary>الفصول</summary><nav aria-label="الفصول"><ol class="toc"><li><a href="ch00.html">0. كيف نستخدم هذا الدليل</a></li><li><a href="ch01.html">1. ما الذي سنبنيه</a></li><li><a href="ch02.html" aria-current="page">2. قبل أن نبدأ</a><ol class="sub"><li><a href="#الخطوة-1-نتأكد-من-أن-المحاكاة-الافتراضية-مفعلة">الخطوة 1. نتأكد من أن المحاكاة الافتراضية مفعّلة</a></li><li><a href="#الخطوة-2-نحدث-wsl">الخطوة 2. نحدّث WSL</a></li><li><a href="#الخطوة-3-نثبت-ubuntu-2404-وننشئ-مستخدم-linux">الخطوة 3. نثبّت Ubuntu 24.04 وننشئ مستخدم Linux</a></li><li><a href="#الخطوة-4-نفتح-طرفية-ubuntu">الخطوة 4. نفتح طرفية Ubuntu</a></li><li><a href="#الخطوة-5-نتحقق-من-أن-ubuntu-يعمل-تحت-wsl-2">الخطوة 5. نتحقق من أن Ubuntu يعمل تحت WSL 2</a></li><li><a href="#الخطوة-6-نثبت-vs-code-ونفتح-فيه-مجلد-المشروع">الخطوة 6. نثبّت VS Code ونفتح فيه مجلد المشروع</a></li><li><a href="#الخطوة-7-ننقل-ملفا-من-windows-إلى-ubuntu">الخطوة 7. ننقل ملفاً من Windows إلى Ubuntu</a></li><li><a href="#الخطوة-8-نهايات-الأسطر-واللصق-الآمن">الخطوة 8. نهايات الأسطر واللصق الآمن</a></li><li><a href="#الخطوة-9-نضبط-git-وننشئ-المستودع">الخطوة 9. نضبط Git وننشئ المستودع</a></li><li><a href="#الخطوة-10-نحفظ-اللقطة-الأولى">الخطوة 10. نحفظ اللقطة الأولى</a></li><li><a href="#الخطوة-11-نرى-تغييرا-ثم-نتراجع-عنه">الخطوة 11. نرى تغييراً ثم نتراجع عنه</a></li><li><a href="#الخطوة-12-ننسخ-المشروع-احتياطيا-إلى-windows">الخطوة 12. ننسخ المشروع احتياطياً إلى Windows</a></li><li><a href="#نقطة-التحقق">نقطة التحقق</a></li></ol></li><li><a href="ch03.html">3. تجهيز بيئة العمل</a></li><li><a href="ch04.html">4. إنشاء العنقود</a></li><li><a href="ch05.html">5. كتابة الخدمات</a></li><li><a href="ch06.html">6. نشر البوابة</a></li><li><a href="ch07.html">7. بناء لوحة التحكم</a></li><li><a href="ch08.html">8. مهاجمة الشبكة المسطحة</a></li><li><a href="ch09.html">9. تصميم السياسة</a></li><li><a href="ch10.html">10. تطبيق التجزئة الدقيقة للشبكة</a></li><li><a href="ch11.html">11. قراءة الأدلة في Hubble</a></li><li><a href="ch12.html">12. القياس</a></li><li><a href="ch13.html">13. تجاوز الأعطال دون مساعدة</a></li><li><a href="ch14.html">14. أدلة بحث التخرج</a></li><li><a href="ch15.html">15. خطة العمل يوماً بيوم</a></li><li><a href="appendix.html">الملاحق</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="الفصل-2-قبل-أن-نبدأ">الفصل 2. قبل أن نبدأ</h1>
+<p>لا يعمل شيء من المختبر على Windows وحده، لذلك نشغّل في هذا الفصل Ubuntu 24.04 داخل WSL 2، ومعه VS Code لتحرير الملفات داخله، وGit لحفظ اللقطات. في نهاية الفصل سيكون لدينا مجلد للمشروع، <code class="nw">~/microseg</code>، فيه ملف صغير واحد نسخناه من Windows، ومعه أول لقطة محفوظة في Git ونسخة احتياطية على جانب Windows. نخصص للفصل من ساعة ونصف إلى ساعتين، ومن ضمنها إعادة تشغيل واحدة لـWindows.</p>
+<h2 id="الخطوة-1-نتأكد-من-أن-المحاكاة-الافتراضية-مفعلة">الخطوة 1. نتأكد من أن المحاكاة الافتراضية مفعّلة</h2>
+<p>يشغّل WSL 2 نظام Linux داخل آلة افتراضية (virtual machine) خفيفة، والآلة الافتراضية تحتاج إلى ميزة في المعالج اسمها المحاكاة الافتراضية، وهي تسمح لحاسوب واحد بأن يتصرف كأنه عدة حواسيب. وكثير من الحواسيب المحمولة تأتي من المصنع وهذه الميزة معطّلة في البرنامج الثابت، وهو البرنامج الصغير الذي يشغّل الحاسوب قبل أن يبدأ Windows. نتحقق منها أولاً، لأن التثبيت الذي يفشل في منتصفه نادراً ما يخبرنا بالسبب.</p>
+<ol>
+<li>نضغط Ctrl+Shift+Esc لفتح مدير المهام (Task Manager).</li>
+<li>إذا كانت النافذة صغيرة ولا تعرض إلا قائمة بالتطبيقات، ننقر More details في أسفلها.</li>
+<li>ننقر صفحة Performance في العمود الأيسر (أيقونتها تشبه خط نبضات القلب)، ثم ننقر CPU.</li>
+<li>نبحث تحت الرسم البياني عن السطر الذي يبدأ بـ<code class="nw">Virtualization:</code>.</li>
+</ol>
+<p><strong>ما يجب أن نراه</strong> هو <code class="nw">Virtualization: Enabled</code>. نغلق مدير المهام وننتقل إلى الخطوة 2.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<p>إذا كان السطر <code class="nw">Virtualization: Disabled</code> فالميزة موجودة لكنها معطّلة في البرنامج الثابت، ولا بد من تفعيلها هناك. نحفظ عملنا ونغلق كل البرامج، لأن الخطوات التالية تعيد تشغيل الحاسوب. وإذا كان الحاسوب يستخدم BitLocker أو تشفير الجهاز، نفتح <code class="nw">aka.ms/myrecoverykey</code> على الهاتف أولاً ونُبقي مفتاح الاسترداد في متناول اليد، لأن بعض الحواسيب تطلبه بعد تغيير إعدادات البرنامج الثابت.</p>
+<ol>
+<li>نفتح Settings، ثم System، ثم Recovery.</li>
+<li>بجانب «Advanced startup» ننقر Restart now ونؤكد.</li>
+<li>في الشاشة الزرقاء التي تظهر نختار Troubleshoot، ثم Advanced options، ثم UEFI Firmware Settings، ثم Restart. إذا لم يكن هناك مربع باسم UEFI Firmware Settings، نطفئ الحاسوب، ثم نضغط زر التشغيل ونكرر الضغط على F2 أو Del أو Esc (أو F10 في حواسيب HP) حتى تظهر شاشة البرنامج الثابت.</li>
+<li>يُعاد تشغيل الحاسوب إلى إعدادات البرنامج الثابت، وشكلها يختلف من شركة إلى أخرى. نبحث عن إعداد اسمه Intel Virtualization Technology أو Intel VT-x أو SVM Mode أو AMD-V، ويكون عادة في صفحة اسمها Advanced أو CPU Configuration أو Security.</li>
+<li>نضبطه على Enabled، ثم نحفظ ونخرج، وغالباً يكون ذلك بالمفتاح F10.</li>
+</ol>
+<p>بعد عودة Windows نفحص مدير المهام مرة أخرى، ونتابع حين يظهر <code class="nw">Enabled</code>.</p>
+<p>إذا لم نجد الإعداد في أي مكان من البرنامج الثابت، نبحث في الويب عن طراز الحاسوب بالضبط متبوعاً بعبارة «enable virtualization BIOS». بعض الحواسيب تخفي هذا الخيار إلى أن نضغط مفتاحاً مثل F7 للانتقال إلى الوضع المتقدم.</p>
+<h2 id="الخطوة-2-نحدث-wsl">الخطوة 2. نحدّث WSL</h2>
+<p>نسخة WSL التي تأتي مع Windows تكون عادة أقدم من أن تناسب هذا المختبر، لذلك نحدّثها أولاً. اختُبر الدليل على WSL 3.0.5.</p>
+<p>يُدار WSL من PowerShell يعمل بصلاحيات المسؤول، وهي مستوى الحساب في Windows الذي يحق له تغيير إعدادات النظام. نضغط مفتاح Windows ونكتب <code class="nw">powershell</code>، ثم ننقر بالزر الأيمن على Windows PowerShell ونختار Run as administrator. وحين يسأل Windows هل نسمح للتطبيق بإجراء تغييرات، ننقر Yes. يبدأ عنوان النافذة الجديدة بـ<code class="nw">Administrator:</code>. ثم نشغّل التحديث.</p>
+<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>wsl --update</code></pre></figure>
+<p>البرنامج <code class="nw">wsl</code> هو برنامج Windows الذي يدير WSL، والخيار <code class="nw">--update</code> يطلب منه تنزيل أحدث إصدار وتثبيته. يطبع الأمر بضعة أسطر عن البحث عن التحديث وتثبيته، وتختلف هذه الأسطر بحسب الإصدار الذي بدأنا منه، لذلك لم ننقلها هنا. السطر الأخير إما يذكر الإصدار الذي ثبّته، وإما يقول إن أحدث إصدار مثبّت أصلاً. والحالتان كلتاهما سليمتان.</p>
+<p>ثم نسأل WSL عن إصداره.</p>
+<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>wsl --version</code></pre></figure>
+<p>الخيار <code class="nw">--version</code> يطبع إصدار WSL وإصدار نواة Linux التي يشغّلها.</p>
+<p><strong>ما يجب أن نراه</strong> قائمة قصيرة بالإصدارات، مثل هذه القائمة من الحاسوب الذي اختُبر عليه الدليل.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>WSL version: 3.0.5.0
+Kernel version: 6.18.58.1-1
+WSLg version: 1.0.79
+MSRDC version: 1.2.7391
+Direct3D version: 1.611.1-81528511
+DXCore version: 10.0.26100.1-240331-1435.ge-release
+Windows version: 10.0.26200.9974</code></pre></figure>
+<p>يجب أن يكون السطر الأول <code class="nw">WSL version: 3.0.5.0</code> أو رقماً أعلى، وأن يكون السطر الثاني <code class="nw">Kernel version: 6.18</code> تتبعه أرقام أخرى، أو إصداراً أعلى. أما بقية الأسطر فستختلف على حاسوبنا.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>Invalid command line option: --version</code></pre></figure>
+<p>إذا تبع هذه الرسالةَ نصُّ مساعدة طويل، فمعنى ذلك أن WSL القديم الذي جاء مع Windows ما زال هو الذي يعمل. نشغّل <code class="nw">wsl --update</code> مرة أخرى في نافذة المسؤول، ثم نعيد تشغيل Windows ونجرّب <code class="nw">wsl --version</code> من جديد.</p>
+<p>إذا توقف التحديث مع رمز خطأ، أو بقي عند 0% أكثر من عشر دقائق، فالسبب غالباً أن الشبكة تحجب Microsoft Store، وهو المصدر الذي ينزّل منه WSL تحديثاته افتراضياً. نضغط Ctrl+C ونشغّل <code class="nw">wsl --update --web-download</code>، الذي يجلب التحديث نفسه من GitHub.</p>
+<p>إذا أظهر السطر الأول إصداراً أقل من <code class="nw">3.0.5.0</code>، مع أن <code class="nw">wsl --update</code> قال إن أحدث إصدار مثبّت أصلاً، نشغّل <code class="nw">wsl --update --web-download</code> في نافذة المسؤول، ثم نعيد تشغيل Windows ونتحقق مرة أخرى.</p>
+<h2 id="الخطوة-3-نثبت-ubuntu-2404-وننشئ-مستخدم-linux">الخطوة 3. نثبّت Ubuntu 24.04 وننشئ مستخدم Linux</h2>
+<p>يستطيع WSL أن يحمل عدة أنظمة Linux جنباً إلى جنب، وكل واحد منها يسمّى توزيعة، أو distro اختصاراً. وUbuntu توزيعة واحدة لها عدة إصدارات. نثبّت الإصدار نفسه الذي اختُبر عليه الدليل، Ubuntu 24.04، باسم <code class="nw">Ubuntu-24.04</code>. وأثناء التثبيت يطلب Ubuntu إنشاء مستخدم Linux، وهو الحساب الذي نعمل به داخل Ubuntu. وهذا الحساب منفصل عن حساب Windows.</p>
+<p>نختار اسم المستخدم قبل أن نبدأ. يجب أن يتكون من أحرف لاتينية صغيرة وأرقام فقط، وأن يبدأ بحرف، وألا يحتوي على مسافات، مثل <code class="nw">sara</code>. ثم نختار كلمة مرور نتذكرها. سنكتبها كثيراً، لأن Ubuntu يطلبها كلما شغّلنا أمراً مع <code class="nw">sudo</code>، وهو الذي يشغّل ذلك الأمر وحده بصلاحيات المسؤول. وكلما كتب الدليل <code class="nw">&lt;user&gt;</code> فالمقصود اسم مستخدم Linux هذا.</p>
+<p>في نافذة PowerShell نفسها، نافذة المسؤول، نشغّل التثبيت.</p>
+<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>wsl --install -d Ubuntu-24.04</code></pre></figure>
+<p>الخيار <code class="nw">--install</code> يثبّت أجزاء WSL إن كانت ناقصة ثم يثبّت توزيعة، والجزء <code class="nw">-d Ubuntu-24.04</code> يحدد التوزيعة المطلوبة. حجم التنزيل بضع مئات من الميغابايتات، فنمنحه بضع دقائق.</p>
+<p>حين يسأل عن اسم المستخدم نكتب الاسم الذي اخترناه ونضغط Enter. وحين يسأل عن كلمة مرور جديدة نكتبها ونضغط Enter، ثم نكتبها مرة أخرى حين يطلب إعادة كتابتها. لا يظهر شيء على الشاشة أثناء كتابة كلمة المرور، ولا حتى نقاط. هذا طبيعي في Linux. ما نكتبه يصل رغم ذلك، لذلك نكتبها دون أن نراها ونضغط Enter.</p>
+<p><strong>ما يجب أن نراه</strong> تقدّم التثبيت، ثم سؤالا اسم المستخدم وكلمة المرور، وفي النهاية موجّه الأوامر (prompt) في Ubuntu.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>Downloading: Ubuntu 24.04 LTS
+Installing: Ubuntu 24.04 LTS
+Distribution successfully installed. It can be launched via &#x27;wsl.exe -d Ubuntu-24.04&#x27;
+student@laptop:~$</code></pre></figure>
+<p>السطر الأخير هو موجّه أوامر Ubuntu. يبدأ باسم مستخدم Linux، ثم <code class="nw">@</code> واسم الحاسوب، وينتهي بـ<code class="nw">$</code>. ستختلف الأسماء عندنا عن أسماء حاسوب الاختبار.</p>
+<p>في الحواسيب التي لم يُثبَّت عليها WSL قط، قد ينتهي التثبيت بهذه الرسالة بدلاً من ذلك، لأن Windows يحتاج أولاً إلى تفعيل ميزة الآلة الافتراضية فيه.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>The requested operation is successful. Changes will not be effective until the system is rebooted.</code></pre></figure>
+<p>نعيد تشغيل Windows. إذا فُتحت نافذة Ubuntu تلقائياً بعد إعادة التشغيل وسألت عن اسم المستخدم، نجيب فيها. وإلا فنفتح PowerShell بصلاحيات المسؤول مرة أخرى ونشغّل <code class="nw">wsl --install -d Ubuntu-24.04</code> مرة ثانية، وفي هذه المرة يثبّت Ubuntu ويسأل عن اسم المستخدم.</p>
+<p>حين يظهر موجّه أوامر Ubuntu نكتب <code class="nw">exit</code> ونضغط Enter للعودة إلى PowerShell، ثم نغلق نافذة المسؤول. لن نحتاج إلى صلاحيات المسؤول مرة أخرى في هذا الفصل.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>Please enable the Virtual Machine Platform Windows feature and ensure virtualization is enabled in the BIOS.</code></pre></figure>
+<p>بحسب إصدار WSL، قد تحمل الرسالة أيضاً رمز خطأ فيه <code class="nw">0x80370102</code> أو <code class="nw">HCS_E_HYPERV_NOT_INSTALLED</code>. السبب أن Windows لا يستطيع تشغيل الآلة الافتراضية، إما لأن المحاكاة الافتراضية معطّلة في البرنامج الثابت، وإما لأن جزء Virtual Machine Platform في Windows غير موجود. نفحص مدير المهام مرة أخرى كما في الخطوة 1. وإذا ظهر <code class="nw">Enabled</code>، نشغّل <code>wsl --install --no-distribution</code> في PowerShell بصلاحيات المسؤول، ثم نعيد تشغيل Windows ونشغّل <code class="nw">wsl --install -d Ubuntu-24.04</code> من جديد.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>Sorry, passwords do not match.
+passwd: Authentication token manipulation error
+passwd: password unchanged
+Try again? [y/N]</code></pre></figure>
+<p>كلمتا المرور اللتان كُتبتا لم تكونا متطابقتين، وهذه زلّة شائعة حين لا نرى ما نكتب. نكتب <code class="nw">y</code> ونضغط Enter، ثم نكتب كلمة المرور مرتين من جديد، ببطء.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>A distribution with the supplied name already exists.</code></pre></figure>
+<p>التوزيعة Ubuntu 24.04 موجودة أصلاً على هذا الحاسوب من محاولة سابقة. وإصدارات WSL الأقدم تقول الشيء نفسه بصيغة أخرى، هي أن التوزيعة مثبّتة أصلاً. إذا كنا نتذكر كلمة مرور ذلك المستخدم، نُبقي على نسخة Ubuntu هذه وننتقل إلى الخطوة 4. وإذا نسينا اسم المستخدم أيضاً، نشغّل <code>wsl -d Ubuntu-24.04 -u root ls /home</code> في PowerShell، فيكون المجلد الذي يطبعه هو الاسم. ولتعيين كلمة مرور جديدة نشغّل <code>wsl -d Ubuntu-24.04 -u root passwd &lt;user&gt;</code> بعد وضع ذلك الاسم مكان <code class="nw">&lt;user&gt;</code>. أما الخطأ <code>The '&lt;' operator is reserved for future use.</code> فمعناه أن <code class="nw">&lt;user&gt;</code> بقي في الأمر كما هو. وللبدء من الصفر تماماً نشغّل <code class="nw">wsl --unregister Ubuntu-24.04</code>، الذي يحذف نسخة Ubuntu هذه وكل ملف فيها، ثم نثبّت من جديد.</p>
+<h2 id="الخطوة-4-نفتح-طرفية-ubuntu">الخطوة 4. نفتح طرفية Ubuntu</h2>
+<p>من الآن فصاعداً نفتح Ubuntu في نافذة الطرفية (terminal) الخاصة به. نضغط مفتاح Windows ونكتب <code class="nw">ubuntu</code>، ثم ننقر النتيجة التي في اسمها 24.04. إذا لم تظهر هذه النتيجة، نفتح نافذة PowerShell عادية ونشغّل <code class="nw">wsl -d Ubuntu-24.04 --cd ~</code> بدلاً من ذلك، فيبدأ Ubuntu نفسه في مجلد المنزل (home folder) الخاص بنا في Linux. نترك نافذة Ubuntu هذه مفتوحة إلى أن تطلب الخطوة 6 إغلاقها.</p>
+<p>نتحقق من الإصدار الذي نعمل فيه، وهل Git، برنامج اللقطات، مثبّت مسبقاً.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>grep PRETTY_NAME /etc/os-release
+git --version</code></pre></figure>
+<p>الملف <code class="nw">/etc/os-release</code> هو الملف الذي يصف فيه Ubuntu نفسه، والأمر <code class="nw">grep PRETTY_NAME</code> يطبع منه السطر الذي فيه اسم الإصدار فقط. أما <code class="nw">git --version</code> فيطبع إصدار Git إن كان موجوداً.</p>
+<p><strong>ما يجب أن نراه</strong> سطران.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>PRETTY_NAME=&quot;Ubuntu 24.04.5 LTS&quot;
+git version 2.43.0</code></pre></figure>
+<p>يجب أن يذكر السطر الأول Ubuntu 24.04. اختُبر الدليل على 24.04.5 LTS. ويبدأ السطر الثاني بـ<code class="nw">git version 2.</code>، وأي إصدار رقمه يبدأ بـ2 يصلح.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>Command &#x27;git&#x27; not found, but can be installed with:
+sudo apt install git</code></pre></figure>
+<p>السبب أن نسخة Ubuntu هذه جاءت من دون Git. نثبّته بـapt، مدير الحزم في Ubuntu، الذي ينزّل البرامج من خوادم Ubuntu نفسها ويثبّتها. نشغّل <code>sudo apt update &amp;&amp; sudo apt install -y git</code>، ونكتب كلمة مرور Linux حين يعرض Ubuntu <code>[sudo] password for &lt;user&gt;:</code>. لا يظهر شيء أثناء الكتابة. ثم نشغّل <code class="nw">git --version</code> مرة أخرى.</p>
+<p>إذا ذكر السطر الأول إصداراً مختلفاً، مثل 22.04، فهذه النافذة تخص توزيعة أخرى. نغلقها، ثم نفتح التوزيعة التي في اسمها 24.04، أو نستخدم الأمر <code class="nw">wsl -d Ubuntu-24.04 --cd ~</code> المذكور أعلاه.</p>
+<h2 id="الخطوة-5-نتحقق-من-أن-ubuntu-يعمل-تحت-wsl-2">الخطوة 5. نتحقق من أن Ubuntu يعمل تحت WSL 2</h2>
+<p>يستطيع WSL تشغيل التوزيعة بطريقتين. الإصدار 1 يترجم طلبات Linux إلى طلبات Windows، وليست فيه نواة Linux حقيقية، لذلك لا يعمل عليه Docker ولا Cilium. أما الإصدار 2 فيشغّل النواة الحقيقية. والمختبر يحتاج إلى الإصدار 2.</p>
+<p>مع إبقاء نافذة Ubuntu مفتوحة، نفتح نافذة PowerShell عادية، لا بصلاحيات المسؤول، ونعرض قائمة التوزيعات.</p>
+<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>wsl -l -v</code></pre></figure>
+<p>الخيار <code class="nw">-l</code> يعرض التوزيعات المثبّتة، والخيار <code class="nw">-v</code> يضيف لكل منها حالتها وإصدار WSL الذي تعمل عليه.</p>
+<p><strong>ما يجب أن نراه</strong> جدول صغير.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>  NAME              STATE           VERSION
+* Ubuntu-24.04      Running         2</code></pre></figure>
+<p>يجب أن يحمل صف <code class="nw">Ubuntu-24.04</code> القيمة <code class="nw">Running</code> في عمود STATE والقيمة <code class="nw">2</code> في عمود VERSION. وينبغي أيضاً أن تسبقه العلامة <code class="nw">*</code>، وهي تحدد التوزيعة التي يفتحها WSL حين لا نسمّي توزيعة بعينها. وقد تظهر صفوف أخرى إذا كنا ثبّتنا سابقاً توزيعات أخرى أو Docker Desktop. نتركها كما هي ولا ننظر إلا إلى صف Ubuntu-24.04.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<p>إذا أظهر عمود VERSION القيمة <code class="nw">1</code> لـUbuntu-24.04، نحوّل التوزيعة بالأمر <code>wsl --set-version Ubuntu-24.04 2</code>، الذي يستغرق بضع دقائق، ثم نعرض القائمة مرة أخرى.</p>
+<p>إذا كانت العلامة <code class="nw">*</code> أمام توزيعة أخرى، نشغّل <code class="nw">wsl --set-default Ubuntu-24.04</code> ونعرض القائمة مرة أخرى.</p>
+<p>إذا أظهر عمود STATE القيمة <code class="nw">Stopped</code>، فالسبب أن نافذة Ubuntu أُغلقت، وWSL يوقف التوزيعة بعد وقت قصير من إغلاق آخر نافذة لها. نفتح Ubuntu مرة أخرى كما في الخطوة 4 ونشغّل <code class="nw">wsl -l -v</code> من جديد.</p>
+<h2 id="الخطوة-6-نثبت-vs-code-ونفتح-فيه-مجلد-المشروع">الخطوة 6. نثبّت VS Code ونفتح فيه مجلد المشروع</h2>
+<p>سنكتب كل ملفات المشروع ونلصقها في VS Code (Visual Studio Code)، وهو محرر شيفرة مجاني من Microsoft. يعمل VS Code على Windows، لكن إضافة WSL الخاصة به تسمح له بفتح مجلدات موجودة داخل Ubuntu وحفظ الملفات فيها مباشرة، بنهايات أسطر Linux. والإضافة ملحق صغير يمنح VS Code قدرة جديدة.</p>
+<ol>
+<li>نفتح <code class="nw">https://code.visualstudio.com</code> في متصفح Windows، وننقر زر التنزيل الخاص بـWindows.</li>
+<li>نشغّل برنامج التثبيت ونقبل الخيارات الافتراضية. في الصفحة المسمّاة «Select Additional Tasks» نتأكد من أن الخيار Add to PATH محدَّد، لأنه هو الذي يسمح بتشغيل VS Code من طرفية Ubuntu.</li>
+<li>حين ينتهي التثبيت نفتح VS Code.</li>
+<li>نضغط Ctrl+Shift+X لفتح عرض Extensions، ونكتب <code class="nw">WSL</code> في مربع البحث، ثم ننقر Install على الإضافة المسمّاة WSL التي تنشرها Microsoft.</li>
+<li>نغلق VS Code.</li>
+</ol>
+<p>يعرف Ubuntu أماكن برامج Windows حين تبدأ طرفيته، ونافذة Ubuntu المفتوحة لدينا بدأت قبل تثبيت VS Code. لذلك نغلق كل نوافذ الطرفية المفتوحة، نوافذ Ubuntu وPowerShell معاً. ثم نفتح Ubuntu مرة أخرى من قائمة Start.</p>
+<p>كل ما نبنيه يقع في مجلد واحد، <code class="nw">~/microseg</code>، داخل مجلد المنزل في Linux. في طرفية Ubuntu ننشئ المجلد، وندخل إليه، ونطبع موقعنا الحالي، ثم نفتحه في VS Code.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>mkdir -p ~/microseg
+cd ~/microseg
+pwd
+code .</code></pre></figure>
+<p>الأمر <code class="nw">mkdir -p ~/microseg</code> ينشئ المجلد، والخيار <code class="nw">-p</code> يجعله لا يعترض إذا كان المجلد موجوداً. والأمر <code class="nw">cd ~/microseg</code> ينقلنا إلى داخله، فتعمل الأوامر التي بعده داخل ذلك المجلد. ويطبع <code class="nw">pwd</code> المسار الكامل للمجلد الذي نحن فيه. أما <code class="nw">code</code> فيشغّل VS Code، والنقطة <code class="nw">.</code> تعني المجلد الحالي. وفي أول مرة نشغّل فيها <code class="nw">code</code> يثبّت VS Code برنامجاً مساعداً صغيراً داخل Ubuntu اسمه VS Code Server، وهو الذي يسمح لنافذة Windows بالعمل على ملفات Linux.</p>
+<p><strong>ما يجب أن نراه</strong> مسار المجلد، ثم بضعة أسطر عن تثبيت VS Code Server في المرة الأولى.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>/home/student/microseg
+Installing VS Code Server for Linux x64 (2c33b50b16c472efe58357d1d2a8a5414bc23fbf)
+Downloading: 100%
+Unpacking: 100%
+Unpacked 4322 files and folders to /home/student/.vscode-server/bin/2c33b50b16c472efe58357d1d2a8a5414bc23fbf.
+Looking for compatibility check script at /home/student/.vscode-server/bin/2c33b50b16c472efe58357d1d2a8a5414bc23fbf/bin/helpers/check-requirements.sh
+Running compatibility check script
+Compatibility check successful (0)
+[1120/012638.286:ERROR:third_party\crashpad\crashpad\util\win\registration_protocol_win.cc:108] CreateFile: The system cannot find the file specified. (0x2)</code></pre></figure>
+<p>يجب أن يكون السطر الأول <code class="nw">/home/&lt;user&gt;/microseg</code> وفيه اسم مستخدم Linux الخاص بنا. وقد ينتهي الناتج بسطر فيه <code class="nw">ERROR:third_party\crashpad</code> و<code>CreateFile: The system cannot find the file specified. (0x2)</code>. هذا السطر يأتي من أداة الإبلاغ عن الأعطال في VS Code على Windows، ولا ضرر منه، فنتجاهله. في المرات اللاحقة لا يطبع <code class="nw">code .</code> شيئاً. وينتهي موجّه الأوامر الآن بـ<code class="nw">~/microseg$</code>، وهذا يدلّنا أيضاً على مكاننا.</p>
+<p>تُفتح نافذة VS Code. ينتهي شريط العنوان فيها بـ<code class="nw">[WSL: Ubuntu-24.04]</code>، ويظهر في الزاوية السفلية اليسرى <code class="nw">WSL: Ubuntu-24.04</code> على رقعة ملوّنة. إذا سأل VS Code «Do you trust the authors of the files in this folder?»، ننقر Yes, I trust the authors، فنحن مؤلفو هذه الملفات. ويعرض جزء Explorer على اليسار المجلد <code class="nw">MICROSEG</code>، وهو ما زال فارغاً.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>Command &#x27;code&#x27; not found, but can be installed with:
+sudo snap install code</code></pre></figure>
+<p>الرسالة الأقصر <code class="nw">code: command not found</code> تعني الشيء نفسه. لا نشغّل أمر <code class="nw">snap</code> الذي تقترحه الرسالة، لأنه يثبّت نسخة ثانية من VS Code خاصة بـLinux. السبب أن Ubuntu لا يعرف بعد بوجود VS Code المثبّت على Windows. نغلق كل نوافذ الطرفية، Ubuntu وPowerShell معاً، ثم نفتح Ubuntu مرة أخرى ونشغّل <code class="nw">cd ~/microseg</code> ثم <code class="nw">code .</code> من جديد. وإذا استمر الفشل، نشغّل برنامج تثبيت VS Code مرة أخرى ونتأكد من أن Add to PATH محدَّد.</p>
+<p>إذا فُتح VS Code لكن شريط العنوان لا يعرض <code class="nw">[WSL: Ubuntu-24.04]</code> والزاوية السفلية اليسرى خالية من رقعة WSL، فإضافة WSL غير مثبّتة. عندها يفتح VS Code المجلد من جانب Windows، فيكتب نهايات أسطر Windows. نغلق تلك النافذة، ونثبّت إضافة WSL كما في البند 4 أعلاه، ثم نشغّل <code class="nw">code .</code> مرة أخرى من طرفية Ubuntu.</p>
+<h2 id="الخطوة-7-ننقل-ملفا-من-windows-إلى-ubuntu">الخطوة 7. ننقل ملفاً من Windows إلى Ubuntu</h2>
+<p>عاجلاً أو آجلاً سيكون لدينا ملف على Windows مكانه في المشروع، جاء من تنزيل أو من بريد إلكتروني. يظهر القرص <code class="nw">C:</code> الخاص بـWindows داخل Ubuntu على شكل المجلد <code class="nw">/mnt/c</code>. وهذا ما يسمّى نقطة الربط، أي مكان يظهر فيه نظام ملفات داخل نظام ملفات آخر. لذلك يكون مجلد Downloads في Windows هو <code>/mnt/c/Users/&lt;WinUser&gt;/Downloads</code> داخل Ubuntu، و<code class="nw">&lt;WinUser&gt;</code> هو اسم مجلد مستخدم Windows الخاص بنا.</p>
+<p>هذا الاسم ليس دائماً اسم العرض الذي نعرفه. فأحياناً يختصره Windows، مثلاً إلى أول خمسة أحرف من عنوان البريد الإلكتروني. نعرض مجلدات المستخدمين لنجد مجلدنا.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>ls /mnt/c/Users/</code></pre></figure>
+<p>الأمر <code class="nw">ls</code> يعرض محتويات مجلد. ويطبع أسماء المجلدات على سطر واحد أو أكثر.</p>
+<p><strong>ما يجب أن نراه</strong> بضعة أسماء، واسمنا بينها.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code> ASUS  &#x27;All Users&#x27;   CodexSandboxOffline   Default  &#x27;Default User&#x27;   Public   WsiAccount   desktop.ini</code></pre></figure>
+<p>أسماء مثل <code class="nw">Public</code> و<code class="nw">Default</code> و<code class="nw">'Default User'</code> و<code class="nw">'All Users'</code> و<code class="nw">defaultuser0</code> والملف <code class="nw">desktop.ini</code> تخص Windows نفسه، وفي بعض الحواسيب تظهر أيضاً حسابات أنشأتها برامج أخرى، مثل <code class="nw">WsiAccount</code>. ويضع <code class="nw">ls</code> الأسماء التي فيها مسافات بين علامتي تنصيص. أما اسمنا نحن، وهو <code class="nw">ASUS</code> على حاسوب الاختبار، فيجب أن يطابق <code class="nw">&lt;WinUser&gt;</code> الذي وجدناه في <a href="ch00.html">الفصل 0</a>. ندوّنه، <a href="ch03.html">فالفصل 3</a> والفصول التي بعده تحتاج إليه مرة أخرى.</p>
+<p>والآن التمرين. نفتح Notepad على Windows، ونكتب السطر <code class="nw">copied from Windows</code> ونضغط Enter مرة واحدة، حتى ينتهي السطر بفاصل سطر. نختار File ثم Save as، وننقر Downloads في الجزء الأيسر، ونكتب <code class="nw">hello.txt</code> اسماً للملف. نترك «Save as type» على «Text documents (*.txt)» وننقر Save.</p>
+<p>نعود إلى طرفية Ubuntu، فننسخ الملف إلى مجلد المشروع ونطبعه. نستبدل <code class="nw">&lt;WinUser&gt;</code> باسم مجلد مستخدم Windows. وتعديل منتصف سطر طويل في الطرفية مزعج، لذلك نلصق الكتلة في Notepad أولاً، ونستبدل فيها كل <code class="nw">&lt;WinUser&gt;</code>، ثم ننسخها من Notepad إلى طرفية Ubuntu.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>cp /mnt/c/Users/&lt;WinUser&gt;/Downloads/hello.txt ~/microseg/
+cat ~/microseg/hello.txt</code></pre></figure>
+<p>الأمر <code class="nw">cp</code> ينسخ الملف المذكور أولاً إلى المجلد المذكور ثانياً. والأمر <code class="nw">cat</code> يطبع محتوى ملف.</p>
+<p><strong>ما يجب أن نراه</strong> سطرنا وحده.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>copied from Windows</code></pre></figure>
+<p>يجب أن يكون الناتج <code class="nw">copied from Windows</code> بالضبط، مع موجّه الأوامر في السطر التالي. ويظهر <code class="nw">hello.txt</code> أيضاً في جزء Explorer في VS Code.</p>
+<p>يمكننا النظر إلى مجلد المشروع من جانب Windows أيضاً. نشغّل <code class="nw">explorer.exe .</code> في طرفية Ubuntu ونحن داخل <code class="nw">~/microseg</code>. يستطيع Ubuntu تشغيل File Explorer لأن WSL يسمح له بتشغيل برامج Windows، والنقطة <code class="nw">.</code> تعني مرة أخرى المجلد الحالي. تُفتح نافذة File Explorer على المجلد وفيها <code class="nw">hello.txt</code>. ويمكن الوصول إلى المكان نفسه من شريط العنوان في أي نافذة File Explorer بكتابة <code>\\wsl.localhost\Ubuntu-24.04\home\&lt;user&gt;\microseg</code>، كما يعرض File Explorer توزيعة Ubuntu تحت Linux في جزئه الأيسر.</p>
+<p>نستخدم تلك النافذة للنظر فقط، ونغيّر الملفات من VS Code أو من طرفية Ubuntu. يستطيع Windows أن يفتح الملفات الموجودة داخل Ubuntu، ويستطيع Ubuntu أن يفتح الملفات الموجودة على القرص <code class="nw">C:</code>، لكن المشروع يبقى في <code class="nw">~/microseg</code> ولا ينتقل أبداً إلى <code class="nw">/mnt/c</code>. وإذا سحبنا يوماً ملفاً منزَّلاً إلى مجلد Ubuntu عبر File Explorer، يظهر بجانبه ملف ثانٍ بالاسم نفسه مضافاً إليه <code class="nw">:Zone.Identifier</code>، وهو ملاحظة يرفقها Windows ليبيّن مصدر التنزيل. هذا الملف حشو لا ضرر منه. نحذف هذه الملفات بالأمر <code>rm ~/microseg/*:Zone.Identifier</code>، وننسخ الملفات إلى المشروع بالأمر <code class="nw">cp</code> من طرفية Ubuntu بدلاً من السحب.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>-bash: WinUser: No such file or directory
+cat: /home/&lt;user&gt;/microseg/hello.txt: No such file or directory</code></pre></figure>
+<p>قد يبدأ السطر الأول بـ<code class="nw">bash:</code> من دون الشرطة. والسبب أن السطر لُصق دون استبدال <code class="nw">&lt;WinUser&gt;</code>. يقرأ Bash العلامتين <code class="nw">&lt;</code> و<code class="nw">&gt;</code> على أنهما محرفان خاصان، فلم يعمل الأمر <code class="nw">cp</code> أصلاً ولم يُنسخ شيء. نلصق الكتلة في Notepad، ونستبدل <code class="nw">&lt;WinUser&gt;</code> باسم المجلد من دون الأقواس الزاوية، ثم نلصقها في الطرفية مرة أخرى.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>cp: cannot stat &#x27;/mnt/c/Users/sarak/Downloads/hello.txt&#x27;: No such file or directory</code></pre></figure>
+<p>ستُظهر الرسالة عندنا اسم مجلدنا مكان <code class="nw">sarak</code>، والمسار فيها يشير إلى ملف غير موجود. نقارن تهجئة الاسم بناتج <code class="nw">ls /mnt/c/Users/</code>، ثم نشغّل <code>ls /mnt/c/Users/&lt;WinUser&gt;/Downloads/</code> بعد وضع اسمنا مكان <code class="nw">&lt;WinUser&gt;</code> لنرى الاسم الحقيقي للملف. إذا كان الاسم مثل <code class="nw">hello.txt.txt</code> فمعناه أن Windows أضاف <code class="nw">.txt</code> ثانية من دون أن نلاحظ. في File Explorer نختار View ثم Show ثم File name extensions حتى تظهر الأسماء كاملة. ثم نعيد تسمية الملف إلى <code class="nw">hello.txt</code> وننسخه مرة أخرى.</p>
+<p>إذا كان الناتج <code class="nw">copied from Windows</code> وموجّه الأوامر ملتصق بنهاية السطر نفسه، فالسبب أن Enter لم يُضغط بعد النص في Notepad، فليس في نهاية الملف فاصل سطر. نفتحه في Notepad، وننقر عند نهاية السطر، ونضغط Enter، ثم نحفظ ونشغّل الأمرين مرة أخرى.</p>
+<h2 id="الخطوة-8-نهايات-الأسطر-واللصق-الآمن">الخطوة 8. نهايات الأسطر واللصق الآمن</h2>
+<p>نهاية السطر هي المحرف الخفي، أو زوج المحارف، الذي يحدد أين ينتهي سطر من النص. يستخدم Linux محرفاً واحداً اسمه LF (line feed). ويستخدم Windows محرفين، CR (carriage return) ثم LF، ويسمّى الزوج معاً CRLF. نادراً ما نرى الفرق. لكن bash يراه، لأنه يقرأ CR على أنه جزء من الأمر، فيفشل السكربت المحفوظ بـCRLF بأخطاء تبدو بلا معنى للوهلة الأولى. وقد ينكسر ملف YAML بالطريقة نفسها. وYAML هي الصيغة النصية التي تُكتب بها ملفات Kubernetes، وفيها تبيّن الإزاحة أي سطر يتبع أي سطر. جاء الملف <code class="nw">hello.txt</code> من Notepad، لذلك فيه نهاية سطر بأسلوب Windows. نعرضها، ثم نزيلها، ثم نعرضها مرة أخرى.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>cat -A ~/microseg/hello.txt
+sed -i &#x27;s/\r$//&#x27; ~/microseg/hello.txt
+cat -A ~/microseg/hello.txt</code></pre></figure>
+<p>الخيار <code class="nw">-A</code> يجعل <code class="nw">cat</code> يطبع المحارف الخفية على شكل رموز ظاهرة. فيظهر CR على شكل <code class="nw">^M</code>، وتظهر نهاية كل سطر على شكل <code class="nw">$</code>. والأمر <code class="nw">sed</code> يحرّر النصوص، والخيار <code class="nw">-i</code> يجعله يغيّر الملف في مكانه. والتعبير <code class="nw">s/\r$//</code> معناه استبدال محرف CR الموجود في نهاية السطر بلا شيء. سنستخدم أمر <code class="nw">sed</code> نفسه في <a href="ch13.html">الفصل 13</a> مع أي سكربت التقط نهايات أسطر Windows.</p>
+<p><strong>ما يجب أن نراه</strong> السطر نفسه مرتين، بنهايتين مختلفتين.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>copied from Windows^M$
+copied from Windows$</code></pre></figure>
+<p>يجب أن ينتهي السطر الأول بـ<code class="nw">^M$</code>، و<code class="nw">^M</code> هو محرف CR الذي يضعه Windows. ويجب أن ينتهي الثاني بـ<code class="nw">$</code> وحدها. صار الملف الآن بأسلوب Linux.</p>
+<p>الملفات التي ننشئها في نافذة VS Code التي تعرض <code class="nw">[WSL: Ubuntu-24.04]</code> تحمل نهايات LF من البداية. نضبط VS Code حتى نتأكد من ذلك بنظرة واحدة، وحتى تظهر أي محارف Tab شاردة أيضاً. الإزاحة هي المسافات في أول السطر، وYAML وPython كلاهما يستخرج منها المعنى. قد يبدو محرف Tab على الشاشة مطابقاً تماماً لعدة مسافات، ومع ذلك يرفض YAML محارف Tab في الإزاحة، ويفشل Python حين تختلط المسافات بمحارف Tab.</p>
+<ol>
+<li>في VS Code نضغط <code class="nw">Ctrl+,</code> لفتح Settings.</li>
+<li>نكتب <code class="nw">render whitespace</code> في مربع البحث في الأعلى، ونضبط Editor: Render Whitespace على <code class="nw">all</code>. تظهر المسافات الآن نقاطاً باهتة، وتظهر محارف Tab أسهماً صغيرة.</li>
+<li>نكتب <code class="nw">eol</code> في مربع البحث ونضبط Files: Eol على <code class="nw">\n</code>، وهو LF.</li>
+<li>نغلق تبويب Settings وننقر <code class="nw">hello.txt</code> في جزء Explorer لفتحه.</li>
+</ol>
+<p>يعرض شريط الحالة في أسفل نافذة VS Code الآن <code class="nw">Spaces: 4</code> و<code class="nw">UTF-8</code> و<code class="nw">LF</code> جهة اليمين. إذا عرض <code class="nw">CRLF</code>، ننقره ونختار <code class="nw">LF</code> من القائمة التي تظهر في أعلى النافذة. وإذا عرض <code class="nw">Tab Size:</code> بدلاً من <code class="nw">Spaces:</code>، ننقره ونختار Indent Using Spaces. ننظر إلى <code class="nw">LF</code> و<code class="nw">Spaces:</code> في كل مرة نلصق فيها ملفاً في الفصول القادمة.</p>
+<p>قد يفشل اللصق في VS Code وفي الطرفية، لكن بطريقتين مختلفتين. للصق ملف كامل في VS Code ننشئ الملف أولاً، ثم ننقر داخل الملف الفارغ حتى يكون المؤشر في السطر 1، العمود 1، ونضغط Ctrl+V. بعدها نقارن السطر الأول والسطر الأخير بما في الدليل. فخلل اللصق يظهر عادة عند أحد الطرفين.</p>
+<p>في طرفية Ubuntu نلصق بـCtrl+Shift+V أو بالنقر بالزر الأيمن. وحين نلصق عدة أسطر دفعة واحدة، قد تحذّر الطرفية من أن النص يحتوي على عدة أسطر، فننقر Paste anyway إذا كان النص من هذا الدليل. نلصق كتلة واحدة في كل مرة، وننتظر عودة موجّه الأوامر قبل لصق الكتلة التالية. وإذا بقيت الأسطر الملصوقة مظلَّلة في سطر الأوامر ولم يعمل شيء، نضغط Enter.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>&gt;</code></pre></figure>
+<p>تحوّل موجّه الأوامر إلى <code class="nw">&gt;</code> وحدها، ولا يفيد أي شيء نكتبه. فالطرفية تنتظر إغلاق علامة تنصيص أو كتلة لم يكملها اللصق، والسبب عادة أن علامة تنصيص ضاعت أو تحوّلت إلى علامة منحنية أثناء النسخ. نضغط Ctrl+C للإلغاء، ثم ننسخ الكتلة مرة أخرى من صفحة Docs ونلصقها من جديد.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>$&#x27;\r&#x27;: command not found</code></pre></figure>
+<p>هذه الرسالة، وكثيراً ما يسبقها اسم سكربت ورقم سطر، معناها أن السكربت الذي شُغّل يحمل نهايات أسطر Windows. نشغّل <code class="nw">sed -i 's/\r$//'</code> متبوعاً بمسار السكربت، كما في الأعلى، ثم نشغّل السكربت مرة أخرى.</p>
+<h2 id="الخطوة-9-نضبط-git-وننشئ-المستودع">الخطوة 9. نضبط Git وننشئ المستودع</h2>
+<p>يحفظ Git لقطات من مجلد المشروع. فهو يرينا بالضبط ما غيّرناه منذ آخر لقطة، ويعيدنا إلى حالة كانت تعمل. لكنه يحتاج أولاً إلى أن يعرف من نحن، لأنه يكتب الاسم والبريد الإلكتروني في كل لقطة. نضع الاسم والبريد الإلكتروني الخاصين بنا مكان العنصرين النائبين (placeholders)، ونُبقي علامتي التنصيص المزدوجتين.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>git config --global user.name &quot;&lt;Your Name&gt;&quot;
+git config --global user.email &quot;&lt;your-email&gt;&quot;
+git config --global init.defaultBranch main
+git config --global --list</code></pre></figure>
+<p>الأمر <code class="nw">git config --global</code> يحفظ إعداداً لكل مشاريع مستخدم Linux هذا. والقيمتان <code class="nw">user.name</code> و<code class="nw">user.email</code> هما الاسم والبريد اللذان يُكتبان في اللقطات، وبما أن ملحق بحث التخرج سيعرض هذا السجل، نستخدم الاسم الحقيقي. والإعداد <code class="nw">init.defaultBranch main</code> يسمّي الخط الرئيسي للقطات <code class="nw">main</code> في كل مشروع جديد. أما <code class="nw">--list</code> فيطبع الإعدادات التي حفظناها.</p>
+<p><strong>ما يجب أن نراه</strong> الإعدادات الثلاثة، كل واحد منها في سطر.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>user.name=Student Tester
+user.email=student@example.com
+init.defaultbranch=main</code></pre></figure>
+<p>يجب أن تُظهر الأسطر الاسم والبريد الإلكتروني بعد <code class="nw">user.name=</code> و<code class="nw">user.email=</code>. ويطبع Git الإعداد الثالث بأحرف صغيرة، <code class="nw">init.defaultbranch=main</code>. وهذا طبيعي.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>user.name=&lt;Your Name&gt;</code></pre></figure>
+<p>السبب أن عنصراً نائباً بقي في الأمر. منعت علامتا التنصيص المزدوجتان bash من معاملة الأقواس الزاوية على أنها محارف خاصة، فخزّن Git النص النائب على أنه الاسم. نشغّل سطر <code class="nw">user.name</code> مرة أخرى مع الاسم الحقيقي بين علامتي التنصيص، ونفعل الشيء نفسه مع <code class="nw">user.email</code> إذا ظهر فيه <code class="nw">&lt;your-email&gt;</code>. والقيمة الجديدة تحل محل القديمة.</p>
+<p>المستودع مجلد يتتبعه Git، ومعه سجل لقطاته الذي يحفظه Git في مجلد مخفي اسمه <code class="nw">.git</code>. وبعض المجلدات التي ستظهر لاحقاً يجب أن تبقى خارج اللقطات، إما لأنها كبيرة وإما لأن سكربتاً يعيد بناءها. يذكرها ملف اسمه <code class="nw">.gitignore</code>، ويتجاهل Git أي شيء يطابق سطراً فيه. نحوّل <code class="nw">~/microseg</code> إلى مستودع وننشئ ذلك الملف. نلصق الكتلة قطعة واحدة، وإذا حذّرت الطرفية من الأسطر المتعددة ننقر Paste anyway.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+git init
+cat &gt; ~/microseg/.gitignore &lt;&lt;&#x27;EOF&#x27;
+.venv/
+__pycache__/
+images/
+results/
+EOF
+cat ~/microseg/.gitignore</code></pre></figure>
+<p>الأمر <code class="nw">git init</code> ينشئ المجلد المخفي <code class="nw">.git</code> في المجلد الذي نحن فيه. والجزء <code class="nw">cat &gt; ~/microseg/.gitignore</code> يكتب في ذلك الملف كل ما يستقبله <code class="nw">cat</code>، والجزء <code class="nw">&lt;&lt;'EOF'</code> يمرّر إليه كل الأسطر التالية حتى السطر الذي لا يحمل إلا <code class="nw">EOF</code>. وهذه هي المجلدات التي يتجاوزها Git.</p>
+<ul>
+<li>المجلد <code class="nw">.venv/</code> هو بيئة Python التي ننشئها في <a href="ch03.html">الفصل 3</a>. ويعيد أمر واحد بناءها.</li>
+<li>المجلد <code class="nw">__pycache__/</code> يحمل ملفات ينشئها Python بنفسه حين يشغّل شيفرتنا.</li>
+<li>المجلد <code class="nw">images/</code> يحمل أرشيفات صور الحاويات، وحجمها مئات الميغابايتات، ويعيد <code class="nw">setup.sh</code> و<code class="nw">deploy.sh</code> بناءها.</li>
+<li>المجلد <code class="nw">results/</code> يحمل القياسات التي يكتبها <code class="nw">measure.py</code> في <a href="ch12.html">الفصل 12</a>، والنسخة الاحتياطية تحتفظ بها.</li>
+</ul>
+<p>الأمر الأخير يطبع الملف لنتحقق منه.</p>
+<p><strong>ما يجب أن نراه</strong> سطر واحد من Git، ثم أسماء المجلدات الأربعة.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>Initialized empty Git repository in /home/student/microseg/.git/
+.venv/
+__pycache__/
+images/
+results/</code></pre></figure>
+<p>يجب أن يبدأ السطر الأول بـ<code>Initialized empty Git repository in</code> وأن ينتهي بـ<code>/home/&lt;user&gt;/microseg/.git/</code> مع اسم مستخدم Linux الخاص بنا. تليه أربعة أسطر بالضبط، <code class="nw">.venv/</code> و<code class="nw">__pycache__/</code> و<code class="nw">images/</code> و<code class="nw">results/</code>، ولا شيء غيرها.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>hint: Using &#x27;master&#x27; as the name for the initial branch. This default branch name</code></pre></figure>
+<p>يظهر هذا السطر وعدة أسطر أخرى تبدأ بـ<code class="nw">hint:</code> بعد <code class="nw">git init</code> حين يكون الإعداد <code class="nw">init.defaultBranch</code> مفقوداً. نشغّل <code class="nw">git branch -m main</code> لإعادة تسمية الفرع، ثم نتأكد من أن <code class="nw">git status</code> يبدأ بـ<code class="nw">On branch main</code>.</p>
+<h2 id="الخطوة-10-نحفظ-اللقطة-الأولى">الخطوة 10. نحفظ اللقطة الأولى</h2>
+<p>نسأل Git أولاً عمّا يراه.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>git status</code></pre></figure>
+<p>الأمر <code class="nw">git status</code> يخبرنا أي الملفات جديد، وأيها تغيّر، وأيها جاهز للحفظ في اللقطة التالية. نشغّله كلما لم نكن متأكدين من حالة المجلد.</p>
+<p><strong>ما يجب أن نراه</strong> اسم الفرع والملفان.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>On branch main
+
+No commits yet
+
+Untracked files:
+  (use &quot;git add &lt;file&gt;...&quot; to include in what will be committed)
+	.gitignore
+	hello.txt
+
+nothing added to commit but untracked files present (use &quot;git add&quot; to track)</code></pre></figure>
+<p>يجب أن يكون السطر الأول <code class="nw">On branch main</code>. وتحت <code class="nw">Untracked files:</code> يعرض الناتج <code class="nw">.gitignore</code> و<code class="nw">hello.txt</code>، أي أن Git يراهما لكنه لا يتتبعهما بعد.</p>
+<p>تُسمّى اللقطة في Git إيداعاً (commit)، وصنعها يتطلب خطوتين. التجهيز يختار التغييرات التي تدخل في الإيداع التالي. والإيداع يحفظها، مع رسالة تقول ما الذي تغيّر. وهذا الإيداع هو أيضاً إيداع هذا الفصل. ننشئ الإيداع، ثم نعرض قائمة الإيداعات.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>git add -A &amp;&amp; git commit -m &quot;ch02: project folder, hello.txt and .gitignore&quot;
+git log --oneline</code></pre></figure>
+<p>الأمر <code class="nw">git add -A</code> يجهّز كل ملف جديد أو متغيّر أو محذوف في المستودع، باستثناء ما يستبعده <code class="nw">.gitignore</code>. والعلامة <code class="nw">&amp;&amp;</code> تشغّل الأمر الثاني فقط إذا نجح الأول. والأمر <code class="nw">git commit -m</code> يحفظ التغييرات المجهّزة في إيداع، ويجعل النص الذي بين علامتي التنصيص رسالةً له. ويعرض <code class="nw">git log</code> الإيداعات، الأحدث أولاً، والخيار <code class="nw">--oneline</code> يختصر كل واحد منها في سطر واحد.</p>
+<p><strong>ما يجب أن نراه</strong> ملخص قصير للإيداع، ثم سطر واحد من السجل.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>[main (root-commit) 39c2699] ch02: project folder, hello.txt and .gitignore
+ 2 files changed, 5 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100755 hello.txt
+39c2699 (HEAD -&gt; main) ch02: project folder, hello.txt and .gitignore</code></pre></figure>
+<p>يبدأ السطر الأول من الملخص بـ<code class="nw">[main (root-commit)</code>، يليه رمز قصير ثم رسالتنا. وتعني «root-commit» أنه أول إيداع في المستودع. ويقول سطر لاحق <code class="nw">2 files changed</code>. أما السطر الأخير، وهو من <code class="nw">git log</code>، فيبدأ برمز من سبعة محارف يختلف على حاسوبنا، تليه رسالتنا. وقد يطبع Git أيضاً <code class="nw">(HEAD -&gt; main)</code> قبل الرسالة، وهي علامة على أحدث إيداع في الفرع <code class="nw">main</code>. هذا الرمز ذو المحارف السبعة يُكتب في عمود الإيداع (Commit) في جدول متابعة التقدم من <a href="ch00.html">الفصل 0</a>.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>fatal: not a git repository (or any of the parent directories): .git</code></pre></figure>
+<p>السبب أن أمر Git شُغّل خارج المستودع، والأرجح أنه شُغّل في طرفية جديدة تبدأ في مجلد المنزل. نشغّل <code class="nw">cd ~/microseg</code> ثم نعيد المحاولة.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>Author identity unknown
+
+* Please tell me who you are.</code></pre></figure>
+<p>تمضي الرسالة فتقترح أوامر <code class="nw">git config</code>، وتنتهي بسطر يبدأ بـ<code>fatal: unable to auto-detect email address</code>. السبب أن Git لا يعرف الاسم والبريد الإلكتروني، لأن إعدادات الخطوة 9 لم تُحفظ. نشغّل أوامر <code class="nw">git config</code> الأربعة من الخطوة 9 مرة أخرى، ثم نشغّل أمر الإيداع من جديد.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>nothing to commit, working tree clean</code></pre></figure>
+<p>لم يجد Git شيئاً جديداً يحفظه، أي أن الإيداع موجود أصلاً. نشغّل <code class="nw">git log --oneline</code> لنراه.</p>
+<h2 id="الخطوة-11-نرى-تغييرا-ثم-نتراجع-عنه">الخطوة 11. نرى تغييراً ثم نتراجع عنه</h2>
+<p>أمران آخران من Git يُخرجاننا من معظم المتاعب لاحقاً. يعرض <code class="nw">git diff</code> ما تغيّر في الملفات منذ آخر إيداع، ويتخلص <code class="nw">git restore</code> من تلك التغييرات. نتدرّب على الاثنين مع <code class="nw">hello.txt</code> الآن، قبل أن يعتمد عليه أي شيء. تنتقل الكتلة إلى مجلد المشروع، وتضيف سطراً إلى الملف، وتعرض الفرق، ثم تتراجع عنه وتطبع الملف.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+echo &quot;a line to throw away&quot; &gt;&gt; ~/microseg/hello.txt
+git diff
+git restore hello.txt
+cat ~/microseg/hello.txt</code></pre></figure>
+<p>الأمر <code class="nw">cd ~/microseg</code> يضمن أن Git يعمل داخل المستودع. ويطبع <code class="nw">echo</code> النص الذي بعده، والعلامة <code class="nw">&gt;&gt;</code> تضيف ذلك النص إلى نهاية الملف بدلاً من طباعته. ويقارن <code class="nw">git diff</code> الملفات بآخر إيداع. ويعيد <code class="nw">git restore hello.txt</code> الملف إلى ما كان عليه في آخر إيداع، ثم يعرض <code class="nw">cat</code> النتيجة.</p>
+<p>سنرى الفرق أولاً، ثم السطر الأصلي وحده.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>diff --git a/hello.txt b/hello.txt
+index 6cb6254..4604e5e 100755
+--- a/hello.txt
++++ b/hello.txt
+@@ -1 +1,2 @@
+ copied from Windows
++a line to throw away
+copied from Windows</code></pre></figure>
+<p>في جزء <code class="nw">git diff</code> السطر المهم هو <code class="nw">+a line to throw away</code>. العلامة <code class="nw">+</code> في أول السطر تعني سطراً أضفناه، والعلامة <code class="nw">-</code> تعني سطراً حذفناه، والأسطر التي لا تحمل أياً منهما سياق لم يتغيّر. ويجب أن يكون السطر الأخير تماماً <code class="nw">copied from Windows</code>، ولا شيء بعده. حين يفسد ملف لصقناه في فصل لاحق، يعرض <code class="nw">git diff</code> بالضبط ما تغيّر منذ آخر مرة كان يعمل فيها، ويعيد <code class="nw">git restore</code> مع اسم الملف النسخة العاملة.</p>
+<p>عارض الصفحات برنامج يعرض الناتج الطويل شاشةً بعد شاشة. حين يكون لدى <code class="nw">git diff</code> أو <code class="nw">git log</code> ناتج أطول من النافذة، يسلّم Git الناتج إلى عارض الصفحات، فيظهر في السطر الأخير من النافذة <code class="nw">:</code> أو <code class="nw">(END)</code>، ولا يعود موجّه الأوامر. نستخدم مفاتيح الأسهم للتمرير، ونضغط q لاستعادة موجّه الأوامر.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>error: pathspec &#x27;hello.txt&#x27; did not match any file(s) known to git</code></pre></figure>
+<p>لم يطبع <code class="nw">git diff</code> شيئاً قبل هذا السطر، لأن <code class="nw">hello.txt</code> ليس في أي إيداع بعد، أي أن الإيداع في الخطوة 10 لم ينجح. وما زال السطر الإضافي في الملف، فنحذفه بالأمر <code>sed -i '$d' ~/microseg/hello.txt</code>، والجزء <code class="nw">$d</code> معناه حذف السطر الأخير. ثم نعود إلى الخطوة 10، وننشئ الإيداع، ونشغّل هذه الكتلة مرة أخرى.</p>
+<h2 id="الخطوة-12-ننسخ-المشروع-احتياطيا-إلى-windows">الخطوة 12. ننسخ المشروع احتياطياً إلى Windows</h2>
+<p>يحفظ Git لقطاته داخل <code class="nw">~/microseg/.git</code>، فإذا تعطّل Ubuntu أو حُذف ذهبت اللقطات معه. والنسخة الموجودة على Windows تحمينا من ذلك. الأرشيف ملف واحد يحمل ملفات ومجلدات كثيرة، وtar هو برنامج Linux الذي يصنع الأرشيفات. نصنع أول نسخة احتياطية الآن بالكتلة أدناه. ونستبدل <code class="nw">&lt;WinUser&gt;</code> في الأسطر الثلاثة كلها بالطريقة نفسها التي اتبعناها في الخطوة 7، فنلصق الكتلة في Notepad أولاً، ونستبدل فيها كل <code class="nw">&lt;WinUser&gt;</code>، ثم ننسخها من Notepad إلى طرفية Ubuntu.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>tar --exclude=microseg/.venv --exclude=microseg/images -czf /mnt/c/Users/&lt;WinUser&gt;/Documents/microseg-backup-$(date +%F).tar.gz -C ~ microseg
+ls -lh /mnt/c/Users/&lt;WinUser&gt;/Documents/microseg-backup-*
+tar -tzf /mnt/c/Users/&lt;WinUser&gt;/Documents/microseg-backup-*.tar.gz</code></pre></figure>
+<p>نأخذ السطر الأول جزءاً جزءاً.</p>
+<ul>
+<li>الخياران <code class="nw">--exclude</code> يستبعدان <code class="nw">.venv</code> و<code class="nw">images</code>، فهما كبيران ويمكن إعادة بنائهما.</li>
+<li>الخيار <code class="nw">-c</code> ينشئ أرشيفاً، و<code class="nw">-z</code> يضغطه، و<code class="nw">-f</code> يحدد اسم الملف الذي يُكتب.</li>
+<li>الجزء <code class="nw">$(date +%F)</code> يضع تاريخ اليوم في اسم الملف، مثل <code class="nw">2026-11-20</code>، فتحمل كل نسخة احتياطية اسماً خاصاً بها.</li>
+<li>الجزء <code class="nw">-C ~ microseg</code> معناه الانتقال إلى مجلد المنزل ثم أرشفة المجلد <code class="nw">microseg</code> من هناك، فتبدأ المسارات داخل الأرشيف بـ<code class="nw">microseg/</code>.</li>
+</ul>
+<p>يتضمن الأرشيف المجلد <code class="nw">.git</code>، لذلك تحمل النسخة الاحتياطية السجل كاملاً. ويعرض <code class="nw">ls -lh</code> النسخ الاحتياطية مع أحجامها بصيغة سهلة القراءة. أما <code class="nw">tar -tzf</code> فيعرض ما داخل الأرشيف دون فكّه. لدينا اليوم نسخة احتياطية واحدة فقط، لذلك تطابق <code class="nw">*</code> ملفاً واحداً بالضبط.</p>
+<p><strong>ما يجب أن نراه</strong> سطر واحد من <code class="nw">ls</code> لنسخة اليوم، ثم قائمة من المسارات.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>-rwxrwxrwx 1 student student 12K Nov 20 01:28 /mnt/c/Users/ASUS/Documents/microseg-backup-2026-11-20.tar.gz
+microseg/
+microseg/hello.txt
+microseg/.gitignore
+microseg/.git/
+microseg/.git/branches/
+microseg/.git/config
+microseg/.git/objects/
+microseg/.git/objects/39/
+microseg/.git/objects/39/c26990030bb210706f08f2a8a2a59ae42efede
+microseg/.git/objects/79/
+microseg/.git/objects/79/f0cd24110d91438d5e8e6340f267636690b96d
+microseg/.git/objects/f0/
+microseg/.git/objects/f0/fc9bf75e707830ab624a30efa47d36c05cf7b6
+microseg/.git/objects/pack/
+microseg/.git/objects/6c/
+microseg/.git/objects/6c/b625490e5ee3226e02845298843d99b5ed344e
+microseg/.git/objects/info/
+microseg/.git/refs/
+microseg/.git/refs/heads/
+microseg/.git/refs/heads/main
+microseg/.git/refs/tags/
+microseg/.git/HEAD
+microseg/.git/index
+microseg/.git/COMMIT_EDITMSG
+microseg/.git/description
+microseg/.git/hooks/
+microseg/.git/hooks/applypatch-msg.sample
+microseg/.git/hooks/sendemail-validate.sample
+microseg/.git/hooks/pre-commit.sample
+microseg/.git/hooks/commit-msg.sample
+microseg/.git/hooks/pre-rebase.sample
+microseg/.git/hooks/fsmonitor-watchman.sample
+microseg/.git/hooks/pre-applypatch.sample
+microseg/.git/hooks/pre-merge-commit.sample
+microseg/.git/hooks/pre-receive.sample
+microseg/.git/hooks/prepare-commit-msg.sample
+microseg/.git/hooks/push-to-checkout.sample
+microseg/.git/hooks/post-update.sample
+microseg/.git/hooks/update.sample
+microseg/.git/hooks/pre-push.sample
+microseg/.git/logs/
+microseg/.git/logs/refs/
+microseg/.git/logs/refs/heads/
+microseg/.git/logs/refs/heads/main
+microseg/.git/logs/HEAD
+microseg/.git/info/
+microseg/.git/info/exclude</code></pre></figure>
+<p>ينتهي سطر <code class="nw">ls</code> بـ<code class="nw">microseg-backup-</code> ثم تاريخ اليوم ثم <code class="nw">.tar.gz</code>. الحجم بضعة كيلوبايتات الآن، ويكبر كلما امتلأ المشروع. وكل مسار في القائمة التي تليه يبدأ بـ<code class="nw">microseg/</code>، ويجب أن تتضمن القائمة <code class="nw">microseg/hello.txt</code> و<code class="nw">microseg/.gitignore</code> وعناصر كثيرة تحت <code class="nw">microseg/.git/</code>.</p>
+<p>نكرر النسخ الاحتياطي مرة كل أسبوع، وكلما أنهينا <a href="ch06.html">الفصل 6</a> أو 10 أو 12. ومن النسخة الثانية فصاعداً نستخدم الكتلة ذات السطرين أدناه بدلاً من السابقة. فهي لا تتضمن سطر <code class="nw">tar -tzf</code>، الذي يفشل حين تطابق <code class="nw">*</code> أكثر من أرشيف واحد. لا نشغّلها اليوم.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>tar --exclude=microseg/.venv --exclude=microseg/images -czf /mnt/c/Users/&lt;WinUser&gt;/Documents/microseg-backup-$(date +%F).tar.gz -C ~ microseg
+ls -lh /mnt/c/Users/&lt;WinUser&gt;/Documents/microseg-backup-*</code></pre></figure>
+<p>يعرض سطر <code class="nw">ls</code> عندها أرشيفاً واحداً لكل نسخة احتياطية، وأحدث تاريخ في الأخير.</p>
+<p>لاستعادة نسخة احتياطية لاحقاً نشغّل <code class="nw">tar -xzf</code> مع مسار الأرشيف و<code class="nw">-C ~</code>. هذا الأمر يفك الأرشيف في مجلد المنزل ويكتب فوق الملفات الموجودة هناك. لا نشغّله الآن.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>-bash: WinUser: No such file or directory
+-bash: WinUser: No such file or directory
+-bash: WinUser: No such file or directory</code></pre></figure>
+<p>قد تبدأ الأسطر بـ<code class="nw">bash:</code> من دون الشرطة. والسبب أن الكتلة لُصقت دون استبدال <code class="nw">&lt;WinUser&gt;</code>. يقرأ Bash العلامتين <code class="nw">&lt;</code> و<code class="nw">&gt;</code> على أنهما محرفان خاصان، فلم يعمل أي من الأوامر الثلاثة ولم تُصنع نسخة احتياطية. نلصق الكتلة في Notepad، ونستبدل كل <code class="nw">&lt;WinUser&gt;</code> باسم المجلد من دون الأقواس الزاوية، ثم نلصقها في الطرفية مرة أخرى.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>tar (child): /mnt/c/Users/sarak/Documents/microseg-backup-2026-11-20.tar.gz: Cannot open: No such file or directory
+tar (child): Error is not recoverable: exiting now</code></pre></figure>
+<p>ستُظهر الرسالة عندنا اسم مجلدنا وتاريخ اليوم. والسبب إما خطأ في تهجئة اسم المجلد، وإما أن OneDrive نقل مجلد Documents. نشغّل <code>ls /mnt/c/Users/&lt;WinUser&gt;/OneDrive/</code> بعد وضع اسمنا مكان <code class="nw">&lt;WinUser&gt;</code>. فإذا ظهر فيه <code class="nw">Documents</code>، نستخدم <code>/mnt/c/Users/&lt;WinUser&gt;/OneDrive/Documents</code> في كل سطر بدلاً من المسار السابق. والنسخة الاحتياطية هناك تُنسخ أيضاً إلى OneDrive، فتبقى محمية حتى لو تعطّل الحاسوب نهائياً.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>tar: Removing leading `/&#x27; from member names</code></pre></figure>
+<p>السبب أن المجلد كُتب بمساره الكامل، مثل <code class="nw">~/microseg</code>، بدلاً من <code class="nw">-C ~ microseg</code>. الأرشيف يعمل مع ذلك، لكن مساراته تبدأ بـ<code class="nw">home/&lt;user&gt;/microseg</code>. نحذف ذلك الأرشيف بالأمر <code class="nw">rm</code> متبوعاً بمساره، ثم نشغّل الكتلة مرة أخرى كما هي بالضبط.</p>
+<h2 id="نقطة-التحقق">نقطة التحقق</h2>
+<p><strong>نقطة التحقق.</strong> نشغّل هذا الأمر الواحد في طرفية Ubuntu.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>cat ~/microseg/hello.txt &amp;&amp; git -C ~/microseg log --oneline | wc -l</code></pre></figure>
+<p>الجزء <code class="nw">git -C ~/microseg</code> يشغّل Git كأننا داخل ذلك المجلد، فيعمل الأمر من أي مكان. ويعدّ <code class="nw">wc -l</code> الأسطر التي يستقبلها، وهي هنا سطر لكل إيداع.</p>
+<p><strong>ما يجب أن نراه</strong> سطران.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>copied from Windows
+1</code></pre></figure>
+<p>يجب أن يكون الناتج سطرين بالضبط، <code class="nw">copied from Windows</code> ثم <code class="nw">1</code>. ومع ظهور Ubuntu-24.04 بالإصدار <code class="nw">2</code> في ناتج <code class="nw">wsl -l -v</code> في الخطوة 5، تكتمل نقطة التحقق. نكتب تاريخ اليوم ورمز الإيداع في جدول متابعة التقدم.</p>
+<p>إيداع هذا الفصل هو الذي أنشأناه في الخطوة 10، فلا يبقى شيء آخر نودعه. ومن <a href="ch03.html">الفصل 3</a> فصاعداً ينتهي كل فصل بـ<code>git add -A &amp;&amp; git commit -m</code> متبوعاً برسالة ذلك الفصل بين علامتي تنصيص.</p>
+<!-- OUT ids: ch04-wsl-version, ch04-wsl-install, ch04-ubuntu-git, ch04-wsl-list, ch04-pwd-code, ch04-ls-users, ch04-cat-hello, ch04-line-endings, ch04-git-config, ch04-git-init, ch04-git-status, ch04-first-commit, ch04-git-diff-restore, ch04-backup, ch04-checkpoint --><nav class="pager" aria-label="الفصول"><a rel="prev" href="ch01.html"><span>الفصل السابق</span>الفصل 1. ما الذي سنبنيه</a><a rel="next" href="ch03.html"><span>الفصل التالي</span>الفصل 3. تجهيز بيئة العمل</a></nav></main></div>
+<footer class="foot"><div class="foot-in"><p>Kubernetes 1.36 و Cilium 1.20.5 و kind 0.33.0 على Windows 11 مع WSL 2. شغّلنا كل أمر على حاسوب حقيقي في تشرين الثاني 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">المصدر على GitHub</a></p></div></footer>
+<p class="vh" aria-live="polite" id="live"></p>
+<script type="application/json" id="i18n">{"copied": "نُسخ", "copyFail": "نضغط Ctrl+C لنسخ النص المحدد", "doneOf": "الخطوات المنجزة: {d} من {t}", "next": "الخطوة التالية: {s}", "allDone": "اكتمل المسار وأُنجزت الخطوات كلها.", "sumCount": "المنجز {d} من {t}", "cleared": "مُسحت كل العلامات.", "confirm": "هل نمسح كل العلامات في هذه الصفحة؟ تبقى الملفات والعنقود كما هي.", "stageCount": "{d} من {t}"}</script>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
+<title>Chapter 5. Write the services | Micro-segmentation lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&family=Noto+Sans+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="ar" href="../ar/guide/ch05.html">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400&text=%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9&display=swap">
+</head>
+<body class="">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="top-in">
+<a class="brand" href="../index.html">Micro-segmentation lab</a>
+<nav aria-label="Micro-segmentation lab"><ul>
+<li><a href="../index.html">Quick path</a></li>
+<li><a href="../guide/index.html" aria-current="page">Full guide</a></li>
+<li><a href="../downloads.html">Downloads</a></li>
+<li><a href="../ar/guide/ch05.html" lang="ar" hreflang="ar" data-setlang="ar">العربية</a></li>
+</ul></nav>
+</div></header>
+<div class="layout"><details class="rail" open><summary>Chapters</summary><nav aria-label="Chapters"><ol class="toc"><li><a href="ch00.html">0. How to use this guide</a></li><li><a href="ch01.html">1. What you will build</a></li><li><a href="ch02.html">2. Before you start</a></li><li><a href="ch03.html">3. Set up the environment</a></li><li><a href="ch04.html">4. Create the cluster</a></li><li><a href="ch05.html" aria-current="page">5. Write the services</a><ol class="sub"><li><a href="#make-the-folders-apps-db-and-frontend">Make the folders apps, db and frontend</a></li><li><a href="#the-databases-tables-and-starting-data-dbinitsql">The database's tables and starting data, db/init.sql</a></li><li><a href="#the-login-service-appsauthpy">The login service, apps/auth.py</a></li><li><a href="#the-student-api-appsapipy">The student API, apps/api.py</a></li><li><a href="#the-news-service-appsnewspy">The news service, apps/news.py</a></li><li><a href="#the-admin-panel-appsadminpy">The admin panel, apps/admin.py</a></li><li><a href="#the-portals-web-server-frontenddefaultconf-and-frontendindexhtml">The portal's web server, frontend/default.conf and frontend/index.html</a></li><li><a href="#the-python-packages-appsrequirementstxt">The Python packages, apps/requirements.txt</a></li><li><a href="#the-image-recipes-appsdockerfile-and-appsdockerfilenews">The image recipes, apps/Dockerfile and apps/Dockerfile.news</a></li><li><a href="#fire-the-bug-at-a-throwaway-news-container">Fire the bug at a throwaway news container</a></li><li><a href="#checkpoint">Checkpoint</a></li></ol></li><li><a href="ch06.html">6. Deploy the portal</a></li><li><a href="ch07.html">7. Build your dashboard</a></li><li><a href="ch08.html">8. Attack the flat network</a></li><li><a href="ch09.html">9. Design the policy</a></li><li><a href="ch10.html">10. Apply micro-segmentation</a></li><li><a href="ch11.html">11. Read the evidence in Hubble</a></li><li><a href="ch12.html">12. Measure</a></li><li><a href="ch13.html">13. Getting unstuck alone</a></li><li><a href="ch14.html">14. Evidence for your report</a></li><li><a href="ch15.html">15. Day-by-day plan</a></li><li><a href="appendix.html">Appendices</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="chapter-5-write-the-services">Chapter 5. Write the services</h1>
+<p>By the end of this chapter your <code class="nw">~/microseg</code> folder holds the ten files that make up the Campus Portal. Four are Python programs and one fills the database. Two belong to the web server, and the last three describe how to build your images. You'll build both of your own images, <code class="nw">campus-app:1.0</code> and <code class="nw">campus-news:1.0</code>, and then fire the news bug at a throwaway container on your laptop and watch it answer as <code class="nw">uid=1000(app)</code>. Nothing goes into the cluster until <a href="ch06.html">chapter 6</a>.</p>
+<p>Plan on 6 to 8 hours in two sittings. The first sitting covers the database file, auth and api. The second covers news, admin, the two frontend files, the image recipes and the tests. You paste most files and then check them, but one function, <code class="nw">check_image</code> in <code class="nw">apps/news.py</code>, you type by hand.</p>
+<figure class="fig"><a href="../files/figures/fig03-en.png"><img src="../files/figures/web/fig03-en.png" alt="Campus Portal architecture" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>Campus Portal architecture</figcaption></figure>
+<p>Figure 3 shows the services you're about to write and how a request from your browser reaches them. Notice that everything enters through one door, port 30080 on frontend, and that frontend talks only to api and news.</p>
+<h2 id="make-the-folders-apps-db-and-frontend">Make the folders apps, db and frontend</h2>
+<p>The ten files live in three folders, <code class="nw">apps</code>, <code class="nw">db</code> and <code class="nw">frontend</code>, inside <code class="nw">~/microseg</code>. Make them first, so every file in this chapter has a place to go.</p>
+<p>Open the Ubuntu terminal and run this.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; mkdir -p apps db frontend &amp;&amp; ls -d apps db frontend</code></pre></figure>
+<p><code class="nw">cd ~/microseg</code> moves you into the project folder. <code class="nw">mkdir -p apps db frontend</code> makes the three folders, and <code class="nw">-p</code> keeps it from complaining if one of them already exists. <code class="nw">&amp;&amp;</code> runs the next command only when the one before it worked. <code class="nw">ls -d apps db frontend</code> lists the three folder names themselves instead of what's inside them.</p>
+<p><strong>You should see</strong> the three names <code class="nw">apps</code>, <code class="nw">db</code> and <code class="nw">frontend</code>.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>The token &#x27;&amp;&amp;&#x27; is not a valid statement separator in this version.</code></pre></figure>
+<p>You pasted the command into PowerShell. Every command in this chapter goes into the Ubuntu terminal, the one whose prompt ends in <code class="nw">$</code>.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>bash: cd: /home/sara/microseg: No such file or directory</code></pre></figure>
+<p>Your user name appears where this shows <code class="nw">sara</code>. The project folder doesn't exist, which means a step in <a href="ch02.html">chapter 2</a> was skipped. Go back to <a href="ch02.html">chapter 2</a> and make the folder there, along with the Git setup that comes after it.</p>
+<p>Now open the folder in VS Code the way you learned in <a href="ch02.html">chapter 2</a>, by typing <code class="nw">code .</code> in the terminal while you're in <code class="nw">~/microseg</code>. The window title must show <code class="nw">[WSL: Ubuntu-24.04]</code>.</p>
+<p>Every file in this chapter goes in the same way. In the VS Code Explorer pane on the left, right-click the folder the file belongs in, click <strong>New File...</strong>, type the file name and press Enter. An empty tab opens. Copy the whole file block from this guide, click inside the empty tab, press Ctrl+V and then Ctrl+S to save. A round dot on the tab means the file still has unsaved changes. Then look at the status bar along the bottom of the window. It must show <code class="nw">LF</code>. If it shows <code class="nw">CRLF</code>, click it, choose <strong>LF</strong> and save again. With Render Whitespace on from <a href="ch02.html">chapter 2</a>, the start of each indented line must show faint dots, not small arrows. Arrows are tab characters. If you see any, press Ctrl+Shift+P, type <code class="nw">Convert Indentation to Spaces</code>, press Enter and save.</p>
+<p>The notes under each file refer to line numbers. Those are the numbers VS Code shows in the left margin after you paste, because the guide's blocks don't number their lines.</p>
+<p>VS Code may offer to install extensions when you open a Python, SQL or Docker file. You don't need any of them. If you already have the Python extension, it may put a wavy line under <code class="nw">psycopg2</code> or <code class="nw">flask</code> with a message that the import could not be resolved. Ignore it. Those packages get installed inside the image you build later in this chapter, and the py_compile check you'll meet below is the one that counts here.</p>
+<h2 id="the-databases-tables-and-starting-data-dbinitsql">The database's tables and starting data, db/init.sql</h2>
+<p>The database starts out empty. The PostgreSQL image runs this file once, the first time its container starts with no data, and the file creates the three tables and fills them with four students and their grades. Every grade Omar tries to change in <a href="ch08.html">chapter 8</a> lives in a table this file creates.</p>
+<p>The file is written in SQL (Structured Query Language), the language used to create tables in a database and to ask it questions. A table is like a spreadsheet. Its columns have names and types, and each row holds one record.</p>
+<p>Create <code class="nw">db/init.sql</code> and paste this.</p>
+<figure class="code file"><figcaption><span class="lbl">File: db/init.sql</span><button type="button" class="copy" aria-label="Copy this file">Copy</button></figcaption><pre dir="ltr"><code>CREATE TABLE students (
+    id            SERIAL PRIMARY KEY,
+    username      TEXT UNIQUE NOT NULL,
+    full_name     TEXT NOT NULL,
+    email         TEXT NOT NULL,
+    major         TEXT NOT NULL,
+    year          INT NOT NULL,
+    password_hash TEXT NOT NULL
+);
+
+CREATE TABLE grades (
+    id         SERIAL PRIMARY KEY,
+    student_id INT REFERENCES students(id),
+    course     TEXT NOT NULL,
+    grade      INT NOT NULL
+);
+
+CREATE TABLE sessions (
+    token      TEXT PRIMARY KEY,
+    student_id INT REFERENCES students(id),
+    created_at TIMESTAMP DEFAULT now()
+);
+
+INSERT INTO students (username, full_name, email, major, year, password_hash) VALUES
+  (&#x27;sara&#x27;,   &#x27;Sara Ahmed&#x27;,  &#x27;sara@campus.local&#x27;,   &#x27;Computer Science&#x27;,     4, encode(sha256(&#x27;sara2026&#x27;::bytea), &#x27;hex&#x27;)),
+  (&#x27;omar&#x27;,   &#x27;Omar Khalid&#x27;, &#x27;omar@campus.local&#x27;,   &#x27;Information Security&#x27;, 3, encode(sha256(&#x27;omar2026&#x27;::bytea), &#x27;hex&#x27;)),
+  (&#x27;lina&#x27;,   &#x27;Lina Hassan&#x27;, &#x27;lina@campus.local&#x27;,   &#x27;Software Engineering&#x27;, 2, encode(sha256(&#x27;lina2026&#x27;::bytea), &#x27;hex&#x27;)),
+  (&#x27;yousef&#x27;, &#x27;Yousef Ali&#x27;,  &#x27;yousef@campus.local&#x27;, &#x27;Computer Networks&#x27;,    4, encode(sha256(&#x27;yousef2026&#x27;::bytea), &#x27;hex&#x27;));
+
+INSERT INTO grades (student_id, course, grade) VALUES
+  (1, &#x27;Network Security&#x27;,  91),
+  (1, &#x27;Cloud Computing&#x27;,   88),
+  (2, &#x27;Network Security&#x27;,  58),
+  (2, &#x27;Databases&#x27;,         64),
+  (3, &#x27;Network Security&#x27;,  77),
+  (3, &#x27;Operating Systems&#x27;, 82),
+  (4, &#x27;Network Security&#x27;,  69),
+  (4, &#x27;Cloud Computing&#x27;,   73);</code></pre></figure>
+<p>(1) Lines 1 to 9 create the table <code class="nw">students</code>. Each line inside the brackets is one column, its name first and its type after. <code class="nw">SERIAL</code> is a whole number that PostgreSQL fills in by itself, 1 for the first row, 2 for the second and so on. <code class="nw">PRIMARY KEY</code> marks the column that identifies a row, so no two rows can share an <code class="nw">id</code>. <code class="nw">TEXT</code> holds text of any length and <code class="nw">INT</code> holds a whole number. <code class="nw">UNIQUE</code> refuses a second student with the same user name, and <code class="nw">NOT NULL</code> refuses any row that leaves that column empty.</p>
+<p>(2) Line 8, <code class="nw">password_hash</code>. The table never holds a password. It holds a hash, a one-way fingerprint of the password. Hashing the same password always gives the same hash, but nobody can turn a hash back into the password, so <code class="nw">auth.py</code> checks a login by hashing what was typed and comparing the two hashes.</p>
+<p>(3) Lines 11 to 16 create <code class="nw">grades</code>. <code class="nw">REFERENCES students(id)</code> makes <code class="nw">student_id</code> a foreign key, a column whose value must be the <code class="nw">id</code> of a row that exists in another table. PostgreSQL refuses a grade for a student who doesn't exist.</p>
+<p>(4) Lines 18 to 22 create <code class="nw">sessions</code>, one row per login. <code class="nw">token</code> is the random string a browser receives after a correct password. <code class="nw">DEFAULT now()</code> fills <code class="nw">created_at</code> with the current time.</p>
+<p>(5) Lines 24 to 28 add the four students. <code>INSERT INTO students (...) VALUES</code> names the columns, then lists one bracketed row per student, with commas between the rows and <code class="nw">;</code> after the last one, because every SQL statement ends with <code class="nw">;</code>. The last value of each row, <code>encode(sha256('sara2026'::bytea), 'hex')</code>, computes the hash inside PostgreSQL. <code class="nw">::bytea</code> turns the text into raw bytes, <code class="nw">sha256(...)</code> hashes them, and <code class="nw">encode(..., 'hex')</code> writes the result as 64 characters from 0 to 9 and a to f. That's the same format Python produces in <code class="nw">auth.py</code>, which is why logins work.</p>
+<p>(6) Lines 30 to 38 add eight grades. Rows get their <code class="nw">id</code> in the order they go in. The third row, student 2 (omar), Network Security, 58, gets <code class="nw">id</code> 3. That's the row the attack in <a href="ch08.html">chapter 8</a> changes to 95.</p>
+<h3 id="test-the-file-in-a-throwaway-database">Test the file in a throwaway database</h3>
+<p>A mistake in this file would otherwise only show up in <a href="ch06.html">chapter 6</a>, as a database that keeps crashing inside the cluster, which is harder to read. A throwaway container, one you start for a single test and delete straight after, catches it now. Save <code class="nw">init.sql</code> before you run the command below. If the file doesn't exist yet, Docker makes an empty folder of that name in its place.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>docker run --rm -d --name dbtest -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=campus -v ~/microseg/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro postgres:17</code></pre></figure>
+<p><code class="nw">docker run</code> starts a container from an image. <code class="nw">--rm</code> deletes the container as soon as it stops. <code class="nw">-d</code> runs it in the background and gives you the prompt back. <code class="nw">--name dbtest</code> gives it a name the next commands can use. Each <code class="nw">-e</code> sets an environment variable inside the container. The PostgreSQL image refuses to start without <code class="nw">POSTGRES_PASSWORD</code>, and it reads <code class="nw">POSTGRES_DB</code> as the name of a database to create, here <code class="nw">campus</code>. <code class="nw">-v</code> makes your file appear inside the container at the path after the first colon, which is the folder the image checks for scripts to run on its first start. <code class="nw">:ro</code> means read-only, so the container can't change your copy. <code class="nw">postgres:17</code> is the image that <code class="nw">setup.sh</code> already downloaded in <a href="ch04.html">chapter 4</a>.</p>
+<p><strong>You should see</strong> one long line of letters and digits.</p>
+<p>That's the new container's ID, and yours will be different.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>docker: Error response from daemon: Conflict. The container name &quot;/dbtest&quot; is already in use by container</code></pre></figure>
+<p>The line goes on with a long ID. A <code class="nw">dbtest</code> container from an earlier try is still there. Run <code class="nw">docker rm -f dbtest</code> and start again.</p>
+<p>Wait about 10 seconds. In that time PostgreSQL sets up its data folder, runs your file and restarts itself. Then ask it for every grade with the owner's user name.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>docker exec dbtest psql -U postgres -d campus -c &quot;SELECT g.id, s.username, g.course, g.grade FROM grades g JOIN students s ON s.id = g.student_id ORDER BY g.id&quot;</code></pre></figure>
+<p><code class="nw">docker exec dbtest</code> runs a command inside the running container. <code class="nw">psql</code> is PostgreSQL's command-line client, <code class="nw">-U postgres</code> logs in as the user <code class="nw">postgres</code>, <code class="nw">-d campus</code> opens the <code class="nw">campus</code> database and <code class="nw">-c</code> runs one SQL statement. The statement reads four columns. <code class="nw">FROM grades g</code> gives the table the short nickname <code class="nw">g</code>. <code>JOIN students s ON s.id = g.student_id</code> pairs every grade with the student it belongs to, and <code class="nw">ORDER BY g.id</code> sorts by the grade's <code class="nw">id</code>.</p>
+<p><strong>You should see</strong> a table of eight grades.</p>
+<p>The row with <code class="nw">id</code> 3 must read <code class="nw">omar</code>, <code class="nw">Network Security</code>, <code class="nw">58</code>, and the last line must read <code class="nw">(8 rows)</code>. Spaces inside the table can differ, but the values can't.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>If the command printed an error instead of the table, don't delete the container yet.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>psql: error: connection to server on socket &quot;/var/run/postgresql/.s.PGSQL.5432&quot; failed: No such file or directory</code></pre></figure>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>ERROR:  relation &quot;grades&quot; does not exist</code></pre></figure>
+<p>PostgreSQL hadn't finished starting. Wait another 10 seconds and run the <code class="nw">docker exec</code> command again. If the second message still appears after 30 seconds, the database started from an empty or unsaved <code class="nw">init.sql</code> and has no tables at all. Run <code class="nw">head -1 ~/microseg/db/init.sql</code>. It must print <code class="nw">CREATE TABLE students (</code>. If it prints nothing, save the file in VS Code until its tab shows no round dot, then run <code class="nw">docker rm -f dbtest</code> and start the test again from the <code class="nw">docker run</code> command.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>Error response from daemon: No such container: dbtest</code></pre></figure>
+<p>The container stopped, and <code class="nw">--rm</code> deleted it. First check whether Docker made an empty folder where the file should be. Run <code class="nw">ls -l db</code>, and if the line for <code class="nw">init.sql</code> starts with the letter <code class="nw">d</code>, that's what happened. Remove the folder with <code>sudo rm -r ~/microseg/db/init.sql</code>, create the file as described above and run the test again.</p>
+<p>Otherwise PostgreSQL most likely hit an error in your <code class="nw">init.sql</code>. To read the error, start the container again without <code class="nw">-d</code>, so its messages print in your terminal.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>docker run --rm --name dbtest -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=campus -v ~/microseg/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro postgres:17</code></pre></figure>
+<p>Look for a line that starts with <code>psql:/docker-entrypoint-initdb.d/init.sql:</code> and contains <code class="nw">ERROR:</code>. The number right after the file name is the line in your file. Compare that line with the guide, fix it, save, and run the test again from the top. A line ending in <code>could not read from input file: Is a directory</code> means <code class="nw">init.sql</code> is the empty folder described above. If the last line ends in <code>database system is ready to accept connections</code> and nothing more appears, the file was fine after all. Press Ctrl+C to stop it, then run the test again from the top.</p>
+<p>Now delete the test database.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>docker rm -f dbtest</code></pre></figure>
+<p><code class="nw">docker rm</code> deletes a container, and <code class="nw">-f</code> stops it first if it's still running.</p>
+<p><strong>You should see</strong> the container's name.</p>
+<h2 id="the-login-service-appsauthpy">The login service, apps/auth.py</h2>
+<p>auth is the only service that checks passwords and the only one that hands out tokens. api asks it about every request a logged-in student makes, so you write it first.</p>
+<p>A few Python words before you paste. A module is one <code class="nw">.py</code> file, and <code class="nw">import</code> loads a module so your file can use what's in it. A function is a named block of code that runs when something calls it, and <code class="nw">def</code> starts one. Python groups lines by indentation, the spaces at the start of a line. Every line indented under a <code class="nw">def</code> belongs to that function, and this project uses four spaces per level. A string is a piece of text between quotes, such as <code class="nw">"ok"</code>. Flask is a small library for writing web services. You write a function, put a route above it naming a path such as <code class="nw">/login</code>, and Flask calls the function whenever a request for that path arrives.</p>
+<p>Create <code class="nw">apps/auth.py</code> and paste this.</p>
+<figure class="code file"><figcaption><span class="lbl">File: apps/auth.py</span><button type="button" class="copy" aria-label="Copy this file">Copy</button></figcaption><pre dir="ltr"><code># auth: checks username + password, issues tokens, and verifies tokens for api.
+import hashlib
+import os
+import secrets
+
+import psycopg2
+from flask import Flask, request
+from psycopg2.extras import RealDictCursor
+
+app = Flask(__name__)
+
+
+def query(sql, params=()):
+    &quot;&quot;&quot;Open a DB connection, run one SQL statement, return the rows as dicts, close.&quot;&quot;&quot;
+    conn = psycopg2.connect(host=&quot;db&quot;, dbname=os.environ[&quot;POSTGRES_DB&quot;],
+                            user=os.environ[&quot;POSTGRES_USER&quot;],
+                            password=os.environ[&quot;POSTGRES_PASSWORD&quot;], connect_timeout=3)
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur.execute(sql, params)
+    rows = cur.fetchall()
+    conn.commit()
+    conn.close()
+    return rows
+
+
+@app.get(&quot;/healthz&quot;)
+def healthz():
+    return &quot;ok&quot;
+
+
+@app.post(&quot;/login&quot;)
+def login():
+    body = request.get_json()
+    password_hash = hashlib.sha256(body[&quot;password&quot;].encode()).hexdigest()
+    rows = query(&quot;SELECT id FROM students WHERE username = %s AND password_hash = %s&quot;,
+                 (body[&quot;username&quot;], password_hash))
+    if not rows:
+        return {&quot;error&quot;: &quot;wrong username or password&quot;}, 401
+    token = secrets.token_hex(16)
+    query(&quot;INSERT INTO sessions (token, student_id) VALUES (%s, %s) RETURNING token&quot;, (token, rows[0][&quot;id&quot;]))
+    return {&quot;token&quot;: token}
+
+
+@app.get(&quot;/verify&quot;)
+def verify():
+    token = request.headers.get(&quot;Authorization&quot;, &quot;&quot;).replace(&quot;Bearer &quot;, &quot;&quot;)
+    rows = query(&quot;SELECT student_id FROM sessions WHERE token = %s&quot;, (token,))
+    if not rows:
+        return {&quot;error&quot;: &quot;invalid token&quot;}, 401
+    return {&quot;student_id&quot;: rows[0][&quot;student_id&quot;]}</code></pre></figure>
+<p>(1) Line 1 is a comment. Python ignores everything after a <code class="nw">#</code>.</p>
+<p>(2) Lines 2 to 8 load what the file needs. <code class="nw">hashlib</code> computes hashes, <code class="nw">os</code> reads environment variables and <code class="nw">secrets</code> makes random tokens. <code class="nw">psycopg2</code> is the PostgreSQL driver, the library Python uses to talk to a PostgreSQL server. <code class="nw">Flask</code> and <code class="nw">request</code> come from Flask.</p>
+<p>(3) Line 10, <code class="nw">app = Flask(__name__)</code>, creates the web application. You'll need the name <code class="nw">app</code> again in <a href="ch06.html">chapter 6</a>, where the command that starts this service asks for <code class="nw">auth:app</code>, the object called <code class="nw">app</code> inside <code class="nw">auth.py</code>.</p>
+<p>(4) Lines 13 to 23 define <code class="nw">query</code>, a helper the routes call to talk to the database. <code class="nw">params=()</code> means the second argument is optional and defaults to an empty tuple, <code class="nw">()</code>, meaning no values. A tuple is Python's fixed list, written in round brackets. The text in triple quotes describes the function to human readers. <code class="nw">psycopg2.connect(...)</code> opens a connection to the host named <code class="nw">db</code>, and <code class="nw">os.environ["POSTGRES_DB"]</code> reads the environment variable <code class="nw">POSTGRES_DB</code>. In <a href="ch06.html">chapter 6</a> Kubernetes fills these variables from a Secret, so the password never appears in the code. <code class="nw">connect_timeout=3</code> gives up after three seconds. <code class="nw">RealDictCursor</code> makes each row come back as a dictionary, Python's set of <code class="nw">name: value</code> pairs, so the code can write <code class="nw">rows[0]["id"]</code>. <code class="nw">execute</code> runs the statement, <code class="nw">fetchall</code> collects every row it returned, <code class="nw">commit</code> saves any change and <code class="nw">close</code> ends the connection. Opening a fresh connection for every statement is slow, but it keeps the code short. api and admin carry a copy of the same helper.</p>
+<p>(5) Lines 26 to 28 are the simplest route. A line that starts with <code class="nw">@</code> is a decorator, a label that changes the function below it. <code class="nw">@app.get("/healthz")</code> tells Flask to call <code class="nw">healthz()</code> whenever a GET request for <code class="nw">/healthz</code> arrives. The function returns <code class="nw">ok</code>, and Flask sends that back with status code 200, which means success. In <a href="ch06.html">chapter 6</a> Kubernetes calls <code class="nw">/healthz</code> every 10 seconds to find out whether the service is ready.</p>
+<p>(6) Lines 31 to 34 start the login route, which takes POST requests. <code class="nw">request.get_json()</code> reads the body of the request as JSON (JavaScript Object Notation), the text format web services use for data, such as <code>{"username": "omar", "password": "omar2026"}</code>, and turns it into a dictionary. Line 34 hashes the typed password. <code class="nw">.encode()</code> turns the text into bytes, <code class="nw">sha256</code> hashes them and <code class="nw">hexdigest()</code> writes the 64-character form that <code class="nw">init.sql</code> stored.</p>
+<p>(7) Lines 35 and 36 ask the database for a student with that name and that hash. The SQL holds two <code class="nw">%s</code> markers, and the two values travel separately, in the brackets after the comma. psycopg2 hands them to PostgreSQL as data, never as part of the SQL text, so a user name such as <code class="nw">' OR '1'='1</code> can't change what the statement does. This is a parameterized query. It's why the portal has no SQL injection, the database cousin of the command injection in news.</p>
+<p>(8) Lines 37 and 38 handle a wrong password. <code class="nw">if not rows:</code> is true when the database found nothing. When a Flask function returns a dictionary, Flask sends it as JSON, and a second value after the comma sets the status code. 401 means "you aren't logged in".</p>
+<p>(9) Lines 39 to 41 handle a right password. <code class="nw">secrets.token_hex(16)</code> makes 16 random bytes and writes them as 32 characters. That's the token. Line 40 stores it with the student's <code class="nw">id</code> and line 41 sends it back. The <code class="nw">RETURNING token</code> at the end of the SQL is there because <code class="nw">query</code> always calls <code class="nw">fetchall</code>, and psycopg2 raises an error when you fetch rows from a statement that returns none.</p>
+<p>(10) Lines 44 to 50 check a token for api. A header is a named line of extra information that travels with an HTTP request. The browser sends the token in the <code class="nw">Authorization</code> header as <code class="nw">Bearer</code> followed by a space and the token, and <code class="nw">.replace("Bearer ", "")</code> cuts that word off. <code>request.headers.get("Authorization", "")</code> gives an empty string when the header is missing, so a request without a token gets 401 instead of crashing the route.</p>
+<h3 id="check-the-grammar-with-py_compile">Check the grammar with py_compile</h3>
+<p>py_compile is a tool that comes with Python. It reads a <code class="nw">.py</code> file and translates it the way Python would before running it, but it doesn't run anything. A missing bracket, a quote left open or a wrong indent shows up as an error. It can't tell you whether the logic is right, and it doesn't need Flask or psycopg2 installed, which is why it works with the plain <code class="nw">python3</code> in Ubuntu.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; python3 -m py_compile apps/auth.py &amp;&amp; echo &quot;auth.py compiles&quot;</code></pre></figure>
+<p><code>python3 -m py_compile apps/auth.py</code> checks the file and prints nothing when it's fine. Silence is hard to read, so <code>&amp;&amp; echo "auth.py compiles"</code> prints a line, and only when the check passed. The check also leaves a folder called <code class="nw">apps/__pycache__</code> behind, which Git ignores.</p>
+<p><strong>You should see</strong> one line.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>The last line of a Python error names the problem. A line further up gives the file name and the line number. Press Ctrl+G in VS Code and type the number to jump there.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>IndentationError: unexpected indent</code></pre></figure>
+<p>A line starts with more spaces than its place allows. This usually comes from pasting into a line that already had spaces in it. Make the line start exactly where its neighbours start.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>TabError: inconsistent use of tabs and spaces in indentation</code></pre></figure>
+<p>Some lines are indented with tab characters and others with spaces, and Python refuses to guess how they line up. Turn on Render Whitespace as you did in <a href="ch02.html">chapter 2</a>. Tabs show as arrows and spaces as dots. Press Ctrl+Shift+P, type <code class="nw">Convert Indentation to Spaces</code>, press Enter and save.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>[Errno 2] No such file or directory: &#x27;apps/auth.py&#x27;</code></pre></figure>
+<p>The file isn't where the command expects it. It may have landed in the wrong folder or been saved under another name, such as <code class="nw">Auth.py</code> or <code class="nw">auth.py.txt</code>. Run <code class="nw">ls apps</code> to see what's really there and rename the file in VS Code by right-clicking it and choosing <strong>Rename</strong>.</p>
+<h2 id="the-student-api-appsapipy">The student API, apps/api.py</h2>
+<p>api is the back end the portal page talks to once a student has logged in. It never checks a password itself. It passes the login on to auth, and for every other request it asks auth who owns the token before it reads the database. It also carries a forgotten debug route, <code class="nw">/api/export</code>, which the L7 rule in <a href="ch10.html">chapter 10</a> shuts.</p>
+<p>Create <code class="nw">apps/api.py</code> and paste this.</p>
+<figure class="code file"><figcaption><span class="lbl">File: apps/api.py</span><button type="button" class="copy" aria-label="Copy this file">Copy</button></figcaption><pre dir="ltr"><code># api: profile and grades for the logged-in student. Asks auth who owns the token.
+import os
+
+import psycopg2
+import requests
+from flask import Flask, jsonify, request
+from psycopg2.extras import RealDictCursor
+
+app = Flask(__name__)
+AUTH_URL = &quot;http://auth:5001&quot;
+
+
+def query(sql, params=()):
+    &quot;&quot;&quot;Open a DB connection, run one SQL statement, return the rows as dicts, close.&quot;&quot;&quot;
+    conn = psycopg2.connect(host=&quot;db&quot;, dbname=os.environ[&quot;POSTGRES_DB&quot;],
+                            user=os.environ[&quot;POSTGRES_USER&quot;],
+                            password=os.environ[&quot;POSTGRES_PASSWORD&quot;], connect_timeout=3)
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur.execute(sql, params)
+    rows = cur.fetchall()
+    conn.commit()
+    conn.close()
+    return rows
+
+
+def current_student():
+    &quot;&quot;&quot;Return the student id that owns the Bearer token, or None.&quot;&quot;&quot;
+    answer = requests.get(AUTH_URL + &quot;/verify&quot;, timeout=3,
+                          headers={&quot;Authorization&quot;: request.headers.get(&quot;Authorization&quot;, &quot;&quot;)})
+    if answer.status_code != 200:
+        return None
+    return answer.json()[&quot;student_id&quot;]
+
+
+@app.get(&quot;/healthz&quot;)
+def healthz():
+    return &quot;ok&quot;
+
+
+@app.post(&quot;/api/login&quot;)
+def login():
+    answer = requests.post(AUTH_URL + &quot;/login&quot;, json=request.get_json(), timeout=3)
+    return answer.json(), answer.status_code
+
+
+@app.get(&quot;/api/profile&quot;)
+def profile():
+    student_id = current_student()
+    if student_id is None:
+        return {&quot;error&quot;: &quot;not logged in&quot;}, 401
+    rows = query(&quot;SELECT id, full_name, email, major, year FROM students WHERE id = %s&quot;, (student_id,))
+    return jsonify(rows[0])
+
+
+@app.get(&quot;/api/grades&quot;)
+def grades():
+    student_id = current_student()
+    if student_id is None:
+        return {&quot;error&quot;: &quot;not logged in&quot;}, 401
+    rows = query(&quot;SELECT course, grade FROM grades WHERE student_id = %s ORDER BY course&quot;, (student_id,))
+    return jsonify(rows)
+
+
+@app.get(&quot;/api/export&quot;)
+def export():
+    # Old debug endpoint that nobody removed: every grade of every student, no login.
+    rows = query(&quot;SELECT s.full_name, g.course, g.grade FROM grades g JOIN students s ON s.id = g.student_id ORDER BY s.id&quot;)
+    return jsonify(rows)</code></pre></figure>
+<p>(1) Line 5 loads <code class="nw">requests</code>, a library that sends HTTP requests from Python the way a browser does. Line 6 adds <code class="nw">jsonify</code> from Flask.</p>
+<p>(2) Line 10, <code class="nw">AUTH_URL = "http://auth:5001"</code>. <code class="nw">auth</code> is the name of the auth Service you create in <a href="ch06.html">chapter 6</a> and 5001 is its port. Inside the cluster, DNS turns the name <code class="nw">auth</code> into the right address.</p>
+<p>(3) Lines 13 to 23 repeat <code class="nw">query</code>.</p>
+<p>(4) Lines 26 to 32 define <code class="nw">current_student()</code>. It sends the browser's <code class="nw">Authorization</code> header on to auth's <code class="nw">/verify</code> route and gives up if auth doesn't connect or answer within three seconds. If auth can't be reached at all, the request fails with an error page (status 500) instead. If auth answers with anything other than 200, the function returns <code class="nw">None</code>, Python's word for "nothing". Otherwise <code class="nw">answer.json()</code> reads auth's JSON answer and the function returns the <code class="nw">student_id</code> in it.</p>
+<p>(5) Lines 40 to 43, <code class="nw">/api/login</code>. The JSON body from the browser goes to auth's <code class="nw">/login</code> unchanged, and auth's answer and status code go back to the browser unchanged. The browser's login request goes through nginx to api and never reaches auth directly, so auth stays out of its reach.</p>
+<p>(6) Lines 46 to 52, <code class="nw">/api/profile</code>. Without a valid token the route returns 401. With one, it reads five columns of that student's row. <code class="nw">(student_id,)</code> with its trailing comma is a tuple holding exactly one value, and without the comma Python would read it as a plain number in brackets. <code class="nw">jsonify(rows[0])</code> sends the first and only row as JSON.</p>
+<p>(7) Lines 55 to 61, <code class="nw">/api/grades</code>, follow the same pattern and return all of this student's grades, sorted by course.</p>
+<p>(8) Lines 64 to 68, <code class="nw">/api/export</code>, never call <code class="nw">current_student()</code>. Anyone who can reach this route gets every grade of every student, with no login at all. Frontend has to reach api for the portal to work, so the L3/L4 rules alone can't protect this route. In <a href="ch10.html">chapter 10</a> an L7 rule allows only three exact method and path pairs, and <code class="nw">/api/export</code> gets 403.</p>
+<p>Check the grammar.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; python3 -m py_compile apps/api.py &amp;&amp; echo &quot;api.py compiles&quot;</code></pre></figure>
+<p><strong>You should see</strong> one line.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>The three errors listed for <code class="nw">auth.py</code> apply here too. One more turns up often in this file.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>SyntaxError: &#x27;(&#x27; was never closed</code></pre></figure>
+<p>A bracket opened and never closed, most often on a long line that was cut short when you copied it. Python names the line where the bracket opened. Compare that line and the one after it with the guide, character by character, right to the end.</p>
+<p>If you're splitting the chapter into two sittings, stop here. Your files are saved and no container is running, so next time you can pick up with news. Don't commit yet, because the commit at the end of the chapter checks all ten files together. When you come back, open the Ubuntu terminal, run <code>cd ~/microseg &amp;&amp; code .</code> and carry on with news.</p>
+<h2 id="the-news-service-appsnewspy">The news service, apps/news.py</h2>
+<p>news shows the announcements on the portal page and offers the image link checker for news editors. That checker is the attacker's way in. You type its function by hand, because typing makes you read every character.</p>
+<p>Create <code class="nw">apps/news.py</code> and paste the whole file below. Then delete lines 26 to 34. Click in front of the <code class="nw">@</code> at the start of line 26, hold Shift, click after the last character of line 34, and press Delete. Now type those nine lines back in yourself, reading them from the block, without copying. In the block they start at <code class="nw">@app.post("/news/check-image")</code> and run to the last line of the file, the one that starts with <code class="nw">return</code>.</p>
+<p>Read these tips before you start typing. Each indent level is four spaces, and pressing Tab in a <code class="nw">.py</code> file in VS Code puts in four spaces for you. After a line that ends in <code class="nw">:</code>, VS Code indents the next line by itself, so don't add spaces on top of that. When VS Code adds a closing bracket or quote for you, type the closing character anyway when you reach it, and VS Code usually steps over its own instead of adding a second one. On line 31 the <code class="nw">\\n</code> has two backslashes, and there's a space between <code class="nw">3</code> and the closing <code class="nw">"</code>.</p>
+<figure class="code file"><figcaption><span class="lbl">File: apps/news.py</span><button type="button" class="copy" aria-label="Copy this file">Copy</button></figcaption><pre dir="ltr"><code># news: public announcements + an &quot;image link checker&quot; for news editors.
+# The checker has a command-injection bug ON PURPOSE. It is the attacker&#x27;s way in.
+import subprocess
+
+from flask import Flask, jsonify, request
+
+app = Flask(__name__)
+
+NEWS = [
+    {&quot;date&quot;: &quot;2026-11-01&quot;, &quot;title&quot;: &quot;Spring registration is open&quot;},
+    {&quot;date&quot;: &quot;2026-11-10&quot;, &quot;title&quot;: &quot;Library opens 24/7 during finals&quot;},
+    {&quot;date&quot;: &quot;2026-11-15&quot;, &quot;title&quot;: &quot;Graduation project fair on 10 December&quot;},
+]
+
+
+@app.get(&quot;/healthz&quot;)
+def healthz():
+    return &quot;ok&quot;
+
+
+@app.get(&quot;/news&quot;)
+def news():
+    return jsonify(NEWS)
+
+
+@app.post(&quot;/news/check-image&quot;)
+def check_image():
+    url = request.form.get(&quot;url&quot;, &quot;&quot;)
+    # BUG ON PURPOSE: the user&#x27;s text is glued into a shell command.
+    # Sending &quot;x; id&quot; makes the shell run curl AND id.
+    command = &quot;curl -s -o /dev/null -w &#x27;%{http_code}\\n&#x27; --max-time 3 &quot; + url
+    result = subprocess.run(command, shell=True, stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT, text=True, timeout=20)
+    return &quot;HTTP status of image: &quot; + result.stdout, 200, {&quot;Content-Type&quot;: &quot;text/plain&quot;}</code></pre></figure>
+<p>(1) Lines 1 and 2 are comments. They say the bug is deliberate.</p>
+<p>(2) Line 3 loads <code class="nw">subprocess</code>, the module Python uses to start other programs.</p>
+<p>(3) Lines 9 to 13 hold the three announcements as a list of dictionaries, written straight into the code. news has no database and nothing worth stealing. The attacker wants it for where it leads.</p>
+<p>(4) Lines 21 to 23 send the list as JSON when a GET request for <code class="nw">/news</code> arrives. The portal page asks for it every time it loads.</p>
+<p>(5) Line 26 answers POST requests for <code class="nw">/news/check-image</code>, which is where the checker form on the portal page sends its data.</p>
+<p>(6) Line 28 reads the field called <code class="nw">url</code> from a submitted form. A form on a web page, like the checker form you add to <code class="nw">index.html</code> below, sends its fields as <code class="nw">url=...</code>, and the test at the end of this chapter sends the same thing with curl. If the field is missing, <code class="nw">url</code> becomes an empty string.</p>
+<p>(7) Line 31 builds one line of text, a complete <code class="nw">curl</code> command. <code class="nw">-s</code> keeps curl quiet, <code class="nw">-o /dev/null</code> throws the downloaded picture away, <code class="nw">-w '%{http_code}\\n'</code> prints only the HTTP status code followed by a line break, and <code class="nw">--max-time 3</code> gives up after three seconds. Then <code class="nw">+ url</code> glues the user's text onto the end, with nothing checking what that text contains. Inside a Python string <code class="nw">\\</code> stands for one backslash, so the command ends up holding <code class="nw">\n</code>, which curl turns into a line break.</p>
+<p>(8) Lines 32 and 33 run that line. <code class="nw">shell=True</code> hands the whole line to a shell, <code class="nw">/bin/sh</code>, and the shell splits it at every <code class="nw">;</code> and runs each piece as its own command. Together with line 31, this is what makes the injection possible. <code class="nw">stdout=subprocess.PIPE</code> collects what the commands print, <code class="nw">stderr=subprocess.STDOUT</code> adds their error messages to the same collection, <code class="nw">text=True</code> returns it as text instead of raw bytes, and <code class="nw">timeout=20</code> makes Python kill the shell after 20 seconds. In that case the request fails with an error page instead of returning the output.</p>
+<p>(9) Line 34 sends back <code class="nw">HTTP status of image:</code> followed by everything the shell printed, with status 200. <code class="nw">Content-Type</code> is a header that tells the browser what kind of answer this is, here plain text. Whatever the attacker's commands print comes back to the attacker in this reply.</p>
+<p>Check your typing.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; python3 -m py_compile apps/news.py &amp;&amp; echo &quot;news.py compiles&quot;</code></pre></figure>
+<p><strong>You should see</strong> one line.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>SyntaxError: unterminated string literal (detected at line 31)</code></pre></figure>
+<p>A quote on line 31 is missing. The text starts with <code class="nw">"curl</code> and ends with <code class="nw">3 "</code> right before <code class="nw">+ url</code>. The two single quotes around <code class="nw">%{http_code}\\n</code> sit inside it.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>IndentationError: expected an indented block after function definition on line 27</code></pre></figure>
+<p>The line after <code class="nw">def check_image():</code> must start with four spaces, and so must every line down to the <code class="nw">return</code>. Lines 32 and 33 are one statement broken in two, and the continuation line may start anywhere, because Python ignores indentation inside open brackets. Line it up under <code class="nw">command</code> to match the guide.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>SyntaxError: unmatched &#x27;)&#x27;</code></pre></figure>
+<p>VS Code kept its own closing bracket and you typed a second one. This happens most on line 33, because pressing Enter at the end of line 32 moves VS Code's <code class="nw">)</code> down with the cursor. Delete one <code class="nw">)</code> at the end of the line Python names.</p>
+<p>The errors listed for <code class="nw">auth.py</code> apply here too. A typo that keeps the grammar intact, such as <code class="nw">subprocess.rum</code>, passes this check. It only fails in the injection test at the end of the chapter, and the troubleshooting there covers it.</p>
+<h2 id="the-admin-panel-appsadminpy">The admin panel, apps/admin.py</h2>
+<p>admin stands in for the internal tools every organization runs. It lists every user with their password hash and asks for no login, on the theory that only insiders can reach it. Attack step 5 in <a href="ch08.html">chapter 8</a> tests that theory.</p>
+<p>Create <code class="nw">apps/admin.py</code> and paste this.</p>
+<figure class="code file"><figcaption><span class="lbl">File: apps/admin.py</span><button type="button" class="copy" aria-label="Copy this file">Copy</button></figcaption><pre dir="ltr"><code># admin: internal admin panel. No login, because &quot;only internal people can reach it&quot;.
+import os
+
+import psycopg2
+from flask import Flask, jsonify
+from psycopg2.extras import RealDictCursor
+
+app = Flask(__name__)
+
+
+def query(sql, params=()):
+    &quot;&quot;&quot;Open a DB connection, run one SQL statement, return the rows as dicts, close.&quot;&quot;&quot;
+    conn = psycopg2.connect(host=&quot;db&quot;, dbname=os.environ[&quot;POSTGRES_DB&quot;],
+                            user=os.environ[&quot;POSTGRES_USER&quot;],
+                            password=os.environ[&quot;POSTGRES_PASSWORD&quot;], connect_timeout=3)
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur.execute(sql, params)
+    rows = cur.fetchall()
+    conn.commit()
+    conn.close()
+    return rows
+
+
+@app.get(&quot;/healthz&quot;)
+def healthz():
+    return &quot;ok&quot;
+
+
+@app.get(&quot;/&quot;)
+def home():
+    return &quot;Campus admin panel (internal only). Endpoints: /users&quot;
+
+
+@app.get(&quot;/users&quot;)
+def users():
+    return jsonify(query(&quot;SELECT id, username, full_name, email, password_hash FROM students ORDER BY id&quot;))</code></pre></figure>
+<p>(1) Line 1 states the assumption the whole design rests on.</p>
+<p>(2) Lines 11 to 21 repeat <code class="nw">query</code>.</p>
+<p>(3) Lines 29 to 31 answer a request for <code class="nw">/</code> with one line of text that lists the endpoints.</p>
+<p>(4) Lines 34 to 36 return every student's <code class="nw">id</code>, user name, full name, email and password hash, and nothing in the code asks who's calling. Only the network decides who can reach this route. After <a href="ch10.html">chapter 10</a> that's ops alone.</p>
+<p>Check it, then list every route in all four files.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; python3 -m py_compile apps/admin.py &amp;&amp; echo &quot;admin.py compiles&quot;</code></pre></figure>
+<p><strong>You should see</strong> one line.</p>
+<p>If it fails, the errors listed for <code class="nw">auth.py</code> apply.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; grep -n &quot;@app&quot; apps/*.py</code></pre></figure>
+<p><code class="nw">grep</code> prints every line of a file that contains a piece of text, here <code class="nw">@app</code>, which every route line starts with. <code class="nw">-n</code> adds each line's number, and <code class="nw">apps/*.py</code> means every file in <code class="nw">apps</code> whose name ends in <code class="nw">.py</code>.</p>
+<p><strong>You should see</strong> 14 lines, each one the file name, the line number and a route.</p>
+<p>The files come in alphabetical order, admin first and news last. Each of the four files has a <code class="nw">/healthz</code> route, and api has five routes. Compare the list with the API list in <a href="ch01.html">chapter 1</a>.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>If you count fewer than 14 lines, a route line was lost in copying. A function that loses its <code class="nw">@app</code> line still compiles, so this list is the only place the mistake shows. The file names in the output tell you which file is short. admin, auth and news should have three lines each and api five. Compare that file with the guide and add the missing <code class="nw">@app</code> line above its function.</p>
+<h2 id="the-portals-web-server-frontenddefaultconf-and-frontendindexhtml">The portal's web server, frontend/default.conf and frontend/index.html</h2>
+<p>frontend runs nginx, a web server, and it's the only service your browser ever talks to. It sends the portal page, and it passes every request for <code class="nw">/api/</code> or <code class="nw">/news</code> on to the service behind it. A server that passes requests on like this is called a reverse proxy. You don't write a program for frontend. The stock <code class="nw">nginx:1.28</code> image reads these two files, which <a href="ch06.html">chapter 6</a> hands to it.</p>
+<p>Create <code class="nw">frontend/default.conf</code> and paste this.</p>
+<figure class="code file"><figcaption><span class="lbl">File: frontend/default.conf</span><button type="button" class="copy" aria-label="Copy this file">Copy</button></figcaption><pre dir="ltr"><code># nginx for the Campus Portal: serves index.html and forwards /api and /news.
+server {
+    listen 80;
+    root /usr/share/nginx/html;
+
+    # Look up service names at request time through kube-dns (10.96.0.10 in kind).
+    # Full names are required: nginx&#x27;s own resolver does not use the search list.
+    resolver 10.96.0.10 valid=10s ipv6=off;
+
+    proxy_http_version 1.1;      # the Cilium L7 proxy (Envoy) expects HTTP/1.1
+    proxy_connect_timeout 5s;    # fail fast if a policy drops the connection
+
+    location = /healthz {
+        return 200 &quot;ok\n&quot;;
+    }
+
+    location /api/ {
+        set $api http://api.campus.svc.cluster.local:8080;
+        proxy_pass $api;
+    }
+
+    location /news {
+        set $news http://news.campus.svc.cluster.local:5000;
+        proxy_pass $news;
+    }
+}</code></pre></figure>
+<p>(1) Line 2, <code class="nw">server {</code>, opens the settings for one website, and the <code class="nw">}</code> on line 26 closes them. Every setting inside ends with <code class="nw">;</code>. <code class="nw">listen 80</code> makes nginx accept connections on port 80. Port 30080 in Figure 3 is the NodePort, the door on the node, and in <a href="ch06.html">chapter 6</a> Kubernetes forwards it to this port 80 inside the frontend pod.</p>
+<p>(2) Line 4, <code class="nw">root</code>, names the folder nginx sends files from. <a href="ch06.html">Chapter 6</a> puts <code class="nw">index.html</code> there, and a request for <code class="nw">/</code> gets that page.</p>
+<p>(3) Line 8, <code class="nw">resolver</code>. nginx has to turn a name such as <code class="nw">api.campus.svc.cluster.local</code> into an address, and this line tells it which DNS server to ask, kube-dns at <code class="nw">10.96.0.10</code>, the fixed address kind gives the cluster's DNS service. <code class="nw">valid=10s</code> makes nginx forget each answer after 10 seconds and ask again, so it finds a service that came back at a new address. <code class="nw">ipv6=off</code> makes it ask for IPv4 addresses only, the kind your cluster uses.</p>
+<p>(4) Line 10, <code class="nw">proxy_http_version 1.1</code>. Toward the services behind it nginx speaks HTTP/1.0 unless told otherwise. Envoy, the proxy that checks the L7 rule in <a href="ch10.html">chapter 10</a>, expects HTTP/1.1, so this line switches nginx to 1.1.</p>
+<p>(5) Line 11, <code class="nw">proxy_connect_timeout 5s</code>. If a connection to a service can't open within 5 seconds, nginx gives up and returns an error page. Without this line it would wait a full minute. When a policy drops a connection, nothing ever answers, so the shorter wait makes a blocked flow show up fast.</p>
+<p>(6) Lines 13 to 15. <code class="nw">location = /healthz</code> matches exactly that path, and nginx answers <code class="nw">ok</code> by itself. Kubernetes uses it the same way as the <code class="nw">/healthz</code> routes in the Python files.</p>
+<p>(7) Lines 17 to 20 handle every request whose path starts with <code class="nw">/api/</code>. <code class="nw">set $api ...</code> stores the full address of api in a variable, and <code class="nw">proxy_pass $api</code> sends the request there with its path unchanged. nginx needs the variable here. When <code class="nw">proxy_pass</code> names a host directly, nginx looks that name up once when it starts and refuses to start at all if the name doesn't exist yet. With a variable it looks the name up at the moment a request arrives, through the resolver from line 8.</p>
+<p>(8) Lines 22 to 25 do the same for news on port 5000. <code class="nw">location /news</code> covers both <code class="nw">/news</code> and <code class="nw">/news/check-image</code>.</p>
+<p>Lines 6 and 7 explain why the addresses are written out in full. Inside a pod, the file <code class="nw">/etc/resolv.conf</code> holds a search list, a list of endings that programs try after a short name. That's how plain <code class="nw">auth</code> works in <code class="nw">api.py</code>. The search list turns it into <code class="nw">auth.campus.svc.cluster.local</code> before the lookup. nginx's own resolver skips the search list, so here the names have to be complete.</p>
+<p>There is no <code class="nw">location</code> for auth, db or admin, so the browser can't ask nginx for any of them. On a flat network every pod can still reach them directly, though, and <a href="ch08.html">chapter 8</a> does exactly that.</p>
+<p>Create <code class="nw">frontend/index.html</code> and paste this.</p>
+<figure class="code file"><figcaption><span class="lbl">File: frontend/index.html</span><button type="button" class="copy" aria-label="Copy this file">Copy</button></figcaption><pre dir="ltr"><code>&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;&gt;
+  &lt;title&gt;Campus Portal&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Campus Portal&lt;/h1&gt;
+
+  &lt;h2&gt;Announcements&lt;/h2&gt;
+  &lt;ul id=&quot;news&quot;&gt;&lt;/ul&gt;
+
+  &lt;h2&gt;Student login&lt;/h2&gt;
+  &lt;input id=&quot;username&quot; placeholder=&quot;username&quot;&gt;
+  &lt;input id=&quot;password&quot; type=&quot;password&quot; placeholder=&quot;password&quot;&gt;
+  &lt;button onclick=&quot;login()&quot;&gt;Log in&lt;/button&gt;
+  &lt;pre id=&quot;result&quot;&gt;&lt;/pre&gt;
+
+  &lt;h2&gt;Image link checker (for news editors)&lt;/h2&gt;
+  &lt;form method=&quot;post&quot; action=&quot;/news/check-image&quot;&gt;
+    &lt;input name=&quot;url&quot; size=&quot;50&quot; placeholder=&quot;http://example.com/picture.png&quot;&gt;
+    &lt;button&gt;Check&lt;/button&gt;
+  &lt;/form&gt;
+
+  &lt;script&gt;
+    async function loadNews() {
+      const answer = await fetch(&quot;/news&quot;);
+      const items = await answer.json();
+      for (const item of items) {
+        const li = document.createElement(&quot;li&quot;);
+        li.textContent = item.date + &quot;  &quot; + item.title;
+        document.getElementById(&quot;news&quot;).appendChild(li);
+      }
+    }
+
+    async function login() {
+      const answer = await fetch(&quot;/api/login&quot;, {
+        method: &quot;POST&quot;,
+        headers: {&quot;Content-Type&quot;: &quot;application/json&quot;},
+        body: JSON.stringify({
+          username: document.getElementById(&quot;username&quot;).value,
+          password: document.getElementById(&quot;password&quot;).value
+        })
+      });
+      const data = await answer.json();
+      if (!data.token) {
+        document.getElementById(&quot;result&quot;).textContent = &quot;Login failed&quot;;
+        return;
+      }
+      const headers = {&quot;Authorization&quot;: &quot;Bearer &quot; + data.token};
+      const profileAnswer = await fetch(&quot;/api/profile&quot;, {headers: headers});
+      const profile = await profileAnswer.json();
+      const gradesAnswer = await fetch(&quot;/api/grades&quot;, {headers: headers});
+      const grades = await gradesAnswer.json();
+      document.getElementById(&quot;result&quot;).textContent = JSON.stringify({profile: profile, grades: grades}, null, 2);
+    }
+
+    loadNews();
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre></figure>
+<p>(1) HTML (HyperText Markup Language) is the language of web pages, made of tags in angle brackets such as <code class="nw">&lt;h1&gt;</code> for a big heading. Lines 1 to 6 are the page's header, and <code class="nw">&lt;title&gt;</code> sets the text on the browser tab.</p>
+<p>(2) Lines 10 and 11 add a heading and an empty list, <code class="nw">&lt;ul id="news"&gt;</code>. The <code class="nw">id</code> gives the list a name the script below can find it by.</p>
+<p>(3) Lines 13 to 17 add two input boxes, a button and an empty <code class="nw">&lt;pre&gt;</code> area called <code class="nw">result</code>. <code class="nw">onclick="login()"</code> runs the <code class="nw">login</code> function when the button is clicked.</p>
+<p>(4) Lines 19 to 23 are the image checker, a form. <code class="nw">method="post"</code> and <code class="nw">action="/news/check-image"</code> make the <strong>Check</strong> button send a POST request to that path, and <code class="nw">name="url"</code> makes the box's text travel as the field <code class="nw">url</code>. That's exactly the request the attack sends with curl in <a href="ch08.html">chapter 8</a>.</p>
+<p>(5) Lines 25 to 59 are JavaScript, the language browsers run inside a page. <code class="nw">async</code> and <code class="nw">await</code> let the page wait for an answer from the server without freezing. <code class="nw">loadNews()</code> asks nginx for <code class="nw">/news</code>, reads the JSON and adds one list item per announcement. It uses <code class="nw">textContent</code>, which puts the title in as plain text, so a title that contained HTML tags would show up as text instead of running as part of the page.</p>
+<p>(6) <code class="nw">login()</code> sends the user name and password as JSON to <code class="nw">/api/login</code>. The <code class="nw">Content-Type: application/json</code> header tells api the body is JSON. If the answer holds no token, the page shows <code class="nw">Login failed</code>. Otherwise it builds the <code class="nw">Authorization</code> header from the word <code class="nw">Bearer</code>, a space and the token, asks for <code class="nw">/api/profile</code> and <code class="nw">/api/grades</code>, and prints both answers. <code class="nw">JSON.stringify(..., null, 2)</code> turns them back into JSON text with two-space indents so a person can read them.</p>
+<p>(7) Line 58 calls <code class="nw">loadNews()</code> once when the page loads, which is why the announcements appear without a click.</p>
+<h3 id="test-defaultconf-with-nginx-t">Test default.conf with nginx -t</h3>
+<p>nginx can check a settings file without starting the server. Run that check in a throwaway nginx container with your file in place of the stock one.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>docker run --rm -v ~/microseg/frontend/default.conf:/etc/nginx/conf.d/default.conf:ro nginx:1.28 nginx -t</code></pre></figure>
+<p><code class="nw">-v</code> puts your <code class="nw">default.conf</code> at the path where the nginx image keeps its own, read-only. <code class="nw">nginx:1.28</code> is the image <code class="nw">setup.sh</code> downloaded in <a href="ch04.html">chapter 4</a>. <code class="nw">nginx -t</code> is the command the container runs. <code class="nw">-t</code> means test the settings and stop. There's no <code class="nw">-d</code> this time, because the container finishes within a second, and <code class="nw">--rm</code> deletes it afterwards.</p>
+<p><strong>You should see</strong> a few lines from the image's startup scripts, then nginx's verdict.</p>
+<p>The last two lines must read <code>nginx: the configuration file /etc/nginx/nginx.conf syntax is ok</code> and <code>nginx: configuration file /etc/nginx/nginx.conf test is successful</code>. The lines above them come from scripts inside the image and change between nginx versions, so ignore them.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>nginx: [emerg] unexpected end of file, expecting &quot;}&quot; in /etc/nginx/conf.d/default.conf:26</code></pre></figure>
+<p>The closing <code class="nw">}</code> at the end of the file is missing, usually because the copy stopped one line short. Any other line that starts with <code class="nw">nginx: [emerg]</code> names a file and a line number in the same way. Look at that line and the one above it, where a missing <code class="nw">;</code> is the usual cause.</p>
+<p>Now list every address the portal page asks the server for.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; grep -o &#x27;fetch(&quot;[^&quot;]*&quot;&#x27; frontend/index.html</code></pre></figure>
+<p><code class="nw">-o</code> prints only the part of each line that matches, instead of the whole line. The pattern means <code class="nw">fetch("</code>, then any run of characters that aren't a <code class="nw">"</code>, then a <code class="nw">"</code>. In words, every address inside a <code class="nw">fetch(...)</code> call.</p>
+<p><strong>You should see</strong> four lines.</p>
+<p>These four paths are the whole conversation between the page and the services behind nginx. Write them down. Three of them, the ones that start with <code class="nw">/api/</code>, become the L7 rule on api in <a href="ch10.html">chapter 10</a>, and <code class="nw">/api/export</code> isn't one of them.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>The <code class="nw">grep</code> command prints nothing at all. Either your <code class="nw">index.html</code> has curly quotes in it instead of straight ones, which happens when a file is copied from a PDF, or the file is empty because it was never saved. A round dot on its tab means unsaved. Delete everything in the file, copy it again from the Docs page and save.</p>
+<h2 id="the-python-packages-appsrequirementstxt">The Python packages, apps/requirements.txt</h2>
+<p>Your images need four Python packages, and this file lists them with exact versions. Pinning the versions means an image you rebuild next month gets the same code that was tested.</p>
+<p>Create <code class="nw">apps/requirements.txt</code> and paste this.</p>
+<figure class="code file"><figcaption><span class="lbl">File: apps/requirements.txt</span><button type="button" class="copy" aria-label="Copy this file">Copy</button></figcaption><pre dir="ltr"><code>flask==3.1.0
+gunicorn==23.0.0
+psycopg2-binary==2.9.10
+requests==2.32.3</code></pre></figure>
+<p>Each line is a package name, <code class="nw">==</code> and a version. Flask you've met. gunicorn is the program that runs a Flask application for real use and can handle several requests at once, where Flask's own built-in server is meant only for trying code out. <code class="nw">psycopg2-binary</code> is the PostgreSQL driver, in a version that ships ready-built so no compiler is needed. <code class="nw">requests</code> is the HTTP library api uses to call auth. The file has nothing to run on its own. The image build in the next step reads it.</p>
+<h2 id="the-image-recipes-appsdockerfile-and-appsdockerfilenews">The image recipes, apps/Dockerfile and apps/Dockerfile.news</h2>
+<p>A Dockerfile is the recipe Docker follows to build an image, one instruction per line. Your project uses two. The first builds <code class="nw">campus-app:1.0</code>, which holds all four Python programs. The second builds <code class="nw">campus-news:1.0</code> on top of it and adds the attacker's tools.</p>
+<p>Create <code class="nw">apps/Dockerfile</code> and paste this. The name has no extension and starts with a capital D.</p>
+<figure class="code file"><figcaption><span class="lbl">File: apps/Dockerfile</span><button type="button" class="copy" aria-label="Copy this file">Copy</button></figcaption><pre dir="ltr"><code># campus-app:1.0  used by api, auth, admin and the ops pod
+FROM python:3.12-slim
+RUN apt-get update &amp;&amp; apt-get install -y --no-install-recommends curl &amp;&amp; rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY news.py api.py auth.py admin.py ./
+RUN useradd --uid 1000 --create-home app
+USER app</code></pre></figure>
+<p>(1) Line 2, <code class="nw">FROM python:3.12-slim</code>, starts from the official Python 3.12 image in its slim form, a small Debian Linux with Python installed and little else.</p>
+<p>(2) Line 3. <code class="nw">RUN</code> runs a command while the image is being built and keeps whatever it changes. <code class="nw">apt-get update</code> downloads Debian's current list of packages, and <code>apt-get install -y --no-install-recommends curl</code> installs curl without asking for confirmation (<code class="nw">-y</code>) and without optional extras. <code class="nw">rm -rf /var/lib/apt/lists/*</code> then deletes the downloaded list to keep the image small. <code class="nw">check_image</code> needs curl, and so does attack step 5.</p>
+<p>(3) Line 4, <code class="nw">WORKDIR /app</code>, makes <code class="nw">/app</code> the folder every later instruction works in, creating it first.</p>
+<p>(4) Lines 5 and 6 copy <code class="nw">requirements.txt</code> into the image and install the four packages. <code class="nw">--no-cache-dir</code> stops pip from keeping a second copy of every download inside the image. The packages go in before the Python files on purpose, because Docker saves the result of each instruction as a layer and keeps the layers in its build cache. When you change a <code class="nw">.py</code> file and build again, Docker reuses every cached layer up to the first instruction whose input changed, so the slow package install doesn't run a second time.</p>
+<p>(5) Line 7 copies the four programs into <code class="nw">/app</code>. All four ride in one image. In <a href="ch06.html">chapter 6</a>, Kubernetes picks which one a pod runs with a command such as <code class="nw">gunicorn ... api:app</code>.</p>
+<p>(6) Line 8 creates a Linux user called <code class="nw">app</code> with user ID 1000. A user ID, or uid, is the number Linux uses to tell users apart. The user <code class="nw">root</code> is uid 0 and is allowed to do anything.</p>
+<p>(7) Line 9, <code class="nw">USER app</code>, makes everything the container runs from now on run as <code class="nw">app</code> instead of <code class="nw">root</code>. That's why the injection test below shows <code class="nw">uid=1000(app)</code>. An attacker who gets in through the bug gets only the rights of <code class="nw">app</code>.</p>
+<p>Create <code class="nw">apps/Dockerfile.news</code> and paste this.</p>
+<figure class="code file"><figcaption><span class="lbl">File: apps/Dockerfile.news</span><button type="button" class="copy" aria-label="Copy this file">Copy</button></figcaption><pre dir="ltr"><code># campus-news:1.0 = campus-app + tools an attacker downloads after the exploit (MITRE T1105).
+# They are pre-installed so the lab is reproducible and works offline.
+FROM campus-app:1.0
+USER root
+RUN apt-get update &amp;&amp; apt-get install -y --no-install-recommends netcat-openbsd postgresql-client &amp;&amp; rm -rf /var/lib/apt/lists/*
+USER app</code></pre></figure>
+<p>(1) Line 3, <code class="nw">FROM campus-app:1.0</code>, starts from your first image, so everything in it, the four programs and the <code class="nw">app</code> user included, is already there. It also means <code class="nw">campus-app:1.0</code> has to be built first.</p>
+<p>(2) Line 4 switches to <code class="nw">root</code>. Installing packages needs it.</p>
+<p>(3) Line 5 installs <code class="nw">netcat-openbsd</code>, which provides <code class="nw">nc</code>, and <code class="nw">postgresql-client</code>, which provides <code class="nw">psql</code>. These are the tools a real attacker would download after getting in (ATT&amp;CK T1105).</p>
+<p>(4) Line 6 switches back to <code class="nw">app</code>, so news runs as uid 1000 like the other services.</p>
+<h3 id="build-campus-app10-and-campus-news10">Build campus-app:1.0 and campus-news:1.0</h3>
+<p>Build <code class="nw">campus-app:1.0</code> first.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; docker build --progress=plain -t campus-app:1.0 apps/</code></pre></figure>
+<p><code class="nw">docker build</code> builds an image from a Dockerfile. By default Docker shows a progress display that keeps overwriting itself. <code class="nw">--progress=plain</code> prints every step as ordinary lines instead, in the same form as the guide's copy. <code class="nw">-t campus-app:1.0</code> gives the image its name and tag. <code class="nw">apps/</code> is the build context, the folder Docker hands to the build. A <code class="nw">COPY</code> instruction can only take files from inside it, and Docker looks there for a file called <code class="nw">Dockerfile</code>. The first build downloads the Python image, Debian's packages and the four Python packages, so it takes a few minutes and needs internet.</p>
+<p><strong>You should see</strong> many lines scroll past. The guide shows the last five.</p>
+<p>The line to look for is <code>naming to docker.io/library/campus-app:1.0 done</code>, followed by a last line that ends in <code class="nw">DONE</code> and a time. <code class="nw">docker.io/library/</code> is the full form of a short image name. The step numbers after <code class="nw">#</code> and the times will be different on your laptop.</p>
+<p>Now build <code class="nw">campus-news:1.0</code>.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; docker build --progress=plain -t campus-news:1.0 -f apps/Dockerfile.news apps/</code></pre></figure>
+<p><code class="nw">-f apps/Dockerfile.news</code> tells Docker which recipe to use, since this one isn't called <code class="nw">Dockerfile</code>. The build context is still <code class="nw">apps/</code>.</p>
+<p><strong>You should see</strong> a shorter build, with the last five lines like these.</p>
+<p>The line to look for this time is <code>naming to docker.io/library/campus-news:1.0 done</code>.</p>
+<p>Check that both images exist.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>docker images --format &#x27;{{.Repository}}:{{.Tag}}  {{.Size}}&#x27; | grep campus</code></pre></figure>
+<p><code class="nw">--format</code> picks what <code class="nw">docker images</code> prints for each image, here the name, a colon, the tag and the size. The <code class="nw">|</code> sends that list to <code class="nw">grep campus</code>, which keeps only the lines that contain <code class="nw">campus</code>.</p>
+<p><strong>You should see</strong> two lines.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>campus-news:1.0  312MB
+campus-app:1.0  235MB</code></pre></figure>
+<p>The two lines can come in either order. Sizes can differ a little too, because Debian keeps updating its packages and the same recipe built on another day can come out a few MB larger or smaller. <code class="nw">campus-news:1.0</code> is bigger by about 77 MB, the weight of the attacker's tools.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>The <code class="nw">campus-app</code> build stops with an error, and higher up the output has lines that end like this.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>Temporary failure resolving &#x27;deb.debian.org&#x27;</code></pre></figure>
+<p>The build couldn't look up any internet names. Docker's build containers use their own DNS settings, which on some networks in WSL don't work even though <code class="nw">docker run hello-world</code> did. Tell Docker which DNS servers to hand its containers with <code>echo '{"dns": ["8.8.8.8", "1.1.1.1"]}' | sudo tee /etc/docker/daemon.json</code>, then restart Docker with <code class="nw">sudo systemctl restart docker</code>. This guide hasn't created that file before, so nothing is lost by overwriting it. Restarting Docker also stops the three cluster containers from <a href="ch04.html">chapter 4</a>. Wait a few minutes, then run <code class="nw">kubectl get nodes</code>, which should list all three nodes as <code class="nw">Ready</code>. If after 5 minutes it doesn't, start them yourself.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>docker start kind-control-plane kind-worker kind-worker2</code></pre></figure>
+<p>Wait another few minutes and run <code class="nw">kubectl get nodes</code> again. If the nodes are still not <code class="nw">Ready</code>, delete the cluster with <code class="nw">kind delete cluster</code> and build it again with <code class="nw">bash ~/microseg/setup.sh</code>, as in <a href="ch04.html">chapter 4</a>. Then run the image build again.</p>
+<p>The <code class="nw">campus-news</code> build stops with a long error line that contains this.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>pull access denied, repository does not exist or may require authorization</code></pre></figure>
+<p><code class="nw">campus-app:1.0</code> doesn't exist yet, so Docker went looking for it on Docker Hub and found nothing. Build <code class="nw">campus-app:1.0</code> first, then <code class="nw">campus-news:1.0</code>.</p>
+<p>The build stops with a long error line that ends in one of these.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>&quot;/admin.py&quot;: not found</code></pre></figure>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>failed to read dockerfile: open Dockerfile: no such file or directory</code></pre></figure>
+<p>A file the recipe needs is missing from <code class="nw">apps/</code> or has a different name. The first message names the missing file. The second means Docker found no file called <code class="nw">Dockerfile</code>, often because it was saved as <code class="nw">Dockerfile.txt</code> or <code class="nw">DockerFile</code>. Run <code class="nw">ls apps</code> and compare the names with the folder tree in <a href="ch00.html">chapter 0</a>.</p>
+<h2 id="fire-the-bug-at-a-throwaway-news-container">Fire the bug at a throwaway news container</h2>
+<p>The portal isn't running yet, but you can already prove two things on your laptop. The bug in <code class="nw">check_image</code> works, and the commands it runs execute as the ordinary user <code class="nw">app</code> and not as <code class="nw">root</code>. A throwaway news container settles both in two minutes and leaves nothing behind.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>docker run --rm -d -p 5000:5000 --name newstest campus-news:1.0 gunicorn --bind 0.0.0.0:5000 news:app</code></pre></figure>
+<p><code class="nw">-p 5000:5000</code> publishes a port, so a connection to port 5000 in Ubuntu reaches port 5000 inside the container. Everything after the image name is the command the container runs. <code class="nw">gunicorn</code> is the server from <code class="nw">requirements.txt</code>, and <code class="nw">--bind 0.0.0.0:5000</code> makes it listen on port 5000 on every network interface the container has, which is what <code class="nw">0.0.0.0</code> means. Had it listened on <code class="nw">127.0.0.1</code> instead, only programs inside the container could reach it, and <code class="nw">-p</code> would lead nowhere. <code class="nw">news:app</code> tells gunicorn to load the module <code class="nw">news</code>, from <code class="nw">news.py</code>, and serve the object <code class="nw">app</code> inside it.</p>
+<p><strong>You should see</strong> the container's ID.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>e45f01ee3ead02d95401be2ac5c5e3dd6aa5a4e37897867b7fd4637e74550e3e</code></pre></figure>
+<p>Give gunicorn about three seconds to start, then ask it for the announcements.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>curl -s localhost:5000/news; echo</code></pre></figure>
+<p><code class="nw">curl</code> sends an HTTP request, a GET unless told otherwise, here to port 5000 on your own machine, the port you published. <code class="nw">-s</code> hides curl's progress meter. <code class="nw">; echo</code> prints a line break after the answer, so your next prompt starts on a line of its own even when a server leaves the break off. Flask ends its answer with a line break already, so here you'll see one empty line under the JSON, which is harmless.</p>
+<p><strong>You should see</strong> one long line of JSON with the three announcements.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>[{&quot;date&quot;:&quot;2026-11-01&quot;,&quot;title&quot;:&quot;Spring registration is open&quot;},{&quot;date&quot;:&quot;2026-11-10&quot;,&quot;title&quot;:&quot;Library opens 24/7 during finals&quot;},{&quot;date&quot;:&quot;2026-11-15&quot;,&quot;title&quot;:&quot;Graduation project fair on 10 December&quot;}]</code></pre></figure>
+<p>It starts with <code>[{"date":"2026-11-01","title":"Spring registration is open"}</code> and ends with the graduation project fair.</p>
+<p>Now send the injection.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>curl -s localhost:5000/news/check-image --data-urlencode &quot;url=x; id&quot;</code></pre></figure>
+<p><code class="nw">--data-urlencode "url=x; id"</code> sends a form field called <code class="nw">url</code>, the same way the portal's checker form does, and it also switches curl to a POST request. curl encodes the space and the <code class="nw">;</code> so they travel safely, and Flask decodes them again before <code class="nw">check_image</code> sees them. So <code class="nw">check_image</code> receives <code class="nw">x; id</code>, glues it onto its curl command, and the shell runs two commands, a <code class="nw">curl</code> aimed at a host called <code class="nw">x</code> and then <code class="nw">id</code>.</p>
+<p><strong>You should see</strong> two lines.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>HTTP status of image: 000
+uid=1000(app) gid=1000(app) groups=1000(app)</code></pre></figure>
+<p>The first line, <code class="nw">HTTP status of image: 000</code>, is the intended curl. No host is called <code class="nw">x</code>, so curl couldn't look up the name and reported 000. The second line must read <code>uid=1000(app) gid=1000(app) groups=1000(app)</code>. That's the output of <code class="nw">id</code>, a command nobody meant this server to run, and it shows the command ran as user <code class="nw">app</code> with uid 1000, the user from the Dockerfile. This is your foothold, and it's the line the checkpoint looks for.</p>
+<p>Next, check that the attacker's tools are there.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>curl -s localhost:5000/news/check-image --data-urlencode &quot;url=x; which nc psql curl&quot;</code></pre></figure>
+<p><code class="nw">which</code> prints where each named program is installed, and nothing for a program that isn't.</p>
+<p><strong>You should see</strong> the status line and three paths.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>HTTP status of image: 000
+/usr/bin/nc
+/usr/bin/psql
+/usr/bin/curl</code></pre></figure>
+<p>All three, <code class="nw">/usr/bin/nc</code>, <code class="nw">/usr/bin/psql</code> and <code class="nw">/usr/bin/curl</code>, must be listed. In <a href="ch08.html">chapter 8</a> the attacker uses them, from inside the news pod, to reach the database and the admin panel.</p>
+<p>Delete the throwaway container.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>docker rm -f newstest</code></pre></figure>
+<p><strong>You should see</strong> the container's name.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>newstest</code></pre></figure>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>A <code class="nw">curl</code> command prints nothing and the prompt comes straight back. <code class="nw">-s</code> hides curl's own errors, so run <code class="nw">curl localhost:5000/news</code> once without it.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>curl: (7) Failed to connect to localhost port 5000 after 0 ms: Couldn&#x27;t connect to server</code></pre></figure>
+<p>The number of milliseconds can differ. No container is publishing port 5000. Run <code class="nw">docker ps</code>, which lists running containers. When <code class="nw">newstest</code> isn't in the list, the container crashed and <code class="nw">--rm</code> deleted it. Start it again without <code class="nw">-d</code>, with <code>docker run --rm -p 5000:5000 --name newstest campus-news:1.0 gunicorn --bind 0.0.0.0:5000 news:app</code>, and gunicorn's messages print in your terminal. The last lines name the problem. Press Ctrl+C to stop it. When <code class="nw">newstest</code> is in the list, your <code class="nw">docker run</code> command was missing <code class="nw">-p 5000:5000</code>. Remove the container and start it again with the command exactly as shown.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>curl: (56) Recv failure: Connection reset by peer</code></pre></figure>
+<p>This one, or <code>curl: (52) Empty reply from server</code>, means the container is there but gunicorn isn't answering inside it. Perhaps it needed a few more seconds, so wait and try again. If the error stays, check that your command had <code class="nw">--bind 0.0.0.0:5000</code> exactly as shown, then remove the container and start it again.</p>
+<p>The injection prints an HTML page with these lines in it.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>&lt;title&gt;500 Internal Server Error&lt;/title&gt;
+&lt;h1&gt;Internal Server Error&lt;/h1&gt;</code></pre></figure>
+<p><code class="nw">check_image</code> crashed while running. The usual cause is a typo that py_compile can't see, such as a misspelled name in the function you typed. Run <code class="nw">docker logs newstest</code> to read the server's messages. The last line of the Python error names the mistake, and the line that mentions <code class="nw">news.py</code> gives its line number. Fix the file, then rebuild both images in order, <code class="nw">campus-app:1.0</code> first and <code class="nw">campus-news:1.0</code> second, because the image holds the copy of <code class="nw">news.py</code> it was built with. Your edit changes nothing in it until you rebuild. This one line does both builds.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; docker build --progress=plain -t campus-app:1.0 apps/ &amp;&amp; docker build --progress=plain -t campus-news:1.0 -f apps/Dockerfile.news apps/</code></pre></figure>
+<p>Run <code class="nw">docker rm -f newstest</code> and start this section again from the <code class="nw">docker run</code> command.</p>
+<p>The first line of the injection's answer doesn't end in a number, or <code class="nw">uid=</code> sits on the same line as <code class="nw">HTTP status of image:</code>. Line 31 was typed slightly wrong. Compare it with the guide character by character, especially the space between <code class="nw">3</code> and the closing <code class="nw">"</code>, and the <code class="nw">\\n</code> with two backslashes inside the single quotes. Fix it, rebuild both images with the line above, run <code class="nw">docker rm -f newstest</code> and run the test again from the <code class="nw">docker run</code> command.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>uid=0(root) gid=0(root) groups=0(root)</code></pre></figure>
+<p>The commands ran as <code class="nw">root</code>. The last line of <code class="nw">apps/Dockerfile.news</code>, <code class="nw">USER app</code>, is missing. Add it, rebuild both images with the line above, run <code class="nw">docker rm -f newstest</code> and start the test again from the <code class="nw">docker run</code> command.</p>
+<p>If the first line shows a number other than 000, such as 200, your network answers DNS lookups even for a made-up name like <code class="nw">x</code>, and curl reached some server. That's harmless. Only the <code class="nw">uid=</code> line counts.</p>
+<h2 id="checkpoint">Checkpoint</h2>
+<p>This one command repeats the grammar check on all four Python files and the injection test, then cleans up.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; python3 -m py_compile apps/auth.py apps/api.py apps/news.py apps/admin.py &amp;&amp; echo &quot;py_compile: 4 files OK&quot; &amp;&amp; docker run --rm -d -p 5000:5000 --name newstest campus-news:1.0 gunicorn --bind 0.0.0.0:5000 news:app &gt; /dev/null &amp;&amp; sleep 3 &amp;&amp; curl -s localhost:5000/news/check-image --data-urlencode &quot;url=x; id&quot; &amp;&amp; docker rm -f newstest</code></pre></figure>
+<p><code class="nw">&gt; /dev/null</code> throws away the container ID so it doesn't clutter the result, and <code class="nw">sleep 3</code> waits three seconds for gunicorn to start. Each <code class="nw">&amp;&amp;</code> runs the next part only when the one before it worked.</p>
+<p>Your output must match these four lines exactly. The one allowed difference is the number after <code class="nw">HTTP status of image:</code> on a network that answers made-up names, as described above. If <code class="nw">py_compile: 4 files OK</code> is missing, one of the Python files has an error, which the command prints in its place. If the command stops with a <code class="nw">Conflict</code> error, a <code class="nw">newstest</code> container from earlier is still there. Remove it with <code class="nw">docker rm -f newstest</code> and run the checkpoint again. If the output stops after <code class="nw">py_compile: 4 files OK</code> with nothing else, gunicorn wasn't ready after three seconds and the container is still running. Run <code class="nw">docker rm -f newstest</code> and run the checkpoint again. If that happens twice, change <code class="nw">sleep 3</code> to <code class="nw">sleep 6</code> in the command.</p>
+<p>Save this state in Git.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; git add -A &amp;&amp; git commit -m &quot;ch05: write the services&quot;</code></pre></figure>
+<p><code class="nw">git add -A</code> stages every new and changed file, and <code class="nw">git commit -m</code> saves the snapshot with that message.</p>
+<p>The first line shows <code class="nw">main</code>, a short code that's different on your laptop, and your message. The second line must say <code>10 files changed, 332 insertions(+)</code>, or a few more insertions if some files end with extra empty lines. The <code class="nw">create mode</code> lines that follow list the ten files. Fewer than 332 insertions means some file is missing lines. To find it, count the lines in each file.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; grep -c &#x27;&#x27; db/init.sql apps/*.py apps/requirements.txt apps/Dockerfile apps/Dockerfile.news frontend/default.conf frontend/index.html</code></pre></figure>
+<p><code class="nw">grep -c ''</code> counts the lines of each file, the last one included even when it has no line break after it, and prints each file's name with its count. Compare the counts with the file index in appendix C. A count that's higher only because of empty lines at the end is harmless. A lower count means a line is missing. Find it, add it, save, and commit again with <code>cd ~/microseg &amp;&amp; git add -A &amp;&amp; git commit -m "ch05: add a missing line"</code>.</p>
+<!-- OUT ids: ch07-folders, ch07-db-run, ch07-db-grades, ch07-db-remove, ch07-compile-auth, ch07-compile-api, ch07-compile-news, ch07-compile-admin, ch07-routes, ch07-nginx-test, ch07-frontend-paths, ch07-build-app, ch07-build-news, ch07-images, ch07-news-run, ch07-news-list, ch07-news-injection, ch07-news-tools, ch07-news-remove, ch07-checkpoint, ch07-commit --><nav class="pager" aria-label="Chapters"><a rel="prev" href="ch04.html"><span>Previous chapter</span>Chapter 4. Create the cluster</a><a rel="next" href="ch06.html"><span>Next chapter</span>Chapter 6. Deploy the portal</a></nav></main></div>
+<footer class="foot"><div class="foot-in"><p>Kubernetes 1.36, Cilium 1.20.5 and kind 0.33.0 on Windows 11 with WSL 2. Every command was run on a real laptop in November 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">Source on GitHub</a></p></div></footer>
+<p class="vh" aria-live="polite" id="live"></p>
+<script type="application/json" id="i18n">{"copied": "Copied", "copyFail": "Press Ctrl+C to copy the selected text", "doneOf": "{d} of {t} steps done", "next": "Next step: {s}", "allDone": "All {t} steps done.", "sumCount": "{d} of {t} done", "cleared": "All ticks cleared.", "confirm": "Clear every tick on this page? Your files and your cluster stay as they are.", "stageCount": "{d} of {t}"}</script>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

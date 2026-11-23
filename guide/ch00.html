@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
+<title>Chapter 0. How to use this guide | Micro-segmentation lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&family=Noto+Sans+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="ar" href="../ar/guide/ch00.html">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400&text=%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9&display=swap">
+</head>
+<body class="">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="top-in">
+<a class="brand" href="../index.html">Micro-segmentation lab</a>
+<nav aria-label="Micro-segmentation lab"><ul>
+<li><a href="../index.html">Quick path</a></li>
+<li><a href="../guide/index.html" aria-current="page">Full guide</a></li>
+<li><a href="../downloads.html">Downloads</a></li>
+<li><a href="../ar/guide/ch00.html" lang="ar" hreflang="ar" data-setlang="ar">العربية</a></li>
+</ul></nav>
+</div></header>
+<div class="layout"><details class="rail" open><summary>Chapters</summary><nav aria-label="Chapters"><ol class="toc"><li><a href="ch00.html" aria-current="page">0. How to use this guide</a><ol class="sub"><li><a href="#what-youre-building-and-in-what-order">What you're building, and in what order</a></li><li><a href="#windows-ubuntu-and-the-two-kinds-of-command">Windows, Ubuntu and the two kinds of command</a></li><li><a href="#how-a-step-is-laid-out">How a step is laid out</a></li><li><a href="#when-your-output-doesnt-match">When your output doesn't match</a></li><li><a href="#one-rule">One rule</a></li><li><a href="#practice-step-check-that-your-laptop-can-run-the-lab">Practice step: check that your laptop can run the lab</a></li><li><a href="#tested-versions">Tested versions</a></li><li><a href="#your-project-folder-microseg-at-the-end">Your project folder, ~/microseg, at the end</a></li><li><a href="#progress-tracker">Progress tracker</a></li></ol></li><li><a href="ch01.html">1. What you will build</a></li><li><a href="ch02.html">2. Before you start</a></li><li><a href="ch03.html">3. Set up the environment</a></li><li><a href="ch04.html">4. Create the cluster</a></li><li><a href="ch05.html">5. Write the services</a></li><li><a href="ch06.html">6. Deploy the portal</a></li><li><a href="ch07.html">7. Build your dashboard</a></li><li><a href="ch08.html">8. Attack the flat network</a></li><li><a href="ch09.html">9. Design the policy</a></li><li><a href="ch10.html">10. Apply micro-segmentation</a></li><li><a href="ch11.html">11. Read the evidence in Hubble</a></li><li><a href="ch12.html">12. Measure</a></li><li><a href="ch13.html">13. Getting unstuck alone</a></li><li><a href="ch14.html">14. Evidence for your report</a></li><li><a href="ch15.html">15. Day-by-day plan</a></li><li><a href="appendix.html">Appendices</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="chapter-0-how-to-use-this-guide">Chapter 0. How to use this guide</h1>
+<p>This guide takes you from an ordinary Windows laptop to a working micro-segmentation lab, with measured results and the evidence your thesis needs. You'll build it on your own, so every step tells you what to type and what your screen should show, and gives the fix for the errors you're most likely to hit. Read this chapter first. It takes about 15 minutes and ends with a real step that checks your laptop is big enough for the lab.</p>
+<h2 id="what-youre-building-and-in-what-order">What you're building, and in what order</h2>
+<p>You'll build a university "Campus Portal" out of six small services that run on Kubernetes, a system that runs programs across several machines and keeps them running. All of those machines are simulated inside your laptop. First you attack the portal the way a real intruder would, and the attack reaches the grade database and the admin panel. Then you add Cilium network policies, which are rules about who may talk to whom, and run the same attack again. This time it stops after the first step. Your thesis result is the measured difference between those two runs.</p>
+<figure class="fig"><a href="../files/figures/fig08-en.png"><img src="../files/figures/web/fig08-en.png" alt="Build roadmap" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>Build roadmap</figcaption></figure>
+<p>Figure 8 is the build roadmap. You attack the flat network in <a href="ch08.html">chapter 8</a>, before <a href="ch10.html">chapter 10</a> adds any policy, so you always have a "before" result to compare against.</p>
+<p>The whole build takes about 33 to 41 hours. If you work 6 to 8 hours a day that's seven working days plus one spare, and at 3 to 4 hours a day it takes about twice as long. <a href="ch15.html">Chapter 15</a> has the day-by-day plan.</p>
+<p>You won't read the chapters strictly in order. On day 1 you read this chapter and then work through chapters 2, 3 and 4. <a href="ch04.html">Chapter 4</a> tells you whether Cilium runs on your laptop, and that's the one thing you need to know as early as possible. At 6 to 8 hours a day you'll know by the evening of day 1, and at 3 to 4 hours a day by the end of day 2. If Cilium won't run, appendix A moves the lab into an Ubuntu virtual machine, a simulated computer that runs inside your real one, and the rest of the guide still applies. <a href="ch01.html">Chapter 1</a>, the lab on paper, comes on day 2. If a word in chapters 2 to 4 stops you, look it up in the glossary in appendix D.</p>
+<p>The guide has chapters 0 to 15, listed in the progress tracker near the end of this chapter, and appendices A to D. Appendix A is the virtual machine plan, B is a one-page command card, C lists every project file with the chapter that builds it, and D is the glossary, which is in the Arabic edition.</p>
+<h2 id="windows-ubuntu-and-the-two-kinds-of-command">Windows, Ubuntu and the two kinds of command</h2>
+<p>A terminal is a window where you type commands instead of clicking. It shows a prompt, a short line of text that means "ready, type the next command". You'll use two terminals.</p>
+<p>PowerShell is the Windows terminal. To open it, press the Windows key, type <code class="nw">powershell</code> and click <strong>Windows PowerShell</strong>. Its prompt ends in <code class="nw">&gt;</code> and looks like this, with your own folder name in place of <code class="nw">Sara</code>.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>PS C:\Users\Sara&gt;</code></pre></figure>
+<p>Ubuntu is a version of Linux, and WSL (Windows Subsystem for Linux) is the part of Windows that runs it next to your Windows programs. You install both in <a href="ch02.html">chapter 2</a>, which also shows you how to open the Ubuntu terminal. Its prompt ends in <code class="nw">$</code> and looks like this, with your Linux user name and your laptop's name in it.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>sara@LAPTOP-1234:~$</code></pre></figure>
+<p>Almost all of the project runs in Ubuntu, because Docker, the simulated cluster and Cilium all need a Linux kernel, the core of a Linux system, to run on.</p>
+<p>Every command in this guide tells you twice which window it goes into. The sentence before it names the window, as in "In PowerShell, run" or "In the Ubuntu terminal, run", and the block carries a small label in its top corner. A block labelled <code class="nw">powershell</code> goes into PowerShell. A block labelled <code class="nw">bash</code> goes into the Ubuntu terminal, since bash is the program that reads what you type there. A block labelled <code class="nw">text</code> is never a command. It holds something to read or compare, such as output, or a file or message that the step tells you to copy somewhere.</p>
+<p>Paste one block at a time. In PowerShell you paste with Ctrl+V. In the Ubuntu terminal you paste with Ctrl+Shift+V, because Ctrl+V means something else in Linux terminals. After pasting, press Enter if the command hasn't started by itself. If a warning says the text contains multiple lines, click <strong>Paste anyway</strong>. Then wait until the prompt comes back before you paste the next block. A few commands keep running until you stop them, and the step says so when that happens. Press Ctrl+C in that window to stop one and get the prompt back.</p>
+<h2 id="how-a-step-is-laid-out">How a step is laid out</h2>
+<p>Every step in chapters 2 to 14 has the same five parts, always in the same order.</p>
+<ol>
+<li>What the step is for, in one or two sentences. Read this part even when you're in a hurry, because when something breaks later, knowing what the step was for tells you where to look.</li>
+<li>The command or the file, in a grey code block. When a step gives you a whole file, the sentence before the block names the file's path inside your project folder.</li>
+<li>What each part does. For a command, each piece is explained under the block. For a file, numbered notes such as (1) and (2) under the block explain the lines that need explaining.</li>
+<li>A block labelled <strong>You should see</strong>, holding the real output the command printed when this guide was tested, followed by a sentence naming the exact line that has to match on your screen.</li>
+<li>A block labelled <strong>If you see this instead</strong>, with the two or three failures most likely at that step. Each one shows the exact error text, says what caused it and tells you how to fix it.</li>
+</ol>
+<p>Each build chapter ends with a checkpoint and a <code class="nw">git commit</code> command. The checkpoint is a short check, usually one command. The line or lines it names must match the guide exactly, while parts the guide says will change, such as pod names, ages and IP addresses, don't count. Git is a program that keeps snapshots of your project folder, and a commit is one saved snapshot, so after every chapter you can always get back to the last state that worked. You set Git up in <a href="ch02.html">chapter 2</a>.</p>
+<h3 id="placeholders-words-in-angle-brackets">Placeholders: words in angle brackets</h3>
+<p>A few commands contain a placeholder, a word in angle brackets such as <code class="nw">&lt;WinUser&gt;</code>, which stands for a value only you know. Replace the whole placeholder, brackets included, with your own value. Everything outside the angle brackets is typed exactly as shown, spaces and capital letters included.</p>
+<p><code class="nw">&lt;WinUser&gt;</code> means the name of your folder under <code class="nw">C:\Users</code>, which isn't always the name Windows greets you with. When Windows was set up with a Microsoft account, the folder often gets a shortened name. In PowerShell, run this to read it.</p>
+<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>$env:USERPROFILE</code></pre></figure>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>C:\Users\ASUS</code></pre></figure>
+<p>That's the folder on the laptop the guide was tested on. Yours prints a line such as <code class="nw">C:\Users\sarak</code>, and the part after the last backslash, here <code class="nw">sarak</code>, is your <code class="nw">&lt;WinUser&gt;</code>. The path <code>/mnt/c/Users/&lt;WinUser&gt;/Downloads</code> then becomes <code class="nw">/mnt/c/Users/sarak/Downloads</code>.</p>
+<h3 id="files-you-paste-files-you-type">Files you paste, files you type</h3>
+<p>You paste most project files in full and then check them. Three pieces you type by hand, because typing forces you to read every line. They are the file <code class="nw">k8s/policies/1-baseline.yaml</code>, the api policy inside <code class="nw">k8s/policies/2-allow.yaml</code> and the <code class="nw">check_image</code> function in <code class="nw">apps/news.py</code>. The chapter that builds each one tells you when to start typing.</p>
+<h3 id="copy-from-the-docs-page-not-a-pdf">Copy from the Docs page, not a PDF</h3>
+<p>Copy commands and files from the online Docs page of this guide, the page whose link you were given, or from a .docx copy that you download through that page's export option. Never copy from a PDF. A PDF often turns straight quotes into curly ones and loses or merges spaces, and a command copied from it then fails with an error that seems to have nothing to do with what you pasted. If all you have is a PDF, get the page's link from whoever gave you the guide before you start <a href="ch02.html">chapter 2</a>.</p>
+<h2 id="when-your-output-doesnt-match">When your output doesn't match</h2>
+<p>Your screen won't match the guide character for character, and it doesn't have to. Some parts change on every run, and the text under each output names them. Pod names end in different random letters, and your IP addresses, dates and timings will differ from the guide's. When something doesn't match, go down this list in order.</p>
+<ol>
+<li>Ignore the parts the guide says will change. Compare everything else, above all the line that the "You should see" text names, such as <code class="nw">PORTAL: 6/6 OK</code>.</li>
+<li>If that line is different, or you got an error, find the line that names the error. Python puts it on the last line of its message, while most other tools put it near the top. Look for that exact text in the step's "If you see this instead" block.</li>
+<li>If it isn't there, go to <a href="ch13.html">chapter 13</a>. It has a table of symptoms and fixes built from every error met while this guide was tested, plus a method for finding which layer is broken.</li>
+<li>If you changed files since your last commit, <code class="nw">git diff</code> shows what changed in files Git already tracks, and <code class="nw">git restore &lt;file&gt;</code> puts such a file back the way it was at the last commit, as long as you haven't run <code class="nw">git add</code> since. <a href="ch02.html">Chapter 2</a> explains both.</li>
+<li>Rebuild from scratch only as the last resort. <a href="ch13.html">Chapter 13</a> shows how.</li>
+</ol>
+<h2 id="one-rule">One rule</h2>
+<p>Never start the next chapter in your reading order until the current chapter's checkpoint matches. Every chapter builds on the one before it, and a problem you carry forward tends to surface two chapters later as an error that points somewhere else entirely. Caught at the checkpoint, a mismatch usually takes a few minutes to fix, but if it only shows up in <a href="ch10.html">chapter 10</a> it can cost you a day.</p>
+<h2 id="practice-step-check-that-your-laptop-can-run-the-lab">Practice step: check that your laptop can run the lab</h2>
+<p>The lab runs three simulated machines, the seven programs that make up the portal (the six services plus a small helper) and Cilium, all at the same time. In <a href="ch03.html">chapter 3</a> you hand about 10 GB of memory and 4 processors to WSL, the virtual machine that Ubuntu runs in. A smaller laptop can't run it, and it's better to find that out today than halfway through day 2. This is also your first step written in the five-part layout, so read it through once before you type anything.</p>
+<p>In PowerShell, run this command to read how much memory your laptop has.</p>
+<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>[math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 1)</code></pre></figure>
+<p><code>Get-CimInstance Win32_ComputerSystem</code> asks Windows for facts about the computer. <code class="nw">.TotalPhysicalMemory</code> picks out the memory size, which Windows reports in bytes. <code class="nw">/ 1GB</code> turns the bytes into gigabytes. <code class="nw">[math]::Round(</code> together with <code class="nw">, 1)</code> at the end rounds the answer to one decimal place.</p>
+<p><strong>You should see</strong> a single number on one line.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>15.9</code></pre></figure>
+<p>That's the value from the laptop the guide was tested on. Yours must be 13.5 or more. A laptop sold with 16 GB prints a number a little under 16, because the graphics chip and the firmware keep a slice of memory for themselves.</p>
+<p>Now count the processors. In PowerShell, run this.</p>
+<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>(Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors</code></pre></figure>
+<p><code class="nw">NumberOfLogicalProcessors</code> counts the processor threads Windows can hand work to. Ubuntu sees the same kind of count as its number of CPUs.</p>
+<p><strong>You should see</strong> one whole number.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>12</code></pre></figure>
+<p>Your number will probably differ from the tested laptop's. It must be 4 or more.</p>
+<p>Last, check the free disk space, which needs no command. Press Windows+E to open File Explorer and click <strong>This PC</strong> in the left-hand pane. Under "Devices and drives", the drive marked (C:) shows a line such as "120 GB free of 476 GB". You need at least 30 GB free. Ubuntu, Docker, the three simulated machines and every image (the packaged programs the lab downloads and builds) all live on drive C:, and the file that holds Ubuntu's whole disk grows as you work but doesn't shrink by itself.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>&#x27;[math]::Round&#x27; is not recognized as an internal or external command,
+operable program or batch file.</code></pre></figure>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>.NumberOfLogicalProcessors was unexpected at this time.</code></pre></figure>
+<p>You typed the command into Command Prompt, the older black Windows terminal, which doesn't understand PowerShell commands. The first message comes from the memory command and the second from the processor command. Close Command Prompt, open <strong>Windows PowerShell</strong> as described earlier, and run the command again.</p>
+<p>The memory number is below 13.5, for example 7.9 or 11.8. That means your laptop has 8 GB or 12 GB of memory, and the cluster won't fit beside Windows. Use a laptop with 16 GB or more, or have memory added, before you go any further.</p>
+<p>Drive C: has less than 30 GB free. Empty the Recycle Bin first. Then open <strong>Settings &gt; System &gt; Storage &gt; Temporary files</strong>, tick everything except Downloads and click <strong>Remove files</strong>. If that still isn't enough, move large personal files such as videos to another drive or a USB disk, and check This PC again.</p>
+<p>If the processor count is below 4, the lab can't run on this laptop at all. You'll need a different machine.</p>
+<p><a href="ch02.html">Chapter 2</a> checks the last requirement, that virtualization is switched on.</p>
+<h2 id="tested-versions">Tested versions</h2>
+<p>The guide was validated on 19 November 2026 with the versions below. WSL, Ubuntu and Docker Engine keep publishing updates, so you may get a slightly newer release than the table shows, and that's fine as long as <code class="nw">check-env.sh</code> in <a href="ch03.html">chapter 3</a> passes. Everything from kind down to the hubble CLI, and the Python packages, is installed by exact version. A CLI is a command-line tool, a program you run by typing its name in a terminal. Those versions must match the table even if something newer has come out, because a newer one breaks this lab. kind starts each simulated machine from a node image, the packaged system the machine boots from, and kind's default node image holds Kubernetes 1.37, which Cilium 1.20 doesn't support. The cilium CLI also installs Cilium 1.20.3 unless you ask for 1.20.5. The commands in chapters 3 and 4 name the exact version every time.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Version</th>
+<th>What it is</th>
+<th>Installed in</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Windows</td>
+<td>11 (Pro used for validation, Home also works for WSL)</td>
+<td>your laptop's operating system</td>
+<td>already there</td>
+</tr>
+<tr>
+<td>WSL</td>
+<td>3.0.5, kernel 6.18.58.1-microsoft-standard-WSL2</td>
+<td>runs Linux inside Windows</td>
+<td><a href="ch02.html">chapter 2</a></td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>24.04.5 LTS</td>
+<td>the Linux system you work in</td>
+<td><a href="ch02.html">chapter 2</a></td>
+</tr>
+<tr>
+<td>Docker Engine</td>
+<td>29.10.0 (Docker's apt repo, not Docker Desktop)</td>
+<td>builds images and runs containers</td>
+<td><a href="ch03.html">chapter 3</a></td>
+</tr>
+<tr>
+<td>kind</td>
+<td>v0.33.0, node image <code class="nw">kindest/node:v1.36.4</code></td>
+<td>runs a Kubernetes cluster as Docker containers</td>
+<td><a href="ch03.html">chapter 3</a></td>
+</tr>
+<tr>
+<td>kubectl</td>
+<td>v1.36.6</td>
+<td>the command you use to talk to Kubernetes</td>
+<td><a href="ch03.html">chapter 3</a></td>
+</tr>
+<tr>
+<td>cilium CLI</td>
+<td>v0.20.3 (its default is Cilium 1.20.3, so always pass <code class="nw">--version 1.20.5</code>)</td>
+<td>installs and checks Cilium</td>
+<td><a href="ch03.html">chapter 3</a></td>
+</tr>
+<tr>
+<td>Cilium</td>
+<td>1.20.5</td>
+<td>the network plug-in that enforces your policies</td>
+<td><a href="ch04.html">chapter 4</a></td>
+</tr>
+<tr>
+<td>hubble CLI</td>
+<td>v1.20.4</td>
+<td>reads Cilium's record of every connection</td>
+<td><a href="ch03.html">chapter 3</a></td>
+</tr>
+<tr>
+<td>Python (WSL)</td>
+<td>3.12.3</td>
+<td>runs the dashboard and the latency test</td>
+<td>comes with Ubuntu</td>
+</tr>
+<tr>
+<td>Python packages</td>
+<td>flask 3.1.0, gunicorn 23.0.0, psycopg2-binary 2.9.10, requests 2.32.3</td>
+<td>web framework, web server, PostgreSQL driver, HTTP client</td>
+<td>flask and requests in <a href="ch03.html">chapter 3</a>, all four inside the images in <a href="ch05.html">chapter 5</a></td>
+</tr>
+</tbody>
+</table></div>
+<p>Docker's apt repo is the download source Docker runs for apt, Ubuntu's package installer. Docker Desktop is a separate Windows app that this guide doesn't use. The hubble CLI is numbered separately from Cilium, and 1.20.4 is the release that was tested with Cilium 1.20.5, so the different last digit is expected.</p>
+<h2 id="your-project-folder-microseg-at-the-end">Your project folder, <code class="nw">~/microseg</code>, at the end</h2>
+<p>Everything you build lives in one folder inside Ubuntu, <code class="nw">~/microseg</code>. The <code class="nw">~</code> is Linux shorthand for your home folder, <code class="nw">/home/&lt;user&gt;</code>, where <code class="nw">&lt;user&gt;</code> is the Linux user name you create in <a href="ch02.html">chapter 2</a>. The map below shows the folder as it looks after <a href="ch14.html">chapter 14</a>, ordered by the chapter that adds each item. <code class="nw">ls -a</code> lists the top-level names in alphabetical order instead. Plain <code class="nw">ls</code> hides names that start with a dot, such as <code class="nw">.git</code>.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>~/microseg/
+    .git/                     Git&#x27;s saved snapshots (chapter 2)
+    .gitignore                folders Git should skip (chapter 2)
+    hello.txt                 the file-copy drill (chapter 2)
+    .venv/                    Python with flask and requests (chapter 3)
+    check-env.sh              environment checkpoint (chapter 3)
+    kind-config.yaml          shape of the cluster (chapter 4)
+    setup.sh                  one-time cluster, Cilium and Hubble setup (chapter 4)
+    images/                   image archives made by setup.sh and deploy.sh (chapter 4)
+    apps/                     the Python services (chapter 5)
+        requirements.txt      Python packages baked into the images
+        Dockerfile            builds campus-app:1.0
+        Dockerfile.news       builds campus-news:1.0
+        news.py               announcements and the vulnerable image checker
+        api.py                login, profile, grades, forgotten /api/export
+        auth.py               password check and tokens
+        admin.py              admin panel with no login
+    frontend/                 the portal&#x27;s web server files (chapter 5)
+        default.conf          nginx settings
+        index.html            the portal page
+    db/
+        init.sql              tables and seed data (chapter 5)
+    k8s/
+        app.yaml              Secret, 6 Services, 7 Deployments (chapter 6)
+        policies/
+            1-baseline.yaml   default deny, DNS, health checks (chapter 10)
+            2-allow.yaml      one policy per workload (chapter 10)
+    deploy.sh                 builds and deploys the portal (chapter 6)
+    check-portal.sh           checks that real users still get through (chapter 6)
+    dashboard/
+        app.py                dashboard back end (chapter 7)
+        index.html            dashboard page (chapter 7)
+    measure.py                latency test (chapter 12)
+    results/
+        latency.csv           written by measure.py (chapter 12)
+    evidence/                 outputs and screenshots for your report (chapters 11 to 14)</code></pre></figure>
+<p>Folders named <code class="nw">__pycache__</code> also appear once you run Python files. Python creates them and Git ignores them, so leave them alone.</p>
+<h2 id="progress-tracker">Progress tracker</h2>
+<p>Copy this table into a notebook or a document on Windows. Each time a checkpoint matches, write the date. For chapters that end with a commit, also write the code at the start of the first line that <code class="nw">git log --oneline</code> prints, such as <code class="nw">3f2a9c1</code>. The first line is always the newest commit. <a href="ch13.html">Chapter 13</a> uses that code to compare your files with the last state that worked.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>Chapter</th>
+<th>Checkpoint that must match</th>
+<th>Date</th>
+<th>Commit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0 How to use this guide</td>
+<td>none</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>1 What you will build</td>
+<td>the 8-row flow table, written from memory, matches</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>2 Before you start</td>
+<td><code class="nw">hello.txt</code> copied in and the first commit made</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>3 Set up the environment</td>
+<td><code class="nw">14 of 14 checks passed</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>4 Create the cluster</td>
+<td>3 nodes Ready with their tiers, connectivity test passes</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>5 Write the services</td>
+<td><code class="nw">py_compile</code> passes, injection test shows <code class="nw">uid=1000(app)</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>6 Deploy the portal</td>
+<td>7 pods <code class="nw">1/1 Running</code>, <code class="nw">PORTAL: 6/6 OK</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>7 Build your dashboard</td>
+<td>matrix shows 36 of 36 reachable</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>8 Attack the flat network</td>
+<td>5 of 5 steps succeed, Omar's grade is 95</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>9 Design the policy</td>
+<td>your 8 flows match the table in <a href="ch01.html">chapter 1</a></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>10 Apply micro-segmentation</td>
+<td>0 of 36, then 7 of 36, attack 1 of 5, <code class="nw">/api/export</code> gives 403, <code class="nw">PORTAL: 6/6 OK</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>11 Read the evidence in Hubble</td>
+<td><code class="nw">Policy denied</code> drops from news, api to db FORWARDED</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>12 Measure</td>
+<td><code class="nw">results/latency.csv</code> with 20 rows</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>13 Getting unstuck alone</td>
+<td>every drill ends with <code class="nw">PORTAL: 6/6 OK</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>14 Evidence for your report</td>
+<td>all files present</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>15 Day-by-day plan</td>
+<td>none</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p><a href="ch01.html">Chapter 1</a> comes on day 2, so fill in its row then.</p>
+<!-- OUT ids: ch00-userprofile, ch00-ram-gb, ch00-logical-cpus --><nav class="pager" aria-label="Chapters"><a rel="next" href="ch01.html"><span>Next chapter</span>Chapter 1. What you will build</a></nav></main></div>
+<footer class="foot"><div class="foot-in"><p>Kubernetes 1.36, Cilium 1.20.5 and kind 0.33.0 on Windows 11 with WSL 2. Every command was run on a real laptop in November 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">Source on GitHub</a></p></div></footer>
+<p class="vh" aria-live="polite" id="live"></p>
+<script type="application/json" id="i18n">{"copied": "Copied", "copyFail": "Press Ctrl+C to copy the selected text", "doneOf": "{d} of {t} steps done", "next": "Next step: {s}", "allDone": "All {t} steps done.", "sumCount": "{d} of {t} done", "cleared": "All ticks cleared.", "confirm": "Clear every tick on this page? Your files and your cluster stay as they are.", "stageCount": "{d} of {t}"}</script>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

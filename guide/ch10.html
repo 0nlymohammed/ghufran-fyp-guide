@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
+<title>Chapter 10. Apply micro-segmentation | Micro-segmentation lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&family=Noto+Sans+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="ar" href="../ar/guide/ch10.html">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400&text=%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9&display=swap">
+</head>
+<body class="">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="top-in">
+<a class="brand" href="../index.html">Micro-segmentation lab</a>
+<nav aria-label="Micro-segmentation lab"><ul>
+<li><a href="../index.html">Quick path</a></li>
+<li><a href="../guide/index.html" aria-current="page">Full guide</a></li>
+<li><a href="../downloads.html">Downloads</a></li>
+<li><a href="../ar/guide/ch10.html" lang="ar" hreflang="ar" data-setlang="ar">العربية</a></li>
+</ul></nav>
+</div></header>
+<div class="layout"><details class="rail" open><summary>Chapters</summary><nav aria-label="Chapters"><ol class="toc"><li><a href="ch00.html">0. How to use this guide</a></li><li><a href="ch01.html">1. What you will build</a></li><li><a href="ch02.html">2. Before you start</a></li><li><a href="ch03.html">3. Set up the environment</a></li><li><a href="ch04.html">4. Create the cluster</a></li><li><a href="ch05.html">5. Write the services</a></li><li><a href="ch06.html">6. Deploy the portal</a></li><li><a href="ch07.html">7. Build your dashboard</a></li><li><a href="ch08.html">8. Attack the flat network</a></li><li><a href="ch09.html">9. Design the policy</a></li><li><a href="ch10.html" aria-current="page">10. Apply micro-segmentation</a><ol class="sub"><li><a href="#start-flat-with-omar-at-58">Start flat, with Omar at 58</a></li><li><a href="#type-1-baselineyaml-and-test-it-with-a-dry-run">Type 1-baseline.yaml and test it with a dry run</a></li><li><a href="#apply-the-baseline-alone-0-of-36">Apply the baseline alone: 0 of 36</a></li><li><a href="#write-2-allowyaml-one-policy-per-workload">Write 2-allow.yaml: one policy per workload</a></li><li><a href="#apply-2-allowyaml-10-policies">Apply 2-allow.yaml: 10 policies</a></li><li><a href="#the-portal-works-again-66">The portal works again: 6/6</a></li><li><a href="#the-matrix-7-of-36">The matrix: 7 of 36</a></li><li><a href="#attack-again-1-of-5">Attack again: 1 of 5</a></li><li><a href="#the-forgotten-endpoint-now-answers-403">The forgotten endpoint now answers 403</a></li><li><a href="#toggle-test-remove-reapply-compare">Toggle test: remove, reapply, compare</a></li><li><a href="#checkpoint">Checkpoint</a></li></ol></li><li><a href="ch11.html">11. Read the evidence in Hubble</a></li><li><a href="ch12.html">12. Measure</a></li><li><a href="ch13.html">13. Getting unstuck alone</a></li><li><a href="ch14.html">14. Evidence for your report</a></li><li><a href="ch15.html">15. Day-by-day plan</a></li><li><a href="appendix.html">Appendices</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="chapter-10-apply-micro-segmentation">Chapter 10. Apply micro-segmentation</h1>
+<p>You type the default-deny baseline by hand, apply it on its own and watch it close every path, including the ones the portal needs. Then you add one policy per workload, which reopens exactly the 8 connections from your flow table. You run the same checks and the same attack as in <a href="ch08.html">chapter 8</a>, and finish with a toggle test that flips the results back and forth. At the end the portal still passes <code class="nw">PORTAL: 6/6 OK</code>, the matrix shows 7 of 36 paths open, the attack stops after step 1, and <code class="nw">/api/export</code> answers <code class="nw">403 Forbidden</code>. Plan on two to three hours.</p>
+<p>Keep the dashboard running in its own Ubuntu window, as in <a href="ch08.html">chapter 8</a>, and type every other command in your first Ubuntu window unless the text right above the block says to use Windows PowerShell. Keep a sheet of paper or a text file next to you, and write down each number this chapter gives you as soon as you get it. The checkpoint at the end asks for them.</p>
+<h2 id="start-flat-with-omar-at-58">Start flat, with Omar at 58</h2>
+<p>The before-and-after comparison only holds if you start from the same state <a href="ch08.html">chapter 8</a> started from: no policies, and Omar's grade back at 58.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus get ciliumnetworkpolicies
+kubectl -n campus exec deploy/db -- psql -U postgres -d campus -c &quot;SELECT * FROM grades WHERE id = 3&quot;</code></pre></figure>
+<p>The first command lists the Cilium policies in <code class="nw">campus</code>. The second reads Omar's Network Security grade from inside the db pod, as in <a href="ch08.html">chapter 8</a>.</p>
+<p><strong>You should see</strong> no policies and a grade of 58.</p>
+<p>The first line must read <code>No resources found in campus namespace.</code> and the grade column must show <code class="nw">58</code>.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>The grade reads 95. You skipped the reset at the end of <a href="ch08.html">chapter 8</a>. Run the four commands from that chapter's "Reset Omar's grade" step, then this check again.</p>
+<p>The first command lists policies. Remove them with <code>kubectl delete -f ~/microseg/k8s/policies/</code>, which deletes every policy defined in that folder, and run this check again.</p>
+<h2 id="type-1-baselineyaml-and-test-it-with-a-dry-run">Type <code class="nw">1-baseline.yaml</code> and test it with a dry run</h2>
+<p>The baseline file holds the three policies that apply to every pod in <code class="nw">campus</code>: deny everything, allow name lookups, allow health checks. You type it by hand, so that you read every line as you go.</p>
+<p>Create the file in VS Code, in the project window you opened with <code class="nw">code .</code> in <a href="ch02.html">chapter 2</a>. In the Explorer pane on the left, right-click the <code class="nw">k8s</code> folder, choose "New File...", type <code class="nw">policies/1-baseline.yaml</code> as the name and press Enter. Typing a name with a slash in it makes VS Code create the <code class="nw">policies</code> folder and the file inside it in one go, and the empty file opens in a new tab.</p>
+<p>Type the file below. Copy the indentation exactly, using spaces, never the Tab key. YAML, the format Kubernetes files are written in, decides what belongs to what by how far each line is indented, so one wrong space changes the meaning. VS Code indents YAML for you as you type. When you press Enter after a line that ends in <code class="nw">:</code>, it moves the cursor in, and on other lines it keeps the indentation of the line above. So before you type each line, look at the <code class="nw">Col</code> number in the status bar at the bottom right. Add or delete spaces until it matches the listing, where <code class="nw">Col 1</code> means no spaces at all, <code class="nw">Col 3</code> means two spaces, and so on. The label keys under <code class="nw">matchLabels</code> in the second policy are in double quotes because they contain a colon. Type those quotes too. The lines that start with <code class="nw">#</code> are comments, and Kubernetes ignores them. Type them too if you can spare the time, since they explain what each line does.</p>
+<figure class="code file"><figcaption><span class="lbl">File: k8s/policies/1-baseline.yaml</span><button type="button" class="copy" aria-label="Copy this file">Copy</button></figcaption><pre dir="ltr"><code># 1) default-deny: selects every pod in campus. The empty ingress rule and the empty
+#    egress rule switch both directions to &quot;deny unless another policy allows it&quot;.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default-deny
+  namespace: campus
+spec:
+  endpointSelector: {}
+  ingress:
+  - {}
+  egress:
+  - {}
+---
+# 2) allow-dns: every pod may ask kube-dns (in kube-system) on port 53, for any name.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-dns
+  namespace: campus
+spec:
+  endpointSelector: {}
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        &quot;k8s:io.kubernetes.pod.namespace&quot;: kube-system
+        &quot;k8s:k8s-app&quot;: kube-dns
+    toPorts:
+    - ports:
+      - port: &quot;53&quot;
+        protocol: ANY
+      rules:
+        dns:
+        - matchPattern: &quot;*&quot;
+---
+# 3) allow-kubelet-probes: readiness probes come from the node itself (entity &quot;host&quot;).
+#    Cilium already allows this by default. Writing it down makes the rule visible
+#    and keeps probes working if that default is ever changed.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-kubelet-probes
+  namespace: campus
+spec:
+  endpointSelector: {}
+  ingress:
+  - fromEntities:
+    - host</code></pre></figure>
+<p>What each part does:</p>
+<p>(1) The <code class="nw">---</code> lines split one file into three separate objects. YAML allows several documents in one file, and <code class="nw">kubectl</code> applies them in order.</p>
+<p>(2) <code class="nw">apiVersion: cilium.io/v2</code> and <code class="nw">kind: CiliumNetworkPolicy</code> say what sort of object this is. Kubernetes didn't know this kind when it was first installed. Cilium taught it in <a href="ch04.html">chapter 4</a>. It registered the new type with a CustomResourceDefinition, CRD for short, which is the word <code class="nw">kubectl</code> uses in its error messages. The objects of that type, such as your policies, are called custom resources, and the Cilium agent on each node watches for them.</p>
+<p>(3) <code class="nw">name:</code> is how you refer to the policy later, and <code class="nw">namespace: campus</code> limits it to pods in <code class="nw">campus</code>. Leave the namespace line out and the policy lands in the <code class="nw">default</code> namespace, where it selects none of your pods.</p>
+<p>(4) <code class="nw">endpointSelector: {}</code> picks which pods the policy is about. An endpoint is Cilium's word for a pod it manages. A selector with nothing inside it has no conditions, so it picks every pod in the namespace.</p>
+<p>(5) <code class="nw">ingress:</code> followed by <code class="nw">- {}</code>, and <code class="nw">egress:</code> followed by <code class="nw">- {}</code>, are lists holding one empty rule each. In Cilium, as soon as a policy with an ingress section selects a pod, every incoming connection that no rule allows is dropped, and an egress section does the same for outgoing connections. The empty rule allows nothing. The result is default deny in both directions for every pod. Be careful with this shape, because the identical <code class="nw">- {}</code> in a standard Kubernetes NetworkPolicy means the opposite, allow everything. And in Cilium an empty list, <code class="nw">ingress: []</code>, wouldn't switch on default deny at all. Type it as a dash, a space, an opening brace and a closing brace.</p>
+<p>(6) <code class="nw">allow-dns</code> gives every pod one exit: to the kube-dns pods, which turn service names such as <code class="nw">db</code> into addresses. The two labels under <code class="nw">matchLabels</code> pick those pods. <code>k8s:io.kubernetes.pod.namespace: kube-system</code> reaches into the <code class="nw">kube-system</code> namespace, where kube-dns runs, and <code class="nw">k8s:k8s-app: kube-dns</code> is the label the kube-dns pods carry. The <code class="nw">k8s:</code> prefix tells Cilium these are Kubernetes labels. <code class="nw">port: "53"</code> is the DNS port, written in quotes because Cilium expects the port as text. <code class="nw">protocol: ANY</code> covers both UDP and TCP, since DNS uses both.</p>
+<p>(7) The <code class="nw">rules:</code> block with <code class="nw">dns:</code> and <code class="nw">matchPattern: "*"</code> sends every lookup through Cilium's DNS proxy. The <code class="nw">*</code> lets any name through, but every lookup gets recorded, so in <a href="ch11.html">chapter 11</a> you'll see the attacker's lookups in Hubble even though all their connections failed.</p>
+<p>(8) <code class="nw">allow-kubelet-probes</code> lets health checks in. <code class="nw">fromEntities: - host</code> allows connections from the <code class="nw">host</code> entity. An entity is a group that Cilium names itself, with no labels involved. <code class="nw">host</code> means the node the pod runs on, where the kubelet sends readiness probes from, and <code class="nw">world</code> means everything outside the cluster. Cilium allows the host by default anyway. Writing it down makes the rule visible, and keeps the probes working if that default ever changes.</p>
+<p>Save the file with Ctrl+S. Now let the API server check it without changing anything.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+kubectl apply --dry-run=server -f k8s/policies/1-baseline.yaml</code></pre></figure>
+<p><code class="nw">cd ~/microseg</code> moves into the project folder, because the file path in the next line starts from there. <code class="nw">--dry-run=server</code> sends the objects to the Kubernetes API server, which checks them as if it were going to store them, then throws them away. Typing mistakes show up here, while nothing in the cluster has changed yet.</p>
+<p><strong>You should see</strong> one line per policy.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>ciliumnetworkpolicy.cilium.io/default-deny created (server dry run)
+ciliumnetworkpolicy.cilium.io/allow-dns created (server dry run)
+ciliumnetworkpolicy.cilium.io/allow-kubelet-probes created (server dry run)</code></pre></figure>
+<p>All three lines must end in <code class="nw">created (server dry run)</code>.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>error: the path &quot;k8s/policies/1-baseline.yaml&quot; does not exist</code></pre></figure>
+<p>The file isn't where the command looks for it. Run <code class="nw">ls ~/microseg/k8s/policies</code>, which must list <code class="nw">1-baseline.yaml</code>. If the file sits somewhere else in the project, such as directly in <code class="nw">k8s</code>, drag it onto the <code class="nw">policies</code> folder in VS Code's Explorer pane. If <code class="nw">ls</code> says <code class="nw">No such file or directory</code> although VS Code shows the file, check the VS Code window. If the title bar doesn't show <code class="nw">[WSL: Ubuntu-24.04]</code> and the bottom-left corner has no WSL patch, you're editing files on the Windows side. Close that window, run <code>cd ~/microseg &amp;&amp; code .</code> in Ubuntu, and create the file again in the window that opens.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>error: error parsing k8s/policies/1-baseline.yaml: error converting YAML to JSON: yaml: line 9: found character that cannot start any token</code></pre></figure>
+<p>A Tab character is hiding in your indentation, or a line starts with a character YAML reserves, such as a backtick. The line number points at it, and yours may differ. Render Whitespace is already on from <a href="ch02.html">chapter 2</a>, so tabs show as small arrows and spaces as dots. If you see neither, set Editor: Render Whitespace to <code class="nw">all</code> in Settings, as in <a href="ch02.html">chapter 2</a>. Replace every arrow with spaces and run the dry run again.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>error: error parsing k8s/policies/1-baseline.yaml: error converting YAML to JSON: yaml: line 12: mapping values are not allowed in this context</code></pre></figure>
+<p>The same error can end in <code class="nw">did not find expected key</code> instead, and the line number may differ. A line is indented more or less than it should be compared with its neighbours, often because VS Code had already moved the cursor in and you typed the spaces on top. Put the cursor at the start of the line it names and of the two or three lines above it, compare each <code class="nw">Col</code> number with the listing, and fix the spaces.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>error: resource mapping not found for name: &quot;default-deny&quot; namespace: &quot;campus&quot; from &quot;k8s/policies/1-baseline.yaml&quot;: no matches for kind &quot;CiliumNetworkpolicy&quot; in version &quot;cilium.io/v2&quot;
+ensure CRDs are installed first</code></pre></figure>
+<p>The <code class="nw">kind</code> line has a typo, here a lower-case <code class="nw">p</code>. Kubernetes matches kinds letter for letter. Write <code class="nw">CiliumNetworkPolicy</code> with capital C, N and P.</p>
+<p>An error that ends in <code>strict decoding error: unknown field "spec.endpointSelecter"</code> means a field name is misspelled, or a line is indented under the wrong parent. The quoted path names the field, for example <code class="nw">spec.endpointSelecter</code> for a misspelled <code class="nw">endpointSelector</code>. Fix that line and run the dry run again.</p>
+<h2 id="apply-the-baseline-alone-0-of-36">Apply the baseline alone: 0 of 36</h2>
+<p>Before you allow anything, prove that default deny is really on.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+kubectl apply -f k8s/policies/1-baseline.yaml</code></pre></figure>
+<p>This time <code class="nw">kubectl apply</code> stores the three policies. Within a few seconds, the Cilium agent on every node turns them into entries that the eBPF programs on each pod's network interface check for every new connection.</p>
+<p><strong>You should see</strong> three <code class="nw">created</code> lines.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>ciliumnetworkpolicy.cilium.io/default-deny created
+ciliumnetworkpolicy.cilium.io/allow-dns created
+ciliumnetworkpolicy.cilium.io/allow-kubelet-probes created</code></pre></figure>
+<p>Each line must end in <code class="nw">created</code>, with no <code class="nw">(server dry run)</code> this time. If you applied this file before, the lines end in <code class="nw">unchanged</code> or <code class="nw">configured</code> instead, and that's fine.</p>
+<p>Give Cilium a few seconds to load the new rules, then ask the dashboard for the matrix.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>sleep 8
+curl -s localhost:5050/api/matrix | jq -c &#x27;{open, total}&#x27;</code></pre></figure>
+<p><code class="nw">sleep 8</code> is the settle time, the few seconds Cilium needs after a change before every node enforces it. The second line calls the matrix route behind the dashboard's "Refresh" button. <code class="nw">jq -c '{open, total}'</code> keeps only the two counts and prints them on one line.</p>
+<p><strong>You should see</strong> no open paths.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>{&quot;open&quot;:0,&quot;total&quot;:36}</code></pre></figure>
+<p>It must read <code class="nw">{"open":0,"total":36}</code>. The dashboard page doesn't notice changes you make from the terminal by itself. Reload it in the browser with F5, and the heading reads "Policies: ON (3 policies)". Reloading runs the matrix again too, and every cell turns orange, marked blocked.</p>
+<p>Now check the portal itself.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>bash ~/microseg/check-portal.sh</code></pre></figure>
+<p><strong>You should see</strong> every check fail.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>FAIL  portal page loads (expected &#x27;200&#x27;, got &#x27;000&#x27;)
+FAIL  news list has 3 items (expected &#x27;3&#x27;, got &#x27;&#x27;)
+FAIL  sara can log in (expected &#x27;32&#x27;, got &#x27;0&#x27;)
+FAIL  sara sees her profile (expected &#x27;Sara Ahmed&#x27;, got &#x27;&#x27;)
+FAIL  sara sees her 2 grades (expected &#x27;2&#x27;, got &#x27;&#x27;)
+command terminated with exit code 28
+FAIL  ops can open the admin panel (expected &#x27;4&#x27;, got &#x27;&#x27;)
+PORTAL: 0/6 OK</code></pre></figure>
+<p>The last line must read <code class="nw">PORTAL: 0/6 OK</code>. The script takes about half a minute, because each check waits up to 5 seconds for an answer that never comes. The line <code>command terminated with exit code 28</code> comes from the admin panel check: curl inside the ops pod gave up with its timeout code, 28, and <code class="nw">kubectl</code> passed that on. This broken portal is the result you want here. It proves that nothing gets through unless a rule allows it, including your own students.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>The matrix still reads <code class="nw">{"open":36,"total":36}</code>. The policies aren't in <code class="nw">campus</code>. Run <code>kubectl -n campus get ciliumnetworkpolicies</code>. If it prints <code>No resources found in campus namespace.</code>, the <code class="nw">namespace: campus</code> line is missing or misspelled. Remove what you applied with <code>kubectl delete -f k8s/policies/1-baseline.yaml</code>, fix the file and apply it again.</p>
+<p>The matrix command prints nothing. The dashboard isn't running. Start it in its own Ubuntu window as in <a href="ch08.html">chapter 8</a> and run the matrix command again.</p>
+<p>The portal check ends <code class="nw">PORTAL: 6/6 OK</code>, and <code>kubectl -n campus get ciliumnetworkpolicies</code> lists 10 policies instead of 3. You applied the whole folder, or clicked "Apply policies", and a <code class="nw">2-allow.yaml</code> from an earlier attempt came along. Remove its policies with <code>kubectl delete -f k8s/policies/2-allow.yaml</code>, wait a few seconds and run the matrix and portal checks again.</p>
+<h2 id="write-2-allowyaml-one-policy-per-workload">Write <code class="nw">2-allow.yaml</code>: one policy per workload</h2>
+<p>The baseline closed everything. The second file reopens exactly the 8 connections in your flow table, with one policy for each of the seven workloads, following the plan table in <a href="ch09.html">chapter 9</a>'s section "Two permissions per connection: exit visa and entry visa".</p>
+<p>Create it next to the baseline. In VS Code's Explorer pane, right-click the <code class="nw">policies</code> folder, choose "New File..." and name it <code class="nw">2-allow.yaml</code>.</p>
+<p>Here is the whole file. Build it in three parts. Paste everything from the first line down to and including the <code class="nw">---</code> line that follows the news policy. Then type the api policy yourself, from <code class="nw">apiVersion: cilium.io/v2</code> to the last <code class="nw">protocol: TCP</code> before the next <code class="nw">---</code>. Last, paste everything from that <code class="nw">---</code> line to the end. While you type the api policy, check the <code class="nw">Col</code> number before each line, as you did for the baseline, because VS Code indents for you here too.</p>
+<figure class="code file"><figcaption><span class="lbl">File: k8s/policies/2-allow.yaml</span><button type="button" class="copy" aria-label="Copy this file">Copy</button></figcaption><pre dir="ltr"><code># One policy per workload. Every allowed connection needs BOTH
+# egress in the caller&#x27;s policy AND ingress in the callee&#x27;s policy.
+# Ports are container ports (equal to the Service ports in app.yaml).
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: frontend
+  namespace: campus
+spec:
+  endpointSelector:
+    matchLabels:
+      app: frontend
+  ingress:
+  - fromEntities:
+    - world                       # Windows / WSL through NodePort 30080
+    toPorts:
+    - ports:
+      - port: &quot;80&quot;
+        protocol: TCP
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        app: api
+    toPorts:
+    - ports:
+      - port: &quot;8080&quot;
+        protocol: TCP
+  - toEndpoints:
+    - matchLabels:
+        app: news
+    toPorts:
+    - ports:
+      - port: &quot;5000&quot;
+        protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: news
+  namespace: campus
+spec:
+  endpointSelector:
+    matchLabels:
+      app: news
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: frontend
+    toPorts:
+    - ports:
+      - port: &quot;5000&quot;
+        protocol: TCP
+  # No egress section: news keeps default-deny egress (only DNS, from allow-dns).
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: api
+  namespace: campus
+spec:
+  endpointSelector:
+    matchLabels:
+      app: api
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: frontend
+    toPorts:
+    - ports:
+      - port: &quot;8080&quot;
+        protocol: TCP
+      rules:
+        http:                     # L7: only these three calls, everything else gets 403
+        - method: &quot;GET&quot;
+          path: &quot;/api/grades&quot;
+        - method: &quot;GET&quot;
+          path: &quot;/api/profile&quot;
+        - method: &quot;POST&quot;
+          path: &quot;/api/login&quot;
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        app: auth
+    toPorts:
+    - ports:
+      - port: &quot;5001&quot;
+        protocol: TCP
+  - toEndpoints:
+    - matchLabels:
+        app: db
+    toPorts:
+    - ports:
+      - port: &quot;5432&quot;
+        protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: auth
+  namespace: campus
+spec:
+  endpointSelector:
+    matchLabels:
+      app: auth
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: api
+    toPorts:
+    - ports:
+      - port: &quot;5001&quot;
+        protocol: TCP
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        app: db
+    toPorts:
+    - ports:
+      - port: &quot;5432&quot;
+        protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: db
+  namespace: campus
+spec:
+  endpointSelector:
+    matchLabels:
+      app: db
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: api
+    - matchLabels:
+        app: auth
+    - matchLabels:
+        app: admin
+    toPorts:
+    - ports:
+      - port: &quot;5432&quot;
+        protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: admin
+  namespace: campus
+spec:
+  endpointSelector:
+    matchLabels:
+      app: admin
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: ops
+    toPorts:
+    - ports:
+      - port: &quot;5002&quot;
+        protocol: TCP
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        app: db
+    toPorts:
+    - ports:
+      - port: &quot;5432&quot;
+        protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: ops
+  namespace: campus
+spec:
+  endpointSelector:
+    matchLabels:
+      app: ops
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        app: admin
+    toPorts:
+    - ports:
+      - port: &quot;5002&quot;
+        protocol: TCP</code></pre></figure>
+<p>Every policy in this file has the same parts. <code class="nw">endpointSelector</code> with <code class="nw">matchLabels</code> picks the pods the policy is about, by their <code class="nw">app</code> label. <code class="nw">ingress</code> lists who may connect to those pods, and <code class="nw">egress</code> lists what they may connect to. Inside a rule, <code class="nw">fromEndpoints</code> or <code class="nw">toEndpoints</code> names the other side by its labels, <code class="nw">fromEntities</code> names it by entity, and <code class="nw">toPorts</code> names the port. Each rule is one visa from <a href="ch09.html">chapter 9</a>. The comment at the top of the file says so: every allowed connection needs egress in the caller's policy and ingress in the callee's.</p>
+<p>Go through the api policy, the one you typed, line by line.</p>
+<p>(1) <code class="nw">endpointSelector</code> with <code class="nw">app: api</code> makes this policy about the api pods. Cilium resolves that label to a security identity, so the policy follows api to whatever IP address its pod gets.</p>
+<p>(2) Under <code class="nw">ingress</code>, <code class="nw">fromEndpoints</code> with <code class="nw">app: frontend</code> and <code class="nw">port: "8080"</code> is api's entry visa: only pods labelled <code class="nw">app: frontend</code> may connect, and only on port 8080. The ports in these policies are container ports, the ports the programs listen on inside the pods. Cilium checks a connection after the Service address has been turned into a pod address, so it sees the container port. In this lab they're equal to the Service ports anyway.</p>
+<p>(3) The <code class="nw">rules:</code> block inside that port is the L7 part. It's the excerpt below, copied from the file.</p>
+<figure class="code file excerpt"><figcaption><span class="lbl">From k8s/policies/2-allow.yaml</span></figcaption><pre dir="ltr"><code>      rules:
+        http:                     # L7: only these three calls, everything else gets 403
+        - method: &quot;GET&quot;
+          path: &quot;/api/grades&quot;
+        - method: &quot;GET&quot;
+          path: &quot;/api/profile&quot;
+        - method: &quot;POST&quot;
+          path: &quot;/api/login&quot;</code></pre></figure>
+<p>Because a <code class="nw">rules: http:</code> block exists, Cilium sends every connection from frontend to api through Envoy, its HTTP proxy. Envoy reads each request and lets it through only if its method and path match one of the three pairs. Cilium compares the whole path, so <code class="nw">/api/grades</code> doesn't let <code class="nw">/api/grades2</code> or <code class="nw">/api/export</code> through. Any other request gets an immediate <code class="nw">403 Forbidden</code> answer from Envoy, and api never sees it. Spelling counts here. <code class="nw">POST</code> must be in capitals, and the paths must match the ones in the nginx log from <a href="ch09.html">chapter 9</a> character for character.</p>
+<p>(4) Under <code class="nw">egress</code>, two <code class="nw">toEndpoints</code> rules are api's exit visas, to auth on 5001 and to db on 5432.</p>
+<p>Now look at what the other policies leave out, because the gaps are part of the design. The news policy has no <code class="nw">egress</code> section, so news keeps the baseline's default deny for egress and can only reach DNS. The db policy has no egress either. The ops policy has no <code class="nw">ingress</code> section, so nothing may connect to ops. The frontend policy is the only one that uses <code class="nw">fromEntities: world</code>, which lets visitors in from outside the cluster on port 80.</p>
+<p>Save the file with Ctrl+S.</p>
+<figure class="fig"><a href="../files/figures/fig06-en.png"><img src="../files/figures/web/fig06-en.png" alt="How Cilium decides" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>How Cilium decides</figcaption></figure>
+<p>Figure 6 follows one connection through Cilium's checks, egress at the caller's network interface and ingress at the callee's. Frontend to api is the only connection that detours through Envoy.</p>
+<p>Before you apply the allow file, check that both files sit where the commands in this chapter expect them.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>ls ~/microseg/k8s/policies</code></pre></figure>
+<p><code class="nw">ls</code> lists the files in a folder.</p>
+<p><strong>You should see</strong> your two policy files.</p>
+<p>The line must read <code class="nw">1-baseline.yaml  2-allow.yaml</code>, and nothing else.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p><code class="nw">2-allow.yaml</code> is missing from the list. VS Code created it in another folder, usually <code class="nw">k8s</code> or the project's top level. Drag it onto the <code class="nw">policies</code> folder in the Explorer pane and run <code class="nw">ls</code> again.</p>
+<h2 id="apply-2-allowyaml-10-policies">Apply <code class="nw">2-allow.yaml</code>: 10 policies</h2>
+<p>Apply the allow file on top of the baseline, then check that Cilium accepted every policy in it.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+kubectl apply -f k8s/policies/2-allow.yaml</code></pre></figure>
+<p>This stores the seven per-workload policies next to the three baseline ones.</p>
+<p><strong>You should see</strong> seven <code class="nw">created</code> lines, one for each workload.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>ciliumnetworkpolicy.cilium.io/frontend created
+ciliumnetworkpolicy.cilium.io/news created
+ciliumnetworkpolicy.cilium.io/api created
+ciliumnetworkpolicy.cilium.io/auth created
+ciliumnetworkpolicy.cilium.io/db created
+ciliumnetworkpolicy.cilium.io/admin created
+ciliumnetworkpolicy.cilium.io/ops created</code></pre></figure>
+<p>The names must be frontend, news, api, auth, db, admin and ops, each followed by <code class="nw">created</code>. If you applied this file before, the lines end in <code class="nw">unchanged</code> or <code class="nw">configured</code> instead, and that's fine.</p>
+<p>Wait a few seconds, then list everything that's now in force.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>sleep 8
+kubectl -n campus get ciliumnetworkpolicies</code></pre></figure>
+<p><strong>You should see</strong> ten policies.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>NAME                   AGE   VALID
+admin                  7s    True
+allow-dns              49s   True
+allow-kubelet-probes   49s   True
+api                    7s    True
+auth                   7s    True
+db                     7s    True
+default-deny           49s   True
+frontend               7s    True
+news                   7s    True
+ops                    7s    True</code></pre></figure>
+<p>There must be 10 rows, and every row must show <code class="nw">True</code> under VALID. VALID <code class="nw">True</code> means Cilium parsed the policy and found nothing wrong with it. Kubernetes accepting an object only means the fields are spelled right, so this column tells you more. What proves that the agents on the nodes enforce the policies is the matrix and the portal check, which come next. The AGE values differ on your laptop. Reload the dashboard page with F5, and its heading reads "Policies: ON (10 policies)". <code class="nw">cnp</code> is the short name for <code class="nw">ciliumnetworkpolicies</code>, and you can type <code class="nw">kubectl -n campus get cnp</code> from now on.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>If you get a YAML or field error like the ones in the dry-run step, it means the same thing here. Run <code>kubectl apply --dry-run=server -f k8s/policies/2-allow.yaml</code>, fix what it names, and apply the file again.</p>
+<p>If the error contains <code class="nw">Unsupported value: "tcp"</code>, you wrote the protocol in lower case, and Cilium only accepts protocol names in capitals. Write <code class="nw">TCP</code>.</p>
+<p>A row shows <code class="nw">False</code> under VALID. Kubernetes stored the policy, but Cilium couldn't turn it into rules. Run <code>kubectl -n campus get cnp api -o yaml</code>, using the name from the row that says <code class="nw">False</code>, and read the <code class="nw">status</code> section at the bottom of the output. Its message line names the problem. Fix the policy in <code class="nw">2-allow.yaml</code> and apply the file again.</p>
+<h2 id="the-portal-works-again-66">The portal works again: 6/6</h2>
+<p>Default deny broke the portal on purpose. Check that the allow file brings back everything a normal user and the IT team do.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>bash ~/microseg/check-portal.sh</code></pre></figure>
+<p><strong>You should see</strong> all six checks pass.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>OK    portal page loads
+OK    news list has 3 items
+OK    sara can log in
+OK    sara sees her profile
+OK    sara sees her 2 grades
+OK    ops can open the admin panel
+PORTAL: 6/6 OK</code></pre></figure>
+<p>The last line must read <code class="nw">PORTAL: 6/6 OK</code>. It's the same result as on the flat network in <a href="ch06.html">chapter 6</a>.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>Some of the fixes below use <code class="nw">hubble observe</code>, which needs the port-forward from <a href="ch09.html">chapter 9</a>. If <code class="nw">hubble</code> answers with an error containing <code>4245: connect: connection refused</code>, the port-forward stopped when its window closed. Run <code>cilium hubble port-forward &amp;</code>, wait five seconds and run the <code class="nw">hubble observe</code> command again.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>FAIL  sara can log in (expected &#x27;32&#x27;, got &#x27;0&#x27;)</code></pre></figure>
+<p>The checks after it fail too. The L7 rule doesn't match the login request, so Envoy answered 403 and Sara got no token. Check <code class="nw">method: "POST"</code> and <code class="nw">path: "/api/login"</code> in your api policy, capitals and slashes included. To see what Envoy rejected, run <code>hubble observe --namespace campus --protocol http --last 10</code> and look for a line containing <code class="nw">http-request DROPPED</code> with the request's method and path in brackets. Fix the file and run <code>kubectl apply -f k8s/policies/2-allow.yaml</code> again. Applying a changed file updates the policies in place.</p>
+<p><code class="nw">PORTAL: 1/6 OK</code>, with only <code class="nw">portal page loads</code> passing. The page itself is a static file inside frontend, while every other check needs a connection from one pod to another. Two causes give this result. Either name lookups are being dropped, or the egress rules are missing, for example because only part of <code class="nw">2-allow.yaml</code> was applied. Run <code>hubble observe --namespace campus --verdict DROPPED --last 20</code> to tell them apart. Drops toward kube-dns on port 53 point at DNS, so check the two labels under <code class="nw">matchLabels</code> in the <code class="nw">allow-dns</code> policy in <code class="nw">1-baseline.yaml</code>, letter by letter. Drops toward api, news or admin point at missing egress rules, so compare the <code class="nw">egress</code> sections in your <code class="nw">2-allow.yaml</code> with the listing and apply the file again.</p>
+<p>Any other check fails, for example the admin panel check with <code>command terminated with exit code 28</code>. Some connection is missing one of its two visas. Run <code>hubble observe --namespace campus --verdict DROPPED --last 20</code> straight after the portal check, without refreshing the dashboard's matrix or reloading its page first, since the matrix probes create drops of their own. A line such as <code>campus/ops-... &lt;&gt; campus/admin-...:5002 ... Policy denied DROPPED</code> names the source, the destination and the port. Find that pair in your plan table from <a href="ch09.html">chapter 9</a> and check both of its rules, the egress one in the source's policy and the ingress one in the destination's.</p>
+<h2 id="the-matrix-7-of-36">The matrix: 7 of 36</h2>
+<p>Every open cell in the matrix is a path from one program to a service.</p>
+<p>In the dashboard, click "Refresh" next to "Reachability matrix", and print the counts in the terminal too.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>curl -s localhost:5050/api/matrix | jq -c &#x27;{open, total}&#x27;</code></pre></figure>
+<p><strong>You should see</strong> seven open paths out of 36.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>{&quot;open&quot;:7,&quot;total&quot;:36}</code></pre></figure>
+<p>It must read <code class="nw">{"open":7,"total":36}</code>. In the dashboard, the seven blue cells are frontend to news, frontend to api, api to auth, api to db, auth to db, admin to db and ops to admin. Those are your flow table minus the world row, because the outside world isn't one of the matrix's seven sources. Every other cell is orange. The row for news is orange from end to end.</p>
+<p>Going from 36 to 7 open paths removes 29 of them, which is 80.6% fewer paths an attacker can use.</p>
+<figure class="fig"><a href="../files/figures/fig09-en.png"><img src="../files/figures/web/fig09-en.png" alt="Reachability matrix before and after" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>Reachability matrix before and after</figcaption></figure>
+<p>Figure 9 puts the two matrices side by side. The news row, where the attacker starts, goes from all blue to all orange.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>The count is still 36. The policies aren't in force. Run <code class="nw">kubectl -n campus get cnp</code>. If it prints <code>No resources found in campus namespace.</code>, apply both files again from the start of this chapter.</p>
+<p>The count is higher than 7, for example 8. A cell only turns blue when both ends allow it, so an extra open cell means two mistakes, or one leftover policy. First run <code class="nw">kubectl -n campus get cnp</code>, which must list exactly 10 policies. If it lists more, delete the extra one by name with <code class="nw">kubectl -n campus delete cnp</code> followed by that name. If it lists 10, find the unexpected blue cell in the dashboard and check both of its rules. The row's service needs an egress rule that allows more than you meant, and the column's service an ingress rule that does the same. Look for a <code class="nw">matchLabels</code> left empty, since an empty selector matches every pod.</p>
+<p>The count is lower than 7 and the portal check also failed. Fix the portal first, using the failure block of the previous step. The same missing rule explains both.</p>
+<h2 id="attack-again-1-of-5">Attack again: 1 of 5</h2>
+<p>Run the <a href="ch08.html">chapter 8</a> attack again, unchanged, against the segmented network.</p>
+<p>In the dashboard, click "Run attack". It takes about 18 seconds this time, because the blocked steps wait for their timeouts. The summary must read "1 of 5 attack steps succeeded". Then save each step's full output as evidence.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>curl -s -X POST localhost:5050/api/attack | jq -r &#x27;.[] | &quot;--- &quot; + .step + &quot;\n&quot; + .output&#x27; | tee ~/microseg/evidence/ch12-attack-segmented.txt</code></pre></figure>
+<p>This calls the same attack route as the button. Nothing prints for about 20 seconds while the blocked steps wait for their timeouts, so wait for the prompt and don't press Ctrl+C. The <code class="nw">jq</code> filter prints, for each step, a line with <code class="nw">---</code> and the step name, then everything the news service sent back. <code class="nw">tee</code> saves a copy in <code class="nw">evidence/</code>.</p>
+<p><strong>You should see</strong> five sections, one per step.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>--- 1. T1190 exploit the image checker
+HTTP status of image: 000
+uid=1000(app) gid=1000(app) groups=1000(app)
+news-545758c8c6-2jp4n
+
+--- 2. T1046 discover and scan services
+HTTP status of image: 000
+ADMIN_SERVICE_PORT=5002
+API_SERVICE_PORT=8080
+AUTH_SERVICE_PORT=5001
+DB_SERVICE_PORT=5432
+FRONTEND_SERVICE_PORT=80
+KUBERNETES_SERVICE_PORT=443
+NEWS_SERVICE_PORT=5000
+nc: connect to frontend (10.96.181.104) port 80 (tcp) timed out: Operation now in progress
+nc: connect to api (10.96.122.235) port 8080 (tcp) timed out: Operation now in progress
+nc: connect to auth (10.96.108.176) port 5001 (tcp) timed out: Operation now in progress
+nc: connect to db (10.96.126.23) port 5432 (tcp) timed out: Operation now in progress
+nc: connect to admin (10.96.110.73) port 5002 (tcp) timed out: Operation now in progress
+
+--- 3. T1078.001 log in to db with the default account
+HTTP status of image: 000
+psql: error: connection to server at &quot;db&quot; (10.96.126.23), port 5432 failed: timeout expired
+
+--- 4. T1565.001 change Omar&#x27;s grade
+HTTP status of image: 000
+psql: error: connection to server at &quot;db&quot; (10.96.126.23), port 5432 failed: timeout expired
+
+--- 5. reach the admin panel and dump users
+HTTP status of image: 000
+curl: (28) Connection timed out after 3001 milliseconds</code></pre></figure>
+<p>Step 1 still shows <code class="nw">uid=1000(app)</code> and the news pod's name, because the bug is still there. Frontend has to reach news for the announcements, so the attacker's request still arrives and the shell still runs it. What changes is how far the attacker can get from there.</p>
+<p>Step 2 still prints the seven <code class="nw">SERVICE_PORT</code> variables, because environment variables live inside the pod and need no network. Every <code class="nw">nc</code> line now ends in <code>timed out: Operation now in progress</code> instead of <code class="nw">succeeded!</code>. Steps 3 and 4 end in <code class="nw">timeout expired</code>, and step 5 in <code>curl: (28) Connection timed out after 3001 milliseconds</code>. These are all timeouts, not refusals. Cilium drops the attacker's first packet without answering, so each tool waits until its own time limit runs out. The attacker can't tell whether anything is listening behind a name, because a dropped packet looks the same as a host that is down.</p>
+<p>Now confirm that step 4 changed nothing.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus exec deploy/db -- psql -U postgres -d campus -c &quot;SELECT * FROM grades WHERE id = 3&quot;</code></pre></figure>
+<p><strong>You should see</strong> Omar's original grade.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code> id | student_id |      course      | grade 
+----+------------+------------------+-------
+  3 |          2 | Network Security |    58
+(1 row)</code></pre></figure>
+<p>The grade column must still read <code class="nw">58</code>.</p>
+<figure class="fig"><a href="../files/figures/fig10-en.png"><img src="../files/figures/web/fig10-en.png" alt="Attack steps that succeeded" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>Attack steps that succeeded</figcaption></figure>
+<p>Figure 10 compares the attack on the two networks. The one step that survives is the one that never leaves the news pod.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>The summary reads "5 of 5 attack steps succeeded" and the grade is 95. The policies aren't in force. Run <code class="nw">kubectl -n campus get cnp</code>, apply both files if they're missing, reset Omar's grade as in <a href="ch08.html">chapter 8</a>, and run the attack again.</p>
+<p>The summary reads "0 of 5 attack steps succeeded", and step 1 shows no <code class="nw">uid=</code> line. Frontend can't reach news, so the news list check in <code class="nw">check-portal.sh</code> fails too. Check the frontend policy's egress rule for news and the news policy's ingress rule from frontend, both on port 5000.</p>
+<h2 id="the-forgotten-endpoint-now-answers-403">The forgotten endpoint now answers 403</h2>
+<p>In <a href="ch08.html">chapter 8</a>, <code class="nw">/api/export</code> handed every grade to anyone who asked. The L7 rule should now stop it, while the three requests the portal uses keep working.</p>
+<p>Run this in Windows PowerShell, exactly as in <a href="ch08.html">chapter 8</a>.</p>
+<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>curl.exe -s -i http://localhost:30080/api/export</code></pre></figure>
+<p><strong>You should see</strong> a refusal.</p>
+<p>The first line must read <code class="nw">HTTP/1.1 403 Forbidden</code> and the body must read <code class="nw">Access denied</code>. Envoy answered on api's behalf, so the request never reached api's code. The <code class="nw">Server: nginx/1.28.3</code> line is there because frontend passed Envoy's answer back to you, and the version number after <code class="nw">nginx/</code> may differ on your laptop. The date differs on your run.</p>
+<p>Compare the two kinds of denial you've now seen. An L3/L4 denial, such as news to db, is silence: the packet is dropped and the caller times out. An L7 denial is a fast, explicit <code class="nw">403</code>, because the connection itself is allowed and only the request inside it is refused.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>HTTP/1.1 200 OK</code></pre></figure>
+<p>The export still works. Either the api policy has no <code class="nw">rules:</code> block, or applying the api policy failed and you missed the error. Run <code>kubectl -n campus get cnp api -o yaml</code> and check that <code class="nw">rules:</code> with <code class="nw">http:</code> under it appears inside <code class="nw">toPorts</code>. If it's missing, compare your api policy with the listing, where <code class="nw">rules:</code> lines up with <code class="nw">ports:</code> three lines above it, and apply <code class="nw">2-allow.yaml</code> again.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>HTTP/1.1 504 Gateway Time-out</code></pre></figure>
+<p>Frontend can't reach api at all, so nginx gave up after its 5-second connect timeout. The portal check fails as well. Check the frontend policy's egress rule for api and the api policy's ingress rule from frontend, both on port 8080.</p>
+<h2 id="toggle-test-remove-reapply-compare">Toggle test: remove, reapply, compare</h2>
+<p>Remove every policy and attack again.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+kubectl delete -f k8s/policies/ --ignore-not-found
+sleep 8
+curl -s -X POST localhost:5050/api/attack | jq -r &#x27;[.[] | select(.success)] | length | &quot;attack: \(.) of 5 succeeded&quot;&#x27;
+curl -s localhost:5050/api/matrix | jq -r &#x27;&quot;matrix: \(.open) of \(.total) reachable&quot;&#x27;</code></pre></figure>
+<p><code>kubectl delete -f k8s/policies/</code> deletes every object defined in any file in the folder, both of yours here. <code class="nw">--ignore-not-found</code> keeps it quiet about objects that are already gone. The first <code class="nw">jq</code> filter keeps the steps that succeeded (<code class="nw">select(.success)</code>), counts them with <code class="nw">length</code>, and writes the count into a sentence. The second writes the matrix counts into a sentence.</p>
+<p><strong>You should see</strong> ten deletions, then the flat-network results.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>ciliumnetworkpolicy.cilium.io &quot;default-deny&quot; deleted from campus namespace
+ciliumnetworkpolicy.cilium.io &quot;allow-dns&quot; deleted from campus namespace
+ciliumnetworkpolicy.cilium.io &quot;allow-kubelet-probes&quot; deleted from campus namespace
+ciliumnetworkpolicy.cilium.io &quot;frontend&quot; deleted from campus namespace
+ciliumnetworkpolicy.cilium.io &quot;news&quot; deleted from campus namespace
+ciliumnetworkpolicy.cilium.io &quot;api&quot; deleted from campus namespace
+ciliumnetworkpolicy.cilium.io &quot;auth&quot; deleted from campus namespace
+ciliumnetworkpolicy.cilium.io &quot;db&quot; deleted from campus namespace
+ciliumnetworkpolicy.cilium.io &quot;admin&quot; deleted from campus namespace
+ciliumnetworkpolicy.cilium.io &quot;ops&quot; deleted from campus namespace
+attack: 5 of 5 succeeded
+matrix: 36 of 36 reachable</code></pre></figure>
+<p>The last two lines must read <code class="nw">attack: 5 of 5 succeeded</code> and <code class="nw">matrix: 36 of 36 reachable</code>. Omar's grade is 95 again at this point.</p>
+<p>Now put the policies back, attack again, and reset Omar's grade.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+kubectl apply -f k8s/policies/
+sleep 8
+curl -s -X POST localhost:5050/api/attack | jq -r &#x27;[.[] | select(.success)] | length | &quot;attack: \(.) of 5 succeeded&quot;&#x27;
+curl -s localhost:5050/api/matrix | jq -r &#x27;&quot;matrix: \(.open) of \(.total) reachable&quot;&#x27;
+kubectl -n campus rollout restart deployment/db &gt;/dev/null &amp;&amp; kubectl -n campus rollout status deployment/db --timeout=120s &gt;/dev/null &amp;&amp; echo &quot;db reset&quot;</code></pre></figure>
+<p><code class="nw">kubectl apply -f k8s/policies/</code> applies both files in alphabetical order, the baseline first. The attack line pauses for about 20 seconds again, now that the blocked steps wait for their timeouts. The last line is the database reset from <a href="ch08.html">chapter 8</a>. <code class="nw">&gt;/dev/null</code> hides each command's normal messages, and <code class="nw">echo "db reset"</code> prints a confirmation only if both commands worked.</p>
+<p><strong>You should see</strong> ten creations, the segmented results and the reset.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>ciliumnetworkpolicy.cilium.io/default-deny created
+ciliumnetworkpolicy.cilium.io/allow-dns created
+ciliumnetworkpolicy.cilium.io/allow-kubelet-probes created
+ciliumnetworkpolicy.cilium.io/frontend created
+ciliumnetworkpolicy.cilium.io/news created
+ciliumnetworkpolicy.cilium.io/api created
+ciliumnetworkpolicy.cilium.io/auth created
+ciliumnetworkpolicy.cilium.io/db created
+ciliumnetworkpolicy.cilium.io/admin created
+ciliumnetworkpolicy.cilium.io/ops created
+attack: 1 of 5 succeeded
+matrix: 7 of 36 reachable
+db reset</code></pre></figure>
+<p>The three lines at the bottom must read <code class="nw">attack: 1 of 5 succeeded</code>, <code class="nw">matrix: 7 of 36 reachable</code> and <code class="nw">db reset</code>.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>After reapplying, the attack line reads <code class="nw">attack: 2 of 5 succeeded</code> or higher. Eight seconds weren't enough for your laptop this time. Wait ten seconds and run the two <code class="nw">curl</code> lines again. If the numbers are still wrong, run <code class="nw">kubectl -n campus get cnp</code> and check that all 10 policies show <code class="nw">True</code>.</p>
+<p>The attack line reads <code class="nw">attack: 0 of 5 succeeded</code> after removing the policies. The dashboard can't reach the portal. Run <code>bash ~/microseg/check-portal.sh</code> to find out why.</p>
+<p>Check that the reset worked. The attack you ran with the policies removed set Omar's grade to 95, and the new db pod must have brought back 58.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>sleep 3
+kubectl -n campus exec deploy/db -- psql -U postgres -d campus -c &quot;SELECT * FROM grades WHERE id = 3&quot;</code></pre></figure>
+<p><code class="nw">sleep 3</code> gives PostgreSQL in the new pod a few seconds to settle, as in <a href="ch08.html">chapter 8</a>, and the second line reads row 3 again.</p>
+<p><strong>You should see</strong> Omar's original grade.</p>
+<p>The grade column must read <code class="nw">58</code>. If psql says it can't connect on a socket, PostgreSQL was still starting. Wait ten seconds and run the second line again.</p>
+<p>The dashboard's two buttons at the top run the same <code class="nw">kubectl</code> commands. "Remove policies" turns the heading to "Policies: OFF", and "Apply policies" turns it to "Policies: ON (10 policies)". You can repeat the toggle with them, then click "Refresh" and "Run attack" to show the numbers follow.</p>
+<h2 id="checkpoint">Checkpoint</h2>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; bash check-portal.sh | tail -1 &amp;&amp; curl -s localhost:5050/api/matrix | jq -r &#x27;&quot;matrix: \(.open) of \(.total) reachable&quot;&#x27;</code></pre></figure>
+<p><code class="nw">tail -1</code> keeps only the last line of the portal check. The <code class="nw">&amp;&amp;</code> runs the matrix part once the portal check has finished. It runs even if a portal check failed, because <code class="nw">tail</code> always succeeds, so read both lines.</p>
+<p>The output must be exactly the two lines below. Your notes from this chapter must also show <code class="nw">PORTAL: 0/6 OK</code> and 0 of 36 with the baseline alone, 1 of 5 attack steps, <code class="nw">403 Forbidden</code> for <code class="nw">/api/export</code>, and a grade of 58 after the toggle test's reset.</p>
+<p>The lines must read <code class="nw">PORTAL: 6/6 OK</code> and <code class="nw">matrix: 7 of 36 reachable</code>.</p>
+<p>Save your work.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; git add -A &amp;&amp; git commit -m &quot;ch10: default deny and per-workload policies&quot;</code></pre></figure>
+<p>This commits both policy files and the saved attack output.</p>
+<!-- OUT ids: ch12-start, ch12-dryrun, ch12-apply-baseline, ch12-matrix-baseline, ch12-portal-baseline, ch12-ls-policies, ch12-apply-allow, ch12-cnp-list, ch12-portal-segmented, ch12-matrix-segmented, ch12-attack-segmented-output, ch12-grade-unchanged, ch12-export-403, ch12-toggle-remove, ch12-toggle-apply, ch12-grade-after-toggle, ch12-checkpoint --><nav class="pager" aria-label="Chapters"><a rel="prev" href="ch09.html"><span>Previous chapter</span>Chapter 9. Design the policy</a><a rel="next" href="ch11.html"><span>Next chapter</span>Chapter 11. Read the evidence in Hubble</a></nav></main></div>
+<footer class="foot"><div class="foot-in"><p>Kubernetes 1.36, Cilium 1.20.5 and kind 0.33.0 on Windows 11 with WSL 2. Every command was run on a real laptop in November 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">Source on GitHub</a></p></div></footer>
+<p class="vh" aria-live="polite" id="live"></p>
+<script type="application/json" id="i18n">{"copied": "Copied", "copyFail": "Press Ctrl+C to copy the selected text", "doneOf": "{d} of {t} steps done", "next": "Next step: {s}", "allDone": "All {t} steps done.", "sumCount": "{d} of {t} done", "cleared": "All ticks cleared.", "confirm": "Clear every tick on this page? Your files and your cluster stay as they are.", "stageCount": "{d} of {t}"}</script>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

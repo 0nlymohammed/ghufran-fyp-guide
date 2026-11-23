@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
+<title>الفصل 11. قراءة الأدلة في Hubble | مختبر التجزئة الدقيقة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;700&family=Public+Sans:wght@400;600;700&family=Noto+Sans+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="en" href="../../guide/ch11.html">
+
+</head>
+<body class="">
+<a class="skip" href="#main">الانتقال إلى المحتوى</a>
+<header class="top"><div class="top-in">
+<a class="brand" href="../../ar/index.html">مختبر التجزئة الدقيقة</a>
+<nav aria-label="مختبر التجزئة الدقيقة"><ul>
+<li><a href="../../ar/index.html">المسار السريع</a></li>
+<li><a href="../../ar/guide/index.html" aria-current="page">الدليل الكامل</a></li>
+<li><a href="../../ar/downloads.html">التنزيلات</a></li>
+<li><a href="../../guide/ch11.html" lang="en" hreflang="en" data-setlang="en">English</a></li>
+</ul></nav>
+</div></header>
+<div class="layout"><details class="rail" open><summary>الفصول</summary><nav aria-label="الفصول"><ol class="toc"><li><a href="ch00.html">0. كيف نستخدم هذا الدليل</a></li><li><a href="ch01.html">1. ما الذي سنبنيه</a></li><li><a href="ch02.html">2. قبل أن نبدأ</a></li><li><a href="ch03.html">3. تجهيز بيئة العمل</a></li><li><a href="ch04.html">4. إنشاء العنقود</a></li><li><a href="ch05.html">5. كتابة الخدمات</a></li><li><a href="ch06.html">6. نشر البوابة</a></li><li><a href="ch07.html">7. بناء لوحة التحكم</a></li><li><a href="ch08.html">8. مهاجمة الشبكة المسطحة</a></li><li><a href="ch09.html">9. تصميم السياسة</a></li><li><a href="ch10.html">10. تطبيق التجزئة الدقيقة للشبكة</a></li><li><a href="ch11.html" aria-current="page">11. قراءة الأدلة في Hubble</a><ol class="sub"><li><a href="#أولا-التحقق-من-أن-hubble-يجيب">أولاً، التحقق من أنّ Hubble يجيب</a></li><li><a href="#حركة-مرور-جديدة-الهجوم-وفحوص-البوابة">حركة مرور جديدة: الهجوم وفحوص البوابة</a></li><li><a href="#إسقاطات-pod-news-من-النظرة-الواسعة-إلى-الضيقة">إسقاطات Pod news، من النظرة الواسعة إلى الضيقة</a></li><li><a href="#سطر-واحد-من-hubble-حقلا-حقلا">سطر واحد من Hubble، حقلاً حقلاً</a></li><li><a href="#منفذ-واحد-وهويتان">منفذ واحد وهويتان</a></li><li><a href="#قراءة-قرار-l7">قراءة قرار L7</a></li><li><a href="#قراءة-استعلامات-dns-التي-أجراها-المهاجم">قراءة استعلامات DNS التي أجراها المهاجم</a></li><li><a href="#عد-إسقاطات-المهاجم">عدّ إسقاطات المهاجم</a></li><li><a href="#واجهة-hubble-التدفقات-نفسها-على-شكل-خريطة">واجهة Hubble: التدفقات نفسها على شكل خريطة</a></li><li><a href="#نقطة-التحقق">نقطة التحقق</a></li></ol></li><li><a href="ch12.html">12. القياس</a></li><li><a href="ch13.html">13. تجاوز الأعطال دون مساعدة</a></li><li><a href="ch14.html">14. أدلة بحث التخرج</a></li><li><a href="ch15.html">15. خطة العمل يوماً بيوم</a></li><li><a href="appendix.html">الملاحق</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="الفصل-11-قراءة-الأدلة-في-hubble">الفصل 11. قراءة الأدلة في Hubble</h1>
+<p>في <a href="ch10.html">الفصل 10</a> رأينا الهجوم يفشل. أمّا في هذا الفصل فنرى سبب فشله في سجلات Cilium نفسها. نقرأ الأسطر التي حاول فيها Pod news الوصول إلى db و admin فحصل على <code class="nw">Policy denied</code>، ثم الأسطر التي وصل فيها api إلى منفذ (port) قاعدة البيانات نفسه بعد ثوانٍ قليلة فعبر. ونرى كذلك Envoy يرفض <code class="nw">/api/export</code> برمز الحالة 403، ونجد استعلامات الأسماء التي أجراها المهاجم، وقد سجّلها Hubble مع أنّ كل اتصال بعدها فشل. نحفظ كل مخرج مهم في ملف نصي داخل <code class="nw">~/microseg/evidence</code> ليكون جاهزاً للتقرير. نحتاج إلى ساعة ونصف تقريباً.</p>
+<p>انتهى <a href="ch10.html">الفصل 10</a> وملفا السياسات مطبّقان، ويفترض هذا الفصل كله أنهما ما زالا كذلك. والخطوة الأولى تتحقق من ذلك.</p>
+<h2 id="أولا-التحقق-من-أن-hubble-يجيب">أولاً، التحقق من أنّ Hubble يجيب</h2>
+<p>الأمر <code class="nw">hubble</code> لا يقرأ العنقود (cluster) بنفسه. إنه يسأل Hubble Relay، وهو جزء من Cilium يجمع التدفقات الشبكية (flows) من كل عقدة (node)، ويصل إليه عبر توجيه المنفذ (port-forward) الذي شغّلناه في <a href="ch04.html">الفصل 4</a> بالأمر <code>cilium hubble port-forward &amp;</code>. يتوقف توجيه المنفذ هذا عندما نغلق الطرفية التي شغّلته أو نعيد تشغيل Windows، والشاشة الفارغة الناتجة عن توجيه منفذ متوقف تشبه كثيراً شاشة «لا توجد حركة مرور». لذلك نفحص الاتصال أولاً.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+mkdir -p evidence
+hubble status
+kubectl -n campus get cnp</code></pre></figure>
+<p>ينشئ <code class="nw">mkdir -p evidence</code> المجلد الذي نحفظ فيه مخرجات هذا الفصل، والخيار <code class="nw">-p</code> معناه «لا خطأ إذا كان المجلد موجوداً». أمّا <code class="nw">hubble status</code> فيسأل Relay عن حالته وعن عدد العقد التي يجمع منها التدفقات. ويعرض <code class="nw">kubectl -n campus get cnp</code> السياسات الموجودة في مساحة الأسماء (namespace) <code class="nw">campus</code>. والاسم <code class="nw">cnp</code> هو الاختصار الذي يقبله Kubernetes للنوع CiliumNetworkPolicy، فلا نحتاج إلى كتابة الاسم الطويل.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> أسطر حالة Hubble أولاً، ثم جدول السياسات.</p>
+<p>في جزء Hubble، السطر الذي يجب أن يطابق هو <code class="nw">Connected Nodes: 3/3</code>، ومعناه أنّ Relay يتلقى من العقد الثلاث كلها. ويجب أن يضم جدول السياسات 10 أسماء، من <code class="nw">admin</code> إلى <code class="nw">ops</code>، وأن يحمل كل صف القيمة <code class="nw">True</code> تحت VALID. أمّا العمود AGE فيبين كم مضى على إنشاء كل سياسة، لذلك تختلف قيمه عندنا عن المطبوعة هنا.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>4245: connect: connection refused</code></pre></figure>
+<p>الرسالة الكاملة أطول، لكنها تحتوي هذا النص. المنفذ 4245 هو الذي يستمع عليه توجيه المنفذ، وعبارة «connection refused» تعني أنه لا شيء يستمع هناك، فتوجيه المنفذ متوقف. الحل أن نشغّله من جديد في الخلفية بالأمر <code>cilium hubble port-forward &amp;</code>، ثم ننتظر خمس ثوانٍ ونشغّل <code class="nw">hubble status</code> مرة أخرى. الرمز <code class="nw">&amp;</code> في النهاية يرسل الأمر إلى الخلفية فيعود موجّه الأوامر إلينا.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>No resources found in campus namespace.</code></pre></figure>
+<p>السبب أنّ السياسات غير مطبّقة. ربما أُعيد تشغيل <code class="nw">deploy.sh</code>، وهو يحذف مساحة الأسماء وكل سياسة فيها. نطبّق الملفين بالأمر <code class="nw">kubectl apply -f k8s/policies/</code>، وننتظر عشر ثوانٍ ثم نعيد الخطوة.</p>
+<p>إذا أظهر <code class="nw">Connected Nodes</code> القيمة <code class="nw">2/3</code> أو أقل، فبرنامج Cilium agent على إحدى العقد لم يجهز بعد، وهذا يحدث لدقيقة أو دقيقتين بعد تشغيل Windows. نشغّل <code class="nw">cilium status --wait</code> وننتظر حتى ينتهي، ثم نشغّل <code class="nw">hubble status</code> من جديد.</p>
+<h2 id="حركة-مرور-جديدة-الهجوم-وفحوص-البوابة">حركة مرور جديدة: الهجوم وفحوص البوابة</h2>
+<p>لا يحتفظ Hubble بالتدفقات إلى الأبد. كل عقدة تحفظ أحدثها في مخزن دائري، وهو مخزن ثابت الحجم يدفع فيه كل تدفق جديد أقدمَ تدفق إلى الخارج. ربما خرج الهجوم الذي شغّلناه في <a href="ch10.html">الفصل 10</a> من المخزن. لذلك نشغّله الآن من جديد مع فحوص البوابة، فيكون أمام الخطوات التالية حركة محجوبة وحركة مسموح بها تعرضها.</p>
+<p>يمر الهجوم عبر لوحة التحكم التي بنيناها، فيجب أن تكون اللوحة قيد التشغيل. إذا لم تكن كذلك نفتح طرفية Ubuntu ثانية ونشغّلها بالأمر <code>cd ~/microseg/dashboard &amp;&amp; ../.venv/bin/python app.py</code>، ونترك تلك النافذة مفتوحة ونعود إلى الطرفية الأولى.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>curl -s -X POST localhost:5050/api/attack | jq -r &#x27;.[] | (if .success then &quot;SUCCESS &quot; else &quot;FAILED  &quot; end) + .step&#x27;
+bash check-portal.sh</code></pre></figure>
+<p>يطلب السطر الأول من المسار <code class="nw">/api/attack</code> في لوحة التحكم أن يرسل حمولات (payloads) الهجوم الخمس عبر NodePort على <code class="nw">localhost:30080</code>، وهو الباب نفسه الذي استخدمته أوامر PowerShell في <a href="ch08.html">الفصل 8</a>. نحتاج إلى <code class="nw">-X POST</code> لأنّ هذا المسار لا يقبل إلا طلبات POST. تجيب اللوحة بقائمة من خمس نتائج، ويحوّلها <code class="nw">jq</code> إلى أسطر مقروءة. الخيار <code class="nw">-r</code> يطبع نصاً عادياً بلا علامات اقتباس، والتعبير <code class="nw">.[]</code> يأخذ النتائج واحدة تلو الأخرى. أمّا <code>if .success then "SUCCESS " else "FAILED  " end</code> فيختار كلمة لكل نتيجة، ثم يضيف <code class="nw">+ .step</code> اسم الخطوة بعدها. يستغرق الأمر نحو 18 ثانية، لأنّ كل خطوة من الخطوات الأربع المحجوبة تنتظر انتهاء مهلتها الخاصة. ويشغّل السطر الثاني الفحوص الستة التي يجريها طالب حقيقي وفريق العمليات (ops).</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> خمسة أسطر للهجوم، ثم فحوص البوابة.</p>
+<p>تقول الخطوة 1 SUCCESS، وتقول الخطوات من 2 إلى 5 FAILED، وهذه هي نتيجة 1 من 5 التي رأيناها في <a href="ch10.html">الفصل 10</a>. ويجب أن يكون السطر الأخير <code class="nw">PORTAL: 6/6 OK</code>.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<p>لا يطبع الأمر الأول شيئاً على الإطلاق ويعود موجّه الأوامر فوراً. الخيار <code class="nw">-s</code> يخفي رسائل الخطأ في curl، فتظهر لوحة التحكم المتوقفة على شكل صمت. نشغّل اللوحة كما وصفنا أعلاه ونعيد الأمر.</p>
+<p>الأسطر الخمسة كلها تقول SUCCESS. السبب أنّ السياسات غير موجودة، وكان على الخطوة الأولى من هذا الفصل أن تكشف ذلك. نطبّقها بالأمر <code class="nw">kubectl apply -f k8s/policies/</code> وننتظر عشر ثوانٍ ثم نعيد.</p>
+<p>فحص واحد أو أكثر من فحوص البوابة يقول FAIL. هناك تدفق مشروع محجوب يستطيع Hubble تسميته. نشغّل <code>hubble observe --namespace campus --verdict DROPPED --last 20</code> ونبحث عن مصدر ووجهة موجودين في جدول التدفقات الذي كتبناه في <a href="ch09.html">الفصل 9</a>. ويشرح <a href="ch13.html">الفصل 13</a> هذا النوع من البحث سؤالاً بعد سؤال.</p>
+<h2 id="إسقاطات-pod-news-من-النظرة-الواسعة-إلى-الضيقة">إسقاطات Pod news، من النظرة الواسعة إلى الضيقة</h2>
+<p>يعرض الأمر الأول كل الإسقاطات الحديثة في مساحة الأسماء، ولا يُبقي الثاني إلا على ما جاء من Pod news الذي يتمركز فيه المهاجم.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>hubble observe --namespace campus --verdict DROPPED --last 8</code></pre></figure>
+<p>كل كلمة بعد <code class="nw">hubble observe</code> هي مُرشِّح، أي شرط يجب أن يحققه التدفق حتى يُطبع. يُبقي <code class="nw">--namespace campus</code> على التدفقات التي يكون أحد طرفيها Pod في <code class="nw">campus</code>. ويُبقي <code class="nw">--verdict DROPPED</code> على الحركة المحجوبة وحدها. ويطلب <code class="nw">--last 8</code> أحدث 8 تدفقات مطابقة. يسأل Relay كل عقدة عن أحدث 8 لديها ثم يدمجها، ولأنّ Pods مساحة الأسماء campus موزعة على عقدتين عاملتين (worker nodes) فقد نحصل على ما يصل إلى 16 سطراً.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> ما يصل إلى 16 سطراً، يأتي معظمها أزواجاً. في كل زوج سطر يحمل <code class="nw">EGRESS DENIED</code> وآخر يحمل <code class="nw">Policy denied DROPPED</code>، وينتهي كل سطر بأعلام TCP (TCP flags) أو بطلب HTTP بين قوسين.</p>
+<p>الأسطر الثمانية القادمة من العقدة التي يعمل عليها news مصدرها news، لأنّ الهجوم كان آخر ما شغّلناه هناك. أمّا الأسطر الثمانية الأخرى فتأتي من العقدة العاملة الثانية، وعليها تعمل db و api و auth و admin و ops. وقد تظهر أيضاً إسقاطات من Pods أخرى مثل auth، ومصدرها مصفوفة قابلية الوصول (reachability matrix) في لوحة التحكم. تختبر المصفوفة عمداً المسارات المحجوبة، وكل خلية محجوبة فيها تترك خلفها إسقاطاً. وإذا ظهر سطر منفرد من <code class="nw">campus/frontend-</code> إلى <code class="nw">campus/api-</code> يحمل <code class="nw">http-request DROPPED</code> و <code class="nw">/api/export</code> فهو طلب تصدير ممنوع، مثل الطلب الذي أرسلناه في <a href="ch10.html">الفصل 10</a>. رفضه Envoy، وتشرح خطوة «قراءة قرار L7» لاحقاً في هذا الفصل كيف حدث ذلك. ستختلف الطوابع الزمنية ونهايات أسماء Pods وأرقام المنافذ عندنا عمّا هو مطبوع هنا.</p>
+<p>ولكي نحصر النتائج في إسقاطات Pod news نشغّل الأمر الثاني.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>hubble observe --from-pod campus/news --verdict DROPPED --last 12 | tee ~/microseg/evidence/ch13-drops-from-news.txt</code></pre></figure>
+<p>يُبقي <code class="nw">--from-pod campus/news</code> على التدفقات التي مصدرها Pod في مساحة الأسماء <code class="nw">campus</code> يبدأ اسمه بالكلمة <code class="nw">news</code>. نكتب بداية الاسم فقط لأنّ نهايته عشوائية وتتغير كلما استُبدل Pod. ومساحة الأسماء مكتوبة أصلاً داخل هذه القيمة، لذلك لا يمكن جمع هذا المُرشِّح مع <code class="nw">--namespace</code>. أمّا الرمز <code class="nw">|</code> فهو أنبوب (pipe)، يرسل مخرجات <code class="nw">hubble observe</code> إلى <code class="nw">tee</code>، وهو برنامج صغير يطبع ما يتلقاه على الشاشة ويكتب النص نفسه في الملف الذي نسمّيه له. هكذا نرى المخرجات، وتستقر نسخة منها في <code class="nw">evidence/</code> لنستخدمها في <a href="ch14.html">الفصل 14</a>.</p>
+<p>هذه المرة يبدأ كل سطر بالطابع الزمني ثم <code class="nw">campus/news-</code>.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>Nov 19 20:43:39.887: campus/news-545758c8c6-2jp4n:55292 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) policy-verdict:none EGRESS DENIED (TCP Flags: SYN)
+Nov 19 20:43:39.887: campus/news-545758c8c6-2jp4n:55292 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) Policy denied DROPPED (TCP Flags: SYN)
+Nov 19 20:43:40.911: campus/news-545758c8c6-2jp4n:55292 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) policy-verdict:none EGRESS DENIED (TCP Flags: SYN)
+Nov 19 20:43:40.911: campus/news-545758c8c6-2jp4n:55292 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) Policy denied DROPPED (TCP Flags: SYN)
+Nov 19 20:43:41.917: campus/news-545758c8c6-2jp4n:60310 (ID:53922) &lt;&gt; campus/admin-766cddb668-gr2k8:5002 (ID:5410) policy-verdict:none EGRESS DENIED (TCP Flags: SYN)
+Nov 19 20:43:41.917: campus/news-545758c8c6-2jp4n:60310 (ID:53922) &lt;&gt; campus/admin-766cddb668-gr2k8:5002 (ID:5410) Policy denied DROPPED (TCP Flags: SYN)
+Nov 19 20:43:42.923: campus/news-545758c8c6-2jp4n:60310 (ID:53922) &lt;&gt; campus/admin-766cddb668-gr2k8:5002 (ID:5410) policy-verdict:none EGRESS DENIED (TCP Flags: SYN)
+Nov 19 20:43:42.923: campus/news-545758c8c6-2jp4n:60310 (ID:53922) &lt;&gt; campus/admin-766cddb668-gr2k8:5002 (ID:5410) Policy denied DROPPED (TCP Flags: SYN)
+Nov 19 20:43:43.947: campus/news-545758c8c6-2jp4n:60310 (ID:53922) &lt;&gt; campus/admin-766cddb668-gr2k8:5002 (ID:5410) policy-verdict:none EGRESS DENIED (TCP Flags: SYN)
+Nov 19 20:43:43.947: campus/news-545758c8c6-2jp4n:60310 (ID:53922) &lt;&gt; campus/admin-766cddb668-gr2k8:5002 (ID:5410) Policy denied DROPPED (TCP Flags: SYN)
+Nov 19 20:43:44.971: campus/news-545758c8c6-2jp4n:60310 (ID:53922) &lt;&gt; campus/admin-766cddb668-gr2k8:5002 (ID:5410) policy-verdict:none EGRESS DENIED (TCP Flags: SYN)
+Nov 19 20:43:44.971: campus/news-545758c8c6-2jp4n:60310 (ID:53922) &lt;&gt; campus/admin-766cddb668-gr2k8:5002 (ID:5410) Policy denied DROPPED (TCP Flags: SYN)</code></pre></figure>
+<p>تأتي الأسطر أزواجاً. في كل زوج يحمل السطر الأول <code>policy-verdict:none EGRESS DENIED</code> ويحمل الثاني <code class="nw">Policy denied DROPPED</code>، والمصدر والوجهة والمنفذ واحدة في السطرين. الوجهتان هما db على المنفذ 5432 و admin على المنفذ 5002. أسطر db مصدرها الخطوة 4 من الهجوم، حين حاول <code class="nw">psql</code> تسجيل الدخول إلى قاعدة البيانات. وقد تركت الخطوة 3 أسطراً من النوع نفسه قبل ذلك بثوانٍ، لكنها تقع خارج آخر 12 سطراً. أمّا أسطر admin فمصدرها الخطوة 5، حين حاول <code class="nw">curl</code> فتح لوحة الإدارة. وترك المسح في الخطوة 2 كذلك إسقاطات نحو frontend على المنفذ 80 و api على 8080 و auth على 5001، لكنها أقدم، فقد تقع خارج آخر 12 سطراً.</p>
+<p>يتكرر الزوج نفسه بفارق ثانية تقريباً ومن منفذ المصدر نفسه. هذه نواة نظام التشغيل (kernel) في Linux تعيد محاولة الاتصال نيابة عن Pod news، لأنّ محاولته الأولى لم تتلقَّ جواباً. يُسقط Cilium الحزمة (packet) دون أن يرد، فلا يستطيع المرسل أن يميز منفذاً محجوباً من منفذ بطيء، ويظل يعيد المحاولة حتى تنفد مهلته. وهذا أيضاً سبب استغراق كل خطوة محجوبة من الهجوم في <a href="ch10.html">الفصل 10</a> بضع ثوانٍ قبل أن تفشل.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>filters --from-pod and --namespace cannot be combined</code></pre></figure>
+<p>السبب أنّ <code class="nw">--namespace campus</code> أُضيف إلى الأمر الثاني. نحذفه، فالجزء <code class="nw">campus/</code> في بداية <code class="nw">campus/news</code> يحدد مساحة الأسماء أصلاً.</p>
+<p>لا يطبع الأمر الثاني شيئاً. معنى ذلك أنّ تدفقات الهجوم خرجت من المخزن الدائري، والسبب غالباً أنّ الوقت الذي مضى أطول مما نظن. نشغّل سطر الهجوم من الخطوة السابقة مرة أخرى، ونعيد هذا الأمر خلال دقيقة أو دقيقتين.</p>
+<p>تنتهي الأسطر بالكلمة <code class="nw">FORWARDED</code> بدلاً من <code class="nw">DROPPED</code>، أو لا يظهر أي إسقاط بينما يقول الهجوم 5 من 5. السبب أنّ السياسات غير مطبّقة. نعود إلى الخطوة الأولى من هذا الفصل.</p>
+<h2 id="سطر-واحد-من-hubble-حقلا-حقلا">سطر واحد من Hubble، حقلاً حقلاً</h2>
+<p>هذا سطر واحد من تشغيل الاختبار، منسوخ من المخرجات أعلاه.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>Nov 19 20:43:39.887: campus/news-545758c8c6-2jp4n:55292 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) Policy denied DROPPED (TCP Flags: SYN)</code></pre></figure>
+<p>نقرؤه من اليسار إلى اليمين.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="جدول"><table>
+<thead>
+<tr>
+<th>جزء السطر</th>
+<th>معناه</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code class="nw">Nov 19 20:43:39.887:</code></td>
+<td>الوقت الذي رأى فيه Cilium الحزمة، بدقة الملّي ثانية.</td>
+</tr>
+<tr>
+<td><code class="nw">campus/news-545758c8c6-2jp4n</code></td>
+<td>المصدر، مكتوباً على شكل مساحة الأسماء ثم شرطة مائلة ثم اسم Pod. الجزءان العشوائيان في آخره يخصان هذا Pod.</td>
+</tr>
+<tr>
+<td><code class="nw">:55292</code></td>
+<td>منفذ المصدر. حين يفتح برنامج اتصالاً، تختار النواة منفذاً مؤقتاً شاغراً على جهة المرسل لهذا الاتصال وحده، لذلك يتغير هذا الرقم من اتصال إلى آخر.</td>
+</tr>
+<tr>
+<td><code class="nw">(ID:53922)</code></td>
+<td>رقم هوية المصدر. يعطي Cilium رقماً واحداً لكل مجموعة مميزة من وسوم (labels) Pods، وهي هنا <code class="nw">app=news</code> في مساحة الأسماء <code class="nw">campus</code>، ثم يبني كل قرار من قرارات السياسة على أساس هذا الرقم، لا على أساس عنوان IP أبداً. يختار Cilium الأرقام بنفسه، فأرقامنا مختلفة، لكنّ Pod يحتفظ برقمه عند إعادة تشغيله لأنّ وسومه تبقى كما هي.</td>
+</tr>
+<tr>
+<td><code class="nw">&lt;&gt;</code></td>
+<td>لم يستطع Hubble تحديد الاتجاه، وهذا يحدث مع الحزم التي تُسقط قبل أن ينشأ أي اتصال. أمّا الحركة التي تعبر فيظهر فيها <code class="nw">-&gt;</code> للطلب و <code class="nw">&lt;-</code> للرد.</td>
+</tr>
+<tr>
+<td><code class="nw">campus/db-887596757-wzmtj:5432</code></td>
+<td>Pod الوجهة والمنفذ الذي كانت الحزمة متجهة إليه، وهو هنا منفذ PostgreSQL.</td>
+</tr>
+<tr>
+<td><code class="nw">(ID:13907)</code></td>
+<td>رقم هوية الوجهة، وهو الرقم الذي يخص الوسم <code class="nw">app=db</code>.</td>
+</tr>
+<tr>
+<td><code class="nw">Policy denied</code></td>
+<td>سبب الإسقاط، أي أنّ قرار سياسة أوقف الحزمة. أمّا Pod المتعطل أو المسار المفقود فيحمل سبباً مختلفاً.</td>
+</tr>
+<tr>
+<td><code class="nw">DROPPED</code></td>
+<td>الحكم (verdict). رُميت الحزمة ولم يُرسل أي رد.</td>
+</tr>
+<tr>
+<td><code class="nw">(TCP Flags: SYN)</code></td>
+<td>نوع حزمة TCP. حزمة SYN هي أول حزمة في اتصال TCP جديد، أي الطرقة على الباب التي تسأل «هل أستطيع الاتصال؟». هذا الاتصال لم يتجاوز الطرقة قط.</td>
+</tr>
+</tbody>
+</table></div>
+<p>أمّا السطر الآخر في كل زوج، <code>policy-verdict:none EGRESS DENIED</code>، فيسجل القرار لا الحزمة المُسقطة. الجزء <code class="nw">policy-verdict</code> يدل على أنه سطر قرار. والكلمة <code class="nw">none</code> تعني أنه لم تطابق أي قاعدة سماح، فكان القرار للرفض الافتراضي (default deny). ويقول <code class="nw">EGRESS</code> إنّ الفحص جرى والحزمة تغادر news، وسياسة news لا تحتوي قسماً للحركة الصادرة (egress) أصلاً. و <code class="nw">DENIED</code> هو القرار.</p>
+<p>يمكن طباعة التدفق نفسه بصيغة JSON، وهي صيغة نصية منظمة لكل قيمة فيها اسم. وهذه الصيغة تُظهر حقولاً يتركها التنسيق ذو السطر الواحد، ومنها الوسوم التي تقف خلف رقم الهوية.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>hubble observe --from-pod campus/news --verdict DROPPED --last 1 -o json | jq &#x27;{time: .flow.time, verdict: .flow.verdict, drop_reason: .flow.drop_reason_desc, source: .flow.source.pod_name, source_labels: .flow.source.labels, destination: .flow.destination.pod_name, port: .flow.l4.TCP.destination_port}&#x27;</code></pre></figure>
+<p>يأخذ <code class="nw">--last 1</code> أحدث إسقاط فقط. ويطبعه <code class="nw">-o json</code> بصيغة JSON بدلاً من سطر واحد. أمّا مُرشِّح <code class="nw">jq</code> بين علامتي الاقتباس المفردتين فيبني كائناً أصغر، إذ ينسخ كل زوج <code class="nw">name: .flow.something</code> حقلاً واحداً من التدفق ويعطيه اسماً قصيراً، فلا نحتاج إلى التمرير عبر كل الحقول التي يطبعها Hubble.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> كائن JSON واحد فيه سبعة حقول.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>{
+  &quot;time&quot;: &quot;2026-11-19T20:43:44.971447182Z&quot;,
+  &quot;verdict&quot;: &quot;DROPPED&quot;,
+  &quot;drop_reason&quot;: &quot;POLICY_DENIED&quot;,
+  &quot;source&quot;: &quot;news-545758c8c6-2jp4n&quot;,
+  &quot;source_labels&quot;: [
+    &quot;k8s:app=news&quot;,
+    &quot;k8s:io.cilium.k8s.namespace.labels.kubernetes.io/metadata.name=campus&quot;,
+    &quot;k8s:io.cilium.k8s.policy.cluster=kind-kind&quot;,
+    &quot;k8s:io.cilium.k8s.policy.serviceaccount=default&quot;,
+    &quot;k8s:io.kubernetes.pod.namespace=campus&quot;
+  ],
+  &quot;destination&quot;: &quot;admin-766cddb668-gr2k8&quot;,
+  &quot;port&quot;: 5002
+}</code></pre></figure>
+<p>الحقل <code class="nw">"drop_reason": "POLICY_DENIED"</code> هو سبب الإسقاط نفسه بالصيغة التي يقرؤها برنامج. وتضم القائمة <code class="nw">source_labels</code> الوسم <code class="nw">k8s:app=news</code>، وهو بالضبط الوسم الذي تختاره سياستنا <code class="nw">news</code> بالعبارة <code class="nw">app: news</code>. هذا هو الرابط بين الإسقاط وملف YAML الذي كتبناه. أمّا بقية الوسوم فيضيفها Cilium نفسه، مثل مساحة الأسماء واسم العنقود <code class="nw">kind-kind</code>.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>Command &#x27;jq&#x27; not found, but can be installed with:</code></pre></figure>
+<p>كان من المفترض أن يُثبَّت <code class="nw">jq</code> في <a href="ch03.html">الفصل 3</a>. نثبّته بالأمر <code class="nw">sudo apt install -y jq</code> ونعيد تشغيل الأمر.</p>
+<p>يطبع أحد الحقول <code class="nw">null</code>. السبب خطأ إملائي في الاسم الذي يلي <code class="nw">.flow.</code>، مثل <code class="nw">drop_reason_dsc</code>. ننسخ الأمر من الدليل من جديد بدلاً من إعادة كتابته.</p>
+<h2 id="منفذ-واحد-وهويتان">منفذ واحد وهويتان</h2>
+<p>في التشغيل نفسه، وبفارق ثوانٍ قليلة، يحاول news و api كلاهما الوصول إلى Pod db نفسه على المنفذ نفسه 5432. تُسقَط حزم news ويُسمح لاتصال api بالعبور. لا شيء في الوجهة يختلف، فالتفسير الوحيد الممكن للحكمين هو هوية المرسل.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>hubble observe --to-pod campus/db --last 12 | tee ~/microseg/evidence/ch13-to-db.txt</code></pre></figure>
+<p>يختار <code class="nw">--to-pod campus/db</code> ما يتجه إلى Pod db. لا يوجد مُرشِّح <code class="nw">--verdict</code> هذه المرة، فتظهر الحركة المسموح بها والمحجوبة معاً. ولأنّ db يعمل على عقدة و news على عقدة أخرى، تقدم كل عقدة أسطرها الاثني عشر، وقد نحصل على ما يصل إلى 24 سطراً.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> أسطر news التي تحمل <code class="nw">DROPPED</code> أولاً، ثم أسطر api و admin التي تحمل <code class="nw">FORWARDED</code>.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>Nov 19 20:43:35.786: campus/news-545758c8c6-2jp4n:55282 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) policy-verdict:none EGRESS DENIED (TCP Flags: SYN)
+Nov 19 20:43:35.786: campus/news-545758c8c6-2jp4n:55282 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) Policy denied DROPPED (TCP Flags: SYN)
+Nov 19 20:43:36.815: campus/news-545758c8c6-2jp4n:55282 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) policy-verdict:none EGRESS DENIED (TCP Flags: SYN)
+Nov 19 20:43:36.815: campus/news-545758c8c6-2jp4n:55282 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) Policy denied DROPPED (TCP Flags: SYN)
+Nov 19 20:43:37.835: campus/news-545758c8c6-2jp4n:55282 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) policy-verdict:none EGRESS DENIED (TCP Flags: SYN)
+Nov 19 20:43:37.835: campus/news-545758c8c6-2jp4n:55282 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) Policy denied DROPPED (TCP Flags: SYN)
+Nov 19 20:43:38.870: campus/news-545758c8c6-2jp4n:55292 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) policy-verdict:none EGRESS DENIED (TCP Flags: SYN)
+Nov 19 20:43:38.870: campus/news-545758c8c6-2jp4n:55292 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) Policy denied DROPPED (TCP Flags: SYN)
+Nov 19 20:43:39.887: campus/news-545758c8c6-2jp4n:55292 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) policy-verdict:none EGRESS DENIED (TCP Flags: SYN)
+Nov 19 20:43:39.887: campus/news-545758c8c6-2jp4n:55292 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) Policy denied DROPPED (TCP Flags: SYN)
+Nov 19 20:43:40.911: campus/news-545758c8c6-2jp4n:55292 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) policy-verdict:none EGRESS DENIED (TCP Flags: SYN)
+Nov 19 20:43:40.911: campus/news-545758c8c6-2jp4n:55292 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) Policy denied DROPPED (TCP Flags: SYN)
+Nov 19 20:43:45.283: campus/api-65c5c7d5fd-2qtsk:55286 (ID:6935) -&gt; campus/db-887596757-wzmtj:5432 (ID:13907) to-endpoint FORWARDED (TCP Flags: SYN)
+Nov 19 20:43:45.283: campus/api-65c5c7d5fd-2qtsk:55286 (ID:6935) -&gt; campus/db-887596757-wzmtj:5432 (ID:13907) to-endpoint FORWARDED (TCP Flags: ACK)
+Nov 19 20:43:45.283: campus/api-65c5c7d5fd-2qtsk:55286 (ID:6935) -&gt; campus/db-887596757-wzmtj:5432 (ID:13907) to-endpoint FORWARDED (TCP Flags: ACK, PSH)
+Nov 19 20:43:45.295: campus/api-65c5c7d5fd-2qtsk:55286 (ID:6935) -&gt; campus/db-887596757-wzmtj:5432 (ID:13907) to-endpoint FORWARDED (TCP Flags: ACK, FIN)
+Nov 19 20:43:45.298: campus/api-65c5c7d5fd-2qtsk:55286 (ID:6935) -&gt; campus/db-887596757-wzmtj:5432 (ID:13907) to-endpoint FORWARDED (TCP Flags: ACK)
+Nov 19 20:43:45.620: campus/admin-766cddb668-gr2k8:42818 (ID:5410) -&gt; campus/db-887596757-wzmtj:5432 (ID:13907) policy-verdict:L3-L4 EGRESS ALLOWED (TCP Flags: SYN)
+Nov 19 20:43:45.620: campus/admin-766cddb668-gr2k8:42818 (ID:5410) -&gt; campus/db-887596757-wzmtj:5432 (ID:13907) policy-verdict:L3-L4 INGRESS ALLOWED (TCP Flags: SYN)
+Nov 19 20:43:45.620: campus/admin-766cddb668-gr2k8:42818 (ID:5410) -&gt; campus/db-887596757-wzmtj:5432 (ID:13907) to-endpoint FORWARDED (TCP Flags: SYN)
+Nov 19 20:43:45.620: campus/admin-766cddb668-gr2k8:42818 (ID:5410) -&gt; campus/db-887596757-wzmtj:5432 (ID:13907) to-endpoint FORWARDED (TCP Flags: ACK)
+Nov 19 20:43:45.620: campus/admin-766cddb668-gr2k8:42818 (ID:5410) -&gt; campus/db-887596757-wzmtj:5432 (ID:13907) to-endpoint FORWARDED (TCP Flags: ACK, PSH)
+Nov 19 20:43:45.632: campus/admin-766cddb668-gr2k8:42818 (ID:5410) -&gt; campus/db-887596757-wzmtj:5432 (ID:13907) to-endpoint FORWARDED (TCP Flags: ACK, FIN)
+Nov 19 20:43:45.637: campus/admin-766cddb668-gr2k8:42818 (ID:5410) -&gt; campus/db-887596757-wzmtj:5432 (ID:13907) to-endpoint FORWARDED (TCP Flags: ACK)</code></pre></figure>
+<p>نبحث عن سطر مصدره، بعد الطابع الزمني مباشرة، هو <code class="nw">campus/api-</code>، ويحمل <code class="nw">-&gt; campus/db-</code> و <code class="nw">to-endpoint FORWARDED</code>. السهم <code class="nw">-&gt;</code> يقول إنه طلب، والعبارة <code class="nw">to-endpoint</code> تقول إنّ الحزمة سُلّمت إلى Pod الوجهة، و <code class="nw">FORWARDED</code> هو الحكم. ثم نقارن أرقام هويته بأسطر news فوقه. رقم هوية الوجهة هو 13907 نفسه في الحالتين، أمّا رقم هوية المصدر فيختلف، فهو 53922 عند news و 6935 عند api. أرقامنا ستختلف، لكنّ النمط يجب أن يكون واحداً، فرقم هوية الوجهة ثابت في كل الأسطر، وخلف كل حكم من الحكمين رقم مصدر مختلف.</p>
+<p>لا يتوقف اتصال api عند SYN. تُظهر أسطره اللاحقة <code class="nw">ACK</code> و <code class="nw">ACK, PSH</code> و <code class="nw">ACK, FIN</code>، وهي بقية محادثة TCP عادية. يؤكد ACK الاستلام، ويميّز PSH الحزم التي تحمل بيانات (تسجيل الدخول إلى PostgreSQL والاستعلام)، وينهي FIN الاتصال. لا يطبع Hubble سطراً لكل حزمة، وإنما يطبعه حين تتغير الأعلام. وتُظهر أسطر admin كذلك سطري القرار الخاصين بها، <code>policy-verdict:L3-L4 EGRESS ALLOWED</code> و <code>policy-verdict:L3-L4 INGRESS ALLOWED</code>. تعني <code class="nw">L3-L4</code> أنّ قاعدة عنوان ومنفذ طابقت، مرة عند خروج الحزمة من admin ومرة عند دخولها إلى db. وسبب وجود حركة admin أنّ آخر فحص من فحوص البوابة يطلب من ops فتح لوحة الإدارة، و admin يقرأ قائمة الطلاب من db.</p>
+<figure class="fig"><a href="../../files/figures/fig06-ar.png"><img src="../../files/figures/web/fig06-ar.png" alt="كيف يقرر Cilium" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>كيف يقرر Cilium</figcaption></figure>
+<p>يبين الشكل 6 كيف يقرر Cilium. نلاحظ أنّ الفحص يجري عند واجهة الشبكة التي يملكها Pod نفسه، وعلى أساس رقم الهوية، لذلك قد يحصل مرسلان يطرقان المنفذ نفسه على جوابين مختلفين.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<p>كل الأسطر تقول <code class="nw">DROPPED</code> ولا يقول أي منها <code class="nw">FORWARDED</code>. السبب أنه لم تصل أي حركة مشروعة إلى db مؤخراً. نشغّل <code class="nw">bash check-portal.sh</code> ونعيد الأمر.</p>
+<p>لا يطبع الأمر شيئاً. السبب غالباً كتابة <code class="nw">db</code> بدلاً من <code class="nw">campus/db</code>، فنعيد الأمر بالقيمة <code class="nw">campus/db</code>. ومن دون مساحة أسماء في القيمة يبحث Hubble في مساحة الأسماء المسماة <code class="nw">default</code>، ولا يعمل فيها أي شيء من مشروعنا.</p>
+<p>تنتهي أسطر api إلى db بالكلمة <code class="nw">DROPPED</code>. معنى ذلك أنّ تدفقاً مشروعاً محجوب، وأنّ فحوص البوابة ستفشل هي الأخرى. نقارن قاعدة الحركة الصادرة نحو <code class="nw">app: db</code> في سياسة <code class="nw">api</code>، وقائمة الحركة الواردة (ingress) في سياسة <code class="nw">db</code>، داخل <code class="nw">k8s/policies/2-allow.yaml</code> بالملف الموجود في <a href="ch10.html">الفصل 10</a>، حرفاً حرفاً.</p>
+<h2 id="قراءة-قرار-l7">قراءة قرار L7</h2>
+<p>تعمل القاعدة المفروضة على api في طبقة التطبيقات (L7)، أي على مستوى HTTP. الاتصال من frontend إلى api على المنفذ 8080 مسموح به، ثم يقرأ Envoy كل طلب داخله ولا يمرّر إلا الاستدعاءات الثلاثة المذكورة في القاعدة. نبدأ بالطلبات المسموح بها، وهي التي أرسلتها فحوص البوابة قبل دقائق.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>hubble observe --namespace campus --protocol http --last 6</code></pre></figure>
+<p>يُبقي <code class="nw">--protocol http</code> على تدفقات HTTP وحدها. ولا يستطيع Hubble عرضها إلا لأنّ سياسة api فيها قاعدة <code class="nw">http</code>، وهذه القاعدة ترسل تلك الحركة عبر Envoy الذي يستطيع قراءتها. أمّا الحركة التي لا تغطيها إلا قواعد العنوان والمنفذ فلا تظهر فيها تفاصيل HTTP أبداً.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> أزواج من الأسطر، طلب وجوابه، لاستدعاءات البوابة الخاصة بتسجيل الدخول والملف الشخصي والدرجات.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>Nov 19 20:44:36.885: campus/frontend-6d755c977c-rzsg7:58092 (ID:65149) -&gt; campus/api-65c5c7d5fd-2qtsk:8080 (ID:6935) http-request FORWARDED (HTTP/1.1 POST http://api.campus.svc.cluster.local:8080/api/login)
+Nov 19 20:44:36.920: campus/frontend-6d755c977c-rzsg7:58092 (ID:65149) &lt;- campus/api-65c5c7d5fd-2qtsk:8080 (ID:6935) http-response FORWARDED (HTTP/1.1 200 35ms (POST http://api.campus.svc.cluster.local:8080/api/login))
+Nov 19 20:44:36.934: campus/frontend-6d755c977c-rzsg7:58106 (ID:65149) -&gt; campus/api-65c5c7d5fd-2qtsk:8080 (ID:6935) http-request FORWARDED (HTTP/1.1 GET http://api.campus.svc.cluster.local:8080/api/profile)
+Nov 19 20:44:36.972: campus/frontend-6d755c977c-rzsg7:58106 (ID:65149) &lt;- campus/api-65c5c7d5fd-2qtsk:8080 (ID:6935) http-response FORWARDED (HTTP/1.1 200 38ms (GET http://api.campus.svc.cluster.local:8080/api/profile))
+Nov 19 20:44:36.984: campus/frontend-6d755c977c-rzsg7:58112 (ID:65149) -&gt; campus/api-65c5c7d5fd-2qtsk:8080 (ID:6935) http-request FORWARDED (HTTP/1.1 GET http://api.campus.svc.cluster.local:8080/api/grades)
+Nov 19 20:44:37.015: campus/frontend-6d755c977c-rzsg7:58112 (ID:65149) &lt;- campus/api-65c5c7d5fd-2qtsk:8080 (ID:6935) http-response FORWARDED (HTTP/1.1 200 30ms (GET http://api.campus.svc.cluster.local:8080/api/grades))</code></pre></figure>
+<p>يُظهر كل سطر طلب <code class="nw">http-request FORWARDED</code> مع الطريقة (method) والعنوان الكامل، مثل <code>POST http://api.campus.svc.cluster.local:8080/api/login</code>. ويُظهر كل سطر جواب <code class="nw">http-response FORWARDED</code> مع الحالة <code class="nw">200</code> والزمن الذي استغرقه api، وكان بين 30 و40 ms تقريباً على حاسوب الاختبار المحمول.</p>
+<p>ثم نرسل طلباً تمنعه قاعدة L7.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>curl -s -i localhost:30080/api/export</code></pre></figure>
+<p>يجعل الخيار <code class="nw">-i</code> الأمر curl يطبع ترويسات الجواب قبل جسمه، فنرى سطر الحالة.</p>
+<p>يجب أن يكون السطر الأول <code class="nw">HTTP/1.1 403 Forbidden</code> والسطر الأخير <code class="nw">Access denied</code>.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>HTTP/1.1 403 Forbidden
+Server: nginx/1.28.3
+Date: Thu, 19 Nov 2026 20:43:13 GMT
+Content-Type: text/plain
+Content-Length: 15
+Connection: keep-alive
+
+Access denied</code></pre></figure>
+<p>وقد سجّل Hubble هذا الرفض أيضاً.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>hubble observe --namespace campus --protocol http --last 2 | tee ~/microseg/evidence/ch13-l7-export.txt</code></pre></figure>
+<p>أحدث تدفقين من HTTP هما الطلب الذي أرسلناه وجوابه.</p>
+<p>سطر الطلب نصه <code>http-request DROPPED (HTTP/1.1 GET http://api.campus.svc.cluster.local:8080/api/export)</code>، وسطر الجواب نصه <code>http-response FORWARDED (HTTP/1.1 403 0ms</code> يليه العنوان نفسه. أسقط Envoy الطلب وكتب جواب 403 بنفسه، ولهذا استغرق 0 ms. أمّا برنامج api فلم يرَ الطلب أصلاً. ويحمل الرد 403 الكلمة FORWARDED لأنه سُلّم عائداً إلى frontend. نقارن هذا باتصالات قاعدة البيانات المحجوبة التي رأيناها قبل قليل. الاتصال المحجوب في L3/L4 لا يتلقى أي جواب وتنتهي مهلته بعد ثوانٍ، بينما يتلقى طلب L7 المحجوب رفضاً فورياً مهذباً. وهناك مُرشِّح آخر للدليل نفسه هو <code class="nw">--http-status 403</code>، ولا يعرض إلا الأجوبة التي تحمل هذه الحالة.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<p>تُظهر الأسطر <code class="nw">dns-request</code> و <code class="nw">dns-response</code> بدلاً من HTTP. السبب كتابة <code class="nw">--type l7</code>، وهو يطابق DNS أيضاً لأنّ Cilium يعدّ معالجته لاستعلامات DNS من L7 كذلك. نستخدم <code class="nw">--protocol http</code> كما هو مكتوب.</p>
+<p>لا يطبع <code class="nw">--protocol http</code> شيئاً على الإطلاق. السبب أنّ سياسة api تنقصها قاعدة <code class="nw">http</code>، فلا تمر أي حركة HTTP عبر Envoy. نشغّل <code>kubectl -n campus get cnp api -o yaml</code> ونبحث عن أسطر <code class="nw">method:</code> الثلاثة. إذا لم نجدها نقارن سياسة api في <code class="nw">k8s/policies/2-allow.yaml</code> <a href="ch10.html">بالفصل 10</a> ونطبّق الملف من جديد.</p>
+<p>يجيب طلب التصدير بالسطر <code class="nw">HTTP/1.1 200 OK</code> مع قائمة بالدرجات. السبب أنّ قاعدة L7 غير فعالة. نتحقق من عدد السياسات كما في الخطوة الأولى من هذا الفصل، ومن سياسة api كما في الفقرة السابقة.</p>
+<h2 id="قراءة-استعلامات-dns-التي-أجراها-المهاجم">قراءة استعلامات DNS التي أجراها المهاجم</h2>
+<p>قبل أن يتصل أي برنامج بالاسم <code class="nw">admin</code> عليه أن يحوّل هذا الاسم إلى عنوان. هذا هو DNS، وسياستنا <code class="nw">allow-dns</code> تسمح لكل Pod بسؤال kube-dns. وفي السياسة أيضاً كتلة <code class="nw">dns</code> ترسل كل استعلام عبر وكيل (proxy) DNS في Cilium، وهذا الوكيل يسجّل الاسم. لذلك حتى المهاجم المحجوب تماماً يترك أثراً يضم كل اسم بحث عنه.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>hubble observe --from-pod campus/news --protocol dns --last 10 | tee ~/microseg/evidence/ch13-dns-news.txt</code></pre></figure>
+<p>يُبقي <code class="nw">--protocol dns</code> على تدفقات DNS وحدها. ومع <code class="nw">--from-pod campus/news</code> نرى الأسئلة التي طرحها news. أمّا الأجوبة فتسير في الاتجاه المعاكس، من kube-dns إلى news، ولذلك يستبعدها هذا المُرشِّح.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> عشرة أسطر <code class="nw">dns-request proxy FORWARDED</code> من news إلى Pod يبدأ اسمه بالنص <code class="nw">kube-system/coredns-</code> على المنفذ 53. تُسمّى Pods التي تقف خلف Service المسمى kube-dns باسم <code class="nw">coredns</code>، نسبة إلى البرنامج الذي تشغّله.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>Nov 19 20:43:41.889: campus/news-545758c8c6-2jp4n:46023 (ID:53922) -&gt; kube-system/coredns-589f44dc88-6blh4:53 (ID:61175) dns-request proxy FORWARDED (DNS Query x.campus.svc.cluster.local. AAAA)
+Nov 19 20:43:41.889: campus/news-545758c8c6-2jp4n:46023 (ID:53922) -&gt; kube-system/coredns-589f44dc88-6blh4:53 (ID:61175) dns-request proxy FORWARDED (DNS Query x.campus.svc.cluster.local. A)
+Nov 19 20:43:41.890: campus/news-545758c8c6-2jp4n:33347 (ID:53922) -&gt; kube-system/coredns-589f44dc88-6blh4:53 (ID:61175) dns-request proxy FORWARDED (DNS Query x.svc.cluster.local. AAAA)
+Nov 19 20:43:41.890: campus/news-545758c8c6-2jp4n:33347 (ID:53922) -&gt; kube-system/coredns-589f44dc88-6blh4:53 (ID:61175) dns-request proxy FORWARDED (DNS Query x.svc.cluster.local. A)
+Nov 19 20:43:41.892: campus/news-545758c8c6-2jp4n:53423 (ID:53922) -&gt; kube-system/coredns-589f44dc88-6blh4:53 (ID:61175) dns-request proxy FORWARDED (DNS Query x.cluster.local. AAAA)
+Nov 19 20:43:41.892: campus/news-545758c8c6-2jp4n:53423 (ID:53922) -&gt; kube-system/coredns-589f44dc88-6blh4:53 (ID:61175) dns-request proxy FORWARDED (DNS Query x.cluster.local. A)
+Nov 19 20:43:41.893: campus/news-545758c8c6-2jp4n:42047 (ID:53922) -&gt; kube-system/coredns-589f44dc88-6blh4:53 (ID:61175) dns-request proxy FORWARDED (DNS Query x. A)
+Nov 19 20:43:41.893: campus/news-545758c8c6-2jp4n:42047 (ID:53922) -&gt; kube-system/coredns-589f44dc88-6blh4:53 (ID:61175) dns-request proxy FORWARDED (DNS Query x. AAAA)
+Nov 19 20:43:41.916: campus/news-545758c8c6-2jp4n:59859 (ID:53922) -&gt; kube-system/coredns-589f44dc88-h9pb5:53 (ID:61175) dns-request proxy FORWARDED (DNS Query admin.campus.svc.cluster.local. AAAA)
+Nov 19 20:43:41.916: campus/news-545758c8c6-2jp4n:59859 (ID:53922) -&gt; kube-system/coredns-589f44dc88-h9pb5:53 (ID:61175) dns-request proxy FORWARDED (DNS Query admin.campus.svc.cluster.local. A)</code></pre></figure>
+<p>ينتهي كل سطر بالاسم المطلوب ونوع سجل DNS الذي طُلب. سجل DNS هو جواب واحد مخزّن. النوع <code class="nw">A</code> يطلب عنوان IPv4، والنوع <code class="nw">AAAA</code> يطلب عنوان IPv6، والبرامج تطلب الاثنين عادة. الأسماء التي تبدأ بالنص <code class="nw">x.</code> مصدرها العنوان الوهمي <code class="nw">x</code> الموجود في بداية كل حمولة، وتمرره الدالة <code class="nw">check_image</code> إلى curl على أنه عنوان الصورة. الاسم القصير مثل <code class="nw">x</code> يُجرَّب مع كل عنصر من قائمة البحث في Pod، وهي قائمة النهايات التي يضيفها المحلِّل (resolver) واحدة بعد أخرى، لذلك نرى <code class="nw">x.campus.svc.cluster.local.</code> ثم <code class="nw">x.svc.cluster.local.</code> ثم <code class="nw">x.cluster.local.</code> وأخيراً <code class="nw">x.</code> وحده. لا وجود لأي منها. أمّا السطران اللذان يحملان <code>admin.campus.svc.cluster.local.</code> فمصدرهما الخطوة 5، أي محاولة الهجوم فتح لوحة الإدارة. وقد بحث المسح في الخطوة 2 عن الاسم نفسه قبل ذلك، لكنّ أسطره أقدم من آخر 10 أسطر. نجح هذا الاستعلام وعرف المهاجم عنوان Service المسمى admin، لكنّ الاتصال الذي تلاه هو أحد الإسقاطات التي قرأناها سابقاً. لا يستطيع هذا المُرشِّح أن يُظهر الجواب، لأنّ الأجوبة تسير نحو news. ولرؤية الاتجاهين نشغّل <code>hubble observe --pod campus/news --protocol dns --last 20</code>. سطر <code class="nw">dns-response</code> الخاص بالاستعلام <code>admin.campus.svc.cluster.local. A</code> يحمل عنواناً يبدأ بالنص <code class="nw">10.96.</code>، وهو العنوان الذي عرفه المهاجم.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<p>لا يظهر أي سطر <code class="nw">dns-request</code>، والبحث بالمُرشِّح <code class="nw">--verdict DROPPED</code> يُظهر إسقاطات نحو المنفذ 53. السبب أنّ سياسة <code class="nw">allow-dns</code> غير موجودة، فيفشل كل استعلام في مساحة الأسماء. نطبّقها من جديد بالأمر <code>kubectl apply -f k8s/policies/1-baseline.yaml</code>. وفي <a href="ch13.html">الفصل 13</a> تمرين يكسر هذا عمداً.</p>
+<p>لا يطبع الأمر شيئاً. السبب أنّ الهجوم خرج من المخزن الدائري. نشغّل سطر الهجوم من خطوة «حركة مرور جديدة» مرة أخرى، ونعيد هذا الأمر بعده مباشرة.</p>
+<h2 id="عد-إسقاطات-المهاجم">عدّ إسقاطات المهاجم</h2>
+<p>يعطينا العدّ رقماً واحداً لفصل النتائج في بحث التخرج، من قبيل «أنتج الهجوم N إسقاطاً بسبب السياسات»، ونقطة التحقق تشترط أن يكون هذا الرقم أكبر من صفر.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>hubble observe --from-pod campus/news --verdict DROPPED --since 5m -o compact | grep -c &quot;Policy denied&quot;</code></pre></figure>
+<p>يطلب <code class="nw">--since 5m</code> كل تدفق مطابق من آخر 5 دقائق بدلاً من عدد ثابت منها. و <code class="nw">-o compact</code> هو التنسيق ذو السطر الواحد الذي كنا نقرؤه، كتبناه صراحة كي تبقى المخرجات كما هي إذا تغيّر الإعداد الافتراضي يوماً. ويعدّ <code class="nw">grep -c "Policy denied"</code> الأسطر التي تحتوي هذا النص. أسطر القرار لا تحتويه، فتُحسب كل حزمة مُسقطة مرة واحدة.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> رقم واحد.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>90</code></pre></figure>
+<p>طبع تشغيل الاختبار 90، لأنه شغّل في تلك الدقائق الخمس الهجوم ثلاث مرات ومصفوفة لوحة التحكم ثلاث مرات، ومجسّات المصفوفة (probes) الخارجة من news تُسقَط هي الأخرى. أمّا رقمنا فيعتمد على عدد مرات تشغيل الهجوم والمصفوفة في الدقائق الخمس الأخيرة وعلى توقيت إعادة المحاولات، لذلك يُقبل أي رقم أكبر من 0.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<p>الرقم <code class="nw">0</code>. السبب أنه مضى على الهجوم أكثر من خمس دقائق. نشغّل سطر الهجوم من خطوة «حركة مرور جديدة» مرة أخرى، ثم هذا الأمر.</p>
+<h2 id="واجهة-hubble-التدفقات-نفسها-على-شكل-خريطة">واجهة Hubble: التدفقات نفسها على شكل خريطة</h2>
+<p>ترسم واجهة Hubble (Hubble UI) هذه التدفقات على شكل خريطة. شغّلناها في <a href="ch04.html">الفصل 4</a>، وهي مثل توجيه المنفذ تتوقف حين تُغلق طرفيتها. نشغّل <code class="nw">jobs</code> أولاً، فإذا ظهر فيه <code class="nw">cilium hubble ui</code> على أنه يعمل نتجاوز السطر الأول أدناه.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>cilium hubble ui --open-browser=false &amp;
+sleep 5
+curl -s -o /dev/null -w &quot;%{http_code}\n&quot; http://localhost:12000/</code></pre></figure>
+<p>يجعل <code class="nw">cilium hubble ui</code> واجهة Hubble، وهي تعمل داخل العنقود، متاحة على <code class="nw">localhost:12000</code>. ويمنعه <code class="nw">--open-browser=false</code> من محاولة فتح متصفح داخل Ubuntu، فلا متصفح هناك، ويشغّله <code class="nw">&amp;</code> في الخلفية. أمّا سطر <code class="nw">curl</code> فيطلب الصفحة ولا يطبع إلا رمز حالة HTTP، كما في <a href="ch04.html">الفصل 4</a>.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> رمز حالة في السطر الأخير.</p>
+<p>يجب أن يكون <code class="nw">200</code>. أمّا السطر الذي يبدأ بالنص <code class="nw">[1]</code> أو <code class="nw">[2]</code> فوقه، إن ظهر، فهو bash يبلغ عن المهمة الخلفية ورقم عمليتها. نبقي هذه الطرفية مفتوحة، فإغلاقها يوقف الواجهة. نفتح <code class="nw">http://localhost:12000</code> في متصفح Windows. تطلب الصفحة اختيار مساحة أسماء، فنختار <code class="nw">campus</code>. يظهر مربع لكل خدمة من خدماتنا، ومربع إضافي في العادة للحركة القادمة من خارج العنقود، وخطوط للاتصالات التي رآها Hubble مؤخراً. إذا كنا قد فتحنا لوحة التحكم قبل قليل، فإنّ مجسّات المصفوفة تترك خطوطاً لحركة مُسقطة بين خدمات كثيرة. وللحصول على صورة نظيفة نكتب <code class="nw">pod=news</code> في مربع التصفية في الأعلى، أو ننقر مربع news. تحت الخريطة جدول بالتدفقات، الأحدث أولاً، فيه عمود للحكم يقول forwarded أو dropped.</p>
+<p>نعود إلى الطرفية الأولى ونشغّل سطر الهجوم من خطوة «حركة مرور جديدة» مرة أخرى، ونراقب الجدول في أثناء تشغيله. تظهر صفوف جديدة مصدرها news وحكمها dropped، موجّهة إلى db و admin. ننقر مربع news على الخريطة فلا يبقى إلا تدفقاته. ثم نلتقط صورة للشاشة تضم الخريطة والجدول وفيه الصفوف المُسقطة، بالاختصار Windows+Shift+S، ونحتفظ بها للفصل 14.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<p>يطبع سطر <code class="nw">curl</code> القيمة <code class="nw">000</code>، أو يقول المتصفح إنّ الموقع غير متاح. السبب أنّ توجيه المنفذ الخاص بالواجهة لم يكن جاهزاً بعد، أو أنّ الطرفية التي شغّلته أُغلقت. ننتظر عشر ثوانٍ ونحاول مرة أخرى. إذا استمر الفشل نشغّل <code class="nw">jobs</code>، وإذا لم يظهر فيه <code class="nw">cilium hubble ui</code> على أنه يعمل نشغّله من جديد بالسطر الأول من الكتلة.</p>
+<p>يظهر بعد السطر الأول سطر فيه <code class="nw">address already in use</code> أو <code class="nw">unable to listen</code>، ثم يبلغ bash لاحقاً عن المهمة مع <code class="nw">Exit</code> وأمرها. السبب أنّ الواجهة كانت تعمل أصلاً من طرفية أخرى، فلم تستطع هذه النسخة الثانية حجز المنفذ 12000. ومع ذلك يطبع سطر <code class="nw">curl</code> القيمة <code class="nw">200</code>، فنكمل.</p>
+<p>تبقى الخريطة فارغة بعد اختيار <code class="nw">campus</code>. السبب أنه لم تصل أي حركة إلى مساحة الأسماء في الدقائق الأخيرة. نشغّل سطر الهجوم مرة أخرى وننتظر بضع ثوانٍ حتى تتحدّث الصفحة.</p>
+<h2 id="نقطة-التحقق">نقطة التحقق</h2>
+<p><strong>نقطة التحقق.</strong> عدد إسقاطات أكبر من 0 قادمة من news يثبت أنّ السياسات تحجب المهاجم. والنصف الآخر أنّ السياسات نفسها لا تحجب شيئاً يحتاجه مستخدم مشروع. نشغّل الأوامر التالية، ولا نفتح صفحة لوحة التحكم ولا نحدّثها في أثناء تشغيلها.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>sleep 35
+bash check-portal.sh | tail -1
+hubble observe --from-pod campus/api --verdict DROPPED --since 30s | wc -l</code></pre></figure>
+<p>ينتظر <code class="nw">sleep 35</code> خمساً وثلاثين ثانية أولاً. ففتح صفحة لوحة التحكم أو تحديثها يشغّل مصفوفة قابلية الوصول، وهي تختبر المسارات المحجوبة انطلاقاً من كل Pod، بما في ذلك api، وكل اختبار يترك إسقاطات. يمنح الانتظار هذه الإسقاطات وقتاً لتخرج من نافذة الثلاثين ثانية. ولا يُبقي <code class="nw">tail -1</code> إلا على السطر الأخير من فحوص البوابة. أمّا الأمر الأخير فيعدّ إسقاطات api خلال الثلاثين ثانية التي تشمل فحوص البوابة.</p>
+<p>يجب أن تكون المخرجات هذين السطرين بالضبط، <code class="nw">PORTAL: 6/6 OK</code> ثم <code class="nw">0</code>.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>PORTAL: 6/6 OK
+0</code></pre></figure>
+<p>إذا ظهر فوق <code class="nw">0</code> سطر فيه <code class="nw">4245</code> أو <code class="nw">connection refused</code>، فالصفر معناه أنّ Hubble لم يجب، لا أنّ الإسقاطات معدومة. نعيد تشغيل توجيه المنفذ كما في الخطوة الأولى ونعيد نقطة التحقق.</p>
+<p>مرّت كل استدعاءات البوابة عبر api، ولم يسجل Hubble أي إسقاط منه. هذا، مع العدد الأكبر من 0 القادم من news، هو نقطة التحقق. إذا لم يكن الرقم الثاني 0 فالسبب غالباً لمس صفحة لوحة التحكم في أثناء تشغيل الأمر، فنعيده دون أن نلمسها. وإذا بقي غير 0 نشغّل <code>hubble observe --from-pod campus/api --verdict DROPPED --last 10</code> ونقرأ إلى أين كانت تلك الحزم ذاهبة.</p>
+<p>نحفظ عملنا.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>git add -A &amp;&amp; git commit -m &quot;ch11: hubble evidence&quot;</code></pre></figure>
+<p>يُدرج <code class="nw">git add -A</code> كل ملف جديد أو معدّل، وهي هنا الملفات النصية في <code class="nw">evidence/</code>، ثم يحفظها <code class="nw">git commit -m</code> لقطةً واحدة مع الرسالة المكتوبة بعد <code class="nw">-m</code>.</p>
+<p>يبدأ السطر الأول بالنص <code class="nw">[main</code> ورمز قصير للإيداع (commit)، ويذكر السطر التالي عدد الملفات التي تغيّرت.</p>
+<!-- OUT ids: ch13-ready, ch13-fresh-traffic, ch13-drops-namespace, ch13-drops-from-news, ch13-one-line-json, ch13-to-db, ch13-http-only, ch13-export, ch13-l7-export, ch13-dns-news, ch13-drops-count-news, ch13-hubble-ui, ch13-api-drops-after-portal, ch13-commit --><nav class="pager" aria-label="الفصول"><a rel="prev" href="ch10.html"><span>الفصل السابق</span>الفصل 10. تطبيق التجزئة الدقيقة للشبكة</a><a rel="next" href="ch12.html"><span>الفصل التالي</span>الفصل 12. القياس</a></nav></main></div>
+<footer class="foot"><div class="foot-in"><p>Kubernetes 1.36 و Cilium 1.20.5 و kind 0.33.0 على Windows 11 مع WSL 2. شغّلنا كل أمر على حاسوب حقيقي في تشرين الثاني 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">المصدر على GitHub</a></p></div></footer>
+<p class="vh" aria-live="polite" id="live"></p>
+<script type="application/json" id="i18n">{"copied": "نُسخ", "copyFail": "نضغط Ctrl+C لنسخ النص المحدد", "doneOf": "الخطوات المنجزة: {d} من {t}", "next": "الخطوة التالية: {s}", "allDone": "اكتمل المسار وأُنجزت الخطوات كلها.", "sumCount": "المنجز {d} من {t}", "cleared": "مُسحت كل العلامات.", "confirm": "هل نمسح كل العلامات في هذه الصفحة؟ تبقى الملفات والعنقود كما هي.", "stageCount": "{d} من {t}"}</script>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

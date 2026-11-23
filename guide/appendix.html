@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
+<title>Appendices | Micro-segmentation lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&family=Noto+Sans+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="ar" href="../ar/guide/appendix.html">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400&text=%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9&display=swap">
+</head>
+<body class="">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="top-in">
+<a class="brand" href="../index.html">Micro-segmentation lab</a>
+<nav aria-label="Micro-segmentation lab"><ul>
+<li><a href="../index.html">Quick path</a></li>
+<li><a href="../guide/index.html" aria-current="page">Full guide</a></li>
+<li><a href="../downloads.html">Downloads</a></li>
+<li><a href="../ar/guide/appendix.html" lang="ar" hreflang="ar" data-setlang="ar">العربية</a></li>
+</ul></nav>
+</div></header>
+<div class="layout"><details class="rail" open><summary>Chapters</summary><nav aria-label="Chapters"><ol class="toc"><li><a href="ch00.html">0. How to use this guide</a></li><li><a href="ch01.html">1. What you will build</a></li><li><a href="ch02.html">2. Before you start</a></li><li><a href="ch03.html">3. Set up the environment</a></li><li><a href="ch04.html">4. Create the cluster</a></li><li><a href="ch05.html">5. Write the services</a></li><li><a href="ch06.html">6. Deploy the portal</a></li><li><a href="ch07.html">7. Build your dashboard</a></li><li><a href="ch08.html">8. Attack the flat network</a></li><li><a href="ch09.html">9. Design the policy</a></li><li><a href="ch10.html">10. Apply micro-segmentation</a></li><li><a href="ch11.html">11. Read the evidence in Hubble</a></li><li><a href="ch12.html">12. Measure</a></li><li><a href="ch13.html">13. Getting unstuck alone</a></li><li><a href="ch14.html">14. Evidence for your report</a></li><li><a href="ch15.html">15. Day-by-day plan</a></li><li><a href="appendix.html" aria-current="page">Appendices</a><ol class="sub"><li><a href="#appendix-a-plan-b-an-ubuntu-virtual-machine">Appendix A. Plan B: an Ubuntu virtual machine</a></li><li><a href="#appendix-b-one-page-command-card">Appendix B. One-page command card</a></li><li><a href="#appendix-c-file-index">Appendix C. File index</a></li></ol></li></ol></nav></details><main id="main" class="content chapter"><h1 id="appendices">Appendices</h1>
+<p>Appendix A is Plan B, an Ubuntu virtual machine for when Cilium won't run on WSL. B is a one-page card of the commands you'll use most, and C lists every project file with the chapter that builds it and its length. The glossary is in the Arabic edition.</p>
+<h2 id="appendix-a-plan-b-an-ubuntu-virtual-machine">Appendix A. Plan B: an Ubuntu virtual machine</h2>
+<p>Use this appendix only if <a href="ch04.html">chapter 4</a> fails on WSL and neither its failure blocks nor <a href="ch13.html">chapter 13</a> fixed it. A virtual machine, or VM, is a whole simulated computer running inside your laptop, with its own operating system, memory and disk. Here it runs Ubuntu 24.04 Desktop, which is ordinary Linux with a desktop and a browser. Cilium then runs on Ubuntu's normal kernel instead of the WSL kernel. Expect about 2 hours for the VM, then chapters 3 and 4 again.</p>
+<p>In the VM you work entirely inside the Ubuntu desktop. You open the guide, the terminal, the portal, the dashboard and the Hubble UI there, so <code class="nw">localhost</code> keeps meaning the same thing and every address in the guide stays as written. The table shows what changes.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>Chapter</th>
+<th>On WSL</th>
+<th>In the VM</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2</td>
+<td>install WSL and Ubuntu, VS Code on Windows, copy files from Windows</td>
+<td>skip all of it except the Git set-up and the first commit, follow section A.5 instead</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code class="nw">.wslconfig</code>, <code class="nw">wsl --shutdown</code>, <code class="nw">wsl --terminate</code>, Docker Desktop</td>
+<td>skip <code class="nw">.wslconfig</code>, the <code class="nw">wsl</code> commands and Docker Desktop, load the kernel modules as A.5 shows, restart the VM where <a href="ch03.html">chapter 3</a> restarts the distribution</td>
+</tr>
+<tr>
+<td>4 to 13</td>
+<td>as written</td>
+<td>as written, with every page opened in Firefox inside the VM</td>
+</tr>
+<tr>
+<td>8, 10, 14</td>
+<td>attack commands in Windows PowerShell with <code class="nw">curl.exe</code></td>
+<td>the same five payloads in the Ubuntu terminal with <code class="nw">curl</code>, as A.6 shows</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Windows Snipping Tool, Windows evidence folder</td>
+<td>Ubuntu's screenshot tool, everything saved straight into <code class="nw">~/microseg/evidence</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="a1-download-the-ubuntu-installer">A.1 Download the Ubuntu installer</h3>
+<p>On Windows, open <code>https://releases.ubuntu.com/24.04/</code> in your browser. The page offers the newest 24.04 point release. Download the desktop image for 64-bit PCs, a file named like <code>ubuntu-24.04.5-desktop-amd64.iso</code>, which is about 6 GB. Take a 24.04 release even if Ubuntu's main download page offers a newer one, because the guide was tested on 24.04. An ISO file is a disk image, the contents of an installation DVD stored as one file.</p>
+<h3 id="a2-create-the-vm-on-windows-11-pro-or-education-hyper-v">A.2 Create the VM on Windows 11 Pro or Education (Hyper-V)</h3>
+<p>Hyper-V is the VM program built into Windows Pro and Education. Windows Home doesn't have it, so on Home go to A.3.</p>
+<ol>
+<li>Press the Windows key, type <code>Turn Windows features on or off</code> and open it.</li>
+<li>Tick "Hyper-V", click "OK" and then "Restart now".</li>
+<li>After the restart, press the Windows key, type <code class="nw">Hyper-V Quick Create</code> and open it.</li>
+<li>Click "Local installation source", then "Change installation source", and pick the ISO file you downloaded.</li>
+<li>Untick "This virtual machine will run Windows (enables Windows Secure Boot)".</li>
+<li>Click "More options", type <code class="nw">microseg</code> as the name and click "Create Virtual Machine".</li>
+<li>When it's created, click "Edit settings". Under "Memory", set RAM to <code class="nw">10240</code> MB and untick "Enable Dynamic Memory". Under "Processor", set the number of virtual processors to 4. Under "SCSI Controller", select the hard drive and click "Inspect". The maximum disk size must be at least 60 GB. If it's smaller, close that window, click "Edit" beside "Inspect", choose "Expand" and enter 80 GB. Click "OK".</li>
+</ol>
+<p>Before you start the VM, stop WSL so it gives its memory back. <a href="ch03.html">Chapter 3</a>'s <code class="nw">.wslconfig</code> lets WSL hold about 10 GB, and on a 16 GB laptop WSL and the VM can't both have that much. Run this in PowerShell.</p>
+<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>wsl --shutdown</code></pre></figure>
+<p><code class="nw">wsl --shutdown</code> stops every WSL distribution and the virtual machine they share. It prints nothing when it works. Then click "Connect" in the Quick Create window, and "Start" in the window that opens.</p>
+<p>If step 2 shows "Hyper-V" greyed out, virtualization is off in the firmware. <a href="ch02.html">Chapter 2</a> shows how to check and turn it on.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>Hyper-V refuses to start the VM with a message that contains this text.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>Not enough memory in the system to start the virtual machine</code></pre></figure>
+<p>Usually WSL still holds the memory. Run <code class="nw">wsl --shutdown</code> in PowerShell again, close any programs you don't need, and click "Start" again. If it still fails, restart Windows, which frees the memory other programs hold, and start the VM before you open anything else.</p>
+<h3 id="a3-create-the-vm-on-windows-11-home-virtualbox">A.3 Create the VM on Windows 11 Home (VirtualBox)</h3>
+<p>VirtualBox is a free VM program from Oracle that also runs on Windows Home.</p>
+<ol>
+<li>Download VirtualBox for Windows hosts from <code class="nw">https://www.virtualbox.org</code> and install it with the default choices.</li>
+<li>Open VirtualBox and click "New". Type <code class="nw">microseg</code> as the name, pick your ISO file under "ISO Image" and tick "Skip Unattended Installation".</li>
+<li>Under "Hardware", set "Base Memory" to <code class="nw">10240</code> MB and "Processors" to 4.</li>
+<li>Under "Hard Disk", set the size to 80 GB.</li>
+<li>Click "Finish".</li>
+</ol>
+<p>Before you start the VM, run <code class="nw">wsl --shutdown</code> in PowerShell, as in A.2, so WSL gives its memory back. Then select <code class="nw">microseg</code> in VirtualBox and click "Start".</p>
+<p>Since WSL is installed, VirtualBox has to run on top of Windows' own hypervisor. It works, only slower, and VirtualBox shows a small green turtle icon in the VM window's status bar when it runs this way. Allow extra time for image builds and the connectivity test.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>The VirtualBox installer stops with a message that mentions <code>Microsoft Visual C++ 2019 Redistributable</code>. VirtualBox needs that Microsoft library first. Download it from Microsoft at <code>https://aka.ms/vs/17/release/vc_redist.x64.exe</code>, run it with the default choices, then run the VirtualBox installer again.</p>
+<h3 id="a4-install-ubuntu-inside-the-vm">A.4 Install Ubuntu inside the VM</h3>
+<p>The VM starts from the ISO and shows the Ubuntu installer. Choose your language, click through the accessibility and keyboard screens, and choose "Install Ubuntu". Pick "Interactive installation" and "Default selection". On the disk screen choose "Erase disk and install Ubuntu". This erases only the VM's virtual disk, never your laptop's. Create your user and password, keep your time zone, and start the installation. It takes about 15 minutes. When it asks you to remove the installation medium, press Enter, and the VM restarts into Ubuntu.</p>
+<h3 id="a5-prepare-the-vm">A.5 Prepare the VM</h3>
+<p>Log in. You need this guide inside the VM, because the clipboard between Windows and a VM often doesn't work, so pasting from Windows may fail. On Windows, email yourself the link to this guide's Docs page. In the VM, open Firefox, sign in to your email there and open the link. Copy commands from the guide open inside the VM. Open the terminal with Ctrl+Alt+T. In this terminal you paste with Ctrl+Shift+V, as in <a href="ch00.html">chapter 0</a>.</p>
+<p>On WSL, <code class="nw">.wslconfig</code> told Windows to load the kernel modules Cilium needs. In the VM you load them through a file that Ubuntu reads at every start.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>printf &#x27;xt_socket\nxt_TPROXY\nxt_mark\nxt_CT\ncls_bpf\nsch_ingress\nxt_recent\n&#x27; | sudo tee /etc/modules-load.d/cilium.conf</code></pre></figure>
+<p><code class="nw">printf</code> prints the seven module names, one per line, because <code class="nw">\n</code> means a new line. <code class="nw">sudo tee</code> writes them into <code>/etc/modules-load.d/cilium.conf</code>, in a folder only the administrator may write to, and also prints them. Ubuntu loads every module named in this folder when it starts. Type your password when <code class="nw">sudo</code> asks for it. Nothing shows while you type.</p>
+<p><strong>You should see</strong> the seven names repeated back, one per line, in this order: <code class="nw">xt_socket</code>, <code class="nw">xt_TPROXY</code>, <code class="nw">xt_mark</code>, <code class="nw">xt_CT</code>, <code class="nw">cls_bpf</code>, <code class="nw">sch_ingress</code> and <code class="nw">xt_recent</code>.</p>
+<p>Now load them once by hand, so you don't have to restart, and check two of them.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>sudo modprobe -a xt_socket xt_TPROXY xt_mark xt_CT cls_bpf sch_ingress xt_recent &amp;&amp; lsmod | grep -E &#x27;^xt_(TPROXY|socket)&#x27;</code></pre></figure>
+<p><code class="nw">modprobe -a</code> loads every module named after it. <code class="nw">lsmod</code> lists the loaded modules and <code class="nw">grep -E '^xt_(TPROXY|socket)'</code> keeps the lines that start with either of the two names <code class="nw">check-env.sh</code> tests.</p>
+<p><strong>You should see</strong> two lines, one starting <code class="nw">xt_TPROXY</code> and one starting <code class="nw">xt_socket</code>. The numbers after them vary by kernel.</p>
+<p>Install VS Code, which <a href="ch02.html">chapter 2</a> otherwise installs on Windows.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>sudo snap install code --classic</code></pre></figure>
+<p><code class="nw">snap</code> is Ubuntu's app installer. <code class="nw">--classic</code> lets VS Code reach your whole home folder, which an editor needs.</p>
+<p><strong>You should see</strong> a line that starts with <code class="nw">code</code> and ends in <code class="nw">installed</code>. The version in the middle differs.</p>
+<p>Then make the project folder and open it in VS Code, as <a href="ch02.html">chapter 2</a> does on WSL.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>mkdir -p ~/microseg &amp;&amp; cd ~/microseg &amp;&amp; code .</code></pre></figure>
+<p><strong>You should see</strong> a VS Code window open on the empty <code class="nw">microseg</code> folder. The terminal itself prints nothing, or a short notice from VS Code. Inside the VM the window title shows <code class="nw">microseg</code> without the <code class="nw">[WSL: Ubuntu-24.04]</code> part from <a href="ch02.html">chapter 2</a>.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>modprobe: FATAL: Module xt_tproxy not found in directory /lib/modules/&lt;version&gt;</code></pre></figure>
+<p>The module name is misspelled. Names are case-sensitive, and <code class="nw">TPROXY</code> is in capitals. Copy the command again.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>modprobe: FATAL: Module xt_TPROXY not found in directory /lib/modules/&lt;version&gt;</code></pre></figure>
+<p>The name is right, but this kernel keeps the module in a separate package that isn't installed. Install it with <code>sudo apt install -y linux-modules-extra-$(uname -r)</code>, where <code class="nw">$(uname -r)</code> puts in the version of the running kernel, then run the <code class="nw">modprobe</code> line again.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>error: cannot communicate with server: timeout</code></pre></figure>
+<p>Snap is still setting itself up after the first start of Ubuntu. Wait two minutes, then run it again.</p>
+<h3 id="a6-follow-the-guide-with-these-changes">A.6 Follow the guide with these changes</h3>
+<p>Your WSL files stay in WSL. Create every file again in the VM from the chapters, as if you were starting fresh. From here, work through the guide from <a href="ch02.html">chapter 2</a>'s Git section onward. For the <code class="nw">hello.txt</code> drill in <a href="ch02.html">chapter 2</a>, open the Text Editor in Ubuntu, type <code class="nw">copied from Windows</code>, and save it as <code class="nw">hello.txt</code> in the <code class="nw">microseg</code> folder, so the checkpoint matches.</p>
+<p>In <a href="ch03.html">chapter 3</a>, skip every step about <code class="nw">.wslconfig</code>, every <code class="nw">wsl</code> command and the paragraph about Docker Desktop. In <a href="ch03.html">chapter 3</a>'s systemd check, only the first line, <code class="nw">systemd</code>, matters in the VM. The message <code>cat: /etc/wsl.conf: No such file or directory</code> is expected there, so don't create the file. Where <a href="ch03.html">chapter 3</a> restarts the distribution after <code class="nw">sudo usermod -aG docker $USER</code>, restart the VM instead with <code class="nw">sudo reboot</code>. After the restart, open the terminal and run <code class="nw">id -nG</code>, which lists the groups your user belongs to. <code class="nw">docker</code> must be among them. If the <code class="nw">check-env.sh</code> line about 9 GB of memory prints FAIL, shut the VM down, raise its memory to <code class="nw">11264</code> MB and start it again. The check's name mentions WSL, but it measures whatever Linux runs on.</p>
+<p>Where chapters 8, 10 and 14 send the attack from PowerShell, use these five commands in the Ubuntu terminal instead. They carry the same payloads, and <code class="nw">curl</code> replaces <code class="nw">curl.exe</code>.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>curl -s http://localhost:30080/news/check-image --data-urlencode &quot;url=x; id; hostname&quot;
+curl -s http://localhost:30080/news/check-image --data-urlencode &quot;url=x; env | grep SERVICE_PORT= | sort; nc -zv -w 2 frontend 80; nc -zv -w 2 api 8080; nc -zv -w 2 auth 5001; nc -zv -w 2 db 5432; nc -zv -w 2 admin 5002&quot;
+curl -s http://localhost:30080/news/check-image --data-urlencode &quot;url=x; PGCONNECT_TIMEOUT=3 PGPASSWORD=postgres psql -h db -U postgres -d campus -c &#x27;SELECT id, username, full_name FROM students&#x27;&quot;
+curl -s http://localhost:30080/news/check-image --data-urlencode &quot;url=x; PGCONNECT_TIMEOUT=3 PGPASSWORD=postgres psql -h db -U postgres -d campus -c &#x27;UPDATE grades SET grade = 95 WHERE id = 3&#x27; -c &#x27;SELECT * FROM grades WHERE id = 3&#x27;&quot;
+curl -s http://localhost:30080/news/check-image --data-urlencode &quot;url=x; curl -sS --max-time 3 http://admin:5002/users&quot;</code></pre></figure>
+<p><strong>You should see</strong>, on the flat network, the same answers as the PowerShell commands in <a href="ch08.html">chapter 8</a>. Check the proof text of each step. Step 1 shows <code class="nw">uid=1000(app)</code>, every scan line of step 2 contains <code class="nw">succeeded</code>, step 3 ends with <code class="nw">(4 rows)</code>, step 4 shows <code class="nw">UPDATE 1</code> and step 5 contains <code class="nw">password_hash</code>.</p>
+<p>In <a href="ch14.html">chapter 14</a>, set up Ubuntu's Terminal for screenshots instead of Windows Terminal. Click the menu button with three lines at the top right of the Terminal window and choose "Preferences". Click your profile on the left, which is called "Unnamed" unless you renamed it. On the "Text" tab, tick "Custom font" and set the size to 14. On the "Colors" tab, untick "Use colors from system theme" and pick a light scheme under "Built-in schemes", such as "GNOME light".</p>
+<p>Capture each attack step with the terminal wrapper instead of the PowerShell blocks, for example <code>clear; { date; curl -s http://localhost:30080/news/check-image --data-urlencode "url=x; id; hostname"; date; } 2&gt;&amp;1 | tee ~/microseg/evidence/E13-step1.txt</code>. For screenshots, press the Print Screen key. A bar appears at the bottom of the screen with three choices, "Selection", "Screen" and "Window". For a terminal capture pick "Window", click the terminal, then click the round capture button. For a browser page pick "Screen" instead, so the clock in Ubuntu's top bar is in the picture. Ubuntu saves each picture in <code class="nw">~/Pictures/Screenshots</code> under a name with spaces in it, such as <code>Screenshot From 2026-11-20 14-03-22.png</code>. Move the newest one into the evidence folder under its evidence name.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>mv &quot;$(ls -t ~/Pictures/Screenshots/*.png | head -1)&quot; ~/microseg/evidence/E03-nodes.png</code></pre></figure>
+<p><code class="nw">ls -t</code> lists the screenshots newest first, <code class="nw">head -1</code> keeps the first line, and <code class="nw">$( )</code> puts that file name into the <code class="nw">mv</code> command. The double quotes keep the spaces in the name together. Change <code class="nw">E03-nodes</code> for each capture. <code class="nw">mv</code> prints nothing when it works. Skip the Windows evidence folder and the copy step of <a href="ch14.html">chapter 14</a>.</p>
+<p>The VM can't write to a Windows folder, and Hyper-V doesn't pass USB sticks through to a Linux VM, so the weekly backup from <a href="ch02.html">chapter 2</a> and your evidence reach Windows through a cloud drive. Make the archive in your home folder in the VM.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>tar --exclude=microseg/.venv --exclude=microseg/images -czf ~/microseg-backup-$(date +%F).tar.gz -C ~ microseg</code></pre></figure>
+<p>This is <a href="ch02.html">chapter 2</a>'s backup command with the archive written to your home folder instead of a Windows folder. It includes <code class="nw">~/microseg/evidence</code>, so the same file carries your screenshots and text outputs. It prints nothing when it works. Open Firefox in the VM, sign in to your OneDrive or Google Drive, and upload the <code class="nw">.tar.gz</code> file from your home folder. On Windows, download it from the same drive, right-click it in File Explorer and choose "Extract All" to get the files for your thesis.</p>
+<h2 id="appendix-b-one-page-command-card">Appendix B. One-page command card</h2>
+<p>These are the commands you'll use again and again once the lab is built. Each comes from the chapter named beside it, where its output is shown and explained. Words in angle brackets are placeholders, as <a href="ch00.html">chapter 0</a> explains. Text after <code class="nw">#</code> is a comment, and bash ignores it, so you can paste a whole line.</p>
+<p>Start of a session, each long-running command in its own Ubuntu tab (chapters 4, 7, 11 and 13):</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+docker ps --format &#x27;{{.Names}}&#x27;                              # must list kind-control-plane, kind-worker, kind-worker2
+                                                              # if not, follow &quot;After a Windows restart&quot; in chapter 15
+jobs                                                          # in an old tab: a helper listed here is still running, skip it
+cilium hubble port-forward                                    # tab 1, leave it running
+cilium hubble ui --open-browser=false                         # tab 2, then open http://localhost:12000
+cd ~/microseg/dashboard &amp;&amp; ../.venv/bin/python app.py         # tab 3, then open http://localhost:5050</code></pre></figure>
+<p>Is everything healthy (chapters 4, 6 and 10):</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl get nodes -L tier                                     # 3 nodes Ready, tiers frontend and backend
+kubectl -n campus get pods -o wide                            # 7 pods 1/1 Running
+cilium status                                                 # Cilium, Operator, Envoy DaemonSet, Hubble Relay OK
+hubble status                                                 # Connected Nodes: 3/3
+bash ~/microseg/check-portal.sh                               # last line PORTAL: 6/6 OK
+kubectl -n campus get cnp                                     # 10 policies when segmented, none when flat</code></pre></figure>
+<p>Switch between states (chapters 8 and 10):</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl delete -f ~/microseg/k8s/policies/ --ignore-not-found # flat network
+kubectl apply -f ~/microseg/k8s/policies/1-baseline.yaml      # from the flat state only: default deny, portal breaks
+kubectl apply -f ~/microseg/k8s/policies/                     # segmented, both files
+kubectl -n campus rollout restart deployment/db               # reset the database, Omar back to 58
+kubectl -n campus rollout status deployment/db --timeout=120s # wait for successfully rolled out</code></pre></figure>
+<p>Results without the browser (chapters 7, 8 and 10):</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>curl -s localhost:5050/api/matrix | jq -c &#x27;{open, total}&#x27;
+curl -s -X POST localhost:5050/api/attack | jq -r &#x27;.[] | (if .success then &quot;SUCCESS &quot; else &quot;FAILED  &quot; end) + .step&#x27;
+kubectl -n campus exec deploy/db -- psql -U postgres -d campus -c &quot;SELECT * FROM grades WHERE id = 3&quot;
+curl -s -i http://localhost:30080/api/export</code></pre></figure>
+<p>Hubble (<a href="ch11.html">chapter 11</a>). Never combine <code class="nw">--namespace</code> with <code class="nw">--from-pod</code> or <code class="nw">--to-pod</code>, because Hubble refuses that combination.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>hubble observe --namespace campus --verdict DROPPED --last 20
+hubble observe --from-pod campus/news --verdict DROPPED --last 12
+hubble observe --to-pod campus/db --last 12
+hubble observe --namespace campus --protocol http --last 6
+hubble observe --namespace campus --http-status 403 --last 5
+hubble observe --from-pod campus/news --protocol dns --last 10</code></pre></figure>
+<p>Finding a problem (<a href="ch13.html">chapter 13</a>):</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus describe pod &lt;pod-name&gt;
+kubectl -n campus logs deploy/&lt;service&gt;
+kubectl -n campus logs deploy/&lt;service&gt; --previous
+kubectl get events -n campus --sort-by=.lastTimestamp</code></pre></figure>
+<p>Rebuild and measure (chapters 6, 12 and 13):</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>bash ~/microseg/deploy.sh                                     # rebuild images, redeploy, reset db, remove policies
+kind delete cluster &amp;&amp; bash ~/microseg/setup.sh &amp;&amp; bash ~/microseg/deploy.sh   # everything, about 15 minutes
+cd ~/microseg &amp;&amp; .venv/bin/python -u measure.py               # about 10 minutes, leaves the policies applied</code></pre></figure>
+<p>Git (<a href="ch02.html">chapter 2</a>):</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>git status
+git diff
+git restore &lt;file&gt;
+git log --oneline
+git add -A &amp;&amp; git commit -m &quot;chNN: &lt;what&gt;&quot;</code></pre></figure>
+<p>Windows PowerShell, the attack and WSL (chapters 2 and 8). Always <code class="nw">curl.exe</code>, never <code class="nw">curl</code>.</p>
+<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>curl.exe -s http://localhost:30080/news/check-image --data-urlencode &quot;url=x; id; hostname&quot;
+curl.exe -s http://localhost:30080/news/check-image --data-urlencode &quot;url=x; env | grep SERVICE_PORT= | sort; nc -zv -w 2 frontend 80; nc -zv -w 2 api 8080; nc -zv -w 2 auth 5001; nc -zv -w 2 db 5432; nc -zv -w 2 admin 5002&quot;
+curl.exe -s http://localhost:30080/news/check-image --data-urlencode &quot;url=x; PGCONNECT_TIMEOUT=3 PGPASSWORD=postgres psql -h db -U postgres -d campus -c &#x27;SELECT id, username, full_name FROM students&#x27;&quot;
+curl.exe -s http://localhost:30080/news/check-image --data-urlencode &quot;url=x; PGCONNECT_TIMEOUT=3 PGPASSWORD=postgres psql -h db -U postgres -d campus -c &#x27;UPDATE grades SET grade = 95 WHERE id = 3&#x27; -c &#x27;SELECT * FROM grades WHERE id = 3&#x27;&quot;
+curl.exe -s http://localhost:30080/news/check-image --data-urlencode &quot;url=x; curl -sS --max-time 3 http://admin:5002/users&quot;
+curl.exe -s -i http://localhost:30080/api/export
+wsl -l -v
+wsl --shutdown</code></pre></figure>
+<h2 id="appendix-c-file-index">Appendix C. File index</h2>
+<p>Every project file in <code class="nw">~/microseg</code> that you write or paste, apart from <code class="nw">.gitignore</code> and <code class="nw">hello.txt</code> from <a href="ch02.html">chapter 2</a>, with the chapter that builds it. The line counts are those of the tested files. The three pieces marked "typed" are the ones you type by hand.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>File</th>
+<th>Chapter</th>
+<th>Purpose</th>
+<th>Lines</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code class="nw">check-env.sh</code></td>
+<td>3</td>
+<td>environment checkpoint</td>
+<td>32</td>
+</tr>
+<tr>
+<td><code class="nw">kind-config.yaml</code></td>
+<td>4</td>
+<td>cluster shape</td>
+<td>21</td>
+</tr>
+<tr>
+<td><code class="nw">setup.sh</code></td>
+<td>4</td>
+<td>one time: cluster, Cilium, Hubble, preload nginx and postgres</td>
+<td>23</td>
+</tr>
+<tr>
+<td><code class="nw">apps/requirements.txt</code></td>
+<td>5</td>
+<td>Python packages for the images</td>
+<td>4</td>
+</tr>
+<tr>
+<td><code class="nw">apps/Dockerfile</code></td>
+<td>5</td>
+<td>builds <code class="nw">campus-app:1.0</code> for api, auth, admin and ops</td>
+<td>9</td>
+</tr>
+<tr>
+<td><code class="nw">apps/Dockerfile.news</code></td>
+<td>5</td>
+<td>builds <code class="nw">campus-news:1.0</code> with the attacker's tools</td>
+<td>6</td>
+</tr>
+<tr>
+<td><code class="nw">apps/news.py</code></td>
+<td>5</td>
+<td>announcements and the vulnerable <code class="nw">/news/check-image</code> (typed: the <code class="nw">check_image</code> function)</td>
+<td>34</td>
+</tr>
+<tr>
+<td><code class="nw">apps/api.py</code></td>
+<td>5</td>
+<td>login proxy, profile, grades, forgotten <code class="nw">/api/export</code></td>
+<td>68</td>
+</tr>
+<tr>
+<td><code class="nw">apps/auth.py</code></td>
+<td>5</td>
+<td>login, token check</td>
+<td>50</td>
+</tr>
+<tr>
+<td><code class="nw">apps/admin.py</code></td>
+<td>5</td>
+<td>admin panel with no login, <code class="nw">/users</code></td>
+<td>36</td>
+</tr>
+<tr>
+<td><code class="nw">frontend/default.conf</code></td>
+<td>5</td>
+<td>nginx configuration (ConfigMap <code class="nw">frontend-files</code>)</td>
+<td>26</td>
+</tr>
+<tr>
+<td><code class="nw">frontend/index.html</code></td>
+<td>5</td>
+<td>the portal page (ConfigMap <code class="nw">frontend-files</code>)</td>
+<td>61</td>
+</tr>
+<tr>
+<td><code class="nw">db/init.sql</code></td>
+<td>5</td>
+<td>tables and seed data (ConfigMap <code class="nw">db-init</code>)</td>
+<td>38</td>
+</tr>
+<tr>
+<td><code class="nw">k8s/app.yaml</code></td>
+<td>6</td>
+<td>Secret, 6 Services, 7 Deployments</td>
+<td>311</td>
+</tr>
+<tr>
+<td><code class="nw">deploy.sh</code></td>
+<td>6</td>
+<td>build and load the app images, recreate namespace <code class="nw">campus</code> (resets the database, removes the policies)</td>
+<td>21</td>
+</tr>
+<tr>
+<td><code class="nw">check-portal.sh</code></td>
+<td>6</td>
+<td>legitimate users still get through</td>
+<td>25</td>
+</tr>
+<tr>
+<td><code class="nw">dashboard/app.py</code></td>
+<td>7</td>
+<td>dashboard back end</td>
+<td>121</td>
+</tr>
+<tr>
+<td><code class="nw">dashboard/index.html</code></td>
+<td>7</td>
+<td>dashboard page</td>
+<td>153</td>
+</tr>
+<tr>
+<td><code class="nw">k8s/policies/1-baseline.yaml</code></td>
+<td>10</td>
+<td>default-deny, allow-dns, allow-kubelet-probes (typed: the whole file)</td>
+<td>48</td>
+</tr>
+<tr>
+<td><code class="nw">k8s/policies/2-allow.yaml</code></td>
+<td>10</td>
+<td>the 7 per-workload policies (typed: the api policy)</td>
+<td>186</td>
+</tr>
+<tr>
+<td><code class="nw">measure.py</code></td>
+<td>12</td>
+<td>latency test</td>
+<td>71</td>
+</tr>
+</tbody>
+</table></div>
+<p>Together the files hold 1344 lines. <code class="nw">results/latency.csv</code> and the files in <code class="nw">evidence/</code> are produced by commands, not written by you. To compare your files with the table, count their lines.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; wc -l kind-config.yaml setup.sh deploy.sh check-env.sh check-portal.sh measure.py apps/requirements.txt apps/Dockerfile apps/Dockerfile.news apps/news.py apps/api.py apps/auth.py apps/admin.py frontend/default.conf frontend/index.html db/init.sql k8s/app.yaml k8s/policies/1-baseline.yaml k8s/policies/2-allow.yaml dashboard/app.py dashboard/index.html</code></pre></figure>
+<p><code class="nw">wc -l</code> counts the lines of each file named after it and adds a total at the end.</p>
+<p><strong>You should see</strong> one line per file and a total.</p>
+<p>The last line should read <code class="nw">1344 total</code>. A file that differs from the table by one line is fine, since that's usually a missing or extra empty line at the end, and then the total is off by the same amount. A bigger difference means a pasted block went missing or got pasted twice, so open that file beside the guide's version and compare.</p>
+<!-- OUT ids: appC-wc-lines --><nav class="pager" aria-label="Chapters"><a rel="prev" href="ch15.html"><span>Previous chapter</span>Chapter 15. Day-by-day plan</a></nav></main></div>
+<footer class="foot"><div class="foot-in"><p>Kubernetes 1.36, Cilium 1.20.5 and kind 0.33.0 on Windows 11 with WSL 2. Every command was run on a real laptop in November 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">Source on GitHub</a></p></div></footer>
+<p class="vh" aria-live="polite" id="live"></p>
+<script type="application/json" id="i18n">{"copied": "Copied", "copyFail": "Press Ctrl+C to copy the selected text", "doneOf": "{d} of {t} steps done", "next": "Next step: {s}", "allDone": "All {t} steps done.", "sumCount": "{d} of {t} done", "cleared": "All ticks cleared.", "confirm": "Clear every tick on this page? Your files and your cluster stay as they are.", "stageCount": "{d} of {t}"}</script>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

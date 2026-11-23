@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
+<title>الفصل 10. تطبيق التجزئة الدقيقة للشبكة | مختبر التجزئة الدقيقة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;700&family=Public+Sans:wght@400;600;700&family=Noto+Sans+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="en" href="../../guide/ch10.html">
+
+</head>
+<body class="">
+<a class="skip" href="#main">الانتقال إلى المحتوى</a>
+<header class="top"><div class="top-in">
+<a class="brand" href="../../ar/index.html">مختبر التجزئة الدقيقة</a>
+<nav aria-label="مختبر التجزئة الدقيقة"><ul>
+<li><a href="../../ar/index.html">المسار السريع</a></li>
+<li><a href="../../ar/guide/index.html" aria-current="page">الدليل الكامل</a></li>
+<li><a href="../../ar/downloads.html">التنزيلات</a></li>
+<li><a href="../../guide/ch10.html" lang="en" hreflang="en" data-setlang="en">English</a></li>
+</ul></nav>
+</div></header>
+<div class="layout"><details class="rail" open><summary>الفصول</summary><nav aria-label="الفصول"><ol class="toc"><li><a href="ch00.html">0. كيف نستخدم هذا الدليل</a></li><li><a href="ch01.html">1. ما الذي سنبنيه</a></li><li><a href="ch02.html">2. قبل أن نبدأ</a></li><li><a href="ch03.html">3. تجهيز بيئة العمل</a></li><li><a href="ch04.html">4. إنشاء العنقود</a></li><li><a href="ch05.html">5. كتابة الخدمات</a></li><li><a href="ch06.html">6. نشر البوابة</a></li><li><a href="ch07.html">7. بناء لوحة التحكم</a></li><li><a href="ch08.html">8. مهاجمة الشبكة المسطحة</a></li><li><a href="ch09.html">9. تصميم السياسة</a></li><li><a href="ch10.html" aria-current="page">10. تطبيق التجزئة الدقيقة للشبكة</a><ol class="sub"><li><a href="#البدء-من-شبكة-مسطحة-ودرجة-عمر-58">البدء من شبكة مسطحة، ودرجة عمر 58</a></li><li><a href="#كتابة-1-baselineyaml-واختباره-بتشغيل-تجريبي">كتابة 1-baseline.yaml واختباره بتشغيل تجريبي</a></li><li><a href="#تطبيق-ملف-الأساس-وحده-0-من-36">تطبيق ملف الأساس وحده: 0 من 36</a></li><li><a href="#كتابة-2-allowyaml-سياسة-واحدة-لكل-حمل-عمل">كتابة 2-allow.yaml: سياسة واحدة لكل حمل عمل</a></li><li><a href="#تطبيق-2-allowyaml-10-سياسات">تطبيق 2-allow.yaml: 10 سياسات</a></li><li><a href="#البوابة-تعمل-من-جديد-66">البوابة تعمل من جديد: 6/6</a></li><li><a href="#المصفوفة-7-من-36">المصفوفة: 7 من 36</a></li><li><a href="#الهجوم-مرة-أخرى-1-من-5">الهجوم مرة أخرى: 1 من 5</a></li><li><a href="#مسار-التصدير-المنسي-يجيب-الآن-بـ-403">مسار التصدير المنسي يجيب الآن بـ 403</a></li><li><a href="#اختبار-التبديل-إزالة-ثم-إعادة-تطبيق-ثم-مقارنة">اختبار التبديل: إزالة، ثم إعادة تطبيق، ثم مقارنة</a></li><li><a href="#نقطة-التحقق">نقطة التحقق</a></li></ol></li><li><a href="ch11.html">11. قراءة الأدلة في Hubble</a></li><li><a href="ch12.html">12. القياس</a></li><li><a href="ch13.html">13. تجاوز الأعطال دون مساعدة</a></li><li><a href="ch14.html">14. أدلة بحث التخرج</a></li><li><a href="ch15.html">15. خطة العمل يوماً بيوم</a></li><li><a href="appendix.html">الملاحق</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="الفصل-10-تطبيق-التجزئة-الدقيقة-للشبكة">الفصل 10. تطبيق التجزئة الدقيقة للشبكة</h1>
+<p>نكتب ملف الأساس، أي الرفض الافتراضي (default deny)، بأيدينا، ونطبّقه وحده، ونراقبه وهو يغلق كل مسار، ومنها المسارات التي تحتاجها البوابة نفسها. ثم نضيف سياسة واحدة لكل حمل عمل (workload)، فتعيد هذه السياسات فتح الاتصالات الثمانية الموجودة في جدول التدفقات بالضبط. بعدها نجري الفحوص نفسها والهجوم نفسه اللذين أجريناهما في <a href="ch08.html">الفصل 8</a>، وننهي الفصل باختبار تبديل يقلب النتائج ذهاباً وإياباً. في نهاية الفصل تبقى البوابة تجتاز الفحص بالنتيجة <code class="nw">PORTAL: 6/6 OK</code> وتعرض المصفوفة 7 مسارات مفتوحة من 36، ويتوقف الهجوم بعد الخطوة 1، ويجيب <code class="nw">/api/export</code> بالرد <code class="nw">403 Forbidden</code>. نخصص لهذا الفصل ساعتين إلى ثلاث ساعات.</p>
+<p>نُبقي لوحة التحكم تعمل في نافذة Ubuntu الخاصة بها كما في <a href="ch08.html">الفصل 8</a>، ونكتب كل أمر آخر في نافذة Ubuntu الأولى، إلا إذا ذكر النص الذي فوق الكتلة مباشرة أن الأمر يُكتب في Windows PowerShell. ونضع بجانبنا ورقة أو ملفاً نصياً، ونسجّل فيه كل رقم يعطينا إياه هذا الفصل فور ظهوره. فنقطة التحقق في النهاية تطلب هذه الأرقام.</p>
+<h2 id="البدء-من-شبكة-مسطحة-ودرجة-عمر-58">البدء من شبكة مسطحة، ودرجة عمر 58</h2>
+<p>لا تصح المقارنة بين ما قبل التجزئة الدقيقة للشبكة (micro-segmentation) وما بعدها إلا إذا بدأنا من الحالة نفسها التي بدأ منها <a href="ch08.html">الفصل 8</a>: لا سياسات، ودرجة عمر عادت إلى 58.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>kubectl -n campus get ciliumnetworkpolicies
+kubectl -n campus exec deploy/db -- psql -U postgres -d campus -c &quot;SELECT * FROM grades WHERE id = 3&quot;</code></pre></figure>
+<p>يسرد الأمر الأول سياسات Cilium في مساحة الأسماء (namespace) ‏<code class="nw">campus</code> ويقرأ الثاني درجة عمر في مادة Network Security من داخل Pod قاعدة البيانات db، كما في <a href="ch08.html">الفصل 8</a>.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> لا سياسات، ودرجة 58.</p>
+<p>يجب أن يكون السطر الأول <code>No resources found in campus namespace.</code> ويجب أن تظهر <code class="nw">58</code> في عمود الدرجة grade.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<p>إذا كانت الدرجة 95 فخطوة الإرجاع في نهاية <a href="ch08.html">الفصل 8</a> لم تُنفَّذ. الحل تشغيل الأوامر الأربعة في خطوة «إرجاع درجة عمر» من ذلك الفصل، ثم إعادة هذا الفحص.</p>
+<p>إذا سرد الأمر الأول سياسات، تُحذف بالأمر <code>kubectl delete -f ~/microseg/k8s/policies/</code> الذي يحذف كل سياسة معرّفة في ذلك المجلد، ثم يُعاد هذا الفحص.</p>
+<h2 id="كتابة-1-baselineyaml-واختباره-بتشغيل-تجريبي">كتابة <code class="nw">1-baseline.yaml</code> واختباره بتشغيل تجريبي</h2>
+<p>يحمل ملف الأساس السياسات الثلاث التي تسري على كل Pod في <code class="nw">campus</code>: منع كل شيء، والسماح باستعلامات الأسماء، والسماح بفحوص الجاهزية. نكتبه بأيدينا كي نقرأ كل سطر فيه ونحن نكتبه.</p>
+<p>ننشئ الملف في VS Code، في نافذة المشروع التي فتحناها بالأمر <code class="nw">code .</code> في <a href="ch02.html">الفصل 2</a>. في لوحة Explorer على اليسار ننقر بالزر الأيمن على المجلد <code class="nw">k8s</code> ونختار «New File...»، ونكتب الاسم <code class="nw">policies/1-baseline.yaml</code> ثم نضغط Enter. كتابة اسم فيه شرطة مائلة تجعل VS Code ينشئ المجلد <code class="nw">policies</code> والملف داخله دفعة واحدة، ويُفتح الملف الفارغ في تبويب جديد.</p>
+<p>نكتب الملف أدناه. ننقل الإزاحة كما هي تماماً، بالمسافات، ولا نستخدم مفتاح Tab أبداً. فصيغة YAML، وهي الصيغة التي تُكتب بها ملفات Kubernetes، تحدد ما يتبع ماذا بمقدار إزاحة كل سطر. ومسافة واحدة خاطئة تغيّر المعنى. ويزيح VS Code أسطر YAML نيابة عنا أثناء الكتابة، فحين نضغط Enter بعد سطر ينتهي بالرمز <code class="nw">:</code> ينقل المؤشر إلى الداخل، وفي الأسطر الأخرى يحافظ على إزاحة السطر الذي فوقه. لذلك ننظر قبل كتابة كل سطر إلى الرقم <code class="nw">Col</code> في شريط الحالة أسفل اليمين، ونضيف المسافات أو نحذفها حتى يطابق الرقم ما في الدليل. <code class="nw">Col 1</code> تعني لا مسافات أبداً، و<code class="nw">Col 3</code> تعني مسافتين، وهكذا. مفاتيح الوسوم (labels) تحت <code class="nw">matchLabels</code> في السياسة الثانية محاطة بعلامتي تنصيص مزدوجتين لأن فيها نقطتين رأسيتين، فنكتب علامات التنصيص أيضاً. والأسطر التي تبدأ بالرمز <code class="nw">#</code> تعليقات يتجاهلها Kubernetes. نكتبها هي الأخرى إن سمح الوقت، فهي تشرح ما يفعله كل سطر.</p>
+<figure class="code file"><figcaption><span class="lbl">الملف: k8s/policies/1-baseline.yaml</span><button type="button" class="copy" aria-label="نسخ هذا الملف">نسخ</button></figcaption><pre dir="ltr"><code># 1) default-deny: selects every pod in campus. The empty ingress rule and the empty
+#    egress rule switch both directions to &quot;deny unless another policy allows it&quot;.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default-deny
+  namespace: campus
+spec:
+  endpointSelector: {}
+  ingress:
+  - {}
+  egress:
+  - {}
+---
+# 2) allow-dns: every pod may ask kube-dns (in kube-system) on port 53, for any name.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-dns
+  namespace: campus
+spec:
+  endpointSelector: {}
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        &quot;k8s:io.kubernetes.pod.namespace&quot;: kube-system
+        &quot;k8s:k8s-app&quot;: kube-dns
+    toPorts:
+    - ports:
+      - port: &quot;53&quot;
+        protocol: ANY
+      rules:
+        dns:
+        - matchPattern: &quot;*&quot;
+---
+# 3) allow-kubelet-probes: readiness probes come from the node itself (entity &quot;host&quot;).
+#    Cilium already allows this by default. Writing it down makes the rule visible
+#    and keeps probes working if that default is ever changed.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-kubelet-probes
+  namespace: campus
+spec:
+  endpointSelector: {}
+  ingress:
+  - fromEntities:
+    - host</code></pre></figure>
+<p>ما يفعله كل جزء:</p>
+<p>(1) تقسم الأسطر <code class="nw">---</code> الملف الواحد إلى ثلاثة كائنات منفصلة، لأن YAML تسمح بعدة مستندات في ملف واحد، ويطبّقها <code class="nw">kubectl</code> بالترتيب.</p>
+<p>(2) يحدد السطران <code class="nw">apiVersion: cilium.io/v2</code> و<code class="nw">kind: CiliumNetworkPolicy</code> نوع هذا الكائن. لم يكن Kubernetes يعرف هذا النوع حين ثُبّت أول مرة، وCilium هو الذي عرّفه به في <a href="ch04.html">الفصل 4</a> حين سجّل النوع الجديد بتعريف مورد مخصص، واختصاره CRD، وهي الكلمة التي يستخدمها <code class="nw">kubectl</code> في رسائل الخطأ. أما الكائنات من هذا النوع، مثل سياساتنا، فتسمى الموارد المخصصة، وعميل Cilium ‏(Cilium agent) على كل عقدة (node) يراقب ظهورها.</p>
+<p>(3) <code class="nw">name:</code> هو الاسم الذي نشير به إلى السياسة لاحقاً، و<code class="nw">namespace: campus</code> يحصرها في الـ Pods الموجودة في <code class="nw">campus</code>. وإذا حذفنا سطر مساحة الأسماء تذهب السياسة إلى مساحة الأسماء <code class="nw">default</code> ولا تختار هناك أي Pod من Pods مشروعنا.</p>
+<p>(4) <code class="nw">endpointSelector: {}</code> يختار الـ Pods التي تخصها السياسة. ونقطة النهاية هي الاسم الذي يطلقه Cilium على كل Pod يديره. والمُحدِّد (selector) الذي لا شيء بداخله لا شروط فيه، فيختار كل Pod في مساحة الأسماء.</p>
+<p>(5) كل من <code class="nw">ingress:</code> متبوعاً بـ <code class="nw">- {}</code> و<code class="nw">egress:</code> متبوعاً بـ <code class="nw">- {}</code> قائمة فيها قاعدة فارغة واحدة. في Cilium، ما إن تختار سياسةٌ فيها قسم للحركة الواردة (ingress) أحد الـ Pods حتى يُسقَط كل اتصال داخل إليه لا تسمح به قاعدة، وقسم الحركة الصادرة (egress) يفعل الشيء نفسه بالاتصالات الخارجة. والقاعدة الفارغة لا تسمح بشيء. فالنتيجة رفض افتراضي في الاتجاهين لكل Pod. ننتبه إلى هذا الشكل جيداً، لأن <code class="nw">- {}</code> نفسه في كائن NetworkPolicy العادي في Kubernetes يعني العكس، أي السماح بكل شيء. وفي Cilium لا تشغّل القائمة الفارغة <code class="nw">ingress: []</code> الرفض الافتراضي أصلاً. نكتبه شرطة، ثم مسافة، ثم قوساً معقوفاً مفتوحاً، ثم قوساً معقوفاً مغلقاً.</p>
+<p>(6) <code class="nw">allow-dns</code> يعطي كل Pod مخرجاً واحداً: إلى Pods خدمة kube-dns التي تحوّل أسماء الخدمات (مثل <code class="nw">db</code>) إلى عناوين. يختار الوسمان تحت <code class="nw">matchLabels</code> هذه الـ Pods. يشير <code>k8s:io.kubernetes.pod.namespace: kube-system</code> إلى مساحة الأسماء <code class="nw">kube-system</code> التي تعمل فيها kube-dns، و<code class="nw">k8s:k8s-app: kube-dns</code> هو الوسم الذي تحمله Pods خدمة kube-dns. والبادئة <code class="nw">k8s:</code> تخبر Cilium أن هذه وسوم Kubernetes. أما <code class="nw">port: "53"</code> فهو منفذ (port) خدمة DNS، مكتوب بين علامتي تنصيص لأن Cilium يتوقع المنفذ نصاً. ويغطي <code class="nw">protocol: ANY</code> بروتوكولي UDP وTCP معاً، لأن DNS يستخدم الاثنين.</p>
+<p>(7) كتلة <code class="nw">rules:</code> التي فيها <code class="nw">dns:</code> و<code class="nw">matchPattern: "*"</code> ترسل كل استعلام عبر وكيل DNS ‏(DNS proxy) الخاص بـ Cilium. يسمح <code class="nw">*</code> بأي اسم، لكن كل استعلام يُسجَّل. لذلك سنرى في <a href="ch11.html">الفصل 11</a> استعلامات المهاجم في Hubble مع أن كل اتصالاته فشلت.</p>
+<p>(8) <code class="nw">allow-kubelet-probes</code> يسمح بدخول فحوص الجاهزية. يسمح <code class="nw">fromEntities: - host</code> بالاتصالات القادمة من الكيان <code class="nw">host</code>. والكيان مجموعة يسميها Cilium بنفسه، من دون أي وسوم. <code class="nw">host</code> تعني العقدة التي يعمل عليها الـ Pod، ومنها يرسل kubelet فحوص الجاهزية (readiness probes)، و<code class="nw">world</code> تعني كل ما هو خارج العنقود (cluster). يسمح Cilium بالكيان <code class="nw">host</code> افتراضياً على أي حال. لكن كتابة القاعدة تجعلها ظاهرة للعين، وتُبقي الفحوص تعمل إذا تغيّر هذا السلوك الافتراضي يوماً.</p>
+<p>نحفظ الملف بـ Ctrl+S. ثم ندع خادم API في Kubernetes ‏(API server) يفحصه من دون أن يغيّر شيئاً.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+kubectl apply --dry-run=server -f k8s/policies/1-baseline.yaml</code></pre></figure>
+<p>ينقلنا <code class="nw">cd ~/microseg</code> إلى مجلد المشروع لأن مسار الملف في السطر التالي يبدأ من هناك، ويرسل <code class="nw">--dry-run=server</code> الكائنات إلى خادم API فيفحصها كأنه سيخزنها ثم يتخلّص منها. تظهر أخطاء الكتابة هنا، والعنقود لم يتغير فيه شيء بعد.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> سطر لكل سياسة.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>ciliumnetworkpolicy.cilium.io/default-deny created (server dry run)
+ciliumnetworkpolicy.cilium.io/allow-dns created (server dry run)
+ciliumnetworkpolicy.cilium.io/allow-kubelet-probes created (server dry run)</code></pre></figure>
+<p>يجب أن تنتهي الأسطر الثلاثة كلها بـ <code class="nw">created (server dry run)</code>.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>error: the path &quot;k8s/policies/1-baseline.yaml&quot; does not exist</code></pre></figure>
+<p>الملف ليس في المكان الذي يبحث فيه الأمر. يُشغَّل <code class="nw">ls ~/microseg/k8s/policies</code> الذي يجب أن يسرد <code class="nw">1-baseline.yaml</code>. وإذا كان الملف في مكان آخر من المشروع، مثل <code class="nw">k8s</code> مباشرة، يُسحب إلى المجلد <code class="nw">policies</code> في لوحة Explorer في VS Code. وإذا قال <code class="nw">ls</code> إن النتيجة <code class="nw">No such file or directory</code> مع أن VS Code يعرض الملف، فالمشكلة في نافذة VS Code نفسها. إذا لم يعرض شريط العنوان <code class="nw">[WSL: Ubuntu-24.04]</code> وخلت الزاوية السفلية اليسرى من رقعة WSL، فالتحرير يجري على ملفات في جهة Windows. تُغلق تلك النافذة عندها، ويُشغَّل <code>cd ~/microseg &amp;&amp; code .</code> في Ubuntu، ويُنشأ الملف من جديد في النافذة التي تُفتح.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>error: error parsing k8s/policies/1-baseline.yaml: error converting YAML to JSON: yaml: line 9: found character that cannot start any token</code></pre></figure>
+<p>في الإزاحة محرف Tab مختبئ، أو أن سطراً يبدأ بمحرف تحجزه YAML، مثل علامة الاقتباس المائلة (backtick). رقم السطر يدل على مكانه، وقد يختلف الرقم عندنا. خيار Render Whitespace مفعّل منذ <a href="ch02.html">الفصل 2</a>، فتظهر محارف Tab أسهماً صغيرة والمسافات نقاطاً. وإذا لم يظهر أي منهما يُضبط Editor: Render Whitespace على <code class="nw">all</code> في الإعدادات (Settings)، كما في <a href="ch02.html">الفصل 2</a>. ثم تُستبدل كل الأسهم بمسافات ويُعاد التشغيل التجريبي.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>error: error parsing k8s/policies/1-baseline.yaml: error converting YAML to JSON: yaml: line 12: mapping values are not allowed in this context</code></pre></figure>
+<p>قد ينتهي الخطأ نفسه بـ <code class="nw">did not find expected key</code> بدلاً من ذلك، وقد يختلف رقم السطر. معناه أن سطراً مُزاح أكثر أو أقل مما يجب مقارنة بالأسطر المجاورة له. وكثيراً ما يحدث هذا لأن VS Code نقل المؤشر إلى الداخل أولاً، ثم أضيفت المسافات فوق إزاحته. الحل وضع المؤشر في بداية السطر المذكور وبداية السطرين أو الثلاثة التي فوقه، ومقارنة رقم <code class="nw">Col</code> لكل منها بالدليل، وتصحيح المسافات.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>error: resource mapping not found for name: &quot;default-deny&quot; namespace: &quot;campus&quot; from &quot;k8s/policies/1-baseline.yaml&quot;: no matches for kind &quot;CiliumNetworkpolicy&quot; in version &quot;cilium.io/v2&quot;
+ensure CRDs are installed first</code></pre></figure>
+<p>في سطر <code class="nw">kind</code> خطأ إملائي، وهو هنا حرف <code class="nw">p</code> صغير. يطابق Kubernetes أنواع الكائنات حرفاً بحرف. الصحيح <code class="nw">CiliumNetworkPolicy</code> بالحروف C وN وP كبيرة.</p>
+<p>الخطأ الذي ينتهي بـ <code>strict decoding error: unknown field "spec.endpointSelecter"</code> يعني أن اسم حقل مكتوب خطأً، أو أن سطراً مُزاح تحت الأب الخطأ. والمسار بين علامتي التنصيص يسمّي الحقل، مثل <code class="nw">spec.endpointSelecter</code> إذا كُتب <code class="nw">endpointSelector</code> خطأً. يُصحَّح ذلك السطر ويُعاد التشغيل التجريبي.</p>
+<h2 id="تطبيق-ملف-الأساس-وحده-0-من-36">تطبيق ملف الأساس وحده: 0 من 36</h2>
+<p>قبل أن نسمح بأي شيء نثبت أن الرفض الافتراضي يعمل فعلاً.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+kubectl apply -f k8s/policies/1-baseline.yaml</code></pre></figure>
+<p>هذه المرة يخزّن <code class="nw">kubectl apply</code> السياسات الثلاث. وخلال ثوانٍ قليلة يحوّلها عميل Cilium على كل عقدة إلى مدخلات تفحصها برامج eBPF على واجهة الشبكة الخاصة بكل Pod عند كل اتصال جديد.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> ثلاثة أسطر تنتهي بـ <code class="nw">created</code>.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>ciliumnetworkpolicy.cilium.io/default-deny created
+ciliumnetworkpolicy.cilium.io/allow-dns created
+ciliumnetworkpolicy.cilium.io/allow-kubelet-probes created</code></pre></figure>
+<p>يجب أن ينتهي كل سطر بـ <code class="nw">created</code> من دون <code class="nw">(server dry run)</code> هذه المرة، أما إذا كنا طبّقنا هذا الملف في محاولة سابقة فستنتهي الأسطر بـ <code class="nw">unchanged</code> أو <code class="nw">configured</code> بدلاً منها، ولا بأس بذلك.</p>
+<p>نعطي Cilium بضع ثوانٍ ليحمّل القواعد الجديدة، ثم نطلب المصفوفة من لوحة التحكم.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>sleep 8
+curl -s localhost:5050/api/matrix | jq -c &#x27;{open, total}&#x27;</code></pre></figure>
+<p><code class="nw">sleep 8</code> هو زمن الاستقرار، أي الثواني القليلة التي يحتاجها Cilium بعد أي تغيير قبل أن تطبّقه كل العقد، ويستدعي السطر الثاني مسار المصفوفة الذي يقف خلف زر «Refresh» في لوحة التحكم. أما <code class="nw">jq -c '{open, total}'</code> فيُبقي العددين فقط ويطبعهما في سطر واحد.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> لا مسارات مفتوحة.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>{&quot;open&quot;:0,&quot;total&quot;:36}</code></pre></figure>
+<p>يجب أن يكون الناتج <code class="nw">{"open":0,"total":36}</code>. لا تلاحظ صفحة لوحة التحكم من تلقاء نفسها التغييرات التي نجريها من الطرفية. نعيد تحميلها في المتصفح بالمفتاح F5، فيصبح عنوانها «Policies: ON (3 policies)». وإعادة التحميل تشغّل المصفوفة من جديد أيضاً، فتصير كل الخلايا برتقالية وعليها كلمة blocked، أي محجوبة.</p>
+<p>نفحص الآن البوابة نفسها.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>bash ~/microseg/check-portal.sh</code></pre></figure>
+<p class="see"><strong>ما يجب أن نراه:</strong> فشل كل الفحوص.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>FAIL  portal page loads (expected &#x27;200&#x27;, got &#x27;000&#x27;)
+FAIL  news list has 3 items (expected &#x27;3&#x27;, got &#x27;&#x27;)
+FAIL  sara can log in (expected &#x27;32&#x27;, got &#x27;0&#x27;)
+FAIL  sara sees her profile (expected &#x27;Sara Ahmed&#x27;, got &#x27;&#x27;)
+FAIL  sara sees her 2 grades (expected &#x27;2&#x27;, got &#x27;&#x27;)
+command terminated with exit code 28
+FAIL  ops can open the admin panel (expected &#x27;4&#x27;, got &#x27;&#x27;)
+PORTAL: 0/6 OK</code></pre></figure>
+<p>يجب أن يكون السطر الأخير <code class="nw">PORTAL: 0/6 OK</code>. يستغرق السكربت نحو نصف دقيقة، لأن كل فحص ينتظر حتى 5 ثوانٍ جواباً لا يأتي أبداً. أما السطر <code>command terminated with exit code 28</code> فمصدره فحص لوحة الإدارة. فقد استسلم curl داخل Pod خدمة ops برمز انتهاء المهلة، وهو 28، ومرّره <code class="nw">kubectl</code> إلينا. هذه البوابة المعطلة هي النتيجة التي نريدها هنا. إنها تثبت أن لا شيء يمر ما لم تسمح به قاعدة، حتى طلابنا أنفسهم.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<p>إذا بقيت المصفوفة تقول <code class="nw">{"open":36,"total":36}</code> فالسياسات ليست في <code class="nw">campus</code>. يُشغَّل <code>kubectl -n campus get ciliumnetworkpolicies</code> فإذا طبع <code>No resources found in campus namespace.</code> فسطر <code class="nw">namespace: campus</code> ناقص أو مكتوب خطأً. الحل إزالة ما طُبّق بالأمر <code>kubectl delete -f k8s/policies/1-baseline.yaml</code> ثم تصحيح الملف وتطبيقه من جديد.</p>
+<p>إذا لم يطبع أمر المصفوفة شيئاً، فلوحة التحكم لا تعمل. تُشغَّل عندها في نافذة Ubuntu الخاصة بها كما في <a href="ch08.html">الفصل 8</a>، ثم يُعاد أمر المصفوفة.</p>
+<p>إذا انتهى فحص البوابة بـ <code class="nw">PORTAL: 6/6 OK</code> وسرد <code>kubectl -n campus get ciliumnetworkpolicies</code> عشر سياسات بدلاً من ثلاث، فالمجلد كله طُبّق، أو نُقر الزر «Apply policies»، فطُبّق معه ملف <code class="nw">2-allow.yaml</code> بقي من محاولة سابقة. تُزال سياساته بالأمر <code>kubectl delete -f k8s/policies/2-allow.yaml</code> وبعد بضع ثوانٍ يُعاد فحصا المصفوفة والبوابة.</p>
+<h2 id="كتابة-2-allowyaml-سياسة-واحدة-لكل-حمل-عمل">كتابة <code class="nw">2-allow.yaml</code>: سياسة واحدة لكل حمل عمل</h2>
+<p>أغلق ملف الأساس كل شيء. ويعيد الملف الثاني فتح الاتصالات الثمانية الموجودة في جدول التدفقات بالضبط، بسياسة واحدة لكل حمل من أحمال العمل السبعة، باتباع جدول الخطة في قسم «إذنان لكل اتصال: تأشيرة الخروج وتأشيرة الدخول» من <a href="ch09.html">الفصل 9</a>.</p>
+<p>ننشئه بجانب ملف الأساس. في لوحة Explorer في VS Code ننقر بالزر الأيمن على المجلد <code class="nw">policies</code> ونختار «New File...» ثم نسميه <code class="nw">2-allow.yaml</code>.</p>
+<p>هذا هو الملف كاملاً. نبنيه على ثلاث مراحل. نلصق أولاً كل شيء من السطر الأول حتى سطر <code class="nw">---</code> الذي يلي سياسة news، ومعه ذلك السطر. ثم نكتب سياسة api بأيدينا، من <code class="nw">apiVersion: cilium.io/v2</code> حتى آخر <code class="nw">protocol: TCP</code> قبل <code class="nw">---</code> التالي. وأخيراً نلصق كل شيء من سطر <code class="nw">---</code> ذاك حتى النهاية. وأثناء كتابة سياسة api ننظر إلى رقم <code class="nw">Col</code> قبل كل سطر كما فعلنا مع ملف الأساس، لأن VS Code يزيح الأسطر نيابة عنا هنا أيضاً.</p>
+<figure class="code file"><figcaption><span class="lbl">الملف: k8s/policies/2-allow.yaml</span><button type="button" class="copy" aria-label="نسخ هذا الملف">نسخ</button></figcaption><pre dir="ltr"><code># One policy per workload. Every allowed connection needs BOTH
+# egress in the caller&#x27;s policy AND ingress in the callee&#x27;s policy.
+# Ports are container ports (equal to the Service ports in app.yaml).
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: frontend
+  namespace: campus
+spec:
+  endpointSelector:
+    matchLabels:
+      app: frontend
+  ingress:
+  - fromEntities:
+    - world                       # Windows / WSL through NodePort 30080
+    toPorts:
+    - ports:
+      - port: &quot;80&quot;
+        protocol: TCP
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        app: api
+    toPorts:
+    - ports:
+      - port: &quot;8080&quot;
+        protocol: TCP
+  - toEndpoints:
+    - matchLabels:
+        app: news
+    toPorts:
+    - ports:
+      - port: &quot;5000&quot;
+        protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: news
+  namespace: campus
+spec:
+  endpointSelector:
+    matchLabels:
+      app: news
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: frontend
+    toPorts:
+    - ports:
+      - port: &quot;5000&quot;
+        protocol: TCP
+  # No egress section: news keeps default-deny egress (only DNS, from allow-dns).
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: api
+  namespace: campus
+spec:
+  endpointSelector:
+    matchLabels:
+      app: api
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: frontend
+    toPorts:
+    - ports:
+      - port: &quot;8080&quot;
+        protocol: TCP
+      rules:
+        http:                     # L7: only these three calls, everything else gets 403
+        - method: &quot;GET&quot;
+          path: &quot;/api/grades&quot;
+        - method: &quot;GET&quot;
+          path: &quot;/api/profile&quot;
+        - method: &quot;POST&quot;
+          path: &quot;/api/login&quot;
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        app: auth
+    toPorts:
+    - ports:
+      - port: &quot;5001&quot;
+        protocol: TCP
+  - toEndpoints:
+    - matchLabels:
+        app: db
+    toPorts:
+    - ports:
+      - port: &quot;5432&quot;
+        protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: auth
+  namespace: campus
+spec:
+  endpointSelector:
+    matchLabels:
+      app: auth
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: api
+    toPorts:
+    - ports:
+      - port: &quot;5001&quot;
+        protocol: TCP
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        app: db
+    toPorts:
+    - ports:
+      - port: &quot;5432&quot;
+        protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: db
+  namespace: campus
+spec:
+  endpointSelector:
+    matchLabels:
+      app: db
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: api
+    - matchLabels:
+        app: auth
+    - matchLabels:
+        app: admin
+    toPorts:
+    - ports:
+      - port: &quot;5432&quot;
+        protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: admin
+  namespace: campus
+spec:
+  endpointSelector:
+    matchLabels:
+      app: admin
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: ops
+    toPorts:
+    - ports:
+      - port: &quot;5002&quot;
+        protocol: TCP
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        app: db
+    toPorts:
+    - ports:
+      - port: &quot;5432&quot;
+        protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: ops
+  namespace: campus
+spec:
+  endpointSelector:
+    matchLabels:
+      app: ops
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        app: admin
+    toPorts:
+    - ports:
+      - port: &quot;5002&quot;
+        protocol: TCP</code></pre></figure>
+<p>لكل سياسة في هذا الملف الأجزاء نفسها. يختار <code class="nw">endpointSelector</code> مع <code class="nw">matchLabels</code> الـ Pods التي تخصها السياسة بحسب وسمها <code class="nw">app</code>. ويسرد <code class="nw">ingress</code> من يحق له الاتصال بهذه الـ Pods، ويسرد <code class="nw">egress</code> ما يحق لها الاتصال به. وداخل القاعدة يسمّي <code class="nw">fromEndpoints</code> أو <code class="nw">toEndpoints</code> الطرف الآخر بوسومه، ويسميه <code class="nw">fromEntities</code> بالكيان، ويسمّي <code class="nw">toPorts</code> المنفذ. كل قاعدة تأشيرة واحدة من تأشيرات <a href="ch09.html">الفصل 9</a>، والتعليق في أول الملف يقول ذلك: كل اتصال مسموح يحتاج إلى قاعدة حركة صادرة في سياسة المتصل، وقاعدة حركة واردة في سياسة الطرف المُتصَل به.</p>
+<p>نمر على سياسة api، وهي التي كتبناها بأيدينا، سطراً سطراً.</p>
+<p>(1) يجعل <code class="nw">endpointSelector</code> مع <code class="nw">app: api</code> هذه السياسة خاصة بـ Pods خدمة api. يحوّل Cilium هذا الوسم إلى هوية أمنية (security identity)، فتتبع السياسة api أياً كان عنوان IP الذي يأخذه الـ Pod.</p>
+<p>(2) تحت <code class="nw">ingress</code> تمثل <code class="nw">fromEndpoints</code> مع <code class="nw">app: frontend</code> و<code class="nw">port: "8080"</code> تأشيرة الدخول إلى api: لا يحق الاتصال إلا للـ Pods الموسومة <code class="nw">app: frontend</code> وعلى المنفذ 8080 وحده. والمنافذ في هذه السياسات منافذ الحاويات (container ports)، أي المنافذ التي تستمع عليها البرامج داخل الـ Pods، وCilium يرى منفذ الحاوية لأنه يفحص الاتصال بعد أن يتحول عنوان Service إلى عنوان Pod. وفي هذا المختبر تساوي هذه المنافذ منافذ Service على أي حال.</p>
+<p>(3) كتلة <code class="nw">rules:</code> داخل ذلك المنفذ هي جزء طبقة التطبيقات، أي الطبقة السابعة (L7). وهي المقتطف أدناه، منسوخاً من الملف.</p>
+<figure class="code file excerpt"><figcaption><span class="lbl">من k8s/policies/2-allow.yaml</span></figcaption><pre dir="ltr"><code>      rules:
+        http:                     # L7: only these three calls, everything else gets 403
+        - method: &quot;GET&quot;
+          path: &quot;/api/grades&quot;
+        - method: &quot;GET&quot;
+          path: &quot;/api/profile&quot;
+        - method: &quot;POST&quot;
+          path: &quot;/api/login&quot;</code></pre></figure>
+<p>لأن كتلة <code class="nw">rules: http:</code> موجودة، يرسل Cilium كل اتصال من frontend إلى api عبر Envoy، وهو وكيل HTTP الخاص به. يقرأ Envoy كل طلب ولا يمرّره إلا إذا طابقت طريقته ومساره أحد الأزواج الثلاثة، ويقارن Cilium المسار كاملاً، فلا يفتح <code class="nw">/api/grades</code> الباب أمام <code class="nw">/api/grades2</code> ولا أمام <code class="nw">/api/export</code>. وأي طلب آخر يتلقى فوراً الجواب <code class="nw">403 Forbidden</code> من Envoy، ولا يراه api أبداً. وللإملاء أهمية هنا. يجب أن تُكتب <code class="nw">POST</code> بأحرف كبيرة، وأن تطابق المسارات حرفاً بحرف تلك التي ظهرت في سجل nginx في <a href="ch09.html">الفصل 9</a>.</p>
+<p>(4) تحت <code class="nw">egress</code> قاعدتا <code class="nw">toEndpoints</code> هما تأشيرتا الخروج لـ api، إلى auth على 5001 وإلى db على 5432.</p>
+<p>ننظر الآن إلى ما تتركه السياسات الأخرى، لأن الفجوات جزء من التصميم. لا قسم <code class="nw">egress</code> في سياسة news، فتبقى news على الرفض الافتراضي للحركة الصادرة الذي فرضه ملف الأساس، ولا تصل إلا إلى DNS. وسياسة db بلا حركة صادرة أيضاً. ولا قسم <code class="nw">ingress</code> في سياسة ops، فلا يحق لأي شيء الاتصال بـ ops. أما سياسة frontend فهي الوحيدة التي تستخدم <code class="nw">fromEntities: world</code> لتسمح للزوار القادمين من خارج العنقود بالدخول على المنفذ 80.</p>
+<p>نحفظ الملف بـ Ctrl+S.</p>
+<figure class="fig"><a href="../../files/figures/fig06-ar.png"><img src="../../files/figures/web/fig06-ar.png" alt="كيف يقرر Cilium" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>كيف يقرر Cilium</figcaption></figure>
+<p>يتتبع الشكل 6 اتصالاً واحداً عبر فحوص Cilium: فحص الحركة الصادرة عند واجهة شبكة المتصل، ثم فحص الحركة الواردة عند واجهة شبكة الطرف المُتصَل به. واتصال frontend إلى api هو الوحيد الذي ينعطف عبر Envoy.</p>
+<p>قبل تطبيق ملف السماح نتأكد من أن الملفين في المكان الذي تتوقعه أوامر هذا الفصل.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>ls ~/microseg/k8s/policies</code></pre></figure>
+<p>يسرد <code class="nw">ls</code> الملفات الموجودة في مجلد.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> ملفا السياسات اللذان كتبناهما.</p>
+<p>يجب أن يكون السطر <code class="nw">1-baseline.yaml  2-allow.yaml</code> ولا شيء غيره.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<p>إذا غاب <code class="nw">2-allow.yaml</code> عن القائمة فقد أنشأه VS Code في مجلد آخر، وغالباً في <code class="nw">k8s</code> أو في المستوى الأعلى للمشروع. يُسحب الملف إلى المجلد <code class="nw">policies</code> في لوحة Explorer، ثم يُشغَّل <code class="nw">ls</code> من جديد.</p>
+<h2 id="تطبيق-2-allowyaml-10-سياسات">تطبيق <code class="nw">2-allow.yaml</code>: 10 سياسات</h2>
+<p>نطبّق ملف السماح فوق ملف الأساس، ثم نتأكد من أن Cilium قبِل كل سياسة فيه.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+kubectl apply -f k8s/policies/2-allow.yaml</code></pre></figure>
+<p>يخزّن هذا الأمر السياسات السبع الخاصة بأحمال العمل بجانب سياسات الأساس الثلاث.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> سبعة أسطر، سطر لكل حمل عمل، وكلها تنتهي بـ <code class="nw">created</code>.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>ciliumnetworkpolicy.cilium.io/frontend created
+ciliumnetworkpolicy.cilium.io/news created
+ciliumnetworkpolicy.cilium.io/api created
+ciliumnetworkpolicy.cilium.io/auth created
+ciliumnetworkpolicy.cilium.io/db created
+ciliumnetworkpolicy.cilium.io/admin created
+ciliumnetworkpolicy.cilium.io/ops created</code></pre></figure>
+<p>يجب أن تكون الأسماء frontend وnews وapi وauth وdb وadmin وops، وبعد كل منها <code class="nw">created</code> إلا إذا كنا طبّقنا هذا الملف في محاولة سابقة، فعندها تنتهي الأسطر بـ <code class="nw">unchanged</code> أو <code class="nw">configured</code> ولا بأس بذلك.</p>
+<p>ننتظر بضع ثوانٍ، ثم نسرد كل ما صار سارياً الآن.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>sleep 8
+kubectl -n campus get ciliumnetworkpolicies</code></pre></figure>
+<p class="see"><strong>ما يجب أن نراه:</strong> عشر سياسات.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>NAME                   AGE   VALID
+admin                  7s    True
+allow-dns              49s   True
+allow-kubelet-probes   49s   True
+api                    7s    True
+auth                   7s    True
+db                     7s    True
+default-deny           49s   True
+frontend               7s    True
+news                   7s    True
+ops                    7s    True</code></pre></figure>
+<p>يجب أن تظهر 10 صفوف، وأن يعرض كل صف <code class="nw">True</code> تحت VALID. وتعني <code class="nw">True</code> في عمود VALID أن Cilium حلّل السياسة ولم يجد فيها خطأً. فقبول Kubernetes للكائن لا يعني إلا أن أسماء الحقول مكتوبة بإملاء صحيح. لذلك يقول لنا هذا العمود أكثر. أما ما يثبت أن العملاء على العقد يطبّقون السياسات فعلاً فهو المصفوفة وفحص البوابة، وهما الخطوتان التاليتان. قيم AGE تختلف على حاسوبنا. نعيد تحميل صفحة لوحة التحكم بالمفتاح F5، فيصبح عنوانها «Policies: ON (10 policies)». و<code class="nw">cnp</code> هو الاسم المختصر لـ <code class="nw">ciliumnetworkpolicies</code> ونستطيع من الآن أن نكتب <code class="nw">kubectl -n campus get cnp</code>.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<p>إذا ظهر خطأ YAML أو خطأ حقل مثل أخطاء خطوة التشغيل التجريبي، فمعناه هنا هو نفسه. الحل تشغيل <code>kubectl apply --dry-run=server -f k8s/policies/2-allow.yaml</code> وتصحيح ما يذكره، ثم تطبيق الملف من جديد.</p>
+<p>إذا احتوى الخطأ <code class="nw">Unsupported value: "tcp"</code> فالبروتوكول مكتوب بأحرف صغيرة، وCilium لا يقبل أسماء البروتوكولات إلا بأحرف كبيرة. الصحيح <code class="nw">TCP</code>.</p>
+<p>إذا عرض أحد الصفوف <code class="nw">False</code> تحت VALID فقد خزّن Kubernetes السياسة، لكن Cilium لم يستطع تحويلها إلى قواعد. يُشغَّل عندها <code>kubectl -n campus get cnp api -o yaml</code> مع وضع اسم الصف الذي يقول <code class="nw">False</code> مكان api، ويُقرأ قسم <code class="nw">status</code> في أسفل الناتج. سطر الرسالة فيه يسمّي المشكلة. تُصحَّح السياسة في <code class="nw">2-allow.yaml</code> ويُطبَّق الملف من جديد.</p>
+<h2 id="البوابة-تعمل-من-جديد-66">البوابة تعمل من جديد: 6/6</h2>
+<p>عطّل الرفض الافتراضي البوابة عمداً. نتأكد الآن من أن ملف السماح يعيد كل ما يفعله المستخدم العادي وفريق تقنية المعلومات.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>bash ~/microseg/check-portal.sh</code></pre></figure>
+<p class="see"><strong>ما يجب أن نراه:</strong> نجاح الفحوص الستة كلها.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>OK    portal page loads
+OK    news list has 3 items
+OK    sara can log in
+OK    sara sees her profile
+OK    sara sees her 2 grades
+OK    ops can open the admin panel
+PORTAL: 6/6 OK</code></pre></figure>
+<p>يجب أن يكون السطر الأخير <code class="nw">PORTAL: 6/6 OK</code> كما كان على الشبكة المسطحة (flat network) في <a href="ch06.html">الفصل 6</a>.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<p>بعض الحلول أدناه تستخدم <code class="nw">hubble observe</code> الذي يحتاج إلى port-forward من <a href="ch09.html">الفصل 9</a>. إذا أجاب <code class="nw">hubble</code> بخطأ يحتوي <code>4245: connect: connection refused</code> فقد توقف port-forward حين أُغلقت نافذته. الحل تشغيل <code>cilium hubble port-forward &amp;</code> ثم انتظار خمس ثوانٍ وإعادة أمر <code class="nw">hubble observe</code>.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>FAIL  sara can log in (expected &#x27;32&#x27;, got &#x27;0&#x27;)</code></pre></figure>
+<p>تفشل الفحوص التي بعده أيضاً. السبب أن قاعدة الطبقة السابعة لا تطابق طلب تسجيل الدخول، فأجاب Envoy برمز الحالة 403 ولم تحصل سارة على رمز الدخول (token). يُتحقق من <code class="nw">method: "POST"</code> و<code class="nw">path: "/api/login"</code> في سياسة api، ومن الأحرف الكبيرة والشرطات المائلة فيهما. ولرؤية ما رفضه Envoy يُشغَّل <code>hubble observe --namespace campus --protocol http --last 10</code> ويُبحث عن سطر يحتوي <code class="nw">http-request DROPPED</code> وفيه طريقة الطلب ومساره بين قوسين. ثم يُصحَّح الملف ويُشغَّل <code>kubectl apply -f k8s/policies/2-allow.yaml</code> مرة أخرى. فتطبيق ملف معدَّل يحدّث السياسات في مكانها.</p>
+<p>إذا كانت النتيجة <code class="nw">PORTAL: 1/6 OK</code> ولم ينجح إلا الفحص <code class="nw">portal page loads</code> فذلك لأن الصفحة نفسها ملف ثابت داخل frontend، بينما يحتاج كل فحص آخر إلى اتصال من Pod إلى Pod آخر. ولهذه النتيجة سببان محتملان. إما أن استعلامات الأسماء تُسقَط، وإما أن قواعد الحركة الصادرة ناقصة، كأن يكون جزء من <code class="nw">2-allow.yaml</code> فقط قد طُبّق. يُشغَّل <code>hubble observe --namespace campus --verdict DROPPED --last 20</code> للتمييز بينهما. الإسقاطات نحو kube-dns على المنفذ 53 تدل على DNS، فيُراجَع الوسمان تحت <code class="nw">matchLabels</code> في سياسة <code class="nw">allow-dns</code> في <code class="nw">1-baseline.yaml</code> حرفاً حرفاً. والإسقاطات نحو api أو news أو admin تدل على قواعد حركة صادرة ناقصة، فتُقارن أقسام <code class="nw">egress</code> في <code class="nw">2-allow.yaml</code> بالدليل ويُطبَّق الملف من جديد.</p>
+<p>إذا فشل أي فحص آخر، كأن يظهر <code>command terminated with exit code 28</code> في فحص لوحة الإدارة، فأحد الاتصالات تنقصه إحدى تأشيرتيه. يُشغَّل <code>hubble observe --namespace campus --verdict DROPPED --last 20</code> فور انتهاء فحص البوابة، من دون تحديث مصفوفة لوحة التحكم أو إعادة تحميل صفحتها قبله، لأن مجسّات المصفوفة تُنتج إسقاطات خاصة بها. والسطر مثل <code>campus/ops-... &lt;&gt; campus/admin-...:5002 ... Policy denied DROPPED</code> يسمّي المصدر والوجهة والمنفذ. يُبحث عن هذا الزوج في جدول الخطة من <a href="ch09.html">الفصل 9</a>، ويُتحقق من قاعدتيه كلتيهما: قاعدة الحركة الصادرة في سياسة المصدر، وقاعدة الحركة الواردة في سياسة الوجهة.</p>
+<h2 id="المصفوفة-7-من-36">المصفوفة: 7 من 36</h2>
+<p>كل خلية مفتوحة في المصفوفة مسار من برنامج إلى خدمة.</p>
+<p>في لوحة التحكم ننقر «Refresh» بجانب «Reachability matrix» (مصفوفة قابلية الوصول)، ونطبع العددين في الطرفية أيضاً.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>curl -s localhost:5050/api/matrix | jq -c &#x27;{open, total}&#x27;</code></pre></figure>
+<p class="see"><strong>ما يجب أن نراه:</strong> سبعة مسارات مفتوحة من 36.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>{&quot;open&quot;:7,&quot;total&quot;:36}</code></pre></figure>
+<p>يجب أن يكون الناتج <code class="nw">{"open":7,"total":36}</code>. والخلايا الزرقاء السبع في لوحة التحكم هي frontend إلى news، وfrontend إلى api، وapi إلى auth، وapi إلى db، وauth إلى db، وadmin إلى db، وops إلى admin. إنها جدول التدفقات بلا صف world، لأن العالم الخارجي ليس واحداً من مصادر المصفوفة السبعة. وكل خلية أخرى برتقالية، وصف news برتقالي من أوله إلى آخره.</p>
+<p>الانتقال من 36 مساراً مفتوحاً إلى 7 يزيل 29 منها، أي أن المسارات التي يستطيع المهاجم استخدامها صارت أقل بنسبة 80.6%.</p>
+<figure class="fig"><a href="../../files/figures/fig09-ar.png"><img src="../../files/figures/web/fig09-ar.png" alt="مصفوفة قابلية الوصول قبل التجزئة وبعدها" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>مصفوفة قابلية الوصول قبل التجزئة وبعدها</figcaption></figure>
+<p>يضع الشكل 9 المصفوفتين جنباً إلى جنب. وصف news، وهو نقطة انطلاق المهاجم، ينتقل من الأزرق كله إلى البرتقالي كله.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<p>إذا بقي العدد 36 فالسياسات غير سارية. يُشغَّل <code class="nw">kubectl -n campus get cnp</code> فإذا طبع <code>No resources found in campus namespace.</code> يُطبَّق الملفان من جديد بدءاً من أول هذا الفصل.</p>
+<p>إذا كان العدد أكبر من 7، مثل 8، فالخلية المفتوحة الزائدة تعني خطأين أو سياسة واحدة متبقية، لأن الخلية لا تصير زرقاء إلا إذا سمح بها الطرفان كلاهما. يُشغَّل أولاً <code class="nw">kubectl -n campus get cnp</code> الذي يجب أن يسرد 10 سياسات بالضبط. وإذا سرد أكثر تُحذف الزائدة باسمها بالأمر <code class="nw">kubectl -n campus delete cnp</code> متبوعاً بذلك الاسم. وإذا سرد 10 يُبحث في لوحة التحكم عن الخلية الزرقاء غير المتوقعة، ويُتحقق من قاعدتيها كلتيهما. فخدمة الصف فيها قاعدة حركة صادرة تسمح بأكثر مما قُصد، وخدمة العمود فيها قاعدة حركة واردة تفعل الشيء نفسه. ويُبحث عن <code class="nw">matchLabels</code> تُرك فارغاً، لأن المُحدِّد الفارغ يطابق كل Pod.</p>
+<p>إذا كان العدد أقل من 7 وفشل فحص البوابة أيضاً، فالبداية بإصلاح البوابة باستخدام قسم الأعطال في الخطوة السابقة. القاعدة الناقصة نفسها تفسّر المشكلتين.</p>
+<h2 id="الهجوم-مرة-أخرى-1-من-5">الهجوم مرة أخرى: 1 من 5</h2>
+<p>نشغّل هجوم <a href="ch08.html">الفصل 8</a> مرة أخرى، من دون أي تغيير، على الشبكة المجزأة.</p>
+<p>في لوحة التحكم ننقر «Run attack» (شغّل الهجوم). يستغرق الهجوم هذه المرة نحو 18 ثانية، لأن الخطوات المحجوبة تنتظر انتهاء مهلها. ويجب أن يكون نص الملخص «1 of 5 attack steps succeeded». ثم نحفظ الناتج الكامل لكل خطوة دليلاً.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>curl -s -X POST localhost:5050/api/attack | jq -r &#x27;.[] | &quot;--- &quot; + .step + &quot;\n&quot; + .output&#x27; | tee ~/microseg/evidence/ch12-attack-segmented.txt</code></pre></figure>
+<p>يستدعي هذا الأمر مسار الهجوم نفسه الذي يستدعيه الزر، ولا يُطبع شيء لنحو 20 ثانية بينما تنتظر الخطوات المحجوبة انتهاء مهلها، فننتظر عودة موجّه الأوامر ولا نضغط Ctrl+C. يطبع مرشّح <code class="nw">jq</code> لكل خطوة سطراً فيه <code class="nw">---</code> واسم الخطوة، ثم كل ما أعادته خدمة news. ويحفظ <code class="nw">tee</code> نسخة في <code class="nw">evidence/</code>.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> خمسة أقسام، قسم لكل خطوة.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>--- 1. T1190 exploit the image checker
+HTTP status of image: 000
+uid=1000(app) gid=1000(app) groups=1000(app)
+news-545758c8c6-2jp4n
+
+--- 2. T1046 discover and scan services
+HTTP status of image: 000
+ADMIN_SERVICE_PORT=5002
+API_SERVICE_PORT=8080
+AUTH_SERVICE_PORT=5001
+DB_SERVICE_PORT=5432
+FRONTEND_SERVICE_PORT=80
+KUBERNETES_SERVICE_PORT=443
+NEWS_SERVICE_PORT=5000
+nc: connect to frontend (10.96.181.104) port 80 (tcp) timed out: Operation now in progress
+nc: connect to api (10.96.122.235) port 8080 (tcp) timed out: Operation now in progress
+nc: connect to auth (10.96.108.176) port 5001 (tcp) timed out: Operation now in progress
+nc: connect to db (10.96.126.23) port 5432 (tcp) timed out: Operation now in progress
+nc: connect to admin (10.96.110.73) port 5002 (tcp) timed out: Operation now in progress
+
+--- 3. T1078.001 log in to db with the default account
+HTTP status of image: 000
+psql: error: connection to server at &quot;db&quot; (10.96.126.23), port 5432 failed: timeout expired
+
+--- 4. T1565.001 change Omar&#x27;s grade
+HTTP status of image: 000
+psql: error: connection to server at &quot;db&quot; (10.96.126.23), port 5432 failed: timeout expired
+
+--- 5. reach the admin panel and dump users
+HTTP status of image: 000
+curl: (28) Connection timed out after 3001 milliseconds</code></pre></figure>
+<p>ما زالت الخطوة 1 تُظهر <code class="nw">uid=1000(app)</code> واسم Pod خدمة news، لأن الثغرة ما زالت موجودة. يجب أن يصل frontend إلى news ليعرض الإعلانات، فيبقى طلب المهاجم يصل وتبقى الصدفة (shell) تنفّذه. الذي تغيّر هو المدى الذي يستطيع المهاجم بلوغه انطلاقاً من هناك.</p>
+<p>وما زالت الخطوة 2 تطبع متغيرات <code class="nw">SERVICE_PORT</code> السبعة، لأن متغيرات البيئة موجودة داخل الـ Pod ولا تحتاج إلى الشبكة. لكن كل سطر <code class="nw">nc</code> ينتهي الآن بـ <code>timed out: Operation now in progress</code> بدلاً من <code class="nw">succeeded!</code>. وتنتهي الخطوتان 3 و4 بـ <code class="nw">timeout expired</code> وتنتهي الخطوة 5 بـ <code>curl: (28) Connection timed out after 3001 milliseconds</code>. هذه كلها حالات انتهاء مهلة، لا حالات رفض. يُسقط Cilium أول حزمة (packet) يرسلها المهاجم من دون أي رد، فتنتظر كل أداة حتى ينفد حدها الزمني الخاص بها، ولا يستطيع المهاجم أن يعرف هل يستمع شيء خلف الاسم أم لا، لأن الحزمة المُسقَطة تبدو تماماً مثل مضيف متوقف.</p>
+<p>نتأكد الآن من أن الخطوة 4 لم تغيّر شيئاً.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>kubectl -n campus exec deploy/db -- psql -U postgres -d campus -c &quot;SELECT * FROM grades WHERE id = 3&quot;</code></pre></figure>
+<p class="see"><strong>ما يجب أن نراه:</strong> درجة عمر الأصلية.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code> id | student_id |      course      | grade 
+----+------------+------------------+-------
+  3 |          2 | Network Security |    58
+(1 row)</code></pre></figure>
+<p>يجب أن تبقى القيمة في عمود الدرجة <code class="nw">58</code>.</p>
+<figure class="fig"><a href="../../files/figures/fig10-ar.png"><img src="../../files/figures/web/fig10-ar.png" alt="خطوات الهجوم التي نجحت" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>خطوات الهجوم التي نجحت</figcaption></figure>
+<p>يقارن الشكل 10 الهجوم على الشبكتين. الخطوة الوحيدة التي نجت هي الخطوة التي لا تغادر Pod خدمة news أبداً.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<p>إذا قال الملخص «5 of 5 attack steps succeeded» وكانت الدرجة 95، فالسياسات غير سارية. يُشغَّل <code class="nw">kubectl -n campus get cnp</code> ويُطبَّق الملفان إن كانا غائبين، وتُرجَع درجة عمر كما في <a href="ch08.html">الفصل 8</a>، ثم يُعاد الهجوم.</p>
+<p>إذا قال الملخص «0 of 5 attack steps succeeded» وخلت الخطوة 1 من سطر <code class="nw">uid=</code> فخدمة frontend لا تصل إلى news، ولذلك يفشل فحص قائمة الأخبار في <code class="nw">check-portal.sh</code> أيضاً. يُتحقق من قاعدة الحركة الصادرة نحو news في سياسة frontend، ومن قاعدة الحركة الواردة من frontend في سياسة news، وكلتاهما على المنفذ 5000.</p>
+<h2 id="مسار-التصدير-المنسي-يجيب-الآن-بـ-403">مسار التصدير المنسي يجيب الآن بـ 403</h2>
+<p>في <a href="ch08.html">الفصل 8</a> سلّم <code class="nw">/api/export</code> كل الدرجات لكل من طلبها. ويجب أن توقفه قاعدة الطبقة السابعة الآن، وأن تبقى الطلبات الثلاثة التي تستخدمها البوابة تعمل.</p>
+<p>نشغّل هذا في Windows PowerShell، تماماً كما في <a href="ch08.html">الفصل 8</a>.</p>
+<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>curl.exe -s -i http://localhost:30080/api/export</code></pre></figure>
+<p class="see"><strong>ما يجب أن نراه:</strong> رفض الطلب.</p>
+<p>يجب أن يكون السطر الأول <code class="nw">HTTP/1.1 403 Forbidden</code> وأن يكون متن الرد <code class="nw">Access denied</code>. أجاب Envoy نيابة عن api، فلم يصل الطلب إلى شيفرة api أبداً. ويظهر السطر <code class="nw">Server: nginx/1.28.3</code> لأن frontend أعاد إلينا جواب Envoy، وقد يختلف رقم الإصدار بعد <code class="nw">nginx/</code> على حاسوبنا. والتاريخ يختلف في تشغيلنا.</p>
+<p>نقارن الآن نوعي الرفض اللذين رأيناهما. رفض الطبقتين الثالثة والرابعة (L3/L4)، مثل news إلى db، صمت: تُسقَط الحزمة وينتظر المتصل حتى تنتهي مهلته. أما رفض الطبقة السابعة فهو <code class="nw">403</code> سريع وصريح، لأن الاتصال نفسه مسموح، والمرفوض هو الطلب الذي بداخله فقط.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>HTTP/1.1 200 OK</code></pre></figure>
+<p>مسار التصدير ما زال يعمل. إما أن كتلة <code class="nw">rules:</code> غائبة من سياسة api، وإما أن تطبيقها فشل وفات الانتباه إلى الخطأ. يُشغَّل <code>kubectl -n campus get cnp api -o yaml</code> ويُتحقق من ظهور <code class="nw">rules:</code> وتحتها <code class="nw">http:</code> داخل <code class="nw">toPorts</code>. وإذا كانت غائبة تُقارن سياسة api بالدليل، وفيه تقع <code class="nw">rules:</code> على استقامة <code class="nw">ports:</code> الذي يسبقها بثلاثة أسطر، ثم يُطبَّق <code class="nw">2-allow.yaml</code> من جديد.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>HTTP/1.1 504 Gateway Time-out</code></pre></figure>
+<p>خدمة frontend لا تصل إلى api أصلاً، فاستسلم nginx بعد مهلة الاتصال البالغة 5 ثوانٍ. ويفشل فحص البوابة أيضاً. يُتحقق من قاعدة الحركة الصادرة نحو api في سياسة frontend، ومن قاعدة الحركة الواردة من frontend في سياسة api، وكلتاهما على المنفذ 8080.</p>
+<h2 id="اختبار-التبديل-إزالة-ثم-إعادة-تطبيق-ثم-مقارنة">اختبار التبديل: إزالة، ثم إعادة تطبيق، ثم مقارنة</h2>
+<p>نزيل كل السياسات ونهاجم مرة أخرى.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+kubectl delete -f k8s/policies/ --ignore-not-found
+sleep 8
+curl -s -X POST localhost:5050/api/attack | jq -r &#x27;[.[] | select(.success)] | length | &quot;attack: \(.) of 5 succeeded&quot;&#x27;
+curl -s localhost:5050/api/matrix | jq -r &#x27;&quot;matrix: \(.open) of \(.total) reachable&quot;&#x27;</code></pre></figure>
+<p>يحذف <code>kubectl delete -f k8s/policies/</code> كل كائن معرّف في أي ملف داخل المجلد، أي ملفينا كليهما هنا، ويمنع <code class="nw">--ignore-not-found</code> الأمر من الشكوى من كائنات حُذفت أصلاً. يُبقي مرشّح <code class="nw">jq</code> الأول الخطوات الناجحة (<code class="nw">select(.success)</code>)، ويعدّها بـ <code class="nw">length</code> ثم يضع العدد في جملة. ويضع المرشّح الثاني عددي المصفوفة في جملة.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> عشرة أسطر حذف، ثم نتائج الشبكة المسطحة.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>ciliumnetworkpolicy.cilium.io &quot;default-deny&quot; deleted from campus namespace
+ciliumnetworkpolicy.cilium.io &quot;allow-dns&quot; deleted from campus namespace
+ciliumnetworkpolicy.cilium.io &quot;allow-kubelet-probes&quot; deleted from campus namespace
+ciliumnetworkpolicy.cilium.io &quot;frontend&quot; deleted from campus namespace
+ciliumnetworkpolicy.cilium.io &quot;news&quot; deleted from campus namespace
+ciliumnetworkpolicy.cilium.io &quot;api&quot; deleted from campus namespace
+ciliumnetworkpolicy.cilium.io &quot;auth&quot; deleted from campus namespace
+ciliumnetworkpolicy.cilium.io &quot;db&quot; deleted from campus namespace
+ciliumnetworkpolicy.cilium.io &quot;admin&quot; deleted from campus namespace
+ciliumnetworkpolicy.cilium.io &quot;ops&quot; deleted from campus namespace
+attack: 5 of 5 succeeded
+matrix: 36 of 36 reachable</code></pre></figure>
+<p>يجب أن يكون السطران الأخيران <code class="nw">attack: 5 of 5 succeeded</code> و<code class="nw">matrix: 36 of 36 reachable</code>. ودرجة عمر 95 مرة أخرى في هذه اللحظة.</p>
+<p>نعيد السياسات الآن، ونهاجم مرة أخرى، ونُرجع درجة عمر إلى 58.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+kubectl apply -f k8s/policies/
+sleep 8
+curl -s -X POST localhost:5050/api/attack | jq -r &#x27;[.[] | select(.success)] | length | &quot;attack: \(.) of 5 succeeded&quot;&#x27;
+curl -s localhost:5050/api/matrix | jq -r &#x27;&quot;matrix: \(.open) of \(.total) reachable&quot;&#x27;
+kubectl -n campus rollout restart deployment/db &gt;/dev/null &amp;&amp; kubectl -n campus rollout status deployment/db --timeout=120s &gt;/dev/null &amp;&amp; echo &quot;db reset&quot;</code></pre></figure>
+<p>يطبّق <code class="nw">kubectl apply -f k8s/policies/</code> الملفين بالترتيب الأبجدي، ملف الأساس أولاً. ويتوقف سطر الهجوم نحو 20 ثانية مرة أخرى، لأن الخطوات المحجوبة عادت تنتظر انتهاء مهلها. والسطر الأخير هو إرجاع قاعدة البيانات من <a href="ch08.html">الفصل 8</a>. يخفي <code class="nw">&gt;/dev/null</code> الرسائل العادية لكل أمر، ولا يطبع <code class="nw">echo "db reset"</code> التأكيد إلا إذا نجح الأمران.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> عشرة أسطر إنشاء، ثم نتائج الشبكة المجزأة، ثم الإرجاع.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>ciliumnetworkpolicy.cilium.io/default-deny created
+ciliumnetworkpolicy.cilium.io/allow-dns created
+ciliumnetworkpolicy.cilium.io/allow-kubelet-probes created
+ciliumnetworkpolicy.cilium.io/frontend created
+ciliumnetworkpolicy.cilium.io/news created
+ciliumnetworkpolicy.cilium.io/api created
+ciliumnetworkpolicy.cilium.io/auth created
+ciliumnetworkpolicy.cilium.io/db created
+ciliumnetworkpolicy.cilium.io/admin created
+ciliumnetworkpolicy.cilium.io/ops created
+attack: 1 of 5 succeeded
+matrix: 7 of 36 reachable
+db reset</code></pre></figure>
+<p>يجب أن تكون الأسطر الثلاثة الأخيرة <code class="nw">attack: 1 of 5 succeeded</code> و<code class="nw">matrix: 7 of 36 reachable</code> و<code class="nw">db reset</code>.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<p>إذا قال سطر الهجوم بعد إعادة التطبيق <code class="nw">attack: 2 of 5 succeeded</code> أو أكثر، فالثواني الثماني لم تكفِ الحاسوب هذه المرة. الحل انتظار عشر ثوانٍ وإعادة سطري <code class="nw">curl</code>. وإذا بقيت الأرقام خاطئة يُشغَّل <code class="nw">kubectl -n campus get cnp</code> ويُتحقق من أن السياسات العشر كلها تعرض <code class="nw">True</code>.</p>
+<p>إذا قال سطر الهجوم <code class="nw">attack: 0 of 5 succeeded</code> بعد إزالة السياسات، فلوحة التحكم لا تصل إلى البوابة. يُشغَّل <code>bash ~/microseg/check-portal.sh</code> لمعرفة السبب.</p>
+<p>نتأكد من أن الإرجاع نجح. فالهجوم الذي شغّلناه والسياسات مُزالة جعل درجة عمر 95، ويجب أن يكون Pod قاعدة البيانات الجديد قد أعاد 58.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>sleep 3
+kubectl -n campus exec deploy/db -- psql -U postgres -d campus -c &quot;SELECT * FROM grades WHERE id = 3&quot;</code></pre></figure>
+<p>يعطي <code class="nw">sleep 3</code> خادم PostgreSQL في الـ Pod الجديد بضع ثوانٍ ليستقر، كما في <a href="ch08.html">الفصل 8</a>، ويقرأ السطر الثاني الصف 3 مرة أخرى.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> درجة عمر الأصلية.</p>
+<p>يجب أن يعرض عمود الدرجة <code class="nw">58</code>. وإذا قال psql إنه لا يستطيع الاتصال عبر مقبس (socket)، فخادم PostgreSQL كان ما زال في طور الإقلاع. ننتظر عشر ثوانٍ ونعيد السطر الثاني.</p>
+<p>الزران في أعلى لوحة التحكم يشغّلان أوامر <code class="nw">kubectl</code> نفسها. «Remove policies» يجعل العنوان «Policies: OFF»، و«Apply policies» يجعله «Policies: ON (10 policies)». نستطيع تكرار التبديل بهما، ثم ننقر «Refresh» و«Run attack» لنُظهر أن الأرقام تتبع السياسات.</p>
+<h2 id="نقطة-التحقق">نقطة التحقق</h2>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; bash check-portal.sh | tail -1 &amp;&amp; curl -s localhost:5050/api/matrix | jq -r &#x27;&quot;matrix: \(.open) of \(.total) reachable&quot;&#x27;</code></pre></figure>
+<p>يُبقي <code class="nw">tail -1</code> السطر الأخير فقط من فحص البوابة. ويشغّل <code class="nw">&amp;&amp;</code> جزء المصفوفة بعد انتهاء فحص البوابة. وهذا الجزء يعمل حتى إذا فشل أحد فحوص البوابة، لأن <code class="nw">tail</code> ينجح دائماً، لذلك نقرأ السطرين كليهما.</p>
+<p>يجب أن يكون الناتج السطرين أدناه تماماً. ويجب أن تُظهر ملاحظاتنا من هذا الفصل أيضاً <code class="nw">PORTAL: 0/6 OK</code> و0 من 36 مع ملف الأساس وحده، و1 من 5 خطوات هجوم، ودرجة 58 بعد الإرجاع في اختبار التبديل، والرد <code class="nw">403 Forbidden</code> على <code class="nw">/api/export</code>.</p>
+<p>يجب أن يكون السطران <code class="nw">PORTAL: 6/6 OK</code> و<code class="nw">matrix: 7 of 36 reachable</code>.</p>
+<p>نحفظ عملنا.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; git add -A &amp;&amp; git commit -m &quot;ch10: default deny and per-workload policies&quot;</code></pre></figure>
+<p>يحفظ هذا ملفي السياسات وناتج الهجوم الذي حفظناه.</p>
+<!-- OUT ids: ch12-start, ch12-dryrun, ch12-apply-baseline, ch12-matrix-baseline, ch12-portal-baseline, ch12-ls-policies, ch12-apply-allow, ch12-cnp-list, ch12-portal-segmented, ch12-matrix-segmented, ch12-attack-segmented-output, ch12-grade-unchanged, ch12-export-403, ch12-toggle-remove, ch12-toggle-apply, ch12-grade-after-toggle, ch12-checkpoint --><nav class="pager" aria-label="الفصول"><a rel="prev" href="ch09.html"><span>الفصل السابق</span>الفصل 9. تصميم السياسة</a><a rel="next" href="ch11.html"><span>الفصل التالي</span>الفصل 11. قراءة الأدلة في Hubble</a></nav></main></div>
+<footer class="foot"><div class="foot-in"><p>Kubernetes 1.36 و Cilium 1.20.5 و kind 0.33.0 على Windows 11 مع WSL 2. شغّلنا كل أمر على حاسوب حقيقي في تشرين الثاني 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">المصدر على GitHub</a></p></div></footer>
+<p class="vh" aria-live="polite" id="live"></p>
+<script type="application/json" id="i18n">{"copied": "نُسخ", "copyFail": "نضغط Ctrl+C لنسخ النص المحدد", "doneOf": "الخطوات المنجزة: {d} من {t}", "next": "الخطوة التالية: {s}", "allDone": "اكتمل المسار وأُنجزت الخطوات كلها.", "sumCount": "المنجز {d} من {t}", "cleared": "مُسحت كل العلامات.", "confirm": "هل نمسح كل العلامات في هذه الصفحة؟ تبقى الملفات والعنقود كما هي.", "stageCount": "{d} من {t}"}</script>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

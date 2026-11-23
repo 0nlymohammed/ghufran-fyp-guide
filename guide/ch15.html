@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
+<title>Chapter 15. Day-by-day plan | Micro-segmentation lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&family=Noto+Sans+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="ar" href="../ar/guide/ch15.html">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400&text=%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9&display=swap">
+</head>
+<body class="">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="top-in">
+<a class="brand" href="../index.html">Micro-segmentation lab</a>
+<nav aria-label="Micro-segmentation lab"><ul>
+<li><a href="../index.html">Quick path</a></li>
+<li><a href="../guide/index.html" aria-current="page">Full guide</a></li>
+<li><a href="../downloads.html">Downloads</a></li>
+<li><a href="../ar/guide/ch15.html" lang="ar" hreflang="ar" data-setlang="ar">العربية</a></li>
+</ul></nav>
+</div></header>
+<div class="layout"><details class="rail" open><summary>Chapters</summary><nav aria-label="Chapters"><ol class="toc"><li><a href="ch00.html">0. How to use this guide</a></li><li><a href="ch01.html">1. What you will build</a></li><li><a href="ch02.html">2. Before you start</a></li><li><a href="ch03.html">3. Set up the environment</a></li><li><a href="ch04.html">4. Create the cluster</a></li><li><a href="ch05.html">5. Write the services</a></li><li><a href="ch06.html">6. Deploy the portal</a></li><li><a href="ch07.html">7. Build your dashboard</a></li><li><a href="ch08.html">8. Attack the flat network</a></li><li><a href="ch09.html">9. Design the policy</a></li><li><a href="ch10.html">10. Apply micro-segmentation</a></li><li><a href="ch11.html">11. Read the evidence in Hubble</a></li><li><a href="ch12.html">12. Measure</a></li><li><a href="ch13.html">13. Getting unstuck alone</a></li><li><a href="ch14.html">14. Evidence for your report</a></li><li><a href="ch15.html" aria-current="page">15. Day-by-day plan</a><ol class="sub"><li><a href="#the-plans-order-and-its-terms">The plan's order and its terms</a></li><li><a href="#the-8-day-plan-at-6-to-8-hours-a-day">The 8-day plan at 6 to 8 hours a day</a></li><li><a href="#what-to-do-if-day-1-fails">What to do if day 1 fails</a></li><li><a href="#using-day-8-the-buffer-day">Using day 8, the buffer day</a></li><li><a href="#the-plan-at-3-to-4-hours-a-day">The plan at 3 to 4 hours a day</a></li><li><a href="#if-time-collapses-what-to-cut-first">If time collapses: what to cut first</a></li></ol></li><li><a href="appendix.html">Appendices</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="chapter-15-day-by-day-plan">Chapter 15. Day-by-day plan</h1>
+<p>This chapter turns the guide into a calendar. It assumes you have 6 to 8 hours a day and plans between 3 and 7 of them, which leaves room for surprises, and it fits the whole build and the evidence into seven working days plus one spare day. If you only have 3 or 4 hours a day, the second half of the chapter shows how to stretch the same plan over about two weeks without changing the order. There are no commands here. Read it on day 1, right after <a href="ch00.html">chapter 0</a>, then add a "Planned day" column to the progress tracker from <a href="ch00.html">chapter 0</a> and fill it in from the table below.</p>
+<h2 id="the-plans-order-and-its-terms">The plan's order and its terms</h2>
+<p>The plan puts whatever is most likely to fail on your laptop first, so the cluster and Cilium come on day 1, and <a href="ch01.html">chapter 1</a>, which has no commands, waits until day 2. The go/no-go point is the moment you decide whether to continue on WSL or switch to the Ubuntu virtual machine in appendix A, and it falls on the evening of day 1. A buffer day is a day with no planned chapter, kept free for whatever slipped.</p>
+<p>Each day ends with a "done when" line. It names the checkpoint that must match before you stop for the day. If it doesn't match, the next day starts with fixing it, because every chapter builds on the one before.</p>
+<p>The seven working days add up to about 33 to 41 hours, plus the buffer day. The times below come from the chapter headers and from the test run of this guide. Your first day will probably run longer than planned, since installing software is where most surprises happen, and later days tend to run shorter once the tools are familiar. Days 2 and 7 are planned shorter than the rest, and the spare time on day 2 is for whatever day 1 left over.</p>
+<h2 id="the-8-day-plan-at-6-to-8-hours-a-day">The 8-day plan at 6 to 8 hours a day</h2>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>Day</th>
+<th>Work</th>
+<th>Hours</th>
+<th>Done when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><a href="ch00.html">Chapter 0</a> (15 min). <a href="ch02.html">Chapter 2</a> (1.5 to 2 h, one reboot). <a href="ch03.html">Chapter 3</a> (2 to 2.5 h). <a href="ch04.html">Chapter 4</a> (1.5 h, plus 15 to 25 min for the connectivity test).</td>
+<td>5.5 to 6.75</td>
+<td><code class="nw">kubectl get nodes -L tier</code> shows 3 Ready nodes with their tiers, and the connectivity test ends with <code class="nw">exit code 0</code> or fails only on the internet tests <a href="ch04.html">chapter 4</a> describes. This is the go/no-go point.</td>
+</tr>
+<tr>
+<td>2</td>
+<td><a href="ch01.html">Chapter 1</a> (45 min). <a href="ch05.html">Chapter 5</a>, sitting 1: <code class="nw">db/init.sql</code>, <code class="nw">apps/auth.py</code> and <code class="nw">apps/api.py</code> (3 to 4 h).</td>
+<td>3.75 to 4.75</td>
+<td>The flow table from <a href="ch01.html">chapter 1</a> written from memory matches, and <code class="nw">py_compile</code> passes for the two Python files.</td>
+</tr>
+<tr>
+<td>3</td>
+<td><a href="ch05.html">Chapter 5</a>, sitting 2: <code class="nw">apps/news.py</code>, <code class="nw">apps/admin.py</code>, the frontend files, the two Dockerfiles and the local injection test (3 to 4 h). <a href="ch06.html">Chapter 6</a> (2 to 3 h).</td>
+<td>5 to 7</td>
+<td>Seven pods <code class="nw">1/1 Running</code>, <code class="nw">PORTAL: 6/6 OK</code>, and Sara can log in from your Windows browser.</td>
+</tr>
+<tr>
+<td>4</td>
+<td><a href="ch07.html">Chapter 7</a> in two sittings: the back end, then the page (4 to 6 h). At the end of the day, read the capture rules and the terminal setup in <a href="ch14.html">chapter 14</a> (30 min).</td>
+<td>4.5 to 6.5</td>
+<td>The dashboard shows <code class="nw">36 of 36 paths reachable</code>.</td>
+</tr>
+<tr>
+<td>5</td>
+<td><a href="ch08.html">Chapter 8</a> (1.5 h). <a href="ch09.html">Chapter 9</a> (1.5 h). <a href="ch10.html">Chapter 10</a> (2 to 3 h).</td>
+<td>5 to 6</td>
+<td>Attack 5 of 5 before the policies and 1 of 5 after, matrix 36 of 36 then 7 of 36, <code class="nw">/api/export</code> gives 403 and the portal checks still print <code class="nw">PORTAL: 6/6 OK</code>.</td>
+</tr>
+<tr>
+<td>6</td>
+<td><a href="ch11.html">Chapter 11</a> (1.5 h). <a href="ch12.html">Chapter 12</a> (2 h, of which <code class="nw">measure.py</code> runs for about 10 minutes). <a href="ch14.html">Chapter 14</a>, the full capture session (2.5 h).</td>
+<td>6</td>
+<td><code class="nw">results/latency.csv</code> has 21 lines and the <a href="ch14.html">chapter 14</a> checkpoint prints <code class="nw">0 missing</code>, <code class="nw">41</code> and <code class="nw">37</code>.</td>
+</tr>
+<tr>
+<td>7</td>
+<td><a href="ch13.html">Chapter 13</a> with its three drills (2 to 3 h). Rebuild from scratch as <a href="ch13.html">chapter 13</a> shows, then check the rebuilt lab as described under the table (about 1 h).</td>
+<td>3 to 4</td>
+<td>Every drill ends with <code class="nw">PORTAL: 6/6 OK</code>, and the rebuilt lab gives the results listed under the table.</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Buffer day.</td>
+<td>as needed</td>
+<td>Nothing left over from days 1 to 7.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Do the capture session on day 6, before the drills and the rebuild of day 7, because those can leave the lab in odd states. If day 6 runs late, do the capture session at the start of day 7, before the drills. Day 7 has room for it.</p>
+<p>After the rebuild on day 7, the lab starts flat, because <code class="nw">deploy.sh</code> removes every policy, and the rebuild also stopped the Hubble port-forward, the Hubble UI and the dashboard. Start the three helpers again as <a href="ch14.html">chapter 14</a> shows. Then run <code>bash ~/microseg/check-portal.sh</code>, which must print <code class="nw">PORTAL: 6/6 OK</code>, and the dashboard attack, which must give 5 of 5. Apply the policies with <code>kubectl apply -f ~/microseg/k8s/policies/</code>, wait 10 seconds, and run the attack again for 1 of 5 and the matrix for 7 of 36. Finish by resetting the database as appendix B shows, because the flat attack changed Omar's grade.</p>
+<h2 id="what-to-do-if-day-1-fails">What to do if day 1 fails</h2>
+<p>If the connectivity test in <a href="ch04.html">chapter 4</a> still fails after you've worked through its failure blocks and <a href="ch13.html">chapter 13</a>, stop trying to fix WSL. Start appendix A the same evening. Setting up the virtual machine takes about 2 hours, and chapters 3 and 4 then take another 3 to 4. That costs you most of a day, which is what the buffer day is for. Everything from <a href="ch05.html">chapter 5</a> onward is the same in the virtual machine.</p>
+<p>One failure has nothing to do with your laptop. Some networks block certain internet addresses, and then only the tests that reach the internet fail. <a href="ch04.html">Chapter 4</a> shows how to recognise that case and suggests trying a phone hotspot before you give up on WSL.</p>
+<h2 id="using-day-8-the-buffer-day">Using day 8, the buffer day</h2>
+<p>Spend day 8 on whatever slipped. Start with any checkpoint that didn't match, then rerun the <a href="ch14.html">chapter 14</a> checkpoint and capture whatever it reports missing. If time is left, redraw the result charts from your own numbers as <a href="ch12.html">chapter 12</a> shows and back up <code class="nw">~/microseg</code> with the <code class="nw">tar</code> command from <a href="ch02.html">chapter 2</a>. Use whatever time remains to start the results chapter of your thesis while the screenshots are fresh.</p>
+<h2 id="the-plan-at-3-to-4-hours-a-day">The plan at 3 to 4 hours a day</h2>
+<p>At half the daily time, every day of the plan becomes two, except day 7, which fits in one. Keep the same order and split each day where the table below says, so every sitting ends at a natural stopping point.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>Original day</th>
+<th>First half ends after</th>
+<th>Second half covers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><a href="ch02.html">chapter 2</a>, with its first commit</td>
+<td>chapters 3 and 4, with the go/no-go point at the end</td>
+</tr>
+<tr>
+<td>2</td>
+<td><a href="ch01.html">chapter 1</a> and the <code class="nw">db/init.sql</code> part of <a href="ch05.html">chapter 5</a></td>
+<td>the rest of <a href="ch05.html">chapter 5</a>, sitting 1</td>
+</tr>
+<tr>
+<td>3</td>
+<td><a href="ch05.html">chapter 5</a>, sitting 2</td>
+<td><a href="ch06.html">chapter 6</a></td>
+</tr>
+<tr>
+<td>4</td>
+<td><a href="ch07.html">chapter 7</a>, the back end</td>
+<td><a href="ch07.html">chapter 7</a>, the page, and the <a href="ch14.html">chapter 14</a> capture rules</td>
+</tr>
+<tr>
+<td>5</td>
+<td>chapters 8 and 9</td>
+<td><a href="ch10.html">chapter 10</a></td>
+</tr>
+<tr>
+<td>6</td>
+<td>chapters 11 and 12</td>
+<td>the <a href="ch14.html">chapter 14</a> capture session</td>
+</tr>
+<tr>
+<td>7</td>
+<td><a href="ch13.html">chapter 13</a> and the rebuild, in one day</td>
+<td>nothing, day 7 stays one day</td>
+</tr>
+<tr>
+<td>8</td>
+<td>buffer</td>
+<td>buffer</td>
+</tr>
+</tbody>
+</table></div>
+<p>That makes about 15 days, the two buffer days included. The go/no-go point moves to the end of day 2, and it's still the first thing you find out.</p>
+<p><a href="ch03.html">Chapter 3</a> at a short sitting can end halfway through the installs. That's safe as long as you stop after a step whose "You should see" matched, because every install step in <a href="ch03.html">chapter 3</a> can be repeated without harm. Write down in the progress tracker which step you stopped at.</p>
+<h2 id="if-time-collapses-what-to-cut-first">If time collapses: what to cut first</h2>
+<p>If a deadline moves closer and you can't finish everything, cut in this order. In <a href="ch07.html">chapter 7</a>, paste both dashboard files as usual but skip the route tests in steps 4, 6 and 7. After step 3, read step 5, which shows how one probe works, then go on to steps 8 and 9 and the checkpoint. You still get the full dashboard, so nothing later changes, and you save an hour or two. If the checkpoint fails, go back and run the skipped tests, because they show which route is broken. Then skip the three break-it drills in <a href="ch13.html">chapter 13</a>, reading them without doing them. After that, drop the Hubble UI screenshots E18 and E30, because the text outputs E26 to E29 prove the same thing. The <a href="ch14.html">chapter 14</a> checkpoint then prints <code class="nw">missing E18 png</code>, <code class="nw">missing E30 png</code> and <code class="nw">2 missing</code>, followed by <code class="nw">39</code> and <code class="nw">37</code>, and after this cut that counts as a pass.</p>
+<p>Never cut <a href="ch10.html">chapter 10</a>, <a href="ch11.html">chapter 11</a>, the toggle test or the evidence checkpoint, because your results come from them. And don't skip a checkpoint to save time, because a problem you carry forward is much harder to find two chapters later.</p><nav class="pager" aria-label="Chapters"><a rel="prev" href="ch14.html"><span>Previous chapter</span>Chapter 14. Evidence for your report</a><a rel="next" href="appendix.html"><span>Next chapter</span>Appendices</a></nav></main></div>
+<footer class="foot"><div class="foot-in"><p>Kubernetes 1.36, Cilium 1.20.5 and kind 0.33.0 on Windows 11 with WSL 2. Every command was run on a real laptop in November 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">Source on GitHub</a></p></div></footer>
+<p class="vh" aria-live="polite" id="live"></p>
+<script type="application/json" id="i18n">{"copied": "Copied", "copyFail": "Press Ctrl+C to copy the selected text", "doneOf": "{d} of {t} steps done", "next": "Next step: {s}", "allDone": "All {t} steps done.", "sumCount": "{d} of {t} done", "cleared": "All ticks cleared.", "confirm": "Clear every tick on this page? Your files and your cluster stay as they are.", "stageCount": "{d} of {t}"}</script>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
+<title>الملاحق | مختبر التجزئة الدقيقة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;700&family=Public+Sans:wght@400;600;700&family=Noto+Sans+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="en" href="../../guide/appendix.html">
+
+</head>
+<body class="">
+<a class="skip" href="#main">الانتقال إلى المحتوى</a>
+<header class="top"><div class="top-in">
+<a class="brand" href="../../ar/index.html">مختبر التجزئة الدقيقة</a>
+<nav aria-label="مختبر التجزئة الدقيقة"><ul>
+<li><a href="../../ar/index.html">المسار السريع</a></li>
+<li><a href="../../ar/guide/index.html" aria-current="page">الدليل الكامل</a></li>
+<li><a href="../../ar/downloads.html">التنزيلات</a></li>
+<li><a href="../../guide/appendix.html" lang="en" hreflang="en" data-setlang="en">English</a></li>
+</ul></nav>
+</div></header>
+<div class="layout"><details class="rail" open><summary>الفصول</summary><nav aria-label="الفصول"><ol class="toc"><li><a href="ch00.html">0. كيف نستخدم هذا الدليل</a></li><li><a href="ch01.html">1. ما الذي سنبنيه</a></li><li><a href="ch02.html">2. قبل أن نبدأ</a></li><li><a href="ch03.html">3. تجهيز بيئة العمل</a></li><li><a href="ch04.html">4. إنشاء العنقود</a></li><li><a href="ch05.html">5. كتابة الخدمات</a></li><li><a href="ch06.html">6. نشر البوابة</a></li><li><a href="ch07.html">7. بناء لوحة التحكم</a></li><li><a href="ch08.html">8. مهاجمة الشبكة المسطحة</a></li><li><a href="ch09.html">9. تصميم السياسة</a></li><li><a href="ch10.html">10. تطبيق التجزئة الدقيقة للشبكة</a></li><li><a href="ch11.html">11. قراءة الأدلة في Hubble</a></li><li><a href="ch12.html">12. القياس</a></li><li><a href="ch13.html">13. تجاوز الأعطال دون مساعدة</a></li><li><a href="ch14.html">14. أدلة بحث التخرج</a></li><li><a href="ch15.html">15. خطة العمل يوماً بيوم</a></li><li><a href="appendix.html" aria-current="page">الملاحق</a><ol class="sub"><li><a href="#الملحق-a-الخطة-البديلة-آلة-افتراضية-بنظام-ubuntu">الملحق A. الخطة البديلة، آلة افتراضية بنظام Ubuntu</a></li><li><a href="#الملحق-b-بطاقة-الأوامر-في-صفحة-واحدة">الملحق B. بطاقة الأوامر في صفحة واحدة</a></li><li><a href="#الملحق-c-فهرس-الملفات">الملحق C. فهرس الملفات</a></li><li><a href="#الملحق-d-مسرد-المصطلحات">الملحق D. مسرد المصطلحات</a></li></ol></li></ol></nav></details><main id="main" class="content chapter"><h1 id="الملاحق">الملاحق</h1>
+<p>الملحق A هو الخطة البديلة (Plan B)، أي آلة افتراضية (virtual machine) بنظام Ubuntu نلجأ إليها إذا لم يعمل Cilium على WSL. والملحق B بطاقة من صفحة واحدة تجمع الأوامر التي نستخدمها أكثر من غيرها، والملحق C يسرد كل ملفات المشروع مع الفصل الذي يبني كل ملف وعدد أسطره. أما الملحق D فمسرد المصطلحات الإنجليزية ومقابلاتها العربية، وهو خاص بهذه النسخة العربية.</p>
+<h2 id="الملحق-a-الخطة-البديلة-آلة-افتراضية-بنظام-ubuntu">الملحق A. الخطة البديلة، آلة افتراضية بنظام Ubuntu</h2>
+<p>لا نلجأ إلى هذا الملحق إلا إذا فشل <a href="ch04.html">الفصل 4</a> على WSL ولم تُصلحه كتل «إذا ظهر شيء آخر» فيه ولا <a href="ch13.html">الفصل 13</a>. الآلة الافتراضية، أو VM، حاسوب كامل يُحاكى داخل الحاسوب المحمول، له نظام تشغيله وذاكرته وقرصه، وسيعمل عليها هنا Ubuntu 24.04 Desktop، وهو Linux عادي بسطح مكتب ومتصفح. فيعمل Cilium عندئذ على نواة نظام التشغيل (kernel) العادية في Ubuntu بدلاً من نواة WSL. نتوقع نحو ساعتين لإعداد الآلة الافتراضية، ثم نعيد الفصلين 3 و4.</p>
+<p>داخل الآلة الافتراضية نعمل بالكامل على سطح مكتب Ubuntu، فنفتح هناك الدليل والطرفية والبوابة ولوحة التحكم وHubble UI، ويبقى <code class="nw">localhost</code> بالمعنى نفسه، وتبقى كل العناوين في الدليل كما هي مكتوبة. ويبيّن الجدول ما يتغير.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="جدول"><table>
+<thead>
+<tr>
+<th>الفصل</th>
+<th>على WSL</th>
+<th>في الآلة الافتراضية</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2</td>
+<td>تثبيت WSL وUbuntu، وVS Code على Windows، ونسخ الملفات من Windows</td>
+<td>نتخطى كل ذلك عدا إعداد Git وأول إيداع، ونتبع القسم A.5 بدلاً منه</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code class="nw">.wslconfig</code> و<code class="nw">wsl --shutdown</code> و<code class="nw">wsl --terminate</code> وDocker Desktop</td>
+<td>نتخطى <code class="nw">.wslconfig</code> وأوامر <code class="nw">wsl</code> وDocker Desktop، ونحمّل وحدات النواة (kernel modules) كما يبيّن القسم A.5، ونعيد تشغيل الآلة الافتراضية في الموضع الذي يعيد فيه <a href="ch03.html">الفصل 3</a> تشغيل التوزيعة</td>
+</tr>
+<tr>
+<td>4 إلى 13</td>
+<td>كما هو مكتوب</td>
+<td>كما هو مكتوب، مع فتح كل صفحة في Firefox داخل الآلة الافتراضية</td>
+</tr>
+<tr>
+<td>8 و10 و14</td>
+<td>أوامر الهجوم في Windows PowerShell بـ <code class="nw">curl.exe</code></td>
+<td>الحمولات (payloads) الخمس نفسها في طرفية Ubuntu بـ <code class="nw">curl</code>، كما يبيّن القسم A.6</td>
+</tr>
+<tr>
+<td>14</td>
+<td>أداة Snipping Tool في Windows، ومجلد الأدلة في Windows</td>
+<td>أداة لقطة الشاشة في Ubuntu، وكل شيء يُحفظ مباشرة في <code class="nw">~/microseg/evidence</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="القسم-a1-تنزيل-مثبت-ubuntu">القسم A.1، تنزيل مثبّت Ubuntu</h3>
+<p>في Windows نفتح <code>https://releases.ubuntu.com/24.04/</code> في المتصفح. تعرض الصفحة أحدث إصدار فرعي من 24.04. ننزّل صورة نسخة سطح المكتب لأجهزة PC بمعمارية 64 بت، وهي ملف اسمه يشبه <code>ubuntu-24.04.5-desktop-amd64.iso</code>، وحجمه نحو 6 GB. نختار إصداراً من 24.04 حتى لو عرضت صفحة التنزيل الرئيسية في Ubuntu إصداراً أحدث، لأن الدليل اختُبر على 24.04. وملف ISO صورة قرص (disk image)، أي محتويات قرص DVD للتثبيت مخزّنة في ملف واحد.</p>
+<h3 id="القسم-a2-إنشاء-الآلة-الافتراضية-على-windows-11-pro-أو-education-hyper-v">القسم A.2، إنشاء الآلة الافتراضية على Windows 11 Pro أو Education (Hyper-V)</h3>
+<p>يأتي برنامج الآلات الافتراضية Hyper-V مدمجاً في إصدارَي Windows Pro وEducation. ولا يوجد في Windows Home، فإذا كان لدينا Home ننتقل إلى القسم A.3.</p>
+<ol>
+<li>نضغط مفتاح Windows، ونكتب <code>Turn Windows features on or off</code>، ونفتحه.</li>
+<li>نحدد «Hyper-V»، وننقر «OK» ثم «Restart now».</li>
+<li>بعد إعادة التشغيل نضغط مفتاح Windows، ونكتب <code class="nw">Hyper-V Quick Create</code>، ونفتحه.</li>
+<li>ننقر «Local installation source»، ثم «Change installation source»، ونختار ملف ISO الذي نزّلناه.</li>
+<li>نزيل التحديد عن «This virtual machine will run Windows (enables Windows Secure Boot)».</li>
+<li>ننقر «More options»، ونكتب <code class="nw">microseg</code> اسماً للآلة، ثم ننقر «Create Virtual Machine».</li>
+<li>بعد إنشائها ننقر «Edit settings». تحت «Memory» نضبط RAM على <code class="nw">10240</code> MB ونزيل التحديد عن «Enable Dynamic Memory». وتحت «Processor» نضبط عدد المعالجات الافتراضية على 4. وتحت «SCSI Controller» نختار القرص الصلب وننقر «Inspect». يجب ألا يقل الحجم الأقصى للقرص عن 60 GB. فإن كان أصغر، نغلق تلك النافذة، وننقر «Edit» بجانب «Inspect»، ونختار «Expand» وندخل 80 GB. ثم ننقر «OK».</li>
+</ol>
+<p>قبل تشغيل الآلة الافتراضية نوقف WSL ليُرجع الذاكرة التي يحجزها. فملف <code class="nw">.wslconfig</code> من <a href="ch03.html">الفصل 3</a> يسمح لـ WSL بحجز نحو 10 GB، وعلى حاسوب ذاكرته 16 GB لا يمكن أن يحصل WSL والآلة الافتراضية كلاهما على هذا القدر. نشغّل هذا الأمر في PowerShell.</p>
+<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>wsl --shutdown</code></pre></figure>
+<p>يوقف <code class="nw">wsl --shutdown</code> كل توزيعات WSL والآلة الافتراضية التي تتشاركها، ولا يطبع شيئاً عند نجاحه. ثم ننقر «Connect» في نافذة Quick Create، و«Start» في النافذة التي تُفتح.</p>
+<p>إذا ظهر «Hyper-V» في الخطوة 2 باهتاً لا يمكن تحديده، فالمحاكاة الافتراضية (virtualization) معطّلة في البرنامج الثابت (firmware). ويبيّن <a href="ch02.html">الفصل 2</a> كيف نتحقق منها ونفعّلها.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<p>قد يرفض Hyper-V تشغيل الآلة الافتراضية برسالة فيها هذا النص.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>Not enough memory in the system to start the virtual machine</code></pre></figure>
+<p>السبب أن شيئاً آخر ما زال يحجز الذاكرة، وهو WSL في الغالب. والحل تشغيل <code class="nw">wsl --shutdown</code> في PowerShell مرة أخرى، وإغلاق البرامج غير الضرورية، ثم النقر على «Start» من جديد. وإذا استمر الفشل، فالحل إعادة تشغيل Windows، وهي تحرر الذاكرة التي تحجزها البرامج الأخرى، ثم تشغيل الآلة الافتراضية قبل فتح أي شيء آخر.</p>
+<h3 id="القسم-a3-إنشاء-الآلة-الافتراضية-على-windows-11-home-virtualbox">القسم A.3، إنشاء الآلة الافتراضية على Windows 11 Home (VirtualBox)</h3>
+<p>برنامج VirtualBox مجاني للآلات الافتراضية من Oracle، ويعمل على Windows Home أيضاً.</p>
+<ol>
+<li>ننزّل VirtualBox for Windows hosts من <code class="nw">https://www.virtualbox.org</code> ونثبّته بالخيارات الافتراضية.</li>
+<li>نفتح VirtualBox وننقر «New». نكتب <code class="nw">microseg</code> اسماً للآلة، ونختار ملف ISO تحت «ISO Image»، ونحدد «Skip Unattended Installation».</li>
+<li>تحت «Hardware» نضبط «Base Memory» على <code class="nw">10240</code> MB و«Processors» على 4.</li>
+<li>تحت «Hard Disk» نضبط الحجم على 80 GB.</li>
+<li>ننقر «Finish».</li>
+</ol>
+<p>قبل تشغيل الآلة الافتراضية نشغّل <code class="nw">wsl --shutdown</code> في PowerShell، كما في القسم A.2، ليُرجع WSL ذاكرته. ثم نختار <code class="nw">microseg</code> في VirtualBox وننقر «Start».</p>
+<p>بما أن WSL مثبّت، يضطر VirtualBox إلى العمل فوق برنامج المحاكاة الافتراضية الخاص بـ Windows (hypervisor). ويعمل VirtualBox بهذه الطريقة أبطأ من المعتاد، ويُظهر أيقونة سلحفاة خضراء صغيرة في شريط الحالة أسفل نافذة الآلة حين يعمل هكذا، فنترك وقتاً إضافياً لبناء صور الحاويات (container images) ولاختبار الاتصال.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<p>إذا توقف مثبّت VirtualBox برسالة تذكر <code>Microsoft Visual C++ 2019 Redistributable</code>، فالسبب أن VirtualBox يحتاج إلى مكتبة Microsoft هذه أولاً. والحل تنزيلها من Microsoft على الرابط <code>https://aka.ms/vs/17/release/vc_redist.x64.exe</code>، وتشغيلها بالخيارات الافتراضية، ثم تشغيل مثبّت VirtualBox من جديد.</p>
+<h3 id="القسم-a4-تثبيت-ubuntu-داخل-الآلة-الافتراضية">القسم A.4، تثبيت Ubuntu داخل الآلة الافتراضية</h3>
+<p>تبدأ الآلة الافتراضية من ملف ISO وتعرض مثبّت Ubuntu. نختار اللغة، ونمرّ على شاشات إمكانية الوصول ولوحة المفاتيح، ثم نختار «Install Ubuntu». نختار «Interactive installation» ثم «Default selection». وفي شاشة القرص نختار «Erase disk and install Ubuntu»، وهذا الخيار يمسح القرص الافتراضي للآلة التي أنشأناها فقط، ولا يمس قرص الحاسوب المحمول أبداً. ننشئ المستخدم وكلمة المرور، ونُبقي المنطقة الزمنية كما هي، ونبدأ التثبيت. يستغرق التثبيت نحو 15 دقيقة. وحين يطلب منا إزالة وسيط التثبيت نضغط Enter، فتعيد الآلة تشغيل نفسها وتقلع بنظام Ubuntu.</p>
+<h3 id="القسم-a5-تجهيز-الآلة-الافتراضية">القسم A.5، تجهيز الآلة الافتراضية</h3>
+<p>نسجّل الدخول. نحتاج إلى هذا الدليل داخل الآلة الافتراضية، لأن الحافظة بين Windows والآلة الافتراضية كثيراً ما لا تعمل، فقد يفشل اللصق من Windows. في Windows نرسل إلى بريدنا الإلكتروني رابط صفحة Docs لهذا الدليل، ثم نفتح Firefox في الآلة الافتراضية، ونسجّل الدخول إلى البريد هناك، ونفتح الرابط. ننسخ الأوامر من نسخة الدليل المفتوحة داخل الآلة. نفتح الطرفية بالمفاتيح Ctrl+Alt+T. وفي هذه الطرفية نلصق بـ Ctrl+Shift+V، كما في <a href="ch00.html">الفصل 0</a>.</p>
+<p>على WSL كان ملف <code class="nw">.wslconfig</code> هو الذي يطلب من Windows تحميل وحدات النواة التي يحتاجها Cilium. أما في الآلة الافتراضية فنحمّلها عبر ملف يقرؤه Ubuntu عند كل تشغيل.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>printf &#x27;xt_socket\nxt_TPROXY\nxt_mark\nxt_CT\ncls_bpf\nsch_ingress\nxt_recent\n&#x27; | sudo tee /etc/modules-load.d/cilium.conf</code></pre></figure>
+<p>يطبع <code class="nw">printf</code> أسماء الوحدات السبع، اسماً في كل سطر، لأن <code class="nw">\n</code> تعني سطراً جديداً. ويكتبها <code class="nw">sudo tee</code> في <code>/etc/modules-load.d/cilium.conf</code>، داخل مجلد لا يكتب فيه إلا المسؤول (administrator)، ويطبعها أيضاً. يحمّل Ubuntu عند بدء تشغيله كل وحدة مذكورة في هذا المجلد. نكتب كلمة المرور حين يطلبها <code class="nw">sudo</code>. لا يظهر شيء أثناء الكتابة.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> الأسماء السبعة مكررة، اسماً في كل سطر، بهذا الترتيب: <code class="nw">xt_socket</code> و<code class="nw">xt_TPROXY</code> و<code class="nw">xt_mark</code> و<code class="nw">xt_CT</code> و<code class="nw">cls_bpf</code> و<code class="nw">sch_ingress</code> و<code class="nw">xt_recent</code>.</p>
+<p>نحمّلها الآن مرة واحدة يدوياً كي لا نضطر إلى إعادة التشغيل، ونتحقق من اثنتين منها.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>sudo modprobe -a xt_socket xt_TPROXY xt_mark xt_CT cls_bpf sch_ingress xt_recent &amp;&amp; lsmod | grep -E &#x27;^xt_(TPROXY|socket)&#x27;</code></pre></figure>
+<p>يحمّل <code class="nw">modprobe -a</code> كل وحدة مذكورة بعده. ويسرد <code class="nw">lsmod</code> الوحدات المحمّلة، ويُبقي <code class="nw">grep -E '^xt_(TPROXY|socket)'</code> الأسطر التي تبدأ بأحد الاسمين اللذين يفحصهما <code class="nw">check-env.sh</code>.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> سطران، أحدهما يبدأ بـ <code class="nw">xt_TPROXY</code> والآخر بـ <code class="nw">xt_socket</code>. والأرقام بعد الاسمين تختلف باختلاف النواة.</p>
+<p>نثبّت VS Code، الذي يثبّته <a href="ch02.html">الفصل 2</a> على Windows في الحالة العادية.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>sudo snap install code --classic</code></pre></figure>
+<p>تثبّت الأداة <code class="nw">snap</code> التطبيقات في Ubuntu. والخيار <code class="nw">--classic</code> يسمح لـ VS Code بالوصول إلى مجلد المنزل (home folder) كله، وهذا ما يحتاجه أي محرر.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> سطر يبدأ بـ <code class="nw">code</code> وينتهي بـ <code class="nw">installed</code>. ويختلف رقم الإصدار في الوسط.</p>
+<p>ثم ننشئ مجلد المشروع ونفتحه في VS Code، كما يفعل <a href="ch02.html">الفصل 2</a> على WSL.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>mkdir -p ~/microseg &amp;&amp; cd ~/microseg &amp;&amp; code .</code></pre></figure>
+<p class="see"><strong>ما يجب أن نراه:</strong> نافذة VS Code مفتوحة على المجلد الفارغ <code class="nw">microseg</code>. والطرفية نفسها لا تطبع شيئاً، أو تطبع تنبيهاً قصيراً من VS Code. وداخل الآلة الافتراضية يُظهر عنوان النافذة <code class="nw">microseg</code> دون الجزء <code class="nw">[WSL: Ubuntu-24.04]</code> الذي رأيناه في <a href="ch02.html">الفصل 2</a>.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>modprobe: FATAL: Module xt_tproxy not found in directory /lib/modules/&lt;version&gt;</code></pre></figure>
+<p>السبب خطأ في كتابة اسم الوحدة. فالأسماء تميّز بين الأحرف الكبيرة والصغيرة، و<code class="nw">TPROXY</code> مكتوبة بأحرف كبيرة. والحل نسخ الأمر من جديد.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>modprobe: FATAL: Module xt_TPROXY not found in directory /lib/modules/&lt;version&gt;</code></pre></figure>
+<p>الاسم صحيح هنا، لكن هذه النواة تحفظ الوحدة في حزمة برمجية منفصلة غير مثبّتة. والحل تثبيتها بالأمر <code>sudo apt install -y linux-modules-extra-$(uname -r)</code>، ثم تشغيل سطر <code class="nw">modprobe</code> مرة أخرى. والجزء <code class="nw">$(uname -r)</code> يُدخل في الأمر إصدار النواة العاملة.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>error: cannot communicate with server: timeout</code></pre></figure>
+<p>السبب أن Snap ما زال يُعدّ نفسه بعد أول تشغيل لـ Ubuntu. والحل الانتظار دقيقتين ثم تشغيل الأمر مرة أخرى.</p>
+<h3 id="القسم-a6-متابعة-الدليل-مع-هذه-التغييرات">القسم A.6، متابعة الدليل مع هذه التغييرات</h3>
+<p>ملفاتنا في WSL تبقى في WSL. ننشئ كل ملف من جديد في الآلة الافتراضية انطلاقاً من الفصول، كأننا نبدأ من الصفر. ومن هنا نسير في الدليل ابتداءً من قسم Git في <a href="ch02.html">الفصل 2</a>. وفي تمرين <code class="nw">hello.txt</code> من <a href="ch02.html">الفصل 2</a> نفتح Text Editor في Ubuntu، ونكتب <code class="nw">copied from Windows</code>، ونحفظ الملف باسم <code class="nw">hello.txt</code> في مجلد <code class="nw">microseg</code>، لتتطابق نقطة التحقق.</p>
+<p>في <a href="ch03.html">الفصل 3</a> نتخطى كل خطوة تخص <code class="nw">.wslconfig</code>، وكل أمر <code class="nw">wsl</code>، والفقرة الخاصة بـ Docker Desktop. وفي فحص systemd من <a href="ch03.html">الفصل 3</a> لا يهم داخل الآلة الافتراضية إلا السطر الأول، <code class="nw">systemd</code>. والرسالة <code>cat: /etc/wsl.conf: No such file or directory</code> متوقعة هناك، لذلك لا ننشئ الملف. وفي الموضع الذي يعيد فيه <a href="ch03.html">الفصل 3</a> تشغيل التوزيعة بعد <code class="nw">sudo usermod -aG docker $USER</code>، نعيد تشغيل الآلة الافتراضية بالأمر <code class="nw">sudo reboot</code> بدلاً من ذلك. بعد إعادة التشغيل نفتح الطرفية ونشغّل <code class="nw">id -nG</code>، وهو يسرد المجموعات التي ينتمي إليها مستخدمنا. ويجب أن تكون <code class="nw">docker</code> بينها. وإذا طبع سطر <code class="nw">check-env.sh</code> الخاص بذاكرة 9 GB الكلمة FAIL، نطفئ الآلة الافتراضية ونرفع ذاكرتها إلى <code class="nw">11264</code> MB ثم نشغّلها من جديد. اسم الفحص يذكر WSL، لكنه يقيس أي Linux يعمل عليه.</p>
+<p>وفي المواضع التي ترسل فيها الفصول 8 و10 و14 الهجوم من PowerShell، نستخدم بدلاً من ذلك هذه الأوامر الخمسة في طرفية Ubuntu. فيها الحمولات نفسها، ويحل <code class="nw">curl</code> محل <code class="nw">curl.exe</code>.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>curl -s http://localhost:30080/news/check-image --data-urlencode &quot;url=x; id; hostname&quot;
+curl -s http://localhost:30080/news/check-image --data-urlencode &quot;url=x; env | grep SERVICE_PORT= | sort; nc -zv -w 2 frontend 80; nc -zv -w 2 api 8080; nc -zv -w 2 auth 5001; nc -zv -w 2 db 5432; nc -zv -w 2 admin 5002&quot;
+curl -s http://localhost:30080/news/check-image --data-urlencode &quot;url=x; PGCONNECT_TIMEOUT=3 PGPASSWORD=postgres psql -h db -U postgres -d campus -c &#x27;SELECT id, username, full_name FROM students&#x27;&quot;
+curl -s http://localhost:30080/news/check-image --data-urlencode &quot;url=x; PGCONNECT_TIMEOUT=3 PGPASSWORD=postgres psql -h db -U postgres -d campus -c &#x27;UPDATE grades SET grade = 95 WHERE id = 3&#x27; -c &#x27;SELECT * FROM grades WHERE id = 3&#x27;&quot;
+curl -s http://localhost:30080/news/check-image --data-urlencode &quot;url=x; curl -sS --max-time 3 http://admin:5002/users&quot;</code></pre></figure>
+<p class="see"><strong>ما يجب أن نراه:</strong> على الشبكة المسطحة (flat network)، الإجابات نفسها التي أعطتها أوامر PowerShell في <a href="ch08.html">الفصل 8</a>. نتحقق من نص الإثبات في كل خطوة. الخطوة 1 تُظهر <code class="nw">uid=1000(app)</code>، وكل سطر مسح في الخطوة 2 فيه <code class="nw">succeeded</code>، والخطوة 3 تنتهي بـ <code class="nw">(4 rows)</code>، والخطوة 4 تُظهر <code class="nw">UPDATE 1</code>، والخطوة 5 فيها <code class="nw">password_hash</code>.</p>
+<p>في <a href="ch14.html">الفصل 14</a> نُعدّ تطبيق Terminal في Ubuntu لالتقاط الشاشة بدلاً من Windows Terminal. ننقر زر القائمة ذا الخطوط الثلاثة في أعلى يمين نافذة Terminal، ونختار «Preferences». ننقر ملف التعريف (profile) على اليسار، واسمه «Unnamed» ما لم نكن قد غيّرناه. في تبويب «Text» نحدد «Custom font» ونضبط الحجم على 14، وفي تبويب «Colors» نزيل التحديد عن «Use colors from system theme»، ونختار نظام ألوان فاتحاً تحت «Built-in schemes»، مثل «GNOME light».</p>
+<p>نلتقط كل خطوة من الهجوم بغلاف الطرفية (terminal wrapper) بدلاً من كتل PowerShell، مثلاً <code>clear; { date; curl -s http://localhost:30080/news/check-image --data-urlencode "url=x; id; hostname"; date; } 2&gt;&amp;1 | tee ~/microseg/evidence/E13-step1.txt</code>. ولالتقاط الصور نضغط مفتاح Print Screen. يظهر شريط في أسفل الشاشة فيه ثلاثة خيارات هي «Selection» و«Screen» و«Window». لالتقاط الطرفية نختار «Window»، وننقر الطرفية، ثم ننقر زر الالتقاط الدائري. أما لصفحة المتصفح فنختار «Screen»، لتدخل الساعة في الشريط العلوي لـ Ubuntu في الصورة. يحفظ Ubuntu كل صورة في <code class="nw">~/Pictures/Screenshots</code> باسم فيه مسافات، مثل <code>Screenshot From 2026-11-20 14-03-22.png</code>، ثم ننقل أحدث صورة إلى مجلد الأدلة باسمها في قائمة الأدلة.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>mv &quot;$(ls -t ~/Pictures/Screenshots/*.png | head -1)&quot; ~/microseg/evidence/E03-nodes.png</code></pre></figure>
+<p>يسرد <code class="nw">ls -t</code> لقطات الشاشة من الأحدث إلى الأقدم، ويُبقي <code class="nw">head -1</code> السطر الأول، ويضع <code class="nw">$( )</code> اسم ذلك الملف داخل الأمر <code class="nw">mv</code>. وعلامتا التنصيص المزدوجتان تُبقيان الاسم بمسافاته كتلة واحدة. نغيّر <code class="nw">E03-nodes</code> إلى اسم كل لقطة. ولا يطبع <code class="nw">mv</code> شيئاً عند نجاحه. ونتخطى مجلد الأدلة في Windows وخطوة النسخ في <a href="ch14.html">الفصل 14</a>.</p>
+<p>لا تستطيع الآلة الافتراضية الكتابة في مجلد على Windows، ولا يمرّر Hyper-V أقراص USB إلى آلة Linux افتراضية، لذلك تصل النسخة الاحتياطية الأسبوعية من <a href="ch02.html">الفصل 2</a> والأدلة إلى Windows عبر خدمة تخزين سحابي. ننشئ الأرشيف في مجلد المنزل داخل الآلة الافتراضية.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>tar --exclude=microseg/.venv --exclude=microseg/images -czf ~/microseg-backup-$(date +%F).tar.gz -C ~ microseg</code></pre></figure>
+<p>هذا أمر النسخ الاحتياطي من <a href="ch02.html">الفصل 2</a>، مع كتابة الأرشيف في مجلد المنزل بدلاً من مجلد على Windows. وهو يشمل <code class="nw">~/microseg/evidence</code>، فيحمل الملف نفسه لقطات الشاشة والمخرجات النصية. ولا يطبع شيئاً عند نجاحه. نفتح Firefox في الآلة الافتراضية، ونسجّل الدخول إلى OneDrive أو Google Drive، ونرفع ملف <code class="nw">.tar.gz</code> من مجلد المنزل. ثم في Windows ننزّله من الخدمة نفسها، وننقر عليه بالزر الأيمن في File Explorer، ونختار «Extract All» لنحصل على الملفات التي نحتاجها لبحث التخرج.</p>
+<h2 id="الملحق-b-بطاقة-الأوامر-في-صفحة-واحدة">الملحق B. بطاقة الأوامر في صفحة واحدة</h2>
+<p>هذه هي الأوامر التي نستخدمها مرة بعد مرة بعد اكتمال بناء المختبر. كل أمر مأخوذ من الفصل المذكور بجانبه، وهناك نجد مخرجاته وشرحها. الكلمات بين قوسين زاويين عناصر نائبة (placeholders)، كما يشرح <a href="ch00.html">الفصل 0</a>. والنص بعد <code class="nw">#</code> تعليق يتجاهله bash، لذلك يمكن لصق السطر كاملاً.</p>
+<p>بداية الجلسة، وكل أمر يبقى يعمل طويلاً في تبويب Ubuntu خاص به (الفصول 4 و7 و11 و13):</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+docker ps --format &#x27;{{.Names}}&#x27;                              # must list kind-control-plane, kind-worker, kind-worker2
+                                                              # if not, follow &quot;After a Windows restart&quot; in chapter 15
+jobs                                                          # in an old tab: a helper listed here is still running, skip it
+cilium hubble port-forward                                    # tab 1, leave it running
+cilium hubble ui --open-browser=false                         # tab 2, then open http://localhost:12000
+cd ~/microseg/dashboard &amp;&amp; ../.venv/bin/python app.py         # tab 3, then open http://localhost:5050</code></pre></figure>
+<p>هل كل شيء سليم (الفصول 4 و6 و10):</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>kubectl get nodes -L tier                                     # 3 nodes Ready, tiers frontend and backend
+kubectl -n campus get pods -o wide                            # 7 pods 1/1 Running
+cilium status                                                 # Cilium, Operator, Envoy DaemonSet, Hubble Relay OK
+hubble status                                                 # Connected Nodes: 3/3
+bash ~/microseg/check-portal.sh                               # last line PORTAL: 6/6 OK
+kubectl -n campus get cnp                                     # 10 policies when segmented, none when flat</code></pre></figure>
+<p>التنقل بين الحالات (الفصلان 8 و10):</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>kubectl delete -f ~/microseg/k8s/policies/ --ignore-not-found # flat network
+kubectl apply -f ~/microseg/k8s/policies/1-baseline.yaml      # from the flat state only: default deny, portal breaks
+kubectl apply -f ~/microseg/k8s/policies/                     # segmented, both files
+kubectl -n campus rollout restart deployment/db               # reset the database, Omar back to 58
+kubectl -n campus rollout status deployment/db --timeout=120s # wait for successfully rolled out</code></pre></figure>
+<p>النتائج من دون متصفح (الفصول 7 و8 و10):</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>curl -s localhost:5050/api/matrix | jq -c &#x27;{open, total}&#x27;
+curl -s -X POST localhost:5050/api/attack | jq -r &#x27;.[] | (if .success then &quot;SUCCESS &quot; else &quot;FAILED  &quot; end) + .step&#x27;
+kubectl -n campus exec deploy/db -- psql -U postgres -d campus -c &quot;SELECT * FROM grades WHERE id = 3&quot;
+curl -s -i http://localhost:30080/api/export</code></pre></figure>
+<p>أوامر Hubble <a href="ch11.html">(الفصل 11</a>). لا نجمع أبداً <code class="nw">--namespace</code> مع <code class="nw">--from-pod</code> أو <code class="nw">--to-pod</code>، لأن Hubble يرفض هذا الجمع.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>hubble observe --namespace campus --verdict DROPPED --last 20
+hubble observe --from-pod campus/news --verdict DROPPED --last 12
+hubble observe --to-pod campus/db --last 12
+hubble observe --namespace campus --protocol http --last 6
+hubble observe --namespace campus --http-status 403 --last 5
+hubble observe --from-pod campus/news --protocol dns --last 10</code></pre></figure>
+<p>البحث عن مشكلة <a href="ch13.html">(الفصل 13</a>):</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>kubectl -n campus describe pod &lt;pod-name&gt;
+kubectl -n campus logs deploy/&lt;service&gt;
+kubectl -n campus logs deploy/&lt;service&gt; --previous
+kubectl get events -n campus --sort-by=.lastTimestamp</code></pre></figure>
+<p>إعادة البناء والقياس (الفصول 6 و12 و13):</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>bash ~/microseg/deploy.sh                                     # rebuild images, redeploy, reset db, remove policies
+kind delete cluster &amp;&amp; bash ~/microseg/setup.sh &amp;&amp; bash ~/microseg/deploy.sh   # everything, about 15 minutes
+cd ~/microseg &amp;&amp; .venv/bin/python -u measure.py               # about 10 minutes, leaves the policies applied</code></pre></figure>
+<p>أوامر Git <a href="ch02.html">(الفصل 2</a>):</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>git status
+git diff
+git restore &lt;file&gt;
+git log --oneline
+git add -A &amp;&amp; git commit -m &quot;chNN: &lt;what&gt;&quot;</code></pre></figure>
+<p>أوامر Windows PowerShell، للهجوم ولـ WSL (الفصلان 2 و8). نستخدم دائماً <code class="nw">curl.exe</code>، ولا نستخدم <code class="nw">curl</code> أبداً.</p>
+<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>curl.exe -s http://localhost:30080/news/check-image --data-urlencode &quot;url=x; id; hostname&quot;
+curl.exe -s http://localhost:30080/news/check-image --data-urlencode &quot;url=x; env | grep SERVICE_PORT= | sort; nc -zv -w 2 frontend 80; nc -zv -w 2 api 8080; nc -zv -w 2 auth 5001; nc -zv -w 2 db 5432; nc -zv -w 2 admin 5002&quot;
+curl.exe -s http://localhost:30080/news/check-image --data-urlencode &quot;url=x; PGCONNECT_TIMEOUT=3 PGPASSWORD=postgres psql -h db -U postgres -d campus -c &#x27;SELECT id, username, full_name FROM students&#x27;&quot;
+curl.exe -s http://localhost:30080/news/check-image --data-urlencode &quot;url=x; PGCONNECT_TIMEOUT=3 PGPASSWORD=postgres psql -h db -U postgres -d campus -c &#x27;UPDATE grades SET grade = 95 WHERE id = 3&#x27; -c &#x27;SELECT * FROM grades WHERE id = 3&#x27;&quot;
+curl.exe -s http://localhost:30080/news/check-image --data-urlencode &quot;url=x; curl -sS --max-time 3 http://admin:5002/users&quot;
+curl.exe -s -i http://localhost:30080/api/export
+wsl -l -v
+wsl --shutdown</code></pre></figure>
+<h2 id="الملحق-c-فهرس-الملفات">الملحق C. فهرس الملفات</h2>
+<p>كل ملف من ملفات المشروع في <code class="nw">~/microseg</code> نكتبه أو نلصقه، عدا <code class="nw">.gitignore</code> و<code class="nw">hello.txt</code> من <a href="ch02.html">الفصل 2</a>، مع الفصل الذي يبنيه. وأعداد الأسطر مأخوذة من الملفات المختبَرة. والأجزاء الثلاثة المعلَّمة بعبارة «يُكتب يدوياً» هي التي نكتبها بأيدينا.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="جدول"><table>
+<thead>
+<tr>
+<th>الملف</th>
+<th>الفصل</th>
+<th>الغرض</th>
+<th>الأسطر</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code class="nw">check-env.sh</code></td>
+<td>3</td>
+<td>نقطة التحقق من البيئة</td>
+<td>32</td>
+</tr>
+<tr>
+<td><code class="nw">kind-config.yaml</code></td>
+<td>4</td>
+<td>شكل العنقود (cluster)</td>
+<td>21</td>
+</tr>
+<tr>
+<td><code class="nw">setup.sh</code></td>
+<td>4</td>
+<td>مرة واحدة: العنقود وCilium وHubble، وتحميل nginx وpostgres مسبقاً</td>
+<td>23</td>
+</tr>
+<tr>
+<td><code class="nw">apps/requirements.txt</code></td>
+<td>5</td>
+<td>حزم Python اللازمة لصور الحاويات</td>
+<td>4</td>
+</tr>
+<tr>
+<td><code class="nw">apps/Dockerfile</code></td>
+<td>5</td>
+<td>يبني <code class="nw">campus-app:1.0</code> لخدمات api وauth وadmin وops</td>
+<td>9</td>
+</tr>
+<tr>
+<td><code class="nw">apps/Dockerfile.news</code></td>
+<td>5</td>
+<td>يبني <code class="nw">campus-news:1.0</code> مع أدوات المهاجم</td>
+<td>6</td>
+</tr>
+<tr>
+<td><code class="nw">apps/news.py</code></td>
+<td>5</td>
+<td>الإعلانات، ونقطة النهاية (endpoint) <code class="nw">/news/check-image</code> التي فيها الثغرة الأمنية (vulnerability) (يُكتب يدوياً: الدالة <code class="nw">check_image</code>)</td>
+<td>34</td>
+</tr>
+<tr>
+<td><code class="nw">apps/api.py</code></td>
+<td>5</td>
+<td>وكيل (proxy) لتسجيل الدخول، والملف الشخصي، والدرجات، ونقطة النهاية المنسية <code class="nw">/api/export</code></td>
+<td>68</td>
+</tr>
+<tr>
+<td><code class="nw">apps/auth.py</code></td>
+<td>5</td>
+<td>تسجيل الدخول، والتحقق من رمز الدخول (token)</td>
+<td>50</td>
+</tr>
+<tr>
+<td><code class="nw">apps/admin.py</code></td>
+<td>5</td>
+<td>لوحة إدارة بلا تسجيل دخول، <code class="nw">/users</code></td>
+<td>36</td>
+</tr>
+<tr>
+<td><code class="nw">frontend/default.conf</code></td>
+<td>5</td>
+<td>إعدادات nginx (ConfigMap <code class="nw">frontend-files</code>)</td>
+<td>26</td>
+</tr>
+<tr>
+<td><code class="nw">frontend/index.html</code></td>
+<td>5</td>
+<td>صفحة البوابة (ConfigMap <code class="nw">frontend-files</code>)</td>
+<td>61</td>
+</tr>
+<tr>
+<td><code class="nw">db/init.sql</code></td>
+<td>5</td>
+<td>الجداول والبيانات الأولية (ConfigMap <code class="nw">db-init</code>)</td>
+<td>38</td>
+</tr>
+<tr>
+<td><code class="nw">k8s/app.yaml</code></td>
+<td>6</td>
+<td>Secret و6 Services و7 Deployments</td>
+<td>311</td>
+</tr>
+<tr>
+<td><code class="nw">deploy.sh</code></td>
+<td>6</td>
+<td>يبني صور التطبيق ويحمّلها، ويعيد إنشاء مساحة الأسماء (namespace) <code class="nw">campus</code> (فيعيد ضبط قاعدة البيانات ويحذف السياسات)</td>
+<td>21</td>
+</tr>
+<tr>
+<td><code class="nw">check-portal.sh</code></td>
+<td>6</td>
+<td>يتحقق من أن المستخدمين الشرعيين ما زالوا يصلون</td>
+<td>25</td>
+</tr>
+<tr>
+<td><code class="nw">dashboard/app.py</code></td>
+<td>7</td>
+<td>الواجهة الخلفية للوحة التحكم</td>
+<td>121</td>
+</tr>
+<tr>
+<td><code class="nw">dashboard/index.html</code></td>
+<td>7</td>
+<td>صفحة لوحة التحكم</td>
+<td>153</td>
+</tr>
+<tr>
+<td><code class="nw">k8s/policies/1-baseline.yaml</code></td>
+<td>10</td>
+<td>default-deny وallow-dns وallow-kubelet-probes (يُكتب يدوياً: الملف كله)</td>
+<td>48</td>
+</tr>
+<tr>
+<td><code class="nw">k8s/policies/2-allow.yaml</code></td>
+<td>10</td>
+<td>السياسات السبع الخاصة بكل حمل عمل (workload) (يُكتب يدوياً: سياسة api)</td>
+<td>186</td>
+</tr>
+<tr>
+<td><code class="nw">measure.py</code></td>
+<td>12</td>
+<td>اختبار زمن الاستجابة (latency)</td>
+<td>71</td>
+</tr>
+</tbody>
+</table></div>
+<p>تضم الملفات معاً 1344 سطراً. أما <code class="nw">results/latency.csv</code> والملفات في <code class="nw">evidence/</code> فتُنتجها الأوامر، ولا نكتبها نحن. ولنقارن ملفاتنا بالجدول نعدّ أسطرها.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; wc -l kind-config.yaml setup.sh deploy.sh check-env.sh check-portal.sh measure.py apps/requirements.txt apps/Dockerfile apps/Dockerfile.news apps/news.py apps/api.py apps/auth.py apps/admin.py frontend/default.conf frontend/index.html db/init.sql k8s/app.yaml k8s/policies/1-baseline.yaml k8s/policies/2-allow.yaml dashboard/app.py dashboard/index.html</code></pre></figure>
+<p>يعدّ <code class="nw">wc -l</code> أسطر كل ملف مذكور بعده، ويضيف المجموع في النهاية.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> سطر لكل ملف، ثم المجموع.</p>
+<p>المتوقع أن يكون السطر الأخير <code class="nw">1344 total</code>. ولا بأس إن اختلف ملف عن الجدول بسطر واحد، فهذا في العادة سطر فارغ ناقص أو زائد في آخر الملف، وعندها يختلف المجموع بالمقدار نفسه. أما الفرق الأكبر فمعناه أن كتلة ملصوقة سقطت أو لُصقت مرتين، وعندها نفتح ذلك الملف بجانب نسخته في الدليل ونقارن بينهما سطراً بسطر.</p>
+<h2 id="الملحق-d-مسرد-المصطلحات">الملحق D. مسرد المصطلحات</h2>
+<p>هذا الملحق خاص بالنسخة العربية. يضع الجدول أدناه أهم المصطلحات الإنجليزية بجانب مقابلاتها العربية في هذا الدليل، فإذا صادفنا المصطلح الإنجليزي في مرجع أو في مخرجات أداة عرفنا مقابله هنا.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="جدول"><table>
+<thead>
+<tr>
+<th>المصطلح الإنجليزي</th>
+<th>المصطلح العربي</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Micro-segmentation</td>
+<td>التجزئة الدقيقة للشبكة</td>
+</tr>
+<tr>
+<td>Macro-segmentation</td>
+<td>التجزئة الواسعة للشبكة</td>
+</tr>
+<tr>
+<td>Flat network</td>
+<td>الشبكة المسطحة</td>
+</tr>
+<tr>
+<td>Lateral movement</td>
+<td>الحركة الجانبية</td>
+</tr>
+<tr>
+<td>Zero Trust</td>
+<td>الثقة الصفرية (وتُسمّى أيضاً انعدام الثقة)</td>
+</tr>
+<tr>
+<td>Zero Trust Architecture</td>
+<td>بنية الثقة الصفرية</td>
+</tr>
+<tr>
+<td>Perimeter security</td>
+<td>أمن المحيط</td>
+</tr>
+<tr>
+<td>East-west traffic</td>
+<td>حركة المرور شرق-غرب</td>
+</tr>
+<tr>
+<td>North-south traffic</td>
+<td>حركة المرور شمال-جنوب</td>
+</tr>
+<tr>
+<td>Attack surface</td>
+<td>سطح الهجوم</td>
+</tr>
+<tr>
+<td>Blast radius</td>
+<td>نطاق الضرر</td>
+</tr>
+<tr>
+<td>Least privilege</td>
+<td>مبدأ الحد الأدنى من الصلاحيات</td>
+</tr>
+<tr>
+<td>Default deny</td>
+<td>الرفض الافتراضي</td>
+</tr>
+<tr>
+<td>Allow-list</td>
+<td>قائمة السماح</td>
+</tr>
+<tr>
+<td>Network policy</td>
+<td>سياسة الشبكة</td>
+</tr>
+<tr>
+<td>Ingress</td>
+<td>الحركة الواردة</td>
+</tr>
+<tr>
+<td>Egress</td>
+<td>الحركة الصادرة</td>
+</tr>
+<tr>
+<td>Identity-based policy</td>
+<td>سياسة قائمة على الهوية</td>
+</tr>
+<tr>
+<td>Policy enforcement point</td>
+<td>نقطة فرض السياسة</td>
+</tr>
+<tr>
+<td>Container</td>
+<td>حاوية</td>
+</tr>
+<tr>
+<td>Container image</td>
+<td>صورة الحاوية</td>
+</tr>
+<tr>
+<td>Workload</td>
+<td>حمل العمل</td>
+</tr>
+<tr>
+<td>Microservices</td>
+<td>الخدمات المصغّرة</td>
+</tr>
+<tr>
+<td>Cluster</td>
+<td>عنقود</td>
+</tr>
+<tr>
+<td>Node / worker node</td>
+<td>عقدة / عقدة عاملة</td>
+</tr>
+<tr>
+<td>Control plane</td>
+<td>مستوى التحكم</td>
+</tr>
+<tr>
+<td>Namespace</td>
+<td>مساحة الأسماء</td>
+</tr>
+<tr>
+<td>Pod</td>
+<td>Pod (يبقى بالإنجليزية)</td>
+</tr>
+<tr>
+<td>Label</td>
+<td>وسم</td>
+</tr>
+<tr>
+<td>Selector</td>
+<td>مُحدِّد</td>
+</tr>
+<tr>
+<td>Kernel</td>
+<td>نواة نظام التشغيل</td>
+</tr>
+<tr>
+<td>Virtual machine</td>
+<td>آلة افتراضية</td>
+</tr>
+<tr>
+<td>Proxy</td>
+<td>وكيل</td>
+</tr>
+<tr>
+<td>Application layer (L7)</td>
+<td>طبقة التطبيقات (الطبقة السابعة)</td>
+</tr>
+<tr>
+<td>Port</td>
+<td>منفذ</td>
+</tr>
+<tr>
+<td>Packet</td>
+<td>حزمة</td>
+</tr>
+<tr>
+<td>Flow</td>
+<td>تدفق شبكي</td>
+</tr>
+<tr>
+<td>Observability</td>
+<td>قابلية الرصد</td>
+</tr>
+<tr>
+<td>Command injection</td>
+<td>حقن الأوامر</td>
+</tr>
+<tr>
+<td>Vulnerability</td>
+<td>ثغرة أمنية</td>
+</tr>
+<tr>
+<td>Foothold</td>
+<td>موطئ قدم</td>
+</tr>
+<tr>
+<td>Port scan</td>
+<td>مسح المنافذ (المسح)</td>
+</tr>
+<tr>
+<td>Default credentials</td>
+<td>بيانات الاعتماد الافتراضية</td>
+</tr>
+<tr>
+<td>Data manipulation</td>
+<td>التلاعب بالبيانات</td>
+</tr>
+<tr>
+<td>Insider threat</td>
+<td>التهديد الداخلي</td>
+</tr>
+<tr>
+<td>Latency / overhead</td>
+<td>زمن الاستجابة / الحمل الإضافي</td>
+</tr>
+<tr>
+<td>Reachability matrix</td>
+<td>مصفوفة قابلية الوصول</td>
+</tr>
+<tr>
+<td>Firewall</td>
+<td>جدار الحماية</td>
+</tr>
+<tr>
+<td>Authentication / authorization</td>
+<td>المصادقة / التفويض</td>
+</tr>
+</tbody>
+</table></div>
+<!-- OUT ids: appC-wc-lines --><nav class="pager" aria-label="الفصول"><a rel="prev" href="ch15.html"><span>الفصل السابق</span>الفصل 15. خطة العمل يوماً بيوم</a></nav></main></div>
+<footer class="foot"><div class="foot-in"><p>Kubernetes 1.36 و Cilium 1.20.5 و kind 0.33.0 على Windows 11 مع WSL 2. شغّلنا كل أمر على حاسوب حقيقي في تشرين الثاني 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">المصدر على GitHub</a></p></div></footer>
+<p class="vh" aria-live="polite" id="live"></p>
+<script type="application/json" id="i18n">{"copied": "نُسخ", "copyFail": "نضغط Ctrl+C لنسخ النص المحدد", "doneOf": "الخطوات المنجزة: {d} من {t}", "next": "الخطوة التالية: {s}", "allDone": "اكتمل المسار وأُنجزت الخطوات كلها.", "sumCount": "المنجز {d} من {t}", "cleared": "مُسحت كل العلامات.", "confirm": "هل نمسح كل العلامات في هذه الصفحة؟ تبقى الملفات والعنقود كما هي.", "stageCount": "{d} من {t}"}</script>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

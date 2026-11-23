@@ -1,0 +1,10 @@
+[wsl2]
+memory=10GB
+processors=4
+swap=4GB
+networkingMode=nat
+localhostForwarding=true
+loadKernelModules=xt_socket,xt_TPROXY,xt_mark,xt_CT,xt_set,ip_set_hash_ip,xt_comment,iptable_raw,iptable_mangle,ip6table_raw,ip6table_mangle,sch_ingress,cls_bpf,xt_recent
+
+[general]
+instanceIdleTimeout=-1

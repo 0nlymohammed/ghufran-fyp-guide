@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
+<title>Chapter 11. Read the evidence in Hubble | Micro-segmentation lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&family=Noto+Sans+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="ar" href="../ar/guide/ch11.html">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400&text=%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9&display=swap">
+</head>
+<body class="">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="top-in">
+<a class="brand" href="../index.html">Micro-segmentation lab</a>
+<nav aria-label="Micro-segmentation lab"><ul>
+<li><a href="../index.html">Quick path</a></li>
+<li><a href="../guide/index.html" aria-current="page">Full guide</a></li>
+<li><a href="../downloads.html">Downloads</a></li>
+<li><a href="../ar/guide/ch11.html" lang="ar" hreflang="ar" data-setlang="ar">العربية</a></li>
+</ul></nav>
+</div></header>
+<div class="layout"><details class="rail" open><summary>Chapters</summary><nav aria-label="Chapters"><ol class="toc"><li><a href="ch00.html">0. How to use this guide</a></li><li><a href="ch01.html">1. What you will build</a></li><li><a href="ch02.html">2. Before you start</a></li><li><a href="ch03.html">3. Set up the environment</a></li><li><a href="ch04.html">4. Create the cluster</a></li><li><a href="ch05.html">5. Write the services</a></li><li><a href="ch06.html">6. Deploy the portal</a></li><li><a href="ch07.html">7. Build your dashboard</a></li><li><a href="ch08.html">8. Attack the flat network</a></li><li><a href="ch09.html">9. Design the policy</a></li><li><a href="ch10.html">10. Apply micro-segmentation</a></li><li><a href="ch11.html" aria-current="page">11. Read the evidence in Hubble</a><ol class="sub"><li><a href="#first-check-that-hubble-answers">First, check that Hubble answers</a></li><li><a href="#new-traffic-the-attack-and-the-portal-checks">New traffic: the attack and the portal checks</a></li><li><a href="#drops-from-the-news-pod-wide-then-narrow">Drops from the news pod, wide then narrow</a></li><li><a href="#one-hubble-line-field-by-field">One Hubble line, field by field</a></li><li><a href="#same-port-two-identities">Same port, two identities</a></li><li><a href="#read-the-l7-decision">Read the L7 decision</a></li><li><a href="#read-the-attackers-dns-lookups">Read the attacker's DNS lookups</a></li><li><a href="#count-the-attackers-drops">Count the attacker's drops</a></li><li><a href="#hubble-ui-the-same-flows-as-a-map">Hubble UI: the same flows as a map</a></li><li><a href="#checkpoint">Checkpoint</a></li></ol></li><li><a href="ch12.html">12. Measure</a></li><li><a href="ch13.html">13. Getting unstuck alone</a></li><li><a href="ch14.html">14. Evidence for your report</a></li><li><a href="ch15.html">15. Day-by-day plan</a></li><li><a href="appendix.html">Appendices</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="chapter-11-read-the-evidence-in-hubble">Chapter 11. Read the evidence in Hubble</h1>
+<p>In <a href="ch10.html">chapter 10</a> you watched the attack fail. This chapter shows you why it failed, in Cilium's own records. You'll read the lines where the news pod tried to reach db and admin and got <code class="nw">Policy denied</code>, then the lines where api reached the same database port a few seconds later and got through. You'll also see Envoy refuse <code class="nw">/api/export</code> with a 403 and find the attacker's name lookups, which Hubble logged even though every connection after them failed. Each important output goes into a text file in <code class="nw">~/microseg/evidence</code>, ready for your report. Plan about 1.5 hours.</p>
+<p><a href="ch10.html">Chapter 10</a> ended with both policy files applied, and this whole chapter assumes they still are. The first step checks that for you.</p>
+<h2 id="first-check-that-hubble-answers">First, check that Hubble answers</h2>
+<p>The <code class="nw">hubble</code> command doesn't read the cluster by itself. It asks Hubble Relay, the Cilium part that collects flows from every node, and it reaches Relay through the port-forward you started in <a href="ch04.html">chapter 4</a> with <code>cilium hubble port-forward &amp;</code>. That port-forward stops when you close its terminal or restart Windows, and an empty screen caused by a dead port-forward looks a lot like "no traffic". Check the connection first.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+mkdir -p evidence
+hubble status
+kubectl -n campus get cnp</code></pre></figure>
+<p><code class="nw">mkdir -p evidence</code> creates the folder where this chapter saves its outputs. The <code class="nw">-p</code> means "no error if it already exists". <code class="nw">hubble status</code> asks Relay how it's doing and how many nodes it collects flows from. <code class="nw">kubectl -n campus get cnp</code> lists the policies in the <code class="nw">campus</code> namespace. <code class="nw">cnp</code> is the short name Kubernetes accepts for CiliumNetworkPolicy, so you don't have to type the long one.</p>
+<p><strong>You should see</strong> the Hubble status lines first, then a table of policies.</p>
+<p>In the Hubble part, the line that has to match is <code class="nw">Connected Nodes: 3/3</code>, which means Relay hears from all three nodes. The policy table must list 10 names, from <code class="nw">admin</code> to <code class="nw">ops</code>, and every row must say <code class="nw">True</code> under VALID. The AGE column shows how long ago each policy was created, so yours will differ.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>4245: connect: connection refused</code></pre></figure>
+<p>The full message is longer, but it contains this text. Port 4245 is where the port-forward listens, and "connection refused" means nothing is listening there, so the port-forward isn't running. Start it again in the background with <code>cilium hubble port-forward &amp;</code>, wait five seconds and run <code class="nw">hubble status</code> again. The <code class="nw">&amp;</code> at the end hands the command to the background so your prompt comes back.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>No resources found in campus namespace.</code></pre></figure>
+<p>Your policies aren't applied. Maybe you ran <code class="nw">deploy.sh</code> again, which deletes the namespace and every policy in it. Apply both files with <code class="nw">kubectl apply -f k8s/policies/</code>, wait ten seconds and repeat the step.</p>
+<p>If <code class="nw">Connected Nodes</code> shows <code class="nw">2/3</code> or less, one Cilium agent isn't ready yet, which happens for a minute or two after Windows starts. Run <code class="nw">cilium status --wait</code> and let it finish, then run <code class="nw">hubble status</code> again.</p>
+<h2 id="new-traffic-the-attack-and-the-portal-checks">New traffic: the attack and the portal checks</h2>
+<p>Hubble doesn't keep flows forever. Each node holds the most recent ones in a ring buffer, a store of fixed size where every new flow pushes out the oldest one. The attack you ran in <a href="ch10.html">chapter 10</a> may already have been pushed out. Run it again now, together with the portal checks, so that the next steps have both blocked and allowed traffic to show.</p>
+<p>The attack goes through your dashboard, so the dashboard has to be running. If it isn't, open a second Ubuntu terminal, start it with <code>cd ~/microseg/dashboard &amp;&amp; ../.venv/bin/python app.py</code>, leave that window open and come back to the first terminal.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>curl -s -X POST localhost:5050/api/attack | jq -r &#x27;.[] | (if .success then &quot;SUCCESS &quot; else &quot;FAILED  &quot; end) + .step&#x27;
+bash check-portal.sh</code></pre></figure>
+<p>The first line asks the dashboard's <code class="nw">/api/attack</code> route to send the five attack payloads through the NodePort at <code class="nw">localhost:30080</code>, the same door the PowerShell commands used in <a href="ch08.html">chapter 8</a>. <code class="nw">-X POST</code> is needed because that route only accepts POST requests. The dashboard answers with a list of five results, and <code class="nw">jq</code> turns it into readable lines. <code class="nw">-r</code> prints plain text without quotes, and <code class="nw">.[]</code> takes the results one at a time. <code>if .success then "SUCCESS " else "FAILED  " end</code> picks a word for each one, and <code class="nw">+ .step</code> adds the step's name after it. The command takes about 18 seconds, because the four blocked steps each wait for their own timeout. The second line runs the six checks a real student and the ops team would make.</p>
+<p><strong>You should see</strong> five attack lines and then the portal checks.</p>
+<p>Step 1 says SUCCESS and steps 2 to 5 say FAILED, which is the 1 of 5 from <a href="ch10.html">chapter 10</a>. The last line must read <code class="nw">PORTAL: 6/6 OK</code>.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>The first command prints nothing at all and the prompt returns at once. The <code class="nw">-s</code> flag hides curl's error messages, so a dashboard that isn't running shows up as silence. Start the dashboard as described above and run the command again.</p>
+<p>All five lines say SUCCESS. The policies are missing, and the first step of this chapter should have caught that. Apply them with <code class="nw">kubectl apply -f k8s/policies/</code>, wait ten seconds and repeat.</p>
+<p>One or more portal checks say FAIL. A legitimate flow is being blocked, and Hubble can name it. Run <code>hubble observe --namespace campus --verdict DROPPED --last 20</code> and look for a source and destination that appear in your flow table from <a href="ch09.html">chapter 9</a>. <a href="ch13.html">Chapter 13</a> walks through this kind of search question by question.</p>
+<h2 id="drops-from-the-news-pod-wide-then-narrow">Drops from the news pod, wide then narrow</h2>
+<p>The first command shows every recent drop in the namespace, and the second keeps only the ones from the news pod, where the attacker sits.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>hubble observe --namespace campus --verdict DROPPED --last 8</code></pre></figure>
+<p>Each word after <code class="nw">hubble observe</code> is a filter, a condition a flow has to meet to be printed. <code class="nw">--namespace campus</code> keeps flows where either end is a pod in <code class="nw">campus</code>. <code class="nw">--verdict DROPPED</code> keeps only blocked traffic. <code class="nw">--last 8</code> asks for the 8 newest matching flows. Relay asks each node for its own 8 and then merges them, so with campus pods on two worker nodes you can get up to 16 lines.</p>
+<p><strong>You should see</strong> up to 16 lines. Most of them come in pairs, where one line of each pair holds <code class="nw">EGRESS DENIED</code> and the other <code class="nw">Policy denied DROPPED</code>, and every line ends with the TCP flags or the HTTP request in brackets.</p>
+<p>The 8 lines from the node where news runs come from news, because the attack was the last thing that ran there. The other 8 come from the second worker node, where db, api, auth, admin and ops run. You may also see drops from other pods such as auth. Those come from the dashboard's reachability matrix, which tests blocked paths on purpose, and every blocked cell in the matrix leaves a drop behind. A single line from <code class="nw">campus/frontend-</code> to <code class="nw">campus/api-</code> with <code class="nw">http-request DROPPED</code> and <code class="nw">/api/export</code> is a forbidden export request, such as the one you sent in <a href="ch10.html">chapter 10</a>. Envoy refused it, and the step "Read the L7 decision" later in this chapter shows how. Your timestamps, pod name endings and port numbers will differ from the ones printed here.</p>
+<p>To keep only the drops from the news pod, run the second command.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>hubble observe --from-pod campus/news --verdict DROPPED --last 12 | tee ~/microseg/evidence/ch13-drops-from-news.txt</code></pre></figure>
+<p><code class="nw">--from-pod campus/news</code> keeps flows whose source is a pod in the <code class="nw">campus</code> namespace whose name starts with <code class="nw">news</code>. You give the start of the name because the end is random and changes whenever the pod is replaced. The namespace is already inside that value, so this filter can't be combined with <code class="nw">--namespace</code>. The <code class="nw">|</code> is a pipe. It sends the output of <code class="nw">hubble observe</code> into <code class="nw">tee</code>, a small program that prints what it receives on the screen and writes the same text into the file you name. You see the output, and a copy lands in <code class="nw">evidence/</code> for <a href="ch14.html">chapter 14</a>.</p>
+<p>This time every line starts with the timestamp and then <code class="nw">campus/news-</code>.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>Nov 19 20:43:39.887: campus/news-545758c8c6-2jp4n:55292 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) policy-verdict:none EGRESS DENIED (TCP Flags: SYN)
+Nov 19 20:43:39.887: campus/news-545758c8c6-2jp4n:55292 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) Policy denied DROPPED (TCP Flags: SYN)
+Nov 19 20:43:40.911: campus/news-545758c8c6-2jp4n:55292 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) policy-verdict:none EGRESS DENIED (TCP Flags: SYN)
+Nov 19 20:43:40.911: campus/news-545758c8c6-2jp4n:55292 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) Policy denied DROPPED (TCP Flags: SYN)
+Nov 19 20:43:41.917: campus/news-545758c8c6-2jp4n:60310 (ID:53922) &lt;&gt; campus/admin-766cddb668-gr2k8:5002 (ID:5410) policy-verdict:none EGRESS DENIED (TCP Flags: SYN)
+Nov 19 20:43:41.917: campus/news-545758c8c6-2jp4n:60310 (ID:53922) &lt;&gt; campus/admin-766cddb668-gr2k8:5002 (ID:5410) Policy denied DROPPED (TCP Flags: SYN)
+Nov 19 20:43:42.923: campus/news-545758c8c6-2jp4n:60310 (ID:53922) &lt;&gt; campus/admin-766cddb668-gr2k8:5002 (ID:5410) policy-verdict:none EGRESS DENIED (TCP Flags: SYN)
+Nov 19 20:43:42.923: campus/news-545758c8c6-2jp4n:60310 (ID:53922) &lt;&gt; campus/admin-766cddb668-gr2k8:5002 (ID:5410) Policy denied DROPPED (TCP Flags: SYN)
+Nov 19 20:43:43.947: campus/news-545758c8c6-2jp4n:60310 (ID:53922) &lt;&gt; campus/admin-766cddb668-gr2k8:5002 (ID:5410) policy-verdict:none EGRESS DENIED (TCP Flags: SYN)
+Nov 19 20:43:43.947: campus/news-545758c8c6-2jp4n:60310 (ID:53922) &lt;&gt; campus/admin-766cddb668-gr2k8:5002 (ID:5410) Policy denied DROPPED (TCP Flags: SYN)
+Nov 19 20:43:44.971: campus/news-545758c8c6-2jp4n:60310 (ID:53922) &lt;&gt; campus/admin-766cddb668-gr2k8:5002 (ID:5410) policy-verdict:none EGRESS DENIED (TCP Flags: SYN)
+Nov 19 20:43:44.971: campus/news-545758c8c6-2jp4n:60310 (ID:53922) &lt;&gt; campus/admin-766cddb668-gr2k8:5002 (ID:5410) Policy denied DROPPED (TCP Flags: SYN)</code></pre></figure>
+<p>The lines come in pairs. In each pair the first line holds <code>policy-verdict:none EGRESS DENIED</code> and the second holds <code class="nw">Policy denied DROPPED</code>, with the same source, destination and port in both. The destinations are db on port 5432 and admin on port 5002. The db lines come from attack step 4, where <code class="nw">psql</code> tried to log in to the database. Step 3 left the same kind of lines a few seconds earlier, and they fall outside the last 12. The admin lines come from step 5, where <code class="nw">curl</code> tried to open the admin panel. The scan in step 2 also left drops toward frontend on port 80, api on 8080 and auth on 5001, but they're older, so they may fall outside the last 12.</p>
+<p>The same pair repeats about one second apart with the same source port. That's the Linux kernel retrying the connection for the news pod, because its first attempt got no answer. Cilium drops the packet without replying, so the sender can't tell a blocked port from a slow one and keeps retrying until its timeout runs out. That's also why each blocked attack step in <a href="ch10.html">chapter 10</a> took a few seconds to fail.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>filters --from-pod and --namespace cannot be combined</code></pre></figure>
+<p>You added <code class="nw">--namespace campus</code> to the second command. Remove it. The <code class="nw">campus/</code> at the start of <code class="nw">campus/news</code> already names the namespace.</p>
+<p>The second command prints nothing. The attack flows have already been pushed out of the ring buffer, usually because more time passed than you think. Run the attack line from the previous step again and repeat this command within a minute or two.</p>
+<p>The lines end in <code class="nw">FORWARDED</code> instead of <code class="nw">DROPPED</code>, or you see no drops at all while the attack says 5 of 5. The policies aren't in place. Go back to the first step of this chapter.</p>
+<h2 id="one-hubble-line-field-by-field">One Hubble line, field by field</h2>
+<p>Here is one line from the test run, copied from the output above.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>Nov 19 20:43:39.887: campus/news-545758c8c6-2jp4n:55292 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) Policy denied DROPPED (TCP Flags: SYN)</code></pre></figure>
+<p>Read it from left to right.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>Part of the line</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code class="nw">Nov 19 20:43:39.887:</code></td>
+<td>When Cilium saw the packet, down to the millisecond.</td>
+</tr>
+<tr>
+<td><code class="nw">campus/news-545758c8c6-2jp4n</code></td>
+<td>The source, written as namespace, a slash and the pod name. The two random parts at the end belong to this one pod.</td>
+</tr>
+<tr>
+<td><code class="nw">:55292</code></td>
+<td>The source port. When a program opens a connection, the kernel picks a free temporary port on the sender's side for that one connection, so this number changes from one connection to the next.</td>
+</tr>
+<tr>
+<td><code class="nw">(ID:53922)</code></td>
+<td>The source's identity number. Cilium gives one number to every distinct set of pod labels, here <code class="nw">app=news</code> in namespace <code class="nw">campus</code>, and every policy decision is made against this number, never against the IP address. Cilium picks the numbers itself, so yours are different, but a pod keeps its number when it restarts, because its labels stay the same.</td>
+</tr>
+<tr>
+<td><code class="nw">&lt;&gt;</code></td>
+<td>Hubble couldn't set a direction, which happens to packets dropped before any connection exists. Traffic that gets through shows <code class="nw">-&gt;</code> for a request and <code class="nw">&lt;-</code> for a reply.</td>
+</tr>
+<tr>
+<td><code class="nw">campus/db-887596757-wzmtj:5432</code></td>
+<td>The destination pod and the port the packet was going to, here PostgreSQL's port.</td>
+</tr>
+<tr>
+<td><code class="nw">(ID:13907)</code></td>
+<td>The destination's identity number, the one that belongs to <code class="nw">app=db</code>.</td>
+</tr>
+<tr>
+<td><code class="nw">Policy denied</code></td>
+<td>The drop reason. It says a policy decision stopped the packet. A crashed pod or a missing route would carry a different reason.</td>
+</tr>
+<tr>
+<td><code class="nw">DROPPED</code></td>
+<td>The verdict. The packet was thrown away and nothing was sent back.</td>
+</tr>
+<tr>
+<td><code class="nw">(TCP Flags: SYN)</code></td>
+<td>The kind of TCP packet. A SYN is the first packet of a new TCP connection, the knock that asks "may I connect". This connection never got past the knock.</td>
+</tr>
+</tbody>
+</table></div>
+<p>The other line of each pair, <code>policy-verdict:none EGRESS DENIED</code>, records the decision rather than the dropped packet. <code class="nw">policy-verdict</code> marks it as a decision line. <code class="nw">none</code> means no allow rule matched, so default deny decided. <code class="nw">EGRESS</code> says the check happened as the packet left news, and the news policy has no egress section at all. <code class="nw">DENIED</code> is the decision.</p>
+<p>The same flow can be printed as JSON, a structured text format where every value has a name. That shows fields the one-line format leaves out, among them the labels behind the identity number.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>hubble observe --from-pod campus/news --verdict DROPPED --last 1 -o json | jq &#x27;{time: .flow.time, verdict: .flow.verdict, drop_reason: .flow.drop_reason_desc, source: .flow.source.pod_name, source_labels: .flow.source.labels, destination: .flow.destination.pod_name, port: .flow.l4.TCP.destination_port}&#x27;</code></pre></figure>
+<p><code class="nw">--last 1</code> takes only the newest drop. <code class="nw">-o json</code> prints it as JSON instead of one line. The <code class="nw">jq</code> filter between the single quotes builds a smaller object. Each <code class="nw">name: .flow.something</code> pair copies one field out of the flow and gives it a short name, so you don't have to scroll through every field Hubble prints.</p>
+<p><strong>You should see</strong> one JSON object with seven fields.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>{
+  &quot;time&quot;: &quot;2026-11-19T20:43:44.971447182Z&quot;,
+  &quot;verdict&quot;: &quot;DROPPED&quot;,
+  &quot;drop_reason&quot;: &quot;POLICY_DENIED&quot;,
+  &quot;source&quot;: &quot;news-545758c8c6-2jp4n&quot;,
+  &quot;source_labels&quot;: [
+    &quot;k8s:app=news&quot;,
+    &quot;k8s:io.cilium.k8s.namespace.labels.kubernetes.io/metadata.name=campus&quot;,
+    &quot;k8s:io.cilium.k8s.policy.cluster=kind-kind&quot;,
+    &quot;k8s:io.cilium.k8s.policy.serviceaccount=default&quot;,
+    &quot;k8s:io.kubernetes.pod.namespace=campus&quot;
+  ],
+  &quot;destination&quot;: &quot;admin-766cddb668-gr2k8&quot;,
+  &quot;port&quot;: 5002
+}</code></pre></figure>
+<p><code class="nw">"drop_reason": "POLICY_DENIED"</code> is the same drop reason in the form a program would read. The <code class="nw">source_labels</code> list holds <code class="nw">k8s:app=news</code>, the exact label your <code class="nw">news</code> policy selects with <code class="nw">app: news</code>. That's the link between the drop and your YAML file. The other labels are added by Cilium itself, such as the namespace and the cluster name <code class="nw">kind-kind</code>.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>Command &#x27;jq&#x27; not found, but can be installed with:</code></pre></figure>
+<p><code class="nw">jq</code> was installed in <a href="ch03.html">chapter 3</a>. Install it with <code class="nw">sudo apt install -y jq</code> and run the command again.</p>
+<p>A field prints <code class="nw">null</code>. The name after <code class="nw">.flow.</code> has a typo, for example <code class="nw">drop_reason_dsc</code>. Copy the command again from the guide instead of retyping it.</p>
+<h2 id="same-port-two-identities">Same port, two identities</h2>
+<p>Within a few seconds of each other, in the same run, news and api both try to reach the same db pod on the same port 5432. News is dropped and api is let through. Nothing about the destination differs, so the only thing that can explain the two verdicts is the identity of the sender.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>hubble observe --to-pod campus/db --last 12 | tee ~/microseg/evidence/ch13-to-db.txt</code></pre></figure>
+<p><code class="nw">--to-pod campus/db</code> keeps flows whose destination is the db pod. There's no <code class="nw">--verdict</code> filter this time, so allowed and blocked traffic appear together. Since db runs on one node and news on another, each node contributes its own 12 lines and you can get up to 24.</p>
+<p><strong>You should see</strong> news lines with <code class="nw">DROPPED</code> first, then api and admin lines with <code class="nw">FORWARDED</code>.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>Nov 19 20:43:35.786: campus/news-545758c8c6-2jp4n:55282 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) policy-verdict:none EGRESS DENIED (TCP Flags: SYN)
+Nov 19 20:43:35.786: campus/news-545758c8c6-2jp4n:55282 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) Policy denied DROPPED (TCP Flags: SYN)
+Nov 19 20:43:36.815: campus/news-545758c8c6-2jp4n:55282 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) policy-verdict:none EGRESS DENIED (TCP Flags: SYN)
+Nov 19 20:43:36.815: campus/news-545758c8c6-2jp4n:55282 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) Policy denied DROPPED (TCP Flags: SYN)
+Nov 19 20:43:37.835: campus/news-545758c8c6-2jp4n:55282 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) policy-verdict:none EGRESS DENIED (TCP Flags: SYN)
+Nov 19 20:43:37.835: campus/news-545758c8c6-2jp4n:55282 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) Policy denied DROPPED (TCP Flags: SYN)
+Nov 19 20:43:38.870: campus/news-545758c8c6-2jp4n:55292 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) policy-verdict:none EGRESS DENIED (TCP Flags: SYN)
+Nov 19 20:43:38.870: campus/news-545758c8c6-2jp4n:55292 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) Policy denied DROPPED (TCP Flags: SYN)
+Nov 19 20:43:39.887: campus/news-545758c8c6-2jp4n:55292 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) policy-verdict:none EGRESS DENIED (TCP Flags: SYN)
+Nov 19 20:43:39.887: campus/news-545758c8c6-2jp4n:55292 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) Policy denied DROPPED (TCP Flags: SYN)
+Nov 19 20:43:40.911: campus/news-545758c8c6-2jp4n:55292 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) policy-verdict:none EGRESS DENIED (TCP Flags: SYN)
+Nov 19 20:43:40.911: campus/news-545758c8c6-2jp4n:55292 (ID:53922) &lt;&gt; campus/db-887596757-wzmtj:5432 (ID:13907) Policy denied DROPPED (TCP Flags: SYN)
+Nov 19 20:43:45.283: campus/api-65c5c7d5fd-2qtsk:55286 (ID:6935) -&gt; campus/db-887596757-wzmtj:5432 (ID:13907) to-endpoint FORWARDED (TCP Flags: SYN)
+Nov 19 20:43:45.283: campus/api-65c5c7d5fd-2qtsk:55286 (ID:6935) -&gt; campus/db-887596757-wzmtj:5432 (ID:13907) to-endpoint FORWARDED (TCP Flags: ACK)
+Nov 19 20:43:45.283: campus/api-65c5c7d5fd-2qtsk:55286 (ID:6935) -&gt; campus/db-887596757-wzmtj:5432 (ID:13907) to-endpoint FORWARDED (TCP Flags: ACK, PSH)
+Nov 19 20:43:45.295: campus/api-65c5c7d5fd-2qtsk:55286 (ID:6935) -&gt; campus/db-887596757-wzmtj:5432 (ID:13907) to-endpoint FORWARDED (TCP Flags: ACK, FIN)
+Nov 19 20:43:45.298: campus/api-65c5c7d5fd-2qtsk:55286 (ID:6935) -&gt; campus/db-887596757-wzmtj:5432 (ID:13907) to-endpoint FORWARDED (TCP Flags: ACK)
+Nov 19 20:43:45.620: campus/admin-766cddb668-gr2k8:42818 (ID:5410) -&gt; campus/db-887596757-wzmtj:5432 (ID:13907) policy-verdict:L3-L4 EGRESS ALLOWED (TCP Flags: SYN)
+Nov 19 20:43:45.620: campus/admin-766cddb668-gr2k8:42818 (ID:5410) -&gt; campus/db-887596757-wzmtj:5432 (ID:13907) policy-verdict:L3-L4 INGRESS ALLOWED (TCP Flags: SYN)
+Nov 19 20:43:45.620: campus/admin-766cddb668-gr2k8:42818 (ID:5410) -&gt; campus/db-887596757-wzmtj:5432 (ID:13907) to-endpoint FORWARDED (TCP Flags: SYN)
+Nov 19 20:43:45.620: campus/admin-766cddb668-gr2k8:42818 (ID:5410) -&gt; campus/db-887596757-wzmtj:5432 (ID:13907) to-endpoint FORWARDED (TCP Flags: ACK)
+Nov 19 20:43:45.620: campus/admin-766cddb668-gr2k8:42818 (ID:5410) -&gt; campus/db-887596757-wzmtj:5432 (ID:13907) to-endpoint FORWARDED (TCP Flags: ACK, PSH)
+Nov 19 20:43:45.632: campus/admin-766cddb668-gr2k8:42818 (ID:5410) -&gt; campus/db-887596757-wzmtj:5432 (ID:13907) to-endpoint FORWARDED (TCP Flags: ACK, FIN)
+Nov 19 20:43:45.637: campus/admin-766cddb668-gr2k8:42818 (ID:5410) -&gt; campus/db-887596757-wzmtj:5432 (ID:13907) to-endpoint FORWARDED (TCP Flags: ACK)</code></pre></figure>
+<p>Find a line whose source, right after the timestamp, is <code class="nw">campus/api-</code> and that holds <code class="nw">-&gt; campus/db-</code> and <code class="nw">to-endpoint FORWARDED</code>. The arrow <code class="nw">-&gt;</code> says it's a request, <code class="nw">to-endpoint</code> says the packet was handed to the destination pod, and <code class="nw">FORWARDED</code> is the verdict. Compare its identity numbers with the news lines above it. The destination ID is the same 13907 in both, while the source ID differs, 53922 for news and 6935 for api. Your numbers are different, but the pattern has to match, with one destination ID on every line and a different source ID behind each of the two verdicts.</p>
+<p>The api connection doesn't stop at the SYN. Its later lines show <code class="nw">ACK</code>, <code class="nw">ACK, PSH</code> and <code class="nw">ACK, FIN</code>, the rest of a normal TCP conversation. ACK confirms receipt, PSH marks packets carrying data (the PostgreSQL login and the query), and FIN closes the connection. Hubble prints a line only when the flags change, not for every packet. The admin lines also show their decision lines, <code>policy-verdict:L3-L4 EGRESS ALLOWED</code> and <code>policy-verdict:L3-L4 INGRESS ALLOWED</code>. <code class="nw">L3-L4</code> means an address-and-port rule matched, once on the way out of admin and once on the way into db. The admin traffic is there because the last portal check asks ops to open the admin panel, and admin reads the student list from db.</p>
+<figure class="fig"><a href="../files/figures/fig06-en.png"><img src="../files/figures/web/fig06-en.png" alt="How Cilium decides" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>How Cilium decides</figcaption></figure>
+<p>Figure 6 shows how Cilium makes this decision. Notice that the check happens at the pod's own network interface and is made against the identity number, so two senders hitting the same port can get two different answers.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>Every line says <code class="nw">DROPPED</code> and none says <code class="nw">FORWARDED</code>. No legitimate traffic reached db recently. Run <code class="nw">bash check-portal.sh</code> and repeat the command.</p>
+<p>The command prints nothing. Check that you typed <code class="nw">campus/db</code> and not <code class="nw">db</code>. Without a namespace in the value, Hubble looks in the namespace called <code class="nw">default</code>, where nothing of yours runs.</p>
+<p>Lines from api to db end in <code class="nw">DROPPED</code>. Then a legitimate flow is blocked, and the portal checks would also fail. Compare the <code class="nw">api</code> policy's egress rule for <code class="nw">app: db</code> and the <code class="nw">db</code> policy's ingress list in <code class="nw">k8s/policies/2-allow.yaml</code> with the file in <a href="ch10.html">chapter 10</a>, character by character.</p>
+<h2 id="read-the-l7-decision">Read the L7 decision</h2>
+<p>The rule on api works at L7, the HTTP level. The connection from frontend to api on port 8080 is allowed, and then Envoy reads every request inside it and passes only the three listed calls. Start with the allowed requests, the ones your portal checks sent a few minutes ago.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>hubble observe --namespace campus --protocol http --last 6</code></pre></figure>
+<p><code class="nw">--protocol http</code> keeps only HTTP flows. Hubble can show these only because the api policy has an <code class="nw">http</code> rule, which sends that traffic through Envoy where it can be read. Traffic covered only by address-and-port rules never shows HTTP details.</p>
+<p><strong>You should see</strong> pairs of lines, a request and its response, for the portal's login, profile and grades calls.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>Nov 19 20:44:36.885: campus/frontend-6d755c977c-rzsg7:58092 (ID:65149) -&gt; campus/api-65c5c7d5fd-2qtsk:8080 (ID:6935) http-request FORWARDED (HTTP/1.1 POST http://api.campus.svc.cluster.local:8080/api/login)
+Nov 19 20:44:36.920: campus/frontend-6d755c977c-rzsg7:58092 (ID:65149) &lt;- campus/api-65c5c7d5fd-2qtsk:8080 (ID:6935) http-response FORWARDED (HTTP/1.1 200 35ms (POST http://api.campus.svc.cluster.local:8080/api/login))
+Nov 19 20:44:36.934: campus/frontend-6d755c977c-rzsg7:58106 (ID:65149) -&gt; campus/api-65c5c7d5fd-2qtsk:8080 (ID:6935) http-request FORWARDED (HTTP/1.1 GET http://api.campus.svc.cluster.local:8080/api/profile)
+Nov 19 20:44:36.972: campus/frontend-6d755c977c-rzsg7:58106 (ID:65149) &lt;- campus/api-65c5c7d5fd-2qtsk:8080 (ID:6935) http-response FORWARDED (HTTP/1.1 200 38ms (GET http://api.campus.svc.cluster.local:8080/api/profile))
+Nov 19 20:44:36.984: campus/frontend-6d755c977c-rzsg7:58112 (ID:65149) -&gt; campus/api-65c5c7d5fd-2qtsk:8080 (ID:6935) http-request FORWARDED (HTTP/1.1 GET http://api.campus.svc.cluster.local:8080/api/grades)
+Nov 19 20:44:37.015: campus/frontend-6d755c977c-rzsg7:58112 (ID:65149) &lt;- campus/api-65c5c7d5fd-2qtsk:8080 (ID:6935) http-response FORWARDED (HTTP/1.1 200 30ms (GET http://api.campus.svc.cluster.local:8080/api/grades))</code></pre></figure>
+<p>Each request line shows <code class="nw">http-request FORWARDED</code> with the method and the full address, for example <code>POST http://api.campus.svc.cluster.local:8080/api/login</code>. Each response line shows <code class="nw">http-response FORWARDED</code> with status <code class="nw">200</code> and the time api took, around 30 to 40 ms on the test laptop.</p>
+<p>Then send a request the L7 rule forbids.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>curl -s -i localhost:30080/api/export</code></pre></figure>
+<p><code class="nw">-i</code> makes curl print the response headers before the body, so you can see the status line.</p>
+<p>The first line has to read <code class="nw">HTTP/1.1 403 Forbidden</code> and the last line <code class="nw">Access denied</code>.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>HTTP/1.1 403 Forbidden
+Server: nginx/1.28.3
+Date: Thu, 19 Nov 2026 20:43:13 GMT
+Content-Type: text/plain
+Content-Length: 15
+Connection: keep-alive
+
+Access denied</code></pre></figure>
+<p>Hubble recorded that refusal too.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>hubble observe --namespace campus --protocol http --last 2 | tee ~/microseg/evidence/ch13-l7-export.txt</code></pre></figure>
+<p>The two newest HTTP flows are the request you sent and its answer.</p>
+<p>The request line reads <code>http-request DROPPED (HTTP/1.1 GET http://api.campus.svc.cluster.local:8080/api/export)</code>. The response line reads <code>http-response FORWARDED (HTTP/1.1 403 0ms</code> followed by the same address. Envoy dropped the request and wrote the 403 answer itself, which is why it took 0 ms. The api program never saw the request at all. The 403 reply is marked FORWARDED because it was delivered back to frontend. Compare this with the blocked database connections earlier. A blocked L3/L4 connection gets no answer and times out after seconds, while a blocked L7 request gets an immediate, polite refusal. Another filter for the same evidence is <code class="nw">--http-status 403</code>, which shows only responses with that status.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>The lines show <code class="nw">dns-request</code> and <code class="nw">dns-response</code> instead of HTTP. You typed <code class="nw">--type l7</code>, which also matches DNS, because Cilium's DNS handling counts as L7 too. Use <code class="nw">--protocol http</code> as shown.</p>
+<p><code class="nw">--protocol http</code> prints nothing at all. The api policy is missing its <code class="nw">http</code> rule, so no HTTP traffic passes through Envoy. Run <code>kubectl -n campus get cnp api -o yaml</code> and look for the three <code class="nw">method:</code> lines. If they're missing, compare the api policy in <code class="nw">k8s/policies/2-allow.yaml</code> with <a href="ch10.html">chapter 10</a> and apply the file again.</p>
+<p>The export request answers <code class="nw">HTTP/1.1 200 OK</code> with a list of grades. The L7 rule isn't active. Check the policy count from the first step of this chapter and the api policy as described in the paragraph above.</p>
+<h2 id="read-the-attackers-dns-lookups">Read the attacker's DNS lookups</h2>
+<p>Before a program can connect to <code class="nw">admin</code>, it has to turn that name into an address. That's DNS, and your <code class="nw">allow-dns</code> policy allows every pod to ask kube-dns. The policy also has a <code class="nw">dns</code> block, which sends each lookup through Cilium's DNS proxy, and that proxy logs the name. So even a fully blocked attacker leaves a trail of every name it looked up.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>hubble observe --from-pod campus/news --protocol dns --last 10 | tee ~/microseg/evidence/ch13-dns-news.txt</code></pre></figure>
+<p><code class="nw">--protocol dns</code> keeps only DNS flows. With <code class="nw">--from-pod campus/news</code> you see the questions news asked. The answers travel the other way, from kube-dns to news, and this filter leaves them out.</p>
+<p><strong>You should see</strong> ten <code class="nw">dns-request proxy FORWARDED</code> lines from news to a <code class="nw">kube-system/coredns-</code> pod on port 53. The pods behind the kube-dns Service are named <code class="nw">coredns</code> after the program they run.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>Nov 19 20:43:41.889: campus/news-545758c8c6-2jp4n:46023 (ID:53922) -&gt; kube-system/coredns-589f44dc88-6blh4:53 (ID:61175) dns-request proxy FORWARDED (DNS Query x.campus.svc.cluster.local. AAAA)
+Nov 19 20:43:41.889: campus/news-545758c8c6-2jp4n:46023 (ID:53922) -&gt; kube-system/coredns-589f44dc88-6blh4:53 (ID:61175) dns-request proxy FORWARDED (DNS Query x.campus.svc.cluster.local. A)
+Nov 19 20:43:41.890: campus/news-545758c8c6-2jp4n:33347 (ID:53922) -&gt; kube-system/coredns-589f44dc88-6blh4:53 (ID:61175) dns-request proxy FORWARDED (DNS Query x.svc.cluster.local. AAAA)
+Nov 19 20:43:41.890: campus/news-545758c8c6-2jp4n:33347 (ID:53922) -&gt; kube-system/coredns-589f44dc88-6blh4:53 (ID:61175) dns-request proxy FORWARDED (DNS Query x.svc.cluster.local. A)
+Nov 19 20:43:41.892: campus/news-545758c8c6-2jp4n:53423 (ID:53922) -&gt; kube-system/coredns-589f44dc88-6blh4:53 (ID:61175) dns-request proxy FORWARDED (DNS Query x.cluster.local. AAAA)
+Nov 19 20:43:41.892: campus/news-545758c8c6-2jp4n:53423 (ID:53922) -&gt; kube-system/coredns-589f44dc88-6blh4:53 (ID:61175) dns-request proxy FORWARDED (DNS Query x.cluster.local. A)
+Nov 19 20:43:41.893: campus/news-545758c8c6-2jp4n:42047 (ID:53922) -&gt; kube-system/coredns-589f44dc88-6blh4:53 (ID:61175) dns-request proxy FORWARDED (DNS Query x. A)
+Nov 19 20:43:41.893: campus/news-545758c8c6-2jp4n:42047 (ID:53922) -&gt; kube-system/coredns-589f44dc88-6blh4:53 (ID:61175) dns-request proxy FORWARDED (DNS Query x. AAAA)
+Nov 19 20:43:41.916: campus/news-545758c8c6-2jp4n:59859 (ID:53922) -&gt; kube-system/coredns-589f44dc88-h9pb5:53 (ID:61175) dns-request proxy FORWARDED (DNS Query admin.campus.svc.cluster.local. AAAA)
+Nov 19 20:43:41.916: campus/news-545758c8c6-2jp4n:59859 (ID:53922) -&gt; kube-system/coredns-589f44dc88-h9pb5:53 (ID:61175) dns-request proxy FORWARDED (DNS Query admin.campus.svc.cluster.local. A)</code></pre></figure>
+<p>Each line ends with the name looked up and the kind of DNS record asked for. A DNS record is one stored answer. <code class="nw">A</code> asks for an IPv4 address and <code class="nw">AAAA</code> for an IPv6 address, and programs usually ask for both. The names starting with <code class="nw">x.</code> come from the dummy address <code class="nw">x</code> at the start of every payload, which <code class="nw">check_image</code> hands to curl as the image address. A short name like <code class="nw">x</code> is tried with each entry of the pod's search list, the list of endings the resolver adds in turn, so you see <code class="nw">x.campus.svc.cluster.local.</code>, then <code class="nw">x.svc.cluster.local.</code>, then <code class="nw">x.cluster.local.</code> and finally <code class="nw">x.</code> alone. None of them exist. The two <code>admin.campus.svc.cluster.local.</code> lines come from step 5, the attack's attempt to open the admin panel. The scan in step 2 looked up the same name earlier, but those lines are older than the last 10. That lookup succeeded, and the attacker learned the admin Service's address, but the connection that followed is one of the drops you read earlier. This filter can't show you the answer, since answers travel toward news. To see both directions, run <code>hubble observe --pod campus/news --protocol dns --last 20</code>. The <code class="nw">dns-response</code> line for <code>admin.campus.svc.cluster.local. A</code> carries an address starting with <code class="nw">10.96.</code>, the one the attacker learned.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>No <code class="nw">dns-request</code> lines appear, and a search with <code class="nw">--verdict DROPPED</code> shows drops toward port 53. The <code class="nw">allow-dns</code> policy is missing, so every lookup in the namespace fails. Apply it again with <code>kubectl apply -f k8s/policies/1-baseline.yaml</code>. <a href="ch13.html">Chapter 13</a> has a drill that breaks this on purpose.</p>
+<p>The command prints nothing. The attack has been pushed out of the ring buffer. Run the attack line from the "New traffic" step again and repeat this command right after it.</p>
+<h2 id="count-the-attackers-drops">Count the attacker's drops</h2>
+<p>A count gives you one number for your results chapter, "the attack produced N policy drops", and the checkpoint needs it to be above zero.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>hubble observe --from-pod campus/news --verdict DROPPED --since 5m -o compact | grep -c &quot;Policy denied&quot;</code></pre></figure>
+<p><code class="nw">--since 5m</code> asks for every matching flow from the last 5 minutes instead of a fixed number of them. <code class="nw">-o compact</code> is the one-line format you've been reading, written out so the output stays the same if a default ever changes. <code class="nw">grep -c "Policy denied"</code> counts the lines holding that text. The decision lines don't hold it, so each dropped packet is counted once.</p>
+<p><strong>You should see</strong> a single number.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>90</code></pre></figure>
+<p>The test run printed 90, because in those five minutes it had run the attack three times and the dashboard's matrix three times, and the matrix probes from news are dropped too. Yours depends on how many times the attack and the matrix ran in the last five minutes and on the retry timing, so any number above 0 passes.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>The number is <code class="nw">0</code>. More than five minutes passed since the attack. Run the attack line from the "New traffic" step again, then this command.</p>
+<h2 id="hubble-ui-the-same-flows-as-a-map">Hubble UI: the same flows as a map</h2>
+<p>The Hubble UI draws these flows as a map. You started it in <a href="ch04.html">chapter 4</a>, and like the port-forward it stops when its terminal closes. Run <code class="nw">jobs</code> first. If it lists <code class="nw">cilium hubble ui</code> as running, skip the first line below.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cilium hubble ui --open-browser=false &amp;
+sleep 5
+curl -s -o /dev/null -w &quot;%{http_code}\n&quot; http://localhost:12000/</code></pre></figure>
+<p><code class="nw">cilium hubble ui</code> makes the Hubble UI, which runs inside the cluster, reachable at <code class="nw">localhost:12000</code>. <code class="nw">--open-browser=false</code> stops it from trying to open a browser inside Ubuntu, where none exists, and <code class="nw">&amp;</code> runs it in the background. The <code class="nw">curl</code> line asks for the page and prints only the HTTP status code, as in <a href="ch04.html">chapter 4</a>.</p>
+<p><strong>You should see</strong> a status code on the last line.</p>
+<p>It must be <code class="nw">200</code>. The line starting with <code class="nw">[1]</code> or <code class="nw">[2]</code> above it, if you see one, is bash reporting the background job and its process number. Keep this terminal open, because closing it stops the UI. In your Windows browser, open <code class="nw">http://localhost:12000</code>. The page asks you to choose a namespace, so pick <code class="nw">campus</code>. You get a box for each of your services, usually one more for traffic from outside the cluster, and lines for the connections Hubble saw recently. If you opened the dashboard recently, its matrix probes leave dropped edges between many services. For a clean picture, type <code class="nw">pod=news</code> in the filter box at the top, or click the news box. Under the map sits a table of flows, newest first, with a verdict column that says forwarded or dropped.</p>
+<p>Go back to your first terminal and run the attack line from the "New traffic" step again. While it runs, watch the table. New rows appear with news as the source and dropped as the verdict, aimed at db and admin. Click the news box on the map to keep only its flows. Take a screenshot of the map and of the table showing the dropped rows, with Windows+Shift+S, and keep it for <a href="ch14.html">chapter 14</a>.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>The <code class="nw">curl</code> line prints <code class="nw">000</code>, or the browser says the site can't be reached. The UI's port-forward wasn't ready yet, or the terminal that started it was closed. Wait ten seconds and try again. If it still fails, run <code class="nw">jobs</code>, and if <code class="nw">cilium hubble ui</code> isn't listed as running, start it again with the first line of the block.</p>
+<p>A line containing <code class="nw">address already in use</code> or <code class="nw">unable to listen</code> appears after the first line, and later bash reports the job with <code class="nw">Exit</code> and its command. The UI was already running from another terminal, so this second copy couldn't take port 12000. The <code class="nw">curl</code> line still prints <code class="nw">200</code>, and you can carry on.</p>
+<p>The map is empty after you pick <code class="nw">campus</code>. No traffic reached the namespace in the last few minutes. Run the attack line again and wait a few seconds for the page to update.</p>
+<h2 id="checkpoint">Checkpoint</h2>
+<p><strong>Checkpoint.</strong> A drop count above 0 from news proves the policies block the attacker. The other half is that the same policies block nothing a legitimate user needs. Run this, and don't open or refresh the dashboard page while it runs.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>sleep 35
+bash check-portal.sh | tail -1
+hubble observe --from-pod campus/api --verdict DROPPED --since 30s | wc -l</code></pre></figure>
+<p><code class="nw">sleep 35</code> waits 35 seconds first. Opening or refreshing the dashboard page runs the reachability matrix, which probes blocked paths from every pod, api included, and each probe leaves drops. The wait gives any such drops time to age out of the 30-second window. <code class="nw">tail -1</code> keeps only the last line of the portal checks. The last command counts drops from api in the 30 seconds that include the portal checks.</p>
+<p>The output must be exactly these two lines, <code class="nw">PORTAL: 6/6 OK</code> followed by <code class="nw">0</code>.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>PORTAL: 6/6 OK
+0</code></pre></figure>
+<p>If a line containing <code class="nw">4245</code> or <code class="nw">connection refused</code> appears above the <code class="nw">0</code>, the 0 means Hubble didn't answer, not that there were no drops. Restart the port-forward as in the first step and run the checkpoint again.</p>
+<p>The portal ran every one of its calls through api, and Hubble recorded no drop from it. Together with the count above 0 from news, that's the checkpoint. If the second number isn't 0, you most likely touched the dashboard page while the command ran. Run it again without touching it. If it still isn't 0, run <code>hubble observe --from-pod campus/api --verdict DROPPED --last 10</code> and read where those packets were going.</p>
+<p>Save your work.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>git add -A &amp;&amp; git commit -m &quot;ch11: hubble evidence&quot;</code></pre></figure>
+<p><code class="nw">git add -A</code> stages every new and changed file, here the text files in <code class="nw">evidence/</code>, and <code class="nw">git commit -m</code> saves them as one snapshot with the message after <code class="nw">-m</code>.</p>
+<p>The first line starts with <code class="nw">[main</code> and a short commit code, and the next line says how many files changed.</p>
+<!-- OUT ids: ch13-ready, ch13-fresh-traffic, ch13-drops-namespace, ch13-drops-from-news, ch13-one-line-json, ch13-to-db, ch13-http-only, ch13-export, ch13-l7-export, ch13-dns-news, ch13-drops-count-news, ch13-hubble-ui, ch13-api-drops-after-portal, ch13-commit --><nav class="pager" aria-label="Chapters"><a rel="prev" href="ch10.html"><span>Previous chapter</span>Chapter 10. Apply micro-segmentation</a><a rel="next" href="ch12.html"><span>Next chapter</span>Chapter 12. Measure</a></nav></main></div>
+<footer class="foot"><div class="foot-in"><p>Kubernetes 1.36, Cilium 1.20.5 and kind 0.33.0 on Windows 11 with WSL 2. Every command was run on a real laptop in November 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">Source on GitHub</a></p></div></footer>
+<p class="vh" aria-live="polite" id="live"></p>
+<script type="application/json" id="i18n">{"copied": "Copied", "copyFail": "Press Ctrl+C to copy the selected text", "doneOf": "{d} of {t} steps done", "next": "Next step: {s}", "allDone": "All {t} steps done.", "sumCount": "{d} of {t} done", "cleared": "All ticks cleared.", "confirm": "Clear every tick on this page? Your files and your cluster stay as they are.", "stageCount": "{d} of {t}"}</script>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
+<title>Chapter 2. Before you start | Micro-segmentation lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&family=Noto+Sans+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="ar" href="../ar/guide/ch02.html">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400&text=%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9&display=swap">
+</head>
+<body class="">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="top-in">
+<a class="brand" href="../index.html">Micro-segmentation lab</a>
+<nav aria-label="Micro-segmentation lab"><ul>
+<li><a href="../index.html">Quick path</a></li>
+<li><a href="../guide/index.html" aria-current="page">Full guide</a></li>
+<li><a href="../downloads.html">Downloads</a></li>
+<li><a href="../ar/guide/ch02.html" lang="ar" hreflang="ar" data-setlang="ar">العربية</a></li>
+</ul></nav>
+</div></header>
+<div class="layout"><details class="rail" open><summary>Chapters</summary><nav aria-label="Chapters"><ol class="toc"><li><a href="ch00.html">0. How to use this guide</a></li><li><a href="ch01.html">1. What you will build</a></li><li><a href="ch02.html" aria-current="page">2. Before you start</a><ol class="sub"><li><a href="#step-1-check-that-virtualization-is-on">Step 1. Check that virtualization is on</a></li><li><a href="#step-2-update-wsl">Step 2. Update WSL</a></li><li><a href="#step-3-install-ubuntu-2404-and-create-your-linux-user">Step 3. Install Ubuntu 24.04 and create your Linux user</a></li><li><a href="#step-4-open-the-ubuntu-terminal">Step 4. Open the Ubuntu terminal</a></li><li><a href="#step-5-check-that-ubuntu-runs-under-wsl-2">Step 5. Check that Ubuntu runs under WSL 2</a></li><li><a href="#step-6-install-vs-code-and-open-your-project-folder-in-it">Step 6. Install VS Code and open your project folder in it</a></li><li><a href="#step-7-move-a-file-from-windows-into-ubuntu">Step 7. Move a file from Windows into Ubuntu</a></li><li><a href="#step-8-line-endings-and-safe-pasting">Step 8. Line endings and safe pasting</a></li><li><a href="#step-9-set-up-git-and-create-the-repository">Step 9. Set up Git and create the repository</a></li><li><a href="#step-10-save-the-first-snapshot">Step 10. Save the first snapshot</a></li><li><a href="#step-11-see-a-change-and-undo-it">Step 11. See a change and undo it</a></li><li><a href="#step-12-back-up-the-project-to-windows">Step 12. Back up the project to Windows</a></li><li><a href="#checkpoint">Checkpoint</a></li></ol></li><li><a href="ch03.html">3. Set up the environment</a></li><li><a href="ch04.html">4. Create the cluster</a></li><li><a href="ch05.html">5. Write the services</a></li><li><a href="ch06.html">6. Deploy the portal</a></li><li><a href="ch07.html">7. Build your dashboard</a></li><li><a href="ch08.html">8. Attack the flat network</a></li><li><a href="ch09.html">9. Design the policy</a></li><li><a href="ch10.html">10. Apply micro-segmentation</a></li><li><a href="ch11.html">11. Read the evidence in Hubble</a></li><li><a href="ch12.html">12. Measure</a></li><li><a href="ch13.html">13. Getting unstuck alone</a></li><li><a href="ch14.html">14. Evidence for your report</a></li><li><a href="ch15.html">15. Day-by-day plan</a></li><li><a href="appendix.html">Appendices</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="chapter-2-before-you-start">Chapter 2. Before you start</h1>
+<p>Nothing in the lab runs on plain Windows, so this chapter gets Ubuntu 24.04 running under WSL 2, with VS Code editing files inside it and Git keeping snapshots. By the end you'll have a project folder, <code class="nw">~/microseg</code>, holding one small file you copied in from Windows, with your first Git snapshot saved and a backup copy on the Windows side. Plan on 1.5 to 2 hours, including one restart of Windows.</p>
+<h2 id="step-1-check-that-virtualization-is-on">Step 1. Check that virtualization is on</h2>
+<p>WSL 2 runs Linux in a light virtual machine, and a virtual machine needs a feature of your processor called virtualization, which lets one computer behave like several. Many laptops ship with it switched off in the firmware, the small program that starts the computer before Windows does. Check it first, because an install that fails halfway rarely tells you why.</p>
+<ol>
+<li>Press Ctrl+Shift+Esc to open Task Manager.</li>
+<li>If the window is small and shows only a list of apps, click More details at the bottom.</li>
+<li>Click the Performance page in the left-hand column (its icon looks like a heart-rate line), then click CPU.</li>
+<li>Under the graph, find the line that starts with <code class="nw">Virtualization:</code>.</li>
+</ol>
+<p><strong>You should see</strong> <code class="nw">Virtualization: Enabled</code>. Close Task Manager. Go on to step 2.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>The line reads <code class="nw">Virtualization: Disabled</code>. The feature exists but is switched off in the firmware, and you have to switch it on there. Save your work and close every program, because the next steps restart the laptop. If your laptop uses BitLocker or device encryption, open <code class="nw">aka.ms/myrecoverykey</code> on your phone first and keep the recovery key at hand, because some laptops ask for it after a firmware change.</p>
+<ol>
+<li>Open Settings, then System, then Recovery.</li>
+<li>Next to "Advanced startup", click Restart now and confirm.</li>
+<li>On the blue screen that appears, choose Troubleshoot, then Advanced options, then UEFI Firmware Settings, then Restart. If there's no UEFI Firmware Settings tile, shut the laptop down, then press the power button and tap F2, Del or Esc (F10 on HP) until the firmware screen appears.</li>
+<li>The laptop restarts into its firmware settings, which look different on every brand. Look for a setting named Intel Virtualization Technology, Intel VT-x, SVM Mode or AMD-V, usually on a page called Advanced, CPU Configuration or Security.</li>
+<li>Set it to Enabled, then save and exit, usually with F10.</li>
+</ol>
+<p>When Windows is back, check Task Manager once more, and carry on once it reads <code class="nw">Enabled</code>.</p>
+<p>If you can't find the setting anywhere in the firmware, search the web for your exact laptop model followed by "enable virtualization BIOS". Some laptops hide the option until you press a key such as F7 for an advanced mode.</p>
+<h2 id="step-2-update-wsl">Step 2. Update WSL</h2>
+<p>The WSL that comes with Windows is usually too old for this lab, so update it first. The guide was tested with WSL 3.0.5.</p>
+<p>WSL is managed from PowerShell running as administrator, the Windows account level that may change system settings. Press the Windows key, type <code class="nw">powershell</code>, right-click Windows PowerShell and choose Run as administrator. When Windows asks whether to allow the app to make changes, click Yes. The new window's title starts with <code class="nw">Administrator:</code>. Run the update.</p>
+<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>wsl --update</code></pre></figure>
+<p><code class="nw">wsl</code> is the Windows program that manages WSL, and <code class="nw">--update</code> tells it to download and install the newest version. It prints a few lines about checking for and installing an update, and they depend on the version you started from, so they aren't reproduced here. The last line either names the version it installed or says the most recent version is already installed. Both are fine.</p>
+<p>Now ask WSL which version it is.</p>
+<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>wsl --version</code></pre></figure>
+<p><code class="nw">--version</code> prints the version of WSL and of the Linux kernel it runs.</p>
+<p><strong>You should see</strong> a short list of versions, like this one from the tested laptop.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>WSL version: 3.0.5.0
+Kernel version: 6.18.58.1-1
+WSLg version: 1.0.79
+MSRDC version: 1.2.7391
+Direct3D version: 1.611.1-81528511
+DXCore version: 10.0.26100.1-240331-1435.ge-release
+Windows version: 10.0.26200.9974</code></pre></figure>
+<p>The first line must read <code class="nw">WSL version: 3.0.5.0</code> or a higher number, and the second line must read <code class="nw">Kernel version: 6.18</code> followed by more digits, or a higher version. The other lines will differ on your laptop.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>Invalid command line option: --version</code></pre></figure>
+<p>If a long help text follows, the old WSL that came with Windows is still the one running. Run <code class="nw">wsl --update</code> again in the administrator window, restart Windows, then try <code class="nw">wsl --version</code> again.</p>
+<p>If the update stops with an error code, or sits at 0% for more than ten minutes, your network is probably blocking the Microsoft Store, which WSL downloads through by default. Press Ctrl+C and run <code class="nw">wsl --update --web-download</code>, which fetches the same update from GitHub.</p>
+<p>If the first line shows a version lower than <code class="nw">3.0.5.0</code>, even though <code class="nw">wsl --update</code> said the newest version is already installed, run <code class="nw">wsl --update --web-download</code> in the administrator window, restart Windows and check again.</p>
+<h2 id="step-3-install-ubuntu-2404-and-create-your-linux-user">Step 3. Install Ubuntu 24.04 and create your Linux user</h2>
+<p>WSL can hold several Linux systems side by side, and each one is called a distribution, or distro. Ubuntu is one distribution, and it comes in several releases. You install the exact release the guide was tested with, Ubuntu 24.04, under the name <code class="nw">Ubuntu-24.04</code>. During the install Ubuntu asks you to create a Linux user, the account you'll work as inside Ubuntu. It's separate from your Windows account.</p>
+<p>Pick the user name before you start. It must be lowercase letters and digits only, start with a letter and contain no spaces, for example <code class="nw">sara</code>. Then pick a password you'll remember. You'll type it often, because Ubuntu asks for it whenever you run a command with <code class="nw">sudo</code>, which runs that one command with administrator rights. Every time this guide writes <code class="nw">&lt;user&gt;</code>, it means this Linux user name.</p>
+<p>In the same administrator PowerShell window, run the install.</p>
+<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>wsl --install -d Ubuntu-24.04</code></pre></figure>
+<p><code class="nw">--install</code> installs WSL's parts if they're missing and then a distribution, and <code class="nw">-d Ubuntu-24.04</code> names the distribution to install. The download is several hundred megabytes. Give it a few minutes.</p>
+<p>When it asks for a user name, type the one you picked and press Enter. When it asks for a new password, type it and press Enter, then type it again when asked to retype it. Nothing appears on the screen while you type the password, not even dots. That's normal on Linux. Your typing goes in all the same, so type it blind and press Enter.</p>
+<p><strong>You should see</strong> the install progress, then the questions for the user name and the password, and at the end the Ubuntu prompt.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>Downloading: Ubuntu 24.04 LTS
+Installing: Ubuntu 24.04 LTS
+Distribution successfully installed. It can be launched via &#x27;wsl.exe -d Ubuntu-24.04&#x27;
+student@laptop:~$</code></pre></figure>
+<p>The last line is the Ubuntu prompt. It starts with your Linux user name, then <code class="nw">@</code> and your computer's name, and it ends in <code class="nw">$</code>. Your names will differ from the tested laptop's.</p>
+<p>On laptops where WSL had never been installed, the install may instead end with this message, because Windows has to switch on its virtual machine feature first.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>The requested operation is successful. Changes will not be effective until the system is rebooted.</code></pre></figure>
+<p>Restart Windows. If an Ubuntu window opens on its own after the restart and asks for a user name, answer it there. Otherwise open PowerShell as administrator again and run <code class="nw">wsl --install -d Ubuntu-24.04</code> a second time, and this time it installs Ubuntu and asks for the user name.</p>
+<p>When the Ubuntu prompt appears, type <code class="nw">exit</code> and press Enter to return to PowerShell, then close the administrator window. You won't need administrator rights again in this chapter.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>Please enable the Virtual Machine Platform Windows feature and ensure virtualization is enabled in the BIOS.</code></pre></figure>
+<p>Depending on the WSL version, the message also carries an error code containing <code class="nw">0x80370102</code> or <code class="nw">HCS_E_HYPERV_NOT_INSTALLED</code>. Windows can't start the virtual machine, either because virtualization is off in the firmware or because the Virtual Machine Platform part of Windows is missing. Check Task Manager again as in step 1. If it says <code class="nw">Enabled</code>, run <code>wsl --install --no-distribution</code> in an administrator PowerShell, restart Windows and run <code class="nw">wsl --install -d Ubuntu-24.04</code> again.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>Sorry, passwords do not match.
+passwd: Authentication token manipulation error
+passwd: password unchanged
+Try again? [y/N]</code></pre></figure>
+<p>The two passwords you typed weren't identical, which is a common slip when you can't see them. Type <code class="nw">y</code>, press Enter and type the password twice again, slowly.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>A distribution with the supplied name already exists.</code></pre></figure>
+<p>Ubuntu 24.04 is already on this laptop from an earlier attempt. Older WSL releases say the same thing differently, that the distribution is already installed. If you remember that user's password, keep it and go on to step 4. If you've forgotten the user name too, run <code>wsl -d Ubuntu-24.04 -u root ls /home</code> in PowerShell, and the folder it prints is the name. To set a new password, run <code>wsl -d Ubuntu-24.04 -u root passwd &lt;user&gt;</code> with that name in place of <code class="nw">&lt;user&gt;</code>. The error <code>The '&lt;' operator is reserved for future use.</code> means you left <code class="nw">&lt;user&gt;</code> in. To start completely fresh instead, run <code class="nw">wsl --unregister Ubuntu-24.04</code>, which deletes that Ubuntu and every file inside it, and then install again.</p>
+<h2 id="step-4-open-the-ubuntu-terminal">Step 4. Open the Ubuntu terminal</h2>
+<p>From now on you open Ubuntu in its own terminal window. Press the Windows key, type <code class="nw">ubuntu</code> and click the result with 24.04 in its name. If no such result shows up, open an ordinary PowerShell window and run <code class="nw">wsl -d Ubuntu-24.04 --cd ~</code> instead, which starts the same Ubuntu in your Linux home folder. Leave this Ubuntu window open until step 6 tells you to close it.</p>
+<p>Check which release you're in and whether Git, the snapshot program, is already installed.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>grep PRETTY_NAME /etc/os-release
+git --version</code></pre></figure>
+<p><code class="nw">/etc/os-release</code> is the file where Ubuntu describes itself, and <code class="nw">grep PRETTY_NAME</code> prints only its line holding the release name. <code class="nw">git --version</code> prints Git's version, if Git is there.</p>
+<p><strong>You should see</strong> two lines.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>PRETTY_NAME=&quot;Ubuntu 24.04.5 LTS&quot;
+git version 2.43.0</code></pre></figure>
+<p>The first must name Ubuntu 24.04. The guide was tested with 24.04.5 LTS. The second starts with <code class="nw">git version 2.</code>, and any version 2 works.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>Command &#x27;git&#x27; not found, but can be installed with:
+sudo apt install git</code></pre></figure>
+<p>Your Ubuntu came without Git. Install it with apt, Ubuntu's package manager, which downloads and installs programs from Ubuntu's own servers. Run <code>sudo apt update &amp;&amp; sudo apt install -y git</code> and type your Linux password when Ubuntu shows <code>[sudo] password for &lt;user&gt;:</code>. Nothing appears while you type. Then run <code class="nw">git --version</code> again.</p>
+<p>If the first line names a different release, such as 22.04, this window belongs to another distribution. Close it, and open the one with 24.04 in its name or use the <code class="nw">wsl -d Ubuntu-24.04 --cd ~</code> command above.</p>
+<h2 id="step-5-check-that-ubuntu-runs-under-wsl-2">Step 5. Check that Ubuntu runs under WSL 2</h2>
+<p>WSL can run a distribution in two ways. Version 1 translates Linux requests into Windows ones and has no real Linux kernel, so Docker and Cilium can't run on it. Version 2 runs the real kernel. The lab needs version 2.</p>
+<p>With the Ubuntu window still open, open an ordinary PowerShell window, not as administrator, and list the distributions.</p>
+<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>wsl -l -v</code></pre></figure>
+<p><code class="nw">-l</code> lists the installed distributions and <code class="nw">-v</code> adds each one's state and WSL version.</p>
+<p><strong>You should see</strong> a small table.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>  NAME              STATE           VERSION
+* Ubuntu-24.04      Running         2</code></pre></figure>
+<p>The row for <code class="nw">Ubuntu-24.04</code> must read <code class="nw">Running</code> in the STATE column and <code class="nw">2</code> in the VERSION column. It should also have a <code class="nw">*</code> in front of it, which marks the distribution WSL opens when you don't name one. Other rows may appear if you installed other distributions or Docker Desktop before. Leave them alone and look only at the Ubuntu-24.04 row.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>If the VERSION column shows <code class="nw">1</code> for Ubuntu-24.04, convert it with <code>wsl --set-version Ubuntu-24.04 2</code>, which takes a few minutes, then list again.</p>
+<p>If the <code class="nw">*</code> sits in front of a different distribution, run <code class="nw">wsl --set-default Ubuntu-24.04</code> and list again.</p>
+<p>If the STATE column shows <code class="nw">Stopped</code>, you closed the Ubuntu window, and WSL stops a distribution soon after its last window closes. Open Ubuntu again as in step 4 and run <code class="nw">wsl -l -v</code> once more.</p>
+<h2 id="step-6-install-vs-code-and-open-your-project-folder-in-it">Step 6. Install VS Code and open your project folder in it</h2>
+<p>You'll write and paste every project file in VS Code (Visual Studio Code), a free code editor from Microsoft. VS Code runs on Windows, but its WSL extension lets it open folders that live inside Ubuntu and save files there directly, with Linux line endings. An extension is an add-on that gives VS Code a new ability.</p>
+<ol>
+<li>In your Windows browser, open <code class="nw">https://code.visualstudio.com</code> and click the download button for Windows.</li>
+<li>Run the installer and accept the defaults. On the page called "Select Additional Tasks", check that Add to PATH is ticked, because that's what lets you start VS Code from the Ubuntu terminal.</li>
+<li>When the install finishes, open VS Code.</li>
+<li>Press Ctrl+Shift+X to open the Extensions view, type <code class="nw">WSL</code> in its search box, and on the extension named WSL published by Microsoft click Install.</li>
+<li>Close VS Code.</li>
+</ol>
+<p>Ubuntu learns where the Windows programs are when its terminal starts, and your Ubuntu window started before VS Code existed. Close every terminal window you have open, Ubuntu and PowerShell both. Then open Ubuntu again from the Start menu.</p>
+<p>Everything you build lives in one folder, <code class="nw">~/microseg</code>, inside your Linux home folder. In the Ubuntu terminal, create it, move into it, print where you are and open it in VS Code.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>mkdir -p ~/microseg
+cd ~/microseg
+pwd
+code .</code></pre></figure>
+<p><code class="nw">mkdir -p ~/microseg</code> creates the folder, and <code class="nw">-p</code> keeps it quiet if the folder already exists. <code class="nw">cd ~/microseg</code> moves you into it, so the commands after it work inside that folder. <code class="nw">pwd</code> prints the full path of the folder you're in. <code class="nw">code</code> starts VS Code, and <code class="nw">.</code> means "the folder I'm in". The first time you run <code class="nw">code</code>, VS Code installs a small helper program inside Ubuntu, the VS Code Server, which lets the Windows window work on Linux files.</p>
+<p><strong>You should see</strong> the folder's path, then a few lines about the VS Code Server being installed the first time.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>/home/student/microseg
+Installing VS Code Server for Linux x64 (2c33b50b16c472efe58357d1d2a8a5414bc23fbf)
+Downloading: 100%
+Unpacking: 100%
+Unpacked 4322 files and folders to /home/student/.vscode-server/bin/2c33b50b16c472efe58357d1d2a8a5414bc23fbf.
+Looking for compatibility check script at /home/student/.vscode-server/bin/2c33b50b16c472efe58357d1d2a8a5414bc23fbf/bin/helpers/check-requirements.sh
+Running compatibility check script
+Compatibility check successful (0)
+[1120/012638.286:ERROR:third_party\crashpad\crashpad\util\win\registration_protocol_win.cc:108] CreateFile: The system cannot find the file specified. (0x2)</code></pre></figure>
+<p>The first line must read <code class="nw">/home/&lt;user&gt;/microseg</code> with your own Linux user name in it. The output may end with a line that contains <code class="nw">ERROR:third_party\crashpad</code> and <code>CreateFile: The system cannot find the file specified. (0x2)</code>. That line comes from VS Code's crash reporter on Windows and is harmless, so ignore it. On later runs <code class="nw">code .</code> prints nothing. The prompt now ends in <code class="nw">~/microseg$</code>, which also tells you where you are.</p>
+<p>A VS Code window opens. Its title bar ends with <code class="nw">[WSL: Ubuntu-24.04]</code>, and the bottom-left corner shows <code class="nw">WSL: Ubuntu-24.04</code> on a coloured patch. If VS Code asks "Do you trust the authors of the files in this folder?", click Yes, I trust the authors, since you're the author. The Explorer pane on the left shows the folder <code class="nw">MICROSEG</code>, still empty.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>Command &#x27;code&#x27; not found, but can be installed with:
+sudo snap install code</code></pre></figure>
+<p>The shorter <code class="nw">code: command not found</code> means the same thing. Don't run the <code class="nw">snap</code> command it suggests, which would install a second, Linux copy of VS Code. Ubuntu doesn't know about your Windows VS Code yet. Close every terminal window, Ubuntu and PowerShell both, open Ubuntu again and run <code class="nw">cd ~/microseg</code> and then <code class="nw">code .</code> again. If it still fails, run the VS Code installer again and check that Add to PATH is ticked.</p>
+<p>If VS Code opens but the title bar doesn't show <code class="nw">[WSL: Ubuntu-24.04]</code> and the bottom-left corner has no WSL patch, the WSL extension is missing. VS Code then opens the folder from the Windows side, which writes Windows line endings. Close that window, install the WSL extension as in item 4 above, then run <code class="nw">code .</code> again from the Ubuntu terminal.</p>
+<h2 id="step-7-move-a-file-from-windows-into-ubuntu">Step 7. Move a file from Windows into Ubuntu</h2>
+<p>Sooner or later you'll have a file on Windows that belongs in the project, from a download or an email. Windows drive C: appears inside Ubuntu as the folder <code class="nw">/mnt/c</code>. That's a mount, a place where one file system shows up inside another. Your Windows Downloads folder is therefore <code>/mnt/c/Users/&lt;WinUser&gt;/Downloads</code> in Ubuntu, where <code class="nw">&lt;WinUser&gt;</code> is the name of your Windows user folder.</p>
+<p>That name isn't always your display name. Windows sometimes shortens it, for example to the first five letters of your email address. List the user folders to find yours.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>ls /mnt/c/Users/</code></pre></figure>
+<p><code class="nw">ls</code> lists the contents of a folder. It prints the folder names on one or more lines.</p>
+<p><strong>You should see</strong> a handful of names, yours among them.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code> ASUS  &#x27;All Users&#x27;   CodexSandboxOffline   Default  &#x27;Default User&#x27;   Public   WsiAccount   desktop.ini</code></pre></figure>
+<p>Names such as <code class="nw">Public</code>, <code class="nw">Default</code>, <code class="nw">'Default User'</code>, <code class="nw">'All Users'</code>, <code class="nw">defaultuser0</code> and the file <code class="nw">desktop.ini</code> belong to Windows itself, and some laptops also show accounts made by other programs, such as <code class="nw">WsiAccount</code>. <code class="nw">ls</code> puts names that contain spaces in quotes. Your own name, <code class="nw">ASUS</code> on the tested laptop, should match the <code class="nw">&lt;WinUser&gt;</code> you found in <a href="ch00.html">chapter 0</a>. Write it down. <a href="ch03.html">Chapter 3</a> and later chapters use it again.</p>
+<p>Now the drill. On Windows, open Notepad, type the line <code class="nw">copied from Windows</code> and press Enter once, so the line ends with a line break. Choose File, then Save as, click Downloads in the left-hand pane and type <code class="nw">hello.txt</code> as the file name. Leave "Save as type" on "Text documents (*.txt)" and click Save.</p>
+<p>Back in the Ubuntu terminal, copy the file into your project folder and print it. Replace <code class="nw">&lt;WinUser&gt;</code> with your Windows user folder name. Editing in the middle of a long line in the terminal is awkward, so paste the block into Notepad first, replace every <code class="nw">&lt;WinUser&gt;</code> there, then copy it from Notepad into the Ubuntu terminal.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cp /mnt/c/Users/&lt;WinUser&gt;/Downloads/hello.txt ~/microseg/
+cat ~/microseg/hello.txt</code></pre></figure>
+<p><code class="nw">cp</code> copies the file given first into the folder given second. <code class="nw">cat</code> prints a file's contents.</p>
+<p><strong>You should see</strong> your line on its own.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>copied from Windows</code></pre></figure>
+<p>The output must read exactly <code class="nw">copied from Windows</code>, with the prompt on the next line. <code class="nw">hello.txt</code> also appears in VS Code's Explorer pane.</p>
+<p>You can look at your project folder from the Windows side too. Run <code class="nw">explorer.exe .</code> in the Ubuntu terminal while you're in <code class="nw">~/microseg</code>. Ubuntu can start File Explorer because WSL lets it run Windows programs, and the <code class="nw">.</code> again means the folder you're in. A File Explorer window opens on the folder, showing <code class="nw">hello.txt</code>. You can reach the same place from any File Explorer address bar by typing <code>\\wsl.localhost\Ubuntu-24.04\home\&lt;user&gt;\microseg</code>, and File Explorer also lists Ubuntu under Linux in its left-hand pane.</p>
+<p>Use that window to look, and change files with VS Code or the Ubuntu terminal. Windows can open files inside Ubuntu and Ubuntu can open files on drive C:, but the project stays in <code class="nw">~/microseg</code> and never moves under <code class="nw">/mnt/c</code>. If you ever drag a downloaded file into the Ubuntu folder through File Explorer, a second file with the same name plus <code class="nw">:Zone.Identifier</code> appears next to it, a note Windows attaches to say where the download came from. It's harmless clutter. Delete such files with <code>rm ~/microseg/*:Zone.Identifier</code>, and copy files in with <code class="nw">cp</code> from the Ubuntu terminal instead.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>-bash: WinUser: No such file or directory
+cat: /home/&lt;user&gt;/microseg/hello.txt: No such file or directory</code></pre></figure>
+<p>The first line may start with <code class="nw">bash:</code> without the dash. You pasted the line without replacing <code class="nw">&lt;WinUser&gt;</code>. Bash reads <code class="nw">&lt;</code> and <code class="nw">&gt;</code> as special characters, so the <code class="nw">cp</code> command never ran and nothing was copied. Paste the block into Notepad, replace <code class="nw">&lt;WinUser&gt;</code> with your folder name and no angle brackets, and paste it into the terminal again.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>cp: cannot stat &#x27;/mnt/c/Users/sarak/Downloads/hello.txt&#x27;: No such file or directory</code></pre></figure>
+<p>Your message shows your own folder name where this one shows <code class="nw">sarak</code>, and the path names a file that doesn't exist. Compare the name's spelling with the <code class="nw">ls /mnt/c/Users/</code> output, then run <code>ls /mnt/c/Users/&lt;WinUser&gt;/Downloads/</code> with your name in place to see what the file is really called. A name like <code class="nw">hello.txt.txt</code> means Windows added a second <code class="nw">.txt</code> behind your back. In File Explorer, choose View, then Show, then File name extensions so you can see full names. Rename the file to <code class="nw">hello.txt</code> and copy it again.</p>
+<p>If the output reads <code class="nw">copied from Windows</code> with the prompt glued onto the end of the same line, you didn't press Enter after the text in Notepad, so the file has no line break at the end. Open it in Notepad, click at the end of the line, press Enter, save, and run the two commands again.</p>
+<h2 id="step-8-line-endings-and-safe-pasting">Step 8. Line endings and safe pasting</h2>
+<p>A line ending is the invisible character, or pair of characters, that marks where a line of text ends. Linux uses one character, called LF (line feed). Windows uses two, CR (carriage return) followed by LF, which together are called CRLF. You rarely see the difference. Bash does, though, because it reads the CR as part of the command, so a script saved with CRLF fails with errors that make no sense at first sight. A YAML file can break the same way. YAML is the text format Kubernetes files are written in, where indentation shows which line belongs to which. Your <code class="nw">hello.txt</code> came from Notepad, so it has a Windows line ending. Show it, remove it and show it again.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cat -A ~/microseg/hello.txt
+sed -i &#x27;s/\r$//&#x27; ~/microseg/hello.txt
+cat -A ~/microseg/hello.txt</code></pre></figure>
+<p><code class="nw">-A</code> makes <code class="nw">cat</code> print invisible characters as visible codes. A CR shows as <code class="nw">^M</code> and the end of each line shows as <code class="nw">$</code>. <code class="nw">sed</code> edits text, and <code class="nw">-i</code> makes it change the file in place. Its expression <code class="nw">s/\r$//</code> means "replace a carriage return at the end of a line with nothing". You'll use the same <code class="nw">sed</code> command in <a href="ch13.html">chapter 13</a> on any script that picked up Windows line endings.</p>
+<p><strong>You should see</strong> the same line twice, with different endings.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>copied from Windows^M$
+copied from Windows$</code></pre></figure>
+<p>The first line must end in <code class="nw">^M$</code>, where <code class="nw">^M</code> is the Windows carriage return. The second must end in <code class="nw">$</code> alone. The file is now Linux-style.</p>
+<p>Files you create in the VS Code window that shows <code class="nw">[WSL: Ubuntu-24.04]</code> get LF line endings from the start. Set VS Code up so you can confirm that at a glance and so stray tabs show up too. Indentation is the spaces at the start of a line, and YAML and Python both read meaning from it. A tab can look exactly like a few spaces on screen, yet YAML refuses tabs for indentation and Python fails when tabs and spaces are mixed.</p>
+<ol>
+<li>In VS Code, press Ctrl+, to open Settings.</li>
+<li>Type <code class="nw">render whitespace</code> in the search box at the top, and set Editor: Render Whitespace to <code class="nw">all</code>. Spaces now show as faint dots and tabs as small arrows.</li>
+<li>Type <code class="nw">eol</code> in the search box and set Files: Eol to <code class="nw">\n</code>, which is LF.</li>
+<li>Close the Settings tab and click <code class="nw">hello.txt</code> in the Explorer pane to open it.</li>
+</ol>
+<p>The status bar along the bottom of the VS Code window now shows <code class="nw">Spaces: 4</code>, <code class="nw">UTF-8</code> and <code class="nw">LF</code> toward the right. If it shows <code class="nw">CRLF</code>, click it and choose <code class="nw">LF</code> from the list at the top of the window. If it shows <code class="nw">Tab Size:</code> instead of <code class="nw">Spaces:</code>, click it and choose Indent Using Spaces. Look at the <code class="nw">LF</code> and <code class="nw">Spaces:</code> items every time you paste a file in later chapters.</p>
+<p>A paste can go wrong in VS Code and in the terminal, in different ways. To paste a whole file into VS Code, create the file first, click into the empty file so the cursor sits at line 1, column 1, and press Ctrl+V. Then compare the first and the last line with the guide. A paste that went wrong usually shows at one of the ends.</p>
+<p>In the Ubuntu terminal you paste with Ctrl+Shift+V or with a right-click. When you paste several lines at once, the terminal may warn that the text contains multiple lines, and you click Paste anyway when the text came from this guide. Paste one block at a time. Wait for the prompt to come back before you paste the next. If the pasted lines sit highlighted on the command line and nothing runs, press Enter.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>&gt;</code></pre></figure>
+<p>The prompt has turned into a bare <code class="nw">&gt;</code> and nothing you type does anything useful. The terminal is waiting for you to close a quote or a block that the paste didn't finish, usually because a quote mark was lost or turned curly in copying. Press Ctrl+C to cancel, copy the block again from the Docs page and paste it again.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>$&#x27;\r&#x27;: command not found</code></pre></figure>
+<p>This message, often with a script name and line number in front of it, means you ran a script that has Windows line endings. Run <code class="nw">sed -i 's/\r$//'</code> followed by the script's path, as above, then run the script again.</p>
+<h2 id="step-9-set-up-git-and-create-the-repository">Step 9. Set up Git and create the repository</h2>
+<p>Git keeps snapshots of your project folder. It shows you exactly what you changed since the last snapshot, and it takes you back to a state that worked. It first needs to know who you are, because it writes your name and email into every snapshot. Replace the two placeholders with your own name and email, and keep the double quotes.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>git config --global user.name &quot;&lt;Your Name&gt;&quot;
+git config --global user.email &quot;&lt;your-email&gt;&quot;
+git config --global init.defaultBranch main
+git config --global --list</code></pre></figure>
+<p><code class="nw">git config --global</code> saves a setting for every project of this Linux user. <code class="nw">user.name</code> and <code class="nw">user.email</code> are the name and email written into your snapshots, and since your thesis appendix will show this history, use your real name. <code class="nw">init.defaultBranch main</code> names the main line of snapshots <code class="nw">main</code> in every new project. <code class="nw">--list</code> prints the settings you saved.</p>
+<p><strong>You should see</strong> the three settings, one per line.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>user.name=Student Tester
+user.email=student@example.com
+init.defaultbranch=main</code></pre></figure>
+<p>The lines must show your name and email after <code class="nw">user.name=</code> and <code class="nw">user.email=</code>. Git prints the third setting in lower case, as <code class="nw">init.defaultbranch=main</code>. That's normal.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>user.name=&lt;Your Name&gt;</code></pre></figure>
+<p>You left a placeholder in. The double quotes kept bash from treating the angle brackets as special, so Git stored the placeholder as your name. Run the <code class="nw">user.name</code> line again with your real name between the quotes, and do the same for <code class="nw">user.email</code> if it shows <code class="nw">&lt;your-email&gt;</code>. The new value replaces the old one.</p>
+<p>A repository is a folder that Git tracks, together with the history of its snapshots, which Git keeps in a hidden folder called <code class="nw">.git</code>. Some folders that appear later must stay out of the snapshots, because they're large or because a script rebuilds them. A file named <code class="nw">.gitignore</code> lists them, and Git skips anything that matches a line in it. Turn <code class="nw">~/microseg</code> into a repository and create that file. Paste the block as one piece, and if the terminal warns about multiple lines, click Paste anyway.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+git init
+cat &gt; ~/microseg/.gitignore &lt;&lt;&#x27;EOF&#x27;
+.venv/
+__pycache__/
+images/
+results/
+EOF
+cat ~/microseg/.gitignore</code></pre></figure>
+<p><code class="nw">git init</code> creates the hidden <code class="nw">.git</code> folder in the folder you're in. <code class="nw">cat &gt; ~/microseg/.gitignore</code> writes into that file whatever <code class="nw">cat</code> receives, and <code class="nw">&lt;&lt;'EOF'</code> feeds it every line that follows, up to the line that holds only <code class="nw">EOF</code>. These are the folders to skip.</p>
+<ul>
+<li><code class="nw">.venv/</code> is the Python setup you create in <a href="ch03.html">chapter 3</a>. One command rebuilds it.</li>
+<li><code class="nw">__pycache__/</code> holds files that Python creates on its own when it runs your code.</li>
+<li><code class="nw">images/</code> holds image archives of hundreds of megabytes, which <code class="nw">setup.sh</code> and <code class="nw">deploy.sh</code> rebuild.</li>
+<li><code class="nw">results/</code> holds the measurements <code class="nw">measure.py</code> writes in <a href="ch12.html">chapter 12</a>, and your backup keeps those.</li>
+</ul>
+<p>The last command prints the file so you can check it.</p>
+<p><strong>You should see</strong> one line from Git and then the four folder names.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>Initialized empty Git repository in /home/student/microseg/.git/
+.venv/
+__pycache__/
+images/
+results/</code></pre></figure>
+<p>The first line must start with <code>Initialized empty Git repository in</code> and end with <code>/home/&lt;user&gt;/microseg/.git/</code>, with your Linux user name. Exactly four lines follow, <code class="nw">.venv/</code>, <code class="nw">__pycache__/</code>, <code class="nw">images/</code> and <code class="nw">results/</code>, with nothing else.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>hint: Using &#x27;master&#x27; as the name for the initial branch. This default branch name</code></pre></figure>
+<p>That line and several more <code class="nw">hint:</code> lines appear after <code class="nw">git init</code> when the <code class="nw">init.defaultBranch</code> setting is missing. Run <code class="nw">git branch -m main</code> to rename the branch, then check that <code class="nw">git status</code> starts with <code class="nw">On branch main</code>.</p>
+<h2 id="step-10-save-the-first-snapshot">Step 10. Save the first snapshot</h2>
+<p>First ask Git what it sees.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>git status</code></pre></figure>
+<p><code class="nw">git status</code> reports which files are new, changed or ready to be saved in the next snapshot. Run it whenever you're unsure what state your folder is in.</p>
+<p><strong>You should see</strong> the branch name and the two files.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>On branch main
+
+No commits yet
+
+Untracked files:
+  (use &quot;git add &lt;file&gt;...&quot; to include in what will be committed)
+	.gitignore
+	hello.txt
+
+nothing added to commit but untracked files present (use &quot;git add&quot; to track)</code></pre></figure>
+<p>The first line must read <code class="nw">On branch main</code>. Under <code class="nw">Untracked files:</code> the output lists <code class="nw">.gitignore</code> and <code class="nw">hello.txt</code>, which means Git sees them but doesn't track them yet.</p>
+<p>A snapshot in Git is called a commit, and making one takes two moves. Staging picks the changes that go into the next commit. Committing saves them, with a message that says what changed. This commit is also the one for this chapter. Commit, then list the commits.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>git add -A &amp;&amp; git commit -m &quot;ch02: project folder, hello.txt and .gitignore&quot;
+git log --oneline</code></pre></figure>
+<p><code class="nw">git add -A</code> stages every new, changed and deleted file in the repository, apart from what <code class="nw">.gitignore</code> excludes. <code class="nw">&amp;&amp;</code> runs the second command only if the first succeeded. <code class="nw">git commit -m</code> saves the staged changes as a commit, with the text in quotes as its message. <code class="nw">git log</code> lists commits, newest first, and <code class="nw">--oneline</code> shrinks each one to a single line.</p>
+<p><strong>You should see</strong> a short summary of the commit, then one line of history.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>[main (root-commit) 39c2699] ch02: project folder, hello.txt and .gitignore
+ 2 files changed, 5 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100755 hello.txt
+39c2699 (HEAD -&gt; main) ch02: project folder, hello.txt and .gitignore</code></pre></figure>
+<p>The summary's first line starts with <code class="nw">[main (root-commit)</code>, followed by a short code and your message. "root-commit" means it's the first commit in the repository. A later line says <code class="nw">2 files changed</code>. The last line, from <code class="nw">git log</code>, starts with a seven-character code that's different on your laptop, followed by your message. Git may also print <code class="nw">(HEAD -&gt; main)</code> before the message, which marks the newest commit on the branch <code class="nw">main</code>. That seven-character code goes into the Commit column of your progress tracker from <a href="ch00.html">chapter 0</a>.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>fatal: not a git repository (or any of the parent directories): .git</code></pre></figure>
+<p>You ran a Git command outside the repository, probably in a fresh terminal that starts in your home folder. Run <code class="nw">cd ~/microseg</code> and try again.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>Author identity unknown
+
+* Please tell me who you are.</code></pre></figure>
+<p>The message goes on to suggest <code class="nw">git config</code> commands and ends with a line starting <code>fatal: unable to auto-detect email address</code>. Git doesn't know your name and email, because the settings in step 9 didn't take effect. Run the four <code class="nw">git config</code> commands from step 9 again, then run the commit again.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>nothing to commit, working tree clean</code></pre></figure>
+<p>Git found nothing new to save, which means the commit already exists. Run <code class="nw">git log --oneline</code> to see it.</p>
+<h2 id="step-11-see-a-change-and-undo-it">Step 11. See a change and undo it</h2>
+<p>Two more Git commands get you out of most trouble later. <code class="nw">git diff</code> shows what changed in your files since the last commit, and <code class="nw">git restore</code> throws those changes away. Practise both on <code class="nw">hello.txt</code> now, while nothing depends on it. The block moves into the project folder, adds a line to the file, shows the difference, undoes it and prints the file.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+echo &quot;a line to throw away&quot; &gt;&gt; ~/microseg/hello.txt
+git diff
+git restore hello.txt
+cat ~/microseg/hello.txt</code></pre></figure>
+<p><code class="nw">cd ~/microseg</code> makes sure Git runs inside the repository. <code class="nw">echo</code> prints its text, and <code class="nw">&gt;&gt;</code> adds that text to the end of the file instead of printing it. <code class="nw">git diff</code> compares your files with the last commit. <code class="nw">git restore hello.txt</code> puts the file back the way it was in the last commit, and <code class="nw">cat</code> shows the result.</p>
+<p>You should see the difference first, then the original line on its own.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>diff --git a/hello.txt b/hello.txt
+index 6cb6254..4604e5e 100755
+--- a/hello.txt
++++ b/hello.txt
+@@ -1 +1,2 @@
+ copied from Windows
++a line to throw away
+copied from Windows</code></pre></figure>
+<p>In the <code class="nw">git diff</code> part, the line that counts is <code class="nw">+a line to throw away</code>. A <code class="nw">+</code> at the start marks a line you added, a <code class="nw">-</code> would mark a line you removed, and lines with neither are unchanged context. The very last line must read <code class="nw">copied from Windows</code>, with nothing after it. When a file you pasted goes wrong in a later chapter, <code class="nw">git diff</code> shows exactly what changed since it last worked, and <code class="nw">git restore</code> with the file's name brings the working version back.</p>
+<p>A pager is a program that shows long output one screen at a time. When <code class="nw">git diff</code> or <code class="nw">git log</code> has more to show than fits in the window, Git hands the output to a pager, the last line of the window reads <code class="nw">:</code> or <code class="nw">(END)</code>, and the prompt doesn't come back. Use the arrow keys to scroll and press q to get the prompt back.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>error: pathspec &#x27;hello.txt&#x27; did not match any file(s) known to git</code></pre></figure>
+<p><code class="nw">git diff</code> printed nothing before this line, because <code class="nw">hello.txt</code> isn't in any commit yet. The commit in step 10 didn't go through. Your extra line is still in the file, so remove it with <code>sed -i '$d' ~/microseg/hello.txt</code>, where <code class="nw">$d</code> means "delete the last line". Then go back to step 10, make the commit and run this block again.</p>
+<h2 id="step-12-back-up-the-project-to-windows">Step 12. Back up the project to Windows</h2>
+<p>Git keeps its snapshots inside <code class="nw">~/microseg/.git</code>, so if Ubuntu breaks or gets deleted, the snapshots go with it. A copy on Windows guards against that. An archive is one file that holds many files and folders, and tar is the Linux program that makes archives. Make your first backup now with the block below. Replace <code class="nw">&lt;WinUser&gt;</code> in all three lines, the same way as in step 7, by pasting the block into Notepad first, replacing every <code class="nw">&lt;WinUser&gt;</code> there and copying it from Notepad into the Ubuntu terminal.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>tar --exclude=microseg/.venv --exclude=microseg/images -czf /mnt/c/Users/&lt;WinUser&gt;/Documents/microseg-backup-$(date +%F).tar.gz -C ~ microseg
+ls -lh /mnt/c/Users/&lt;WinUser&gt;/Documents/microseg-backup-*
+tar -tzf /mnt/c/Users/&lt;WinUser&gt;/Documents/microseg-backup-*.tar.gz</code></pre></figure>
+<p>Take the first line piece by piece.</p>
+<ul>
+<li>The two <code class="nw">--exclude</code> options leave out <code class="nw">.venv</code> and <code class="nw">images</code>, which are large and can be rebuilt.</li>
+<li><code class="nw">-c</code> creates an archive, <code class="nw">-z</code> compresses it and <code class="nw">-f</code> names the file to write.</li>
+<li><code class="nw">$(date +%F)</code> puts today's date into the file name, such as <code class="nw">2026-11-20</code>, so each backup gets its own name.</li>
+<li><code class="nw">-C ~ microseg</code> means "go to my home folder and archive the folder <code class="nw">microseg</code> from there", so the paths inside the archive start at <code class="nw">microseg/</code>.</li>
+</ul>
+<p>The archive includes <code class="nw">.git</code>, so the backup carries your whole history. <code class="nw">ls -lh</code> lists your backups with their sizes in a readable form. <code class="nw">tar -tzf</code> lists what's inside an archive without unpacking it. Today there's only one backup, so the <code class="nw">*</code> matches exactly one file.</p>
+<p><strong>You should see</strong> one line from <code class="nw">ls</code> for today's backup, and then a list of paths.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>-rwxrwxrwx 1 student student 12K Nov 20 01:28 /mnt/c/Users/ASUS/Documents/microseg-backup-2026-11-20.tar.gz
+microseg/
+microseg/hello.txt
+microseg/.gitignore
+microseg/.git/
+microseg/.git/branches/
+microseg/.git/config
+microseg/.git/objects/
+microseg/.git/objects/39/
+microseg/.git/objects/39/c26990030bb210706f08f2a8a2a59ae42efede
+microseg/.git/objects/79/
+microseg/.git/objects/79/f0cd24110d91438d5e8e6340f267636690b96d
+microseg/.git/objects/f0/
+microseg/.git/objects/f0/fc9bf75e707830ab624a30efa47d36c05cf7b6
+microseg/.git/objects/pack/
+microseg/.git/objects/6c/
+microseg/.git/objects/6c/b625490e5ee3226e02845298843d99b5ed344e
+microseg/.git/objects/info/
+microseg/.git/refs/
+microseg/.git/refs/heads/
+microseg/.git/refs/heads/main
+microseg/.git/refs/tags/
+microseg/.git/HEAD
+microseg/.git/index
+microseg/.git/COMMIT_EDITMSG
+microseg/.git/description
+microseg/.git/hooks/
+microseg/.git/hooks/applypatch-msg.sample
+microseg/.git/hooks/sendemail-validate.sample
+microseg/.git/hooks/pre-commit.sample
+microseg/.git/hooks/commit-msg.sample
+microseg/.git/hooks/pre-rebase.sample
+microseg/.git/hooks/fsmonitor-watchman.sample
+microseg/.git/hooks/pre-applypatch.sample
+microseg/.git/hooks/pre-merge-commit.sample
+microseg/.git/hooks/pre-receive.sample
+microseg/.git/hooks/prepare-commit-msg.sample
+microseg/.git/hooks/push-to-checkout.sample
+microseg/.git/hooks/post-update.sample
+microseg/.git/hooks/update.sample
+microseg/.git/hooks/pre-push.sample
+microseg/.git/logs/
+microseg/.git/logs/refs/
+microseg/.git/logs/refs/heads/
+microseg/.git/logs/refs/heads/main
+microseg/.git/logs/HEAD
+microseg/.git/info/
+microseg/.git/info/exclude</code></pre></figure>
+<p>The <code class="nw">ls</code> line ends with <code class="nw">microseg-backup-</code>, today's date and <code class="nw">.tar.gz</code>. The size is a few kilobytes for now, and it grows as the project fills up. Every path in the list after it starts with <code class="nw">microseg/</code>, and the list must include <code class="nw">microseg/hello.txt</code>, <code class="nw">microseg/.gitignore</code> and many entries under <code class="nw">microseg/.git/</code>.</p>
+<p>Back up again once a week, and each time you finish <a href="ch06.html">chapter 6</a>, 10 or 12. From your second backup on, use the two-line block below instead. It leaves out the <code class="nw">tar -tzf</code> line, which fails once the <code class="nw">*</code> matches more than one archive. Don't run it today.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>tar --exclude=microseg/.venv --exclude=microseg/images -czf /mnt/c/Users/&lt;WinUser&gt;/Documents/microseg-backup-$(date +%F).tar.gz -C ~ microseg
+ls -lh /mnt/c/Users/&lt;WinUser&gt;/Documents/microseg-backup-*</code></pre></figure>
+<p>The <code class="nw">ls</code> line then lists one archive per backup, newest date last.</p>
+<p>To restore a backup later, you would run <code class="nw">tar -xzf</code> with the archive's path and <code class="nw">-C ~</code>. It unpacks the archive back into your home folder and overwrites the files there. Don't run it now.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>-bash: WinUser: No such file or directory
+-bash: WinUser: No such file or directory
+-bash: WinUser: No such file or directory</code></pre></figure>
+<p>The lines may start with <code class="nw">bash:</code> without the dash. You pasted the block without replacing <code class="nw">&lt;WinUser&gt;</code>. Bash reads <code class="nw">&lt;</code> and <code class="nw">&gt;</code> as special characters, so none of the three commands ran and no backup was made. Paste the block into Notepad, replace every <code class="nw">&lt;WinUser&gt;</code> with your folder name and no angle brackets, and paste it into the terminal again.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>tar (child): /mnt/c/Users/sarak/Documents/microseg-backup-2026-11-20.tar.gz: Cannot open: No such file or directory
+tar (child): Error is not recoverable: exiting now</code></pre></figure>
+<p>Your message shows your own folder name and date. Either the folder name is misspelled, or OneDrive has moved your Documents folder. Run <code>ls /mnt/c/Users/&lt;WinUser&gt;/OneDrive/</code> with your name in place. If it lists <code class="nw">Documents</code>, use <code>/mnt/c/Users/&lt;WinUser&gt;/OneDrive/Documents</code> in every line instead. A backup there also gets copied to OneDrive, which protects it even if the laptop dies.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>tar: Removing leading `/&#x27; from member names</code></pre></figure>
+<p>You typed the folder as a full path, such as <code class="nw">~/microseg</code>, instead of <code class="nw">-C ~ microseg</code>. The archive still works, but its paths start with <code class="nw">home/&lt;user&gt;/microseg</code>. Delete that archive with <code class="nw">rm</code> followed by its path, then run the block again exactly as shown.</p>
+<h2 id="checkpoint">Checkpoint</h2>
+<p><strong>Checkpoint.</strong> Run this one command in the Ubuntu terminal.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cat ~/microseg/hello.txt &amp;&amp; git -C ~/microseg log --oneline | wc -l</code></pre></figure>
+<p><code class="nw">git -C ~/microseg</code> runs Git as if you were in that folder, so the command works from anywhere. <code class="nw">wc -l</code> counts the lines it receives, here one per commit.</p>
+<p><strong>You should see</strong> two lines.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>copied from Windows
+1</code></pre></figure>
+<p>The output must be exactly two lines, <code class="nw">copied from Windows</code> and then <code class="nw">1</code>. Together with <code class="nw">wsl -l -v</code> showing Ubuntu-24.04 at version <code class="nw">2</code> in step 5, that completes the checkpoint. Write today's date and the commit code into your progress tracker.</p>
+<p>Your commit for this chapter is the one you made in step 10, so there's nothing more to commit. From <a href="ch03.html">chapter 3</a> on, each chapter ends with <code>git add -A &amp;&amp; git commit -m</code> followed by that chapter's message in quotes.</p>
+<!-- OUT ids: ch04-wsl-version, ch04-wsl-install, ch04-ubuntu-git, ch04-wsl-list, ch04-pwd-code, ch04-ls-users, ch04-cat-hello, ch04-line-endings, ch04-git-config, ch04-git-init, ch04-git-status, ch04-first-commit, ch04-git-diff-restore, ch04-backup, ch04-checkpoint --><nav class="pager" aria-label="Chapters"><a rel="prev" href="ch01.html"><span>Previous chapter</span>Chapter 1. What you will build</a><a rel="next" href="ch03.html"><span>Next chapter</span>Chapter 3. Set up the environment</a></nav></main></div>
+<footer class="foot"><div class="foot-in"><p>Kubernetes 1.36, Cilium 1.20.5 and kind 0.33.0 on Windows 11 with WSL 2. Every command was run on a real laptop in November 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">Source on GitHub</a></p></div></footer>
+<p class="vh" aria-live="polite" id="live"></p>
+<script type="application/json" id="i18n">{"copied": "Copied", "copyFail": "Press Ctrl+C to copy the selected text", "doneOf": "{d} of {t} steps done", "next": "Next step: {s}", "allDone": "All {t} steps done.", "sumCount": "{d} of {t} done", "cleared": "All ticks cleared.", "confirm": "Clear every tick on this page? Your files and your cluster stay as they are.", "stageCount": "{d} of {t}"}</script>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

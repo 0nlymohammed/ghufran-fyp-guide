@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
+<title>Chapter 3. Set up the environment | Micro-segmentation lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&family=Noto+Sans+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="ar" href="../ar/guide/ch03.html">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400&text=%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9&display=swap">
+</head>
+<body class="">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="top-in">
+<a class="brand" href="../index.html">Micro-segmentation lab</a>
+<nav aria-label="Micro-segmentation lab"><ul>
+<li><a href="../index.html">Quick path</a></li>
+<li><a href="../guide/index.html" aria-current="page">Full guide</a></li>
+<li><a href="../downloads.html">Downloads</a></li>
+<li><a href="../ar/guide/ch03.html" lang="ar" hreflang="ar" data-setlang="ar">العربية</a></li>
+</ul></nav>
+</div></header>
+<div class="layout"><details class="rail" open><summary>Chapters</summary><nav aria-label="Chapters"><ol class="toc"><li><a href="ch00.html">0. How to use this guide</a></li><li><a href="ch01.html">1. What you will build</a></li><li><a href="ch02.html">2. Before you start</a></li><li><a href="ch03.html" aria-current="page">3. Set up the environment</a><ol class="sub"><li><a href="#give-wsl-10-gb-of-memory-and-the-kernel-modules-cilium-needs">Give WSL 10 GB of memory and the kernel modules Cilium needs</a></li><li><a href="#restart-wsl-then-check-what-it-got">Restart WSL, then check what it got</a></li><li><a href="#raise-the-inotify-limits-for-kinds-nodes">Raise the inotify limits for kind's nodes</a></li><li><a href="#install-curl-jq-and-python3-venv">Install curl, jq and python3-venv</a></li><li><a href="#add-dockers-package-repository">Add Docker's package repository</a></li><li><a href="#install-docker-engine-29">Install Docker Engine 29</a></li><li><a href="#let-your-user-run-docker-no-sudo">Let your user run Docker (no sudo)</a></li><li><a href="#install-kind-v0330">Install kind (v0.33.0)</a></li><li><a href="#install-kubectl-v1366">Install kubectl (v1.36.6)</a></li><li><a href="#install-the-cilium-command-v0203">Install the cilium command (v0.20.3)</a></li><li><a href="#install-the-hubble-command-v1204">Install the hubble command (v1.20.4)</a></li><li><a href="#create-the-python-virtual-environment-venv">Create the Python virtual environment (.venv)</a></li><li><a href="#check-the-free-space-on-drive-c">Check the free space on drive C:</a></li><li><a href="#check-the-whole-environment-check-envsh">Check the whole environment (check-env.sh)</a></li><li><a href="#checkpoint">Checkpoint</a></li></ol></li><li><a href="ch04.html">4. Create the cluster</a></li><li><a href="ch05.html">5. Write the services</a></li><li><a href="ch06.html">6. Deploy the portal</a></li><li><a href="ch07.html">7. Build your dashboard</a></li><li><a href="ch08.html">8. Attack the flat network</a></li><li><a href="ch09.html">9. Design the policy</a></li><li><a href="ch10.html">10. Apply micro-segmentation</a></li><li><a href="ch11.html">11. Read the evidence in Hubble</a></li><li><a href="ch12.html">12. Measure</a></li><li><a href="ch13.html">13. Getting unstuck alone</a></li><li><a href="ch14.html">14. Evidence for your report</a></li><li><a href="ch15.html">15. Day-by-day plan</a></li><li><a href="appendix.html">Appendices</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="chapter-3-set-up-the-environment">Chapter 3. Set up the environment</h1>
+<p>At the end of this chapter your Ubuntu has the memory, processors and kernel settings the cluster needs, Docker runs without <code class="nw">sudo</code>, and the exact versions of kind, kubectl, cilium and hubble are installed and checked against their published fingerprints. A Python environment for the dashboard, the control page you build in <a href="ch07.html">chapter 7</a>, is ready too. One script, <code class="nw">check-env.sh</code>, tests all of it and must print <code class="nw">14 of 14 checks passed</code>. Plan on 2 to 2.5 hours, most of it spent waiting for downloads.</p>
+<p>Work in the Ubuntu terminal unless a block is labelled <code class="nw">powershell</code>. Many blocks start with <code class="nw">sudo</code>, which runs a command with administrator rights and asks for the Linux password you created in <a href="ch02.html">chapter 2</a>. Right before every block that contains <code class="nw">sudo</code>, run <code class="nw">sudo true</code> on its own and type your password. Nothing appears on the screen while you type, which is normal. sudo then remembers the password in that terminal for 15 minutes, so the block you paste next isn't interrupted by the password question halfway through. If <code class="nw">[sudo] password for</code> appears while a pasted block is running, those 15 minutes ran out and sudo is reading your pasted lines as a password. Press Ctrl+C, run <code class="nw">sudo true</code>, type your password and paste the block again.</p>
+<h2 id="give-wsl-10-gb-of-memory-and-the-kernel-modules-cilium-needs">Give WSL 10 GB of memory and the kernel modules Cilium needs</h2>
+<p>WSL runs Ubuntu inside a virtual machine, a complete computer simulated in software that borrows memory and processors from Windows. By default it takes half of your laptop's memory and loads only the Linux kernel parts that most people need. Your cluster needs about 10 GB, and Cilium needs several kernel modules, extra pieces of the Linux kernel that WSL ships but doesn't switch on. One Windows file, <code class="nw">.wslconfig</code>, controls both.</p>
+<figure class="fig"><a href="../files/figures/fig02-en.png"><img src="../files/figures/web/fig02-en.png" alt="Where everything runs" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>Where everything runs</figcaption></figure>
+<p>In figure 2, Ubuntu, Docker, the three cluster nodes and every pod all sit inside the one WSL virtual machine, so the memory you set in this step is shared by all of them. A pod is the smallest unit Kubernetes runs, one or more containers that share a network address, and <a href="ch04.html">chapter 4</a> says more about it.</p>
+<p>Press the Windows key, type <code class="nw">notepad</code> and press Enter. If Notepad opens with old text or tabs, click the + next to the tabs to get a new empty one. Paste the following text into the empty Notepad window. Every value has to be exactly as shown, and the long <code class="nw">loadKernelModules</code> line must stay on one line.</p>
+<figure class="code file"><figcaption><span class="lbl">File: .wslconfig</span><button type="button" class="copy" aria-label="Copy this file">Copy</button></figcaption><pre dir="ltr"><code>[wsl2]
+memory=10GB
+processors=4
+swap=4GB
+networkingMode=nat
+localhostForwarding=true
+loadKernelModules=xt_socket,xt_TPROXY,xt_mark,xt_CT,xt_set,ip_set_hash_ip,xt_comment,iptable_raw,iptable_mangle,ip6table_raw,ip6table_mangle,sch_ingress,cls_bpf,xt_recent
+
+[general]
+instanceIdleTimeout=-1</code></pre></figure>
+<p>Click File, then Save as. Click the address bar at the top of the Save as window, type <code class="nw">%USERPROFILE%</code> and press Enter, which opens your Windows user folder (<code class="nw">C:\Users\&lt;WinUser&gt;</code>). In the Save as type list choose "All files". In the File name box type <code class="nw">.wslconfig</code>, with the dot at the start and nothing after it. Click Save and close Notepad. If Windows says that <code class="nw">.wslconfig</code> already exists and asks whether to replace it, click Yes. Tools such as Docker Desktop sometimes create this file, and your version has to replace theirs. If you leave Save as type on "Text documents", Notepad adds <code class="nw">.txt</code> to the name without telling you and WSL never reads the file.</p>
+<p>(1) <code class="nw">[wsl2]</code> starts the section with settings for the WSL 2 virtual machine.</p>
+<p>(2) <code class="nw">memory=10GB</code> gives the virtual machine 10 GB of your laptop's memory. That leaves about 6 GB for Windows on a 16 GB laptop.</p>
+<p>(3) <code class="nw">processors=4</code> gives it 4 processor threads.</p>
+<p>(4) <code class="nw">swap=4GB</code> sets up 4 GB of swap, disk space that Linux uses as overflow when memory runs out. It's slow, but it stops programs from being killed during a short peak, such as the moment all three nodes start together.</p>
+<p>(5) <code class="nw">networkingMode=nat</code> keeps WSL's normal network mode, in which Ubuntu sits behind Windows the way a home laptop sits behind its router. The guide was tested in this mode, so the file names it explicitly instead of trusting the default.</p>
+<p>(6) <code class="nw">localhostForwarding=true</code> makes a port that a program opens on <code class="nw">localhost</code> inside Ubuntu reachable as <code class="nw">localhost</code> from Windows too. That's how your Windows browser will open the Campus Portal, the website you build in this project, at <code class="nw">http://localhost:30080</code>, and Hubble's web page at <code class="nw">http://localhost:12000</code>. Hubble is the part of Cilium that records every connection in the cluster.</p>
+<p>(7) <code class="nw">loadKernelModules=</code> lists the kernel modules WSL loads every time it starts. Kubernetes and Cilium build firewall rules out of them. Two are worth knowing by name. <code class="nw">xt_TPROXY</code> and <code class="nw">xt_socket</code> let Cilium hand web requests to Envoy, a proxy that Cilium runs, meaning a program that sits in the middle of a web request and passes it on. Envoy enforces the L7 part of your policies in <a href="ch10.html">chapter 10</a>, the part that looks inside web requests. If those two modules are missing, the Cilium agent fails or the L7 part doesn't work. Of the others, <code class="nw">sch_ingress</code> and <code class="nw">cls_bpf</code> give Cilium an older way to attach its eBPF programs, the small programs it loads into the Linux kernel, and Cilium falls back on that way if the kernel lacks the newer one.</p>
+<p>(8) <code class="nw">[general]</code> starts the section with settings for WSL as a whole.</p>
+<p>(9) <code class="nw">instanceIdleTimeout=-1</code> keeps Ubuntu running after you close its last terminal window. Without it, WSL stops Ubuntu a short while after the last window closes, and Docker, your cluster and the dashboard stop with it.</p>
+<p>Now check from PowerShell that Windows sees the file under the right name. Open Windows PowerShell and run this.</p>
+<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>Get-Content &quot;$env:USERPROFILE\.wslconfig&quot;</code></pre></figure>
+<p><code class="nw">Get-Content</code> prints a text file. <code class="nw">$env:USERPROFILE</code> is PowerShell's name for your Windows user folder, the same folder <code class="nw">%USERPROFILE%</code> opened in Notepad.</p>
+<p><strong>You should see</strong> the text you pasted, line for line.</p>
+<figure class="code file"><figcaption><span class="lbl">File: .wslconfig</span><button type="button" class="copy" aria-label="Copy this file">Copy</button></figcaption><pre dir="ltr"><code>[wsl2]
+memory=10GB
+processors=4
+swap=4GB
+networkingMode=nat
+localhostForwarding=true
+loadKernelModules=xt_socket,xt_TPROXY,xt_mark,xt_CT,xt_set,ip_set_hash_ip,xt_comment,iptable_raw,iptable_mangle,ip6table_raw,ip6table_mangle,sch_ingress,cls_bpf,xt_recent
+
+[general]
+instanceIdleTimeout=-1</code></pre></figure>
+<p>Compare the <code class="nw">loadKernelModules</code> line character by character with the block above. A missing comma joins two names into one that doesn't exist, and neither module loads.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>Get-Content : Cannot find path &#x27;C:\Users\Sara\.wslconfig&#x27; because it does not exist.</code></pre></figure>
+<p>Your own user name appears where this example shows <code class="nw">Sara</code>. The file was saved under another name, almost always <code class="nw">.wslconfig.txt</code>. Open File Explorer, go to <code class="nw">C:\Users\&lt;WinUser&gt;</code>, click View, then Show, then File name extensions, and rename the file to <code class="nw">.wslconfig</code>. Windows asks if you really want to change the extension. Click Yes.</p>
+<p>The file prints, but the long line is broken in two, or a line starts with a space. Open it again with <code>notepad "$env:USERPROFILE\.wslconfig"</code> in PowerShell, put the text back exactly as shown above and save.</p>
+<h2 id="restart-wsl-then-check-what-it-got">Restart WSL, then check what it got</h2>
+<p>WSL reads <code class="nw">.wslconfig</code> only when its virtual machine starts. Close every Ubuntu terminal and every VS Code window that is connected to Ubuntu, then stop the whole virtual machine from PowerShell.</p>
+<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>wsl --shutdown
+wsl --list --running</code></pre></figure>
+<p><code class="nw">wsl --shutdown</code> stops every running Linux distribution and the virtual machine they share. <code class="nw">wsl --list --running</code> lists the distributions that are still running, and after a shutdown there should be none.</p>
+<p><strong>You should see</strong> one line saying that no distribution is running.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>There are no running distributions.</code></pre></figure>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>The second command still lists <code class="nw">Ubuntu-24.04</code>. A VS Code window or a terminal you forgot has reconnected to Ubuntu and started it again. Close it, wait ten seconds and run both commands once more.</p>
+<p>Now open Ubuntu again the way <a href="ch02.html">chapter 2</a> showed you. Check that the virtual machine got its memory and processors.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>free -h
+nproc</code></pre></figure>
+<p><code class="nw">free -h</code> shows memory, and <code class="nw">-h</code> prints it in human sizes such as <code class="nw">Gi</code> instead of bytes. <code class="nw">nproc</code> prints the number of processors Ubuntu can use.</p>
+<p><strong>You should see</strong> a small memory table followed by a single number.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>               total        used        free      shared  buff/cache   available
+Mem:           9.7Gi       530Mi       8.5Gi       4.1Mi       831Mi       9.2Gi
+Swap:          4.0Gi          0B       4.0Gi
+4</code></pre></figure>
+<p>On the <code class="nw">Mem:</code> line, the <code class="nw">total</code> column must read about <code class="nw">9.7Gi</code>. Linux reports a little less than the 10 GB you asked for, because the kernel keeps some memory for itself. The <code class="nw">Swap:</code> line shows <code class="nw">4.0Gi</code> in the total column. The last line must be <code class="nw">4</code>. The used and free columns change all the time, so ignore them.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>The total on the <code class="nw">Mem:</code> line is about <code class="nw">7.8Gi</code> instead of <code class="nw">9.7Gi</code>. WSL didn't read your file. Either its name is wrong (go back to the previous step and run the <code class="nw">Get-Content</code> check) or WSL wasn't fully stopped. Close every Ubuntu and VS Code window, run <code class="nw">wsl --shutdown</code> again, wait ten seconds and reopen Ubuntu.</p>
+<p><code class="nw">nproc</code> prints a number below 4. Your laptop has fewer than 4 processor threads, which <a href="ch00.html">chapter 0</a> asked you to check. The lab can't run on this machine.</p>
+<p>Next, check that the kernel modules were loaded.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>lsmod | grep -E &quot;^(xt_socket|xt_TPROXY|cls_bpf|sch_ingress)&quot;</code></pre></figure>
+<p><code class="nw">lsmod</code> lists every loaded kernel module, one per line. The <code class="nw">|</code> symbol, called a pipe, sends that list into <code class="nw">grep</code>, which keeps only matching lines. <code class="nw">-E</code> lets the pattern use <code class="nw">|</code> to mean "or", and <code class="nw">^</code> means the name must sit at the start of the line. So the command keeps the lines for four of the modules from your file.</p>
+<p><strong>You should see</strong> four lines, one per module, each starting with the module's name.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>cls_bpf                20480  0
+sch_ingress            16384  0
+xt_TPROXY              12288  0
+xt_socket              12288  0</code></pre></figure>
+<p>The numbers after each name are sizes and use counts, and yours can differ. Only the four names have to match.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>You get no output at all, or fewer than four lines. Look at the <code class="nw">loadKernelModules</code> line in <code class="nw">.wslconfig</code> again for a typo or a line break, fix it, run <code class="nw">wsl --shutdown</code> in PowerShell and reopen Ubuntu.</p>
+<p>Last, check that systemd is running. Systemd is the first program Linux runs at boot, and it launches and supervises background services. One of those services will be Docker's daemon, a program that runs in the background and waits for requests. Ubuntu 24.04 on WSL switches systemd on by default, and these two commands confirm it.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>ps -p 1 -o comm=
+cat /etc/wsl.conf</code></pre></figure>
+<p><code class="nw">ps</code> lists running programs. <code class="nw">-p 1</code> picks process number 1, the first program the system started, and <code class="nw">-o comm=</code> prints only its name, with the <code class="nw">=</code> removing the column heading. <code class="nw">cat</code> prints a file. <code class="nw">/etc/wsl.conf</code> is the settings file that WSL reads for this one distribution, Ubuntu, while <code class="nw">.wslconfig</code> on the Windows side configures the whole virtual machine.</p>
+<p><strong>You should see</strong> <code class="nw">systemd</code> on the first line, then the contents of <code class="nw">/etc/wsl.conf</code>.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>systemd
+[boot]
+systemd=true
+
+[user]
+default=student</code></pre></figure>
+<p>The file must contain a <code class="nw">[boot]</code> line followed by <code class="nw">systemd=true</code>. It may hold other lines too, such as a <code class="nw">[user]</code> section with your user name. Leave those alone.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>The first line reads <code class="nw">init</code> instead of <code class="nw">systemd</code>, and <code class="nw">/etc/wsl.conf</code> has no <code class="nw">systemd=true</code> line. Open the file with <code class="nw">sudo nano /etc/wsl.conf</code>, add the two lines <code class="nw">[boot]</code> and <code class="nw">systemd=true</code> at the end, press Ctrl+O and Enter to save, then Ctrl+X to leave. Run <code class="nw">wsl --shutdown</code> in PowerShell, reopen Ubuntu and check again.</p>
+<h2 id="raise-the-inotify-limits-for-kinds-nodes">Raise the inotify limits for kind's nodes</h2>
+<p>Inotify is the Linux feature that lets a program ask to be told when a file changes. Every kind node runs its own systemd and its own Kubernetes agent, and each of them watches many files. Ubuntu's default limits are sized for one ordinary computer, and three nodes running side by side use them up, after which a node never finishes starting. kind's documentation names this as a known problem and gives these two values.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>echo -e &quot;fs.inotify.max_user_watches=524288\nfs.inotify.max_user_instances=512&quot; | sudo tee /etc/sysctl.d/99-kind.conf
+sudo sysctl --system &gt;/dev/null
+sysctl fs.inotify.max_user_watches fs.inotify.max_user_instances</code></pre></figure>
+<p>The first line writes the new settings to a file. <code class="nw">echo -e</code> prints its text and turns <code class="nw">\n</code> into a line break, so the text becomes two lines, one setting each. The pipe hands those lines to <code>sudo tee /etc/sysctl.d/99-kind.conf</code>, which writes them into that file and also prints them. You need <code class="nw">tee</code> here because files under <code class="nw">/etc</code> belong to the administrator: in <code class="nw">sudo echo ... &gt; file</code>, the <code class="nw">&gt;</code> part would run without administrator rights and fail. Files in <code class="nw">/etc/sysctl.d/</code> are read again at every start, so the setting survives restarts.</p>
+<p><code class="nw">sudo sysctl --system</code> loads every settings file in that folder now, without a restart. <code class="nw">&gt;/dev/null</code> throws its long normal output away. Error messages still appear, because they travel on a separate channel that this redirection doesn't touch.</p>
+<p>The last line, <code class="nw">sysctl</code> with two setting names, prints their current values so you can see that they changed.</p>
+<p><strong>You should see</strong> the two lines written to the file, then the two values now active.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>fs.inotify.max_user_watches=524288
+fs.inotify.max_user_instances=512
+fs.inotify.max_user_watches = 524288
+fs.inotify.max_user_instances = 512</code></pre></figure>
+<p>The last two lines must read <code>fs.inotify.max_user_watches = 524288</code> and <code>fs.inotify.max_user_instances = 512</code>.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>Sorry, try again.</code></pre></figure>
+<p>sudo asked for your password and read one of the pasted lines as the password, or the password was mistyped. Press Ctrl+C to stop, run <code class="nw">sudo true</code> on its own, type your password, then paste the block again.</p>
+<h2 id="install-curl-jq-and-python3-venv">Install curl, jq and python3-venv</h2>
+<p>Ubuntu installs software as packages, ready-made bundles that its package manager, apt, downloads from a repository, a server that hosts packages. This step installs four packages that later steps need.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>sudo apt-get update -qq
+sudo apt-get install -y -qq ca-certificates curl jq python3-venv &gt;/dev/null
+jq --version</code></pre></figure>
+<p><code class="nw">sudo apt-get update</code> refreshes apt's list of which packages and versions exist. <code class="nw">-qq</code> makes it very quiet. <code class="nw">apt-get install -y</code> installs the packages named after it, and <code class="nw">-y</code> answers "yes" to the question about disk space for you.</p>
+<p><code class="nw">ca-certificates</code> holds the list of authorities Ubuntu needs to trust HTTPS sites, and <code class="nw">curl</code> downloads files from web addresses. You'll use <code class="nw">jq</code> from <a href="ch07.html">chapter 7</a> on to read and filter JSON. <code class="nw">python3-venv</code> is the part of Python that creates virtual environments, which you'll do at the end of this chapter. <code class="nw">jq --version</code> at the end proves <code class="nw">jq</code> installed.</p>
+<p><strong>You should see</strong> a single version line after a minute or so.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>jq-1.7</code></pre></figure>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>E: Unable to acquire the dpkg frontend lock (/var/lib/dpkg/lock-frontend), is another process using it?</code></pre></figure>
+<p>Ubuntu is installing its own automatic updates in the background, which often happens in the first hours after installation. Wait five minutes and run the block again. Don't delete the lock file, since that can break the package system.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>Temporary failure resolving &#x27;archive.ubuntu.com&#x27;</code></pre></figure>
+<p>Ubuntu can't reach the internet. Check that Windows is online. A VPN on Windows often blocks WSL's network, so disconnect it and try again.</p>
+<h2 id="add-dockers-package-repository">Add Docker's package repository</h2>
+<p>Docker Engine is the free Docker program for Linux that builds images and runs containers. Ubuntu's own repository carries an older Docker under another name, so you add Docker's own repository to apt. Apt checks every package from it against Docker's signing key, a public key that proves a package was published by Docker and wasn't altered on the way.</p>
+<p>If Docker Desktop is installed on your Windows, deal with it first. Docker Desktop is a separate Windows program that can put its own <code class="nw">docker</code> command into your Ubuntu, and then your commands reach its engine instead of the one you're about to install. Open Docker Desktop, go to Settings, then Resources, then WSL integration. Untick "Enable integration with my default WSL distro" at the top of that page, because Ubuntu-24.04 is probably your default distribution and that box keeps the integration on whatever the list below it says. Then switch Ubuntu-24.04 off in the list and click "Apply &amp; restart" (some versions label it "Apply"). You don't need to uninstall Docker Desktop, but don't use it for this project. A check later in this chapter confirms which engine answers.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+sudo tee /etc/apt/sources.list.d/docker.sources &lt;&lt;EOT
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: $(. /etc/os-release &amp;&amp; echo &quot;${UBUNTU_CODENAME:-$VERSION_CODENAME}&quot;)
+Components: stable
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/docker.asc
+EOT</code></pre></figure>
+<p>Paste the whole block at once. While you paste, the terminal shows <code class="nw">&gt;</code> at the start of the lines after <code class="nw">&lt;&lt;EOT</code>. That's bash collecting the lines it will write to the file, and it stops at the line that reads <code class="nw">EOT</code> alone.</p>
+<p>(1) <code>sudo install -m 0755 -d /etc/apt/keyrings</code> creates the folder where apt keeps signing keys. <code class="nw">-d</code> means "create a directory", and <code class="nw">-m 0755</code> sets its permissions so everyone can read it but only the administrator can change it.</p>
+<p>(2) <code>sudo curl -fsSL &lt;url&gt; -o &lt;file&gt;</code> downloads Docker's signing key into that folder. <code class="nw">-f</code> makes curl fail on a server error instead of saving the error page, <code class="nw">-s</code> hides the progress bar, <code class="nw">-S</code> still shows an error if one happens, <code class="nw">-L</code> follows a redirect to the file's real location and <code class="nw">-o</code> names the output file.</p>
+<p>(3) <code class="nw">sudo chmod a+r</code> makes the key readable by all users, because apt reads it under a user of its own.</p>
+<p>(4) <code>sudo tee /etc/apt/sources.list.d/docker.sources &lt;&lt;EOT</code> writes the lines up to <code class="nw">EOT</code> into a new apt source file and prints them. Inside those lines, <code class="nw">$( ... )</code> runs a command and puts its output in its place. <code class="nw">. /etc/os-release</code> reads Ubuntu's release file, which defines the codename of your Ubuntu version, and <code class="nw">echo</code> prints it. <code class="nw">dpkg --print-architecture</code> prints your processor type.</p>
+<p>The fields tell apt that this source holds <code class="nw">deb</code> packages, Ubuntu's package format, and where the server is. <code class="nw">Suites</code> and <code class="nw">Architectures</code> pick the Ubuntu version and processor type to fetch for, <code class="nw">Components: stable</code> asks for Docker's stable releases only, and <code class="nw">Signed-By</code> names the key that signs them.</p>
+<p><strong>You should see</strong> the file contents with the two computed values filled in.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: noble
+Components: stable
+Architectures: amd64
+Signed-By: /etc/apt/keyrings/docker.asc</code></pre></figure>
+<p><code class="nw">Suites:</code> must read <code class="nw">noble</code>, the codename of Ubuntu 24.04, and <code class="nw">Architectures:</code> must read <code class="nw">amd64</code>.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>curl: (6) Could not resolve host: download.docker.com</code></pre></figure>
+<p>Ubuntu has no internet access at this moment. Fix the connection as in the previous step and run the block again. It's safe to repeat, since every line overwrites what it wrote before.</p>
+<p><code class="nw">Suites:</code> is empty. The <code class="nw">$(</code> part was retyped by hand and a character is missing. Paste the block again from this page.</p>
+<p><code class="nw">[sudo] password for</code> appeared in the middle of the paste, followed by lines such as these.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>Types:: command not found
+EOT: command not found</code></pre></figure>
+<p>sudo's 15 minutes ran out, the password question swallowed some of the pasted lines, and bash then ran the file's lines as commands. Press Ctrl+C, run <code class="nw">sudo true</code>, type your password and paste the whole block again. It rewrites the file from the start.</p>
+<h2 id="install-docker-engine-29">Install Docker Engine 29</h2>
+<p>Now apt can fetch Docker from Docker's own repository.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>sudo apt-get update -qq
+DOCKER_VERSION=5:29.10.0-1~ubuntu.24.04~noble
+sudo apt-get install -y -qq docker-ce=$DOCKER_VERSION docker-ce-cli=$DOCKER_VERSION containerd.io docker-buildx-plugin docker-compose-plugin &gt;/dev/null
+sudo docker version --format &#x27;docker client {{.Client.Version}} server {{.Server.Version}}&#x27;</code></pre></figure>
+<p>The first line refreshes the package list, which now includes Docker's repository. The second line stores the exact Docker version this guide was tested with in a variable named <code class="nw">DOCKER_VERSION</code>. The <code class="nw">5:</code> at its start and the part after <code class="nw">29.10.0</code> are how Docker's repository labels its 29.10.0 build for Ubuntu 24.04. The third line installs five packages, and <code class="nw">=$DOCKER_VERSION</code> after the first two names asks apt for that exact version instead of the newest one. <code class="nw">docker-ce</code> is the Docker daemon itself, and <code class="nw">docker-ce-cli</code> is the <code class="nw">docker</code> command you type. <code class="nw">containerd.io</code> is the lower-level program that actually starts and stops containers for the daemon, and <code class="nw">docker-buildx-plugin</code> is the builder behind <code class="nw">docker build</code>. <code class="nw">docker-compose-plugin</code> is part of Docker's standard installation, although this project doesn't use it.</p>
+<p>The third line prints nothing for a few minutes while about 100 MB downloads. Wait for the version line and the prompt, and don't press Ctrl+C in the meantime. The last line asks Docker for its version. It needs <code class="nw">sudo</code> because your user doesn't have permission to use Docker yet, which the next step fixes. <code class="nw">--format</code> picks two fields out of Docker's long version report and prints them on one line.</p>
+<p><strong>You should see</strong> one line with the same version twice.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>docker client 29.10.0 server 29.10.0</code></pre></figure>
+<p>Both numbers must read <code class="nw">29.10.0</code>, because the install line asked for exactly that version.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>E: Unable to locate package docker-ce</code></pre></figure>
+<p>Apt doesn't know Docker's repository, because the file from the previous step is missing or has a typo. Run <code>cat /etc/apt/sources.list.d/docker.sources</code>, compare it with the output shown in the previous step and repeat that step if anything differs.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>E: Version &#x27;5:29.10.0-1~ubuntu.24.04~noble&#x27; for &#x27;docker-ce&#x27; was not found</code></pre></figure>
+<p>The version line was retyped and a character differs. Copy the whole block again from this page and run it.</p>
+<p>An error that starts with this text:</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>failed to connect to the docker API at unix:///var/run/docker.sock; check if the path is correct and if the daemon is running</code></pre></figure>
+<p>The daemon didn't start, almost always because systemd isn't running. Go back to the systemd check earlier in this chapter.</p>
+<h2 id="let-your-user-run-docker-no-sudo">Let your user run Docker (no sudo)</h2>
+<p>Every Docker command talks to the daemon through a special file, <code class="nw">/var/run/docker.sock</code>, and only members of the <code class="nw">docker</code> group may use it. A group is a named list of users that share a permission. kind, <code class="nw">setup.sh</code> and <code class="nw">deploy.sh</code> call Docker as your user, so your user joins that group.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>sudo usermod -aG docker &quot;$USER&quot;</code></pre></figure>
+<p><code class="nw">usermod</code> changes a user account. <code class="nw">-G docker</code> names the group, <code class="nw">-a</code> means "add to the groups I'm already in" instead of replacing them, and <code class="nw">"$USER"</code> is your own user name. The command prints nothing.</p>
+<p>Linux reads a user's groups when a session starts, so the change only counts in a fresh session. Close every Ubuntu window, then run this in PowerShell.</p>
+<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>wsl --terminate Ubuntu-24.04</code></pre></figure>
+<p><code class="nw">wsl --terminate</code> stops one distribution and leaves the virtual machine running. You need it here because <code class="nw">instanceIdleTimeout=-1</code> keeps Ubuntu alive after its windows close, so closing them alone doesn't start a fresh session.</p>
+<p><strong>You should see</strong> one line confirming that the operation completed.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>The operation completed successfully.</code></pre></figure>
+<p>Open Ubuntu again and run Docker's own test container without <code class="nw">sudo</code>.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>docker run --rm hello-world</code></pre></figure>
+<p><code class="nw">docker run</code> starts a container from an image, here Docker's tiny test image <code class="nw">hello-world</code>. Docker downloads the image first because it isn't on your laptop yet. <code class="nw">--rm</code> deletes the container once it finishes.</p>
+<p><strong>You should see</strong> the download lines, then a short greeting from Docker.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>Unable to find image &#x27;hello-world:latest&#x27; locally
+latest: Pulling from library/hello-world
+4f55086f7dd0: Pull complete
+d5e71e642bf5: Download complete
+Digest: sha256:1e4c05b897a751332ce85c7e9449da2d93514ea2dea6dbb0e2753c9e949b2bfa
+Status: Downloaded newer image for hello-world:latest
+
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+
+To generate this message, Docker took the following steps:
+ 1. The Docker client contacted the Docker daemon.
+ 2. The Docker daemon pulled the &quot;hello-world&quot; image from the Docker Hub.
+    (amd64)
+ 3. The Docker daemon created a new container from that image which runs the
+    executable that produces the output you are currently reading.
+ 4. The Docker daemon streamed that output to the Docker client, which sent it
+    to your terminal.
+
+To try something more ambitious, you can run an Ubuntu container with:
+ $ docker run -it ubuntu bash
+
+Share images, automate workflows, and more with a free Docker ID:
+ https://hub.docker.com/
+
+For more examples and ideas, visit:
+ https://docs.docker.com/get-started/</code></pre></figure>
+<p>Look for the line <code class="nw">Hello from Docker!</code>. The download lines and the long <code class="nw">sha256:</code> code only appear the first time.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>An error that starts with this text:</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>permission denied while trying to connect to the docker API at unix:///var/run/docker.sock</code></pre></figure>
+<p>Your session doesn't have the <code class="nw">docker</code> group yet. Run <code class="nw">getent group docker</code>, which prints the group's saved members at the end of its line. If your user name isn't there, the <code class="nw">usermod</code> command never ran, so run it again. Then close every Ubuntu window, run <code class="nw">wsl --terminate Ubuntu-24.04</code> in PowerShell and reopen Ubuntu. If <code class="nw">id</code> then shows <code class="nw">docker</code> in its <code class="nw">groups=</code> part but the error stays, go to the Docker Desktop check below.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>Command &#x27;docker&#x27; not found, but can be installed with:</code></pre></figure>
+<p>The install step failed earlier without you noticing. Don't follow the suggestion Ubuntu prints under that line, because it installs a different Docker. Run the "Install Docker Engine 29" step again and look for any line starting with <code class="nw">E:</code>.</p>
+<h3 id="check-that-ubuntus-own-docker-answers">Check that Ubuntu's own Docker answers</h3>
+<p>If Docker Desktop's WSL integration is still switched on, your <code class="nw">docker</code> commands reach Docker Desktop's engine, with a different version and different settings. Check which engine answers, even if you've never installed Docker Desktop.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>docker info --format &quot;{{.OperatingSystem}}&quot;</code></pre></figure>
+<p><code class="nw">docker info</code> describes the engine that answered, and <code class="nw">--format</code> picks out the operating system it runs on.</p>
+<p><strong>You should see</strong> one line naming an operating system.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>Ubuntu 24.04.5 LTS</code></pre></figure>
+<p>The line must start with <code class="nw">Ubuntu 24.04</code>. If it reads <code class="nw">Docker Desktop</code> instead, switch off Docker Desktop's WSL integration for Ubuntu-24.04 as described at the start of "Add Docker's package repository", including the "Enable integration with my default WSL distro" box at the top of that page. Then run <code class="nw">wsl --terminate Ubuntu-24.04</code> in PowerShell, reopen Ubuntu and run the check again.</p>
+<h2 id="install-kind-v0330">Install kind (v0.33.0)</h2>
+<p>kind ("Kubernetes in Docker") builds a Kubernetes cluster out of Docker containers, one container per node. It's a single binary, a ready-to-run program file, so you download it and put it in a folder where bash finds commands. Before you install it, you check its checksum, a fingerprint computed from every byte of the file. The kind project publishes the expected fingerprint next to each download, and if a single byte differs, for example because the download was cut short, the fingerprints don't match.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~
+curl -fsSLO https://kind.sigs.k8s.io/dl/v0.33.0/kind-linux-amd64
+curl -fsSLO https://kind.sigs.k8s.io/dl/v0.33.0/kind-linux-amd64.sha256sum
+sha256sum --check kind-linux-amd64.sha256sum &amp;&amp; sudo install -m 0755 kind-linux-amd64 /usr/local/bin/kind &amp;&amp; rm kind-linux-amd64 kind-linux-amd64.sha256sum
+kind version</code></pre></figure>
+<p>(1) <code class="nw">cd ~</code> moves to your home folder, so the downloads land there.</p>
+<p>(2) The two <code class="nw">curl</code> lines download version v0.33.0 of kind and its fingerprint file. <code class="nw">-O</code> (capital O) saves each download under the last part of its address.</p>
+<p>(3) <code class="nw">sha256sum --check</code> reads the fingerprint file, computes the SHA-256 fingerprint of the file it names and compares the two. <code class="nw">&amp;&amp;</code> runs the next command only if the one before it succeeded, so a file that fails the check is never installed.</p>
+<p>(4) <code>sudo install -m 0755 &lt;file&gt; /usr/local/bin/kind</code> copies the program into <code class="nw">/usr/local/bin</code> under the name <code class="nw">kind</code> and marks it as runnable. <code class="nw">/usr/local/bin</code> is one of the folders on your PATH, the list of folders bash searches when you type a command name. The second <code class="nw">&amp;&amp;</code> lets <code class="nw">rm</code> delete the two downloaded files only after the install worked.</p>
+<p>(5) <code class="nw">kind version</code> proves bash finds the new command.</p>
+<p><strong>You should see</strong> the check report <code class="nw">OK</code>, then kind's version.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>kind-linux-amd64: OK
+kind v0.33.0 go1.26.7 linux/amd64</code></pre></figure>
+<p>The check line must end in <code class="nw">OK</code> and the version line must start with <code class="nw">kind v0.33.0</code>.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>kind-linux-amd64: FAILED
+sha256sum: WARNING: 1 computed checksum did NOT match</code></pre></figure>
+<p>The download is damaged, usually cut short by a weak connection. <code class="nw">&amp;&amp;</code> stopped the line there, so nothing was installed, and <code class="nw">kind version</code> reports that the command isn't found. Run the whole block again. The new download replaces the damaged file.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>curl: (22) The requested URL returned error: 404</code></pre></figure>
+<p>The version number in the address is mistyped. Copy the block again from this page.</p>
+<h2 id="install-kubectl-v1366">Install kubectl (v1.36.6)</h2>
+<p>kubectl is the command you use to talk to Kubernetes: to create things, list them, read logs and run commands inside pods. Its version should be close to the cluster's Kubernetes version, which is 1.36 in this guide.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~
+curl -fsSLO https://dl.k8s.io/release/v1.36.6/bin/linux/amd64/kubectl
+curl -fsSLO https://dl.k8s.io/release/v1.36.6/bin/linux/amd64/kubectl.sha256
+echo &quot;$(cat kubectl.sha256)  kubectl&quot; | sha256sum --check &amp;&amp; sudo install -m 0755 kubectl /usr/local/bin/kubectl &amp;&amp; rm kubectl kubectl.sha256
+kubectl version --client</code></pre></figure>
+<p>The two downloads are kubectl v1.36.6 and its fingerprint. Kubernetes publishes the fingerprint alone, without the file name next to it, so the <code class="nw">echo</code> line builds the line <code class="nw">sha256sum</code> expects: <code class="nw">$(cat kubectl.sha256)</code> puts the fingerprint in, followed by two spaces and the file name. The rest of that line works as it did for kind, and <code class="nw">&amp;&amp;</code> again keeps a file that fails the check from being installed. <code class="nw">kubectl version --client</code> prints the version of kubectl itself, and <code class="nw">--client</code> stops it from trying to reach a cluster, since none exists yet.</p>
+<p><strong>You should see</strong> <code class="nw">kubectl: OK</code>, then the version lines.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>kubectl: OK
+Client Version: v1.36.6
+Kustomize Version: v5.8.1</code></pre></figure>
+<p>The line <code class="nw">Client Version: v1.36.6</code> is the one that must match. kubectl also prints the version of Kustomize, a tool built into it that this guide doesn't use.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>kubectl: FAILED
+sha256sum: WARNING: 1 computed checksum did NOT match</code></pre></figure>
+<p>The download was cut short, and <code class="nw">&amp;&amp;</code> stopped the install. Run the block again.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>sha256sum: kubectl: No such file or directory</code></pre></figure>
+<p>The first <code class="nw">curl</code> line failed, so there's no file to check. Scroll up for a <code class="nw">curl:</code> error, fix the connection and run the block again.</p>
+<h2 id="install-the-cilium-command-v0203">Install the cilium command (v0.20.3)</h2>
+<p>The cilium command installs Cilium into a cluster and reports on its health. Cilium itself runs inside the cluster from <a href="ch04.html">chapter 4</a> on, and this command is how you install and inspect it from Ubuntu.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~
+V=v0.20.3
+curl -fsSL --remote-name-all https://github.com/cilium/cilium-cli/releases/download/$V/cilium-linux-amd64.tar.gz{,.sha256sum}
+sha256sum --check cilium-linux-amd64.tar.gz.sha256sum &amp;&amp; sudo tar xzfC cilium-linux-amd64.tar.gz /usr/local/bin &amp;&amp; rm cilium-linux-amd64.tar.gz*
+cilium version --client</code></pre></figure>
+<p>(1) <code class="nw">V=v0.20.3</code> stores the version in a variable named <code class="nw">V</code>, and <code class="nw">$V</code> later in the block is replaced by it.</p>
+<p>(2) The <code class="nw">{,.sha256sum}</code> at the end of the address is brace expansion. Bash turns it into two addresses, the archive itself and the same address with <code class="nw">.sha256sum</code> added, so one <code class="nw">curl</code> downloads both. <code class="nw">--remote-name-all</code> saves every download under its own name.</p>
+<p>(3) <code class="nw">sha256sum --check</code> compares the archive with the published fingerprint, as before, and <code class="nw">&amp;&amp;</code> stops the line there if they differ.</p>
+<p>(4) <code class="nw">tar</code> unpacks archives. The letters <code class="nw">xzfC</code> mean extract (<code class="nw">x</code>) a gzip-compressed (<code class="nw">z</code>) file (<code class="nw">f</code>, named next) into a folder (<code class="nw">C</code>, named after it), so the <code class="nw">cilium</code> program lands in <code class="nw">/usr/local/bin</code>. <code class="nw">rm cilium-linux-amd64.tar.gz*</code> deletes both downloads, since <code class="nw">*</code> matches any ending.</p>
+<p>(5) <code class="nw">cilium version --client</code> prints the tool's version and the Cilium versions it knows.</p>
+<p><strong>You should see</strong> <code class="nw">OK</code> for the archive, then three version lines.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>cilium-linux-amd64.tar.gz: OK
+cilium-cli: v0.20.3 compiled with go1.27.3 on linux/amd64
+cilium image (default): v1.20.3
+cilium image (stable): v1.20.5</code></pre></figure>
+<p>The first line must name <code class="nw">v0.20.3</code>. Read the other two lines closely. <code>cilium image (default): v1.20.3</code> is the Cilium version this tool installs if you don't say otherwise, and <code class="nw">cilium image (stable): v1.20.5</code> is the newest stable release. This guide was tested with 1.20.5, so <code class="nw">setup.sh</code> in <a href="ch04.html">chapter 4</a> always passes <code class="nw">--version 1.20.5</code>. Never run <code class="nw">cilium install</code> without it. The <code class="nw">(stable)</code> line is looked up online each time, so it may show a newer version than v1.20.5 if Cilium has released one since. That's fine, because <code class="nw">setup.sh</code> still installs 1.20.5.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>cilium-linux-amd64.tar.gz: FAILED
+sha256sum: WARNING: 1 computed checksum did NOT match</code></pre></figure>
+<p>The download was cut short, and <code class="nw">&amp;&amp;</code> stopped the install. Run the block again.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>curl: (22) The requested URL returned error: 404</code></pre></figure>
+<p>GitHub has no file at that address, almost always because the version was retyped with a typo. Copy the block again from this page and run it.</p>
+<h2 id="install-the-hubble-command-v1204">Install the hubble command (v1.20.4)</h2>
+<p>The hubble command reads Hubble's record of every connection in the cluster. You'll use it to prove which connections your policies dropped.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~
+V=v1.20.4
+curl -fsSL --remote-name-all https://github.com/cilium/hubble/releases/download/$V/hubble-linux-amd64.tar.gz{,.sha256sum}
+sha256sum --check hubble-linux-amd64.tar.gz.sha256sum &amp;&amp; sudo tar xzfC hubble-linux-amd64.tar.gz /usr/local/bin &amp;&amp; rm hubble-linux-amd64.tar.gz*
+hubble version</code></pre></figure>
+<p>The block works line for line like the cilium block, with hubble's version v1.20.4 and hubble's download address.</p>
+<p><strong>You should see</strong> <code class="nw">OK</code> for the archive, then hubble's version.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>hubble-linux-amd64.tar.gz: OK
+hubble v1.20.4@HEAD-3e268bb compiled with go1.27.3 on linux/amd64</code></pre></figure>
+<p>The version line must start with <code class="nw">hubble v1.20.4</code>. If the check line says <code class="nw">FAILED</code>, or curl reports error 404, the causes and the fixes are the same as for the cilium command.</p>
+<h2 id="create-the-python-virtual-environment-venv">Create the Python virtual environment (<code class="nw">.venv</code>)</h2>
+<p>Your dashboard (<a href="ch07.html">chapter 7</a>) and the latency test (<a href="ch12.html">chapter 12</a>) run with Python directly in Ubuntu and need two packages, Flask for the web pages and Requests for sending HTTP requests. Ubuntu 24.04 refuses to install packages into its own system Python, because they could break programs that Ubuntu itself depends on. So you create a virtual environment, a private copy of Python in a folder of its own, and install the packages there with pip, Python's package installer.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>python3 -m venv ~/microseg/.venv
+~/microseg/.venv/bin/pip install flask==3.1.0 requests==2.32.3
+~/microseg/.venv/bin/pip list | grep -iE &quot;^(flask|requests) &quot;</code></pre></figure>
+<p><code>python3 -m venv ~/microseg/.venv</code> creates the environment in the hidden folder <code class="nw">.venv</code> inside your project. The dot at the start of the name hides it from a plain <code class="nw">ls</code>, and the <code class="nw">.gitignore</code> file from <a href="ch02.html">chapter 2</a> already keeps it out of Git. The second line runs the pip that belongs to that environment, so the packages go into <code class="nw">.venv</code> and nowhere else. <code class="nw">==</code> pins the exact versions the guide was tested with. The last line asks the environment's pip for its list of installed packages, and <code class="nw">grep -iE</code> keeps the two lines that start with <code class="nw">flask</code> or <code class="nw">requests</code>, where <code class="nw">-i</code> ignores the difference between capital and small letters.</p>
+<p><strong>You should see</strong> pip download the packages, then the two lines from <code class="nw">pip list</code>.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>Collecting flask==3.1.0
+  Downloading flask-3.1.0-py3-none-any.whl.metadata (2.7 kB)
+Collecting requests==2.32.3
+  Downloading requests-2.32.3-py3-none-any.whl.metadata (4.6 kB)
+Collecting Werkzeug&gt;=3.1 (from flask==3.1.0)
+  Downloading werkzeug-3.1.9-py3-none-any.whl.metadata (4.1 kB)
+Collecting Jinja2&gt;=3.1.2 (from flask==3.1.0)
+  Downloading jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+Collecting itsdangerous&gt;=2.2 (from flask==3.1.0)
+  Downloading itsdangerous-2.2.0-py3-none-any.whl.metadata (1.9 kB)
+Collecting click&gt;=8.1.3 (from flask==3.1.0)
+  Downloading click-8.5.1-py3-none-any.whl.metadata (2.6 kB)
+Collecting blinker&gt;=1.9 (from flask==3.1.0)
+  Downloading blinker-1.9.0-py3-none-any.whl.metadata (1.6 kB)
+Collecting charset-normalizer&lt;4,&gt;=2 (from requests==2.32.3)
+  Downloading charset_normalizer-3.5.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (46 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 46.4/46.4 kB 470.9 kB/s eta 0:00:00
+Collecting idna&lt;4,&gt;=2.5 (from requests==2.32.3)
+  Downloading idna-3.20-py3-none-any.whl.metadata (7.2 kB)
+Collecting urllib3&lt;3,&gt;=1.21.1 (from requests==2.32.3)
+  Downloading urllib3-2.8.0-py3-none-any.whl.metadata (7.4 kB)
+Collecting certifi&gt;=2017.4.17 (from requests==2.32.3)
+  Downloading certifi-2026.10.23-py3-none-any.whl.metadata (2.5 kB)
+Collecting MarkupSafe&gt;=2.0 (from Jinja2&gt;=3.1.2-&gt;flask==3.1.0)
+  Downloading markupsafe-3.0.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+Downloading flask-3.1.0-py3-none-any.whl (102 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 103.0/103.0 kB 1.1 MB/s eta 0:00:00
+Downloading requests-2.32.3-py3-none-any.whl (64 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 64.9/64.9 kB 2.8 MB/s eta 0:00:00
+Downloading blinker-1.9.0-py3-none-any.whl (8.5 kB)
+Downloading certifi-2026.10.23-py3-none-any.whl (135 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 135.1/135.1 kB 3.5 MB/s eta 0:00:00
+Downloading charset_normalizer-3.5.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (257 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 257.6/257.6 kB 5.7 MB/s eta 0:00:00
+Downloading click-8.5.1-py3-none-any.whl (126 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 126.2/126.2 kB 7.2 MB/s eta 0:00:00
+Downloading idna-3.20-py3-none-any.whl (69 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 69.6/69.6 kB 6.7 MB/s eta 0:00:00
+Downloading itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 134.9/134.9 kB 7.7 MB/s eta 0:00:00
+Downloading urllib3-2.8.0-py3-none-any.whl (135 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 135.7/135.7 kB 7.9 MB/s eta 0:00:00
+Downloading werkzeug-3.1.9-py3-none-any.whl (228 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 228.7/228.7 kB 9.4 MB/s eta 0:00:00
+Downloading markupsafe-3.0.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22 kB)
+Installing collected packages: urllib3, MarkupSafe, itsdangerous, idna, click, charset-normalizer, certifi, blinker, Werkzeug, requests, Jinja2, flask
+Successfully installed Jinja2-3.1.6 MarkupSafe-3.0.4 Werkzeug-3.1.9 blinker-1.9.0 certifi-2026.10.23 charset-normalizer-3.5.2 click-8.5.1 flask-3.1.0 idna-3.20 itsdangerous-2.2.0 requests-2.32.3 urllib3-2.8.0
+Flask              3.1.0
+requests           2.32.3</code></pre></figure>
+<p>The two lines at the end must name <code class="nw">Flask</code> with <code class="nw">3.1.0</code> and <code class="nw">requests</code> with <code class="nw">2.32.3</code>. The download lines above them differ from run to run, because pip also installs the packages Flask and Requests need. pip may also print a notice that a newer pip exists. Ignore it.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>error: externally-managed-environment</code></pre></figure>
+<p>You ran <code class="nw">pip install</code> or <code class="nw">pip3 install</code> without the <code class="nw">~/microseg/.venv/bin/</code> part, so it tried to install into Ubuntu's system Python. Run the second line exactly as written.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>The virtual environment was not created successfully because ensurepip is not</code></pre></figure>
+<p>The <code class="nw">python3-venv</code> package is missing. Run <code>sudo apt-get install -y python3-venv</code>, delete the half-made folder with <code class="nw">rm -rf ~/microseg/.venv</code> and run both lines again.</p>
+<h2 id="check-the-free-space-on-drive-c">Check the free space on drive C:</h2>
+<p>Ubuntu keeps all of its files in one virtual disk file on drive C:, and that file grows as the cluster downloads images. A full build needs about 10 GB more than you have used so far. If C: fills up in the middle of <a href="ch04.html">chapter 4</a>, Ubuntu switches its disk to read-only and every command starts failing, so check the space now.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>df -h /mnt/c</code></pre></figure>
+<p><code class="nw">df</code> shows how much space a drive has, <code class="nw">-h</code> prints the sizes in GB instead of bytes, and <code class="nw">/mnt/c</code> is drive C: as Ubuntu sees it.</p>
+<p>The command prints one line for <code class="nw">C:\</code> with four sizes. Look at the <code class="nw">Avail</code> column.</p>
+<p>It must show at least <code class="nw">15G</code>. If it shows less, free space on Windows before you go on. Empty the Recycle Bin, delete large files you no longer need from Downloads, and in Windows Settings open System, then Storage, then Temporary files and remove them. Then run <code class="nw">df -h /mnt/c</code> again.</p>
+<h2 id="check-the-whole-environment-check-envsh">Check the whole environment (<code class="nw">check-env.sh</code>)</h2>
+<p>The last step is a script that tests everything you set up, one line per check, so an install that failed without you noticing shows up here as <code class="nw">FAIL</code> and not as a confusing error in <a href="ch04.html">chapter 4</a>. Open a new file for it in VS Code from the Ubuntu terminal.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>code ~/microseg/check-env.sh</code></pre></figure>
+<p><code class="nw">code</code> followed by a file path opens that file in VS Code, connected to your Ubuntu. The file doesn't exist yet, so VS Code shows an empty editor with <code class="nw">check-env.sh</code> on its tab and creates the file when you save. Paste the file below into the empty editor. Look at the status bar at the bottom right. It must show <code class="nw">LF</code>, as <a href="ch02.html">chapter 2</a> explained. If it shows <code class="nw">CRLF</code>, click it and choose <code class="nw">LF</code>. Then press Ctrl+S.</p>
+<figure class="code file"><figcaption><span class="lbl">File: check-env.sh</span><button type="button" class="copy" aria-label="Copy this file">Copy</button></figcaption><pre dir="ltr"><code>#!/bin/bash
+# Checks that the lab environment is ready. Run from WSL:  bash ~/microseg/check-env.sh
+# Each check prints OK or FAIL. The last line counts the OKs.
+passed=0
+total=0
+
+check() {
+  total=$((total + 1))
+  if eval &quot;$2&quot; &gt;/dev/null 2&gt;&amp;1; then
+    echo &quot;OK    $1&quot;
+    passed=$((passed + 1))
+  else
+    echo &quot;FAIL  $1&quot;
+  fi
+}
+
+check &quot;systemd is running&quot;                 &#x27;[ &quot;$(ps -p 1 -o comm=)&quot; = &quot;systemd&quot; ]&#x27;
+check &quot;WSL has at least 9 GB of memory&quot;    &#x27;[ $(free -g | awk &quot;/Mem:/ {print \$2}&quot;) -ge 9 ]&#x27;
+check &quot;WSL has 4 CPUs&quot;                     &#x27;[ $(nproc) -ge 4 ]&#x27;
+check &quot;kernel module xt_TPROXY is loaded&quot;  &#x27;lsmod | grep -q &quot;^xt_TPROXY&quot;&#x27;
+check &quot;kernel module xt_socket is loaded&quot;  &#x27;lsmod | grep -q &quot;^xt_socket&quot;&#x27;
+check &quot;inotify watch limit is raised&quot;      &#x27;[ $(sysctl -n fs.inotify.max_user_watches) -ge 524288 ]&#x27;
+check &quot;docker works without sudo&quot;          &#x27;docker info&#x27;
+check &quot;docker is version 29&quot;               &#x27;docker version --format &quot;{{.Server.Version}}&quot; | grep -q &quot;^29\.&quot;&#x27;
+check &quot;kind is v0.33.0&quot;                    &#x27;kind version | grep -q &quot;v0.33.0&quot;&#x27;
+check &quot;kubectl is v1.36&quot;                   &#x27;kubectl version --client | grep -q &quot;v1.36&quot;&#x27;
+check &quot;cilium CLI is v0.20.3&quot;              &#x27;cilium version --client | grep -q &quot;v0.20.3&quot;&#x27;
+check &quot;hubble CLI is v1.20.4&quot;              &#x27;hubble version | grep -q &quot;v1.20.4&quot;&#x27;
+check &quot;jq is installed&quot;                    &#x27;jq --version&#x27;
+check &quot;python venv has flask&quot;              &#x27;~/microseg/.venv/bin/python -c &quot;import flask, requests&quot;&#x27;
+
+echo &quot;$passed of $total checks passed&quot;</code></pre></figure>
+<p>(1) The lines starting with <code class="nw">#</code> are comments, which bash ignores.</p>
+<p>(2) <code class="nw">passed=0</code> and <code class="nw">total=0</code> create two counters.</p>
+<p>(3) <code class="nw">check()</code> defines a function, a named piece of script you can run many times. It receives two values: <code class="nw">$1</code>, the description that gets printed, and <code class="nw">$2</code>, the test to run. <code class="nw">eval "$2"</code> runs the test text as a command. <code class="nw">&gt;/dev/null 2&gt;&amp;1</code> throws away both normal output and error output, because only the result counts, success or failure. If the test succeeds, the function prints <code class="nw">OK</code>, otherwise <code class="nw">FAIL</code>, and both counters are updated.</p>
+<p>(4) Each <code class="nw">check</code> line is one test. The table below says what each test looks at and which step of this chapter to repeat if it fails.</p>
+<p>(5) The last line prints how many tests passed out of how many ran.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>Line in the output</th>
+<th>What it tests</th>
+<th>Step to repeat if it says FAIL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>systemd is running</td>
+<td>process 1 is <code class="nw">systemd</code></td>
+<td>the systemd check</td>
+</tr>
+<tr>
+<td>WSL has at least 9 GB of memory</td>
+<td><code class="nw">free -g</code> reports 9 or more</td>
+<td>the <code class="nw">.wslconfig</code> and restart steps</td>
+</tr>
+<tr>
+<td>WSL has 4 CPUs</td>
+<td><code class="nw">nproc</code> is 4 or more</td>
+<td>the <code class="nw">.wslconfig</code> and restart steps</td>
+</tr>
+<tr>
+<td>kernel module xt_TPROXY is loaded</td>
+<td>the module is in <code class="nw">lsmod</code></td>
+<td>the <code class="nw">.wslconfig</code> and restart steps</td>
+</tr>
+<tr>
+<td>kernel module xt_socket is loaded</td>
+<td>the module is in <code class="nw">lsmod</code></td>
+<td>the <code class="nw">.wslconfig</code> and restart steps</td>
+</tr>
+<tr>
+<td>inotify watch limit is raised</td>
+<td>the limit is 524288 or more</td>
+<td>raise the inotify limits for kind's nodes</td>
+</tr>
+<tr>
+<td>docker works without sudo</td>
+<td><code class="nw">docker info</code> succeeds as your user</td>
+<td>let your user run Docker (no sudo)</td>
+</tr>
+<tr>
+<td>docker is version 29</td>
+<td>the engine's version starts with 29</td>
+<td>install Docker Engine 29</td>
+</tr>
+<tr>
+<td>kind is v0.33.0</td>
+<td><code class="nw">kind version</code></td>
+<td>install kind</td>
+</tr>
+<tr>
+<td>kubectl is v1.36</td>
+<td><code class="nw">kubectl version --client</code></td>
+<td>install kubectl</td>
+</tr>
+<tr>
+<td>cilium CLI is v0.20.3</td>
+<td><code class="nw">cilium version --client</code></td>
+<td>install the cilium command</td>
+</tr>
+<tr>
+<td>hubble CLI is v1.20.4</td>
+<td><code class="nw">hubble version</code></td>
+<td>install the hubble command</td>
+</tr>
+<tr>
+<td>jq is installed</td>
+<td><code class="nw">jq --version</code></td>
+<td>install curl, jq and python3-venv</td>
+</tr>
+<tr>
+<td>python venv has flask</td>
+<td>the venv's Python can import flask and requests</td>
+<td>create the Python virtual environment</td>
+</tr>
+</tbody>
+</table></div>
+<p>Run the script.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+bash check-env.sh</code></pre></figure>
+<p><code class="nw">bash check-env.sh</code> runs the file with bash. It doesn't need to be marked as runnable for that.</p>
+<p><strong>You should see</strong> fourteen lines starting with <code class="nw">OK</code> and a count at the end.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>OK    systemd is running
+OK    WSL has at least 9 GB of memory
+OK    WSL has 4 CPUs
+OK    kernel module xt_TPROXY is loaded
+OK    kernel module xt_socket is loaded
+OK    inotify watch limit is raised
+OK    docker works without sudo
+OK    docker is version 29
+OK    kind is v0.33.0
+OK    kubectl is v1.36
+OK    cilium CLI is v0.20.3
+OK    hubble CLI is v1.20.4
+OK    jq is installed
+OK    python venv has flask
+14 of 14 checks passed</code></pre></figure>
+<p>The last line must read <code class="nw">14 of 14 checks passed</code>.</p>
+<p class="ifnot"><strong>If you see this instead</strong></p>
+<p>One or more lines start with <code class="nw">FAIL</code>. Find each one in the table above and repeat that step, then run the script again. Several FAIL lines can come from one cause. The memory, CPU and two kernel-module checks all lead back to <code class="nw">.wslconfig</code>, so fix that first and run the script again before you touch anything else.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>$&#x27;\r&#x27;: command not found</code></pre></figure>
+<p>This text appears inside several error lines. The file was saved with Windows line endings. Click <code class="nw">CRLF</code> in the VS Code status bar, choose <code class="nw">LF</code>, save and run the script again.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>bash: check-env.sh: No such file or directory</code></pre></figure>
+<p>The file was saved somewhere else, or under another name. Run <code class="nw">ls ~/microseg</code> and look for it. If it was saved as <code class="nw">check-env.sh.txt</code>, rename it with <code>mv ~/microseg/check-env.sh.txt ~/microseg/check-env.sh</code>. <code class="nw">mv</code> moves or renames a file, and it takes the old name first and the new name second. If the file isn't in <code class="nw">~/microseg</code> at all, create it again with <code class="nw">code ~/microseg/check-env.sh</code>.</p>
+<h2 id="checkpoint">Checkpoint</h2>
+<p>Run the script once more and print only its last line.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>bash ~/microseg/check-env.sh | tail -n 1</code></pre></figure>
+<p><code class="nw">tail -n 1</code> keeps only the last line of what it receives.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>14 of 14 checks passed</code></pre></figure>
+<p>It must read exactly <code class="nw">14 of 14 checks passed</code>. Don't start <a href="ch04.html">chapter 4</a> until it does.</p>
+<p>Save this state in Git.</p>
+<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+git add -A
+git commit -m &quot;ch03: environment ready&quot;</code></pre></figure>
+<p><code class="nw">git add -A</code> stages every new and changed file in the project, here <code class="nw">check-env.sh</code>. The <code class="nw">.venv</code> folder is left out because <code class="nw">.gitignore</code> names it. <code class="nw">git commit -m</code> saves the snapshot with the message after <code class="nw">-m</code>. Git answers with a line that contains <code class="nw">main</code>, a short commit code and your message, followed by <code class="nw">1 file changed</code>.</p>
+<!-- OUT ids: ch05-wslconfig, ch05-wsl-shutdown, ch05-memory-cpus, ch05-lsmod, ch05-systemd, ch05-inotify, ch05-apt-basics, ch05-docker-repo, ch05-docker-version, ch05-wsl-terminate, ch05-hello-world, ch05-docker-engine-os, ch05-kind, ch05-kubectl, ch05-cilium-cli, ch05-hubble-cli, ch05-venv, ch05-check-env, ch05-checkpoint --><nav class="pager" aria-label="Chapters"><a rel="prev" href="ch02.html"><span>Previous chapter</span>Chapter 2. Before you start</a><a rel="next" href="ch04.html"><span>Next chapter</span>Chapter 4. Create the cluster</a></nav></main></div>
+<footer class="foot"><div class="foot-in"><p>Kubernetes 1.36, Cilium 1.20.5 and kind 0.33.0 on Windows 11 with WSL 2. Every command was run on a real laptop in November 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">Source on GitHub</a></p></div></footer>
+<p class="vh" aria-live="polite" id="live"></p>
+<script type="application/json" id="i18n">{"copied": "Copied", "copyFail": "Press Ctrl+C to copy the selected text", "doneOf": "{d} of {t} steps done", "next": "Next step: {s}", "allDone": "All {t} steps done.", "sumCount": "{d} of {t} done", "cleared": "All ticks cleared.", "confirm": "Clear every tick on this page? Your files and your cluster stay as they are.", "stageCount": "{d} of {t}"}</script>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

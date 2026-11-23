@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
+<title>الفصل 12. القياس | مختبر التجزئة الدقيقة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;700&family=Public+Sans:wght@400;600;700&family=Noto+Sans+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="en" href="../../guide/ch12.html">
+
+</head>
+<body class="">
+<a class="skip" href="#main">الانتقال إلى المحتوى</a>
+<header class="top"><div class="top-in">
+<a class="brand" href="../../ar/index.html">مختبر التجزئة الدقيقة</a>
+<nav aria-label="مختبر التجزئة الدقيقة"><ul>
+<li><a href="../../ar/index.html">المسار السريع</a></li>
+<li><a href="../../ar/guide/index.html" aria-current="page">الدليل الكامل</a></li>
+<li><a href="../../ar/downloads.html">التنزيلات</a></li>
+<li><a href="../../guide/ch12.html" lang="en" hreflang="en" data-setlang="en">English</a></li>
+</ul></nav>
+</div></header>
+<div class="layout"><details class="rail" open><summary>الفصول</summary><nav aria-label="الفصول"><ol class="toc"><li><a href="ch00.html">0. كيف نستخدم هذا الدليل</a></li><li><a href="ch01.html">1. ما الذي سنبنيه</a></li><li><a href="ch02.html">2. قبل أن نبدأ</a></li><li><a href="ch03.html">3. تجهيز بيئة العمل</a></li><li><a href="ch04.html">4. إنشاء العنقود</a></li><li><a href="ch05.html">5. كتابة الخدمات</a></li><li><a href="ch06.html">6. نشر البوابة</a></li><li><a href="ch07.html">7. بناء لوحة التحكم</a></li><li><a href="ch08.html">8. مهاجمة الشبكة المسطحة</a></li><li><a href="ch09.html">9. تصميم السياسة</a></li><li><a href="ch10.html">10. تطبيق التجزئة الدقيقة للشبكة</a></li><li><a href="ch11.html">11. قراءة الأدلة في Hubble</a></li><li><a href="ch12.html" aria-current="page">12. القياس</a><ol class="sub"><li><a href="#معنى-الوسيط-و-p95-و-stdev">معنى الوسيط و p95 و stdev</a></li><li><a href="#كتابة-measurepy">كتابة measure.py</a></li><li><a href="#تشغيل-measurepy">تشغيل measure.py</a></li><li><a href="#ملف-النتائج-صفا-صفا">ملف النتائج صفاً صفاً</a></li><li><a href="#الضوضاء-متى-يكون-الفرق-حقيقيا">الضوضاء: متى يكون الفرق حقيقياً</a></li><li><a href="#عد-السياسات-وقواعد-l7">عدّ السياسات وقواعد L7</a></li><li><a href="#ما-نذكره-في-التقرير-ومن-أين-يأتي">ما نذكره في التقرير، ومن أين يأتي</a></li><li><a href="#الرسوم-البيانية-للأشكال-من-9-إلى-12">الرسوم البيانية للأشكال من 9 إلى 12</a></li><li><a href="#نقطة-التحقق">نقطة التحقق</a></li></ol></li><li><a href="ch13.html">13. تجاوز الأعطال دون مساعدة</a></li><li><a href="ch14.html">14. أدلة بحث التخرج</a></li><li><a href="ch15.html">15. خطة العمل يوماً بيوم</a></li><li><a href="appendix.html">الملاحق</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="الفصل-12-القياس">الفصل 12. القياس</h1>
+<p>نقيس هنا كلفة التجزئة الدقيقة (micro-segmentation). والأرقام كلها من حاسوبنا نفسه. نكتب <code class="nw">measure.py</code>، وهو سكربت يقيس زمن 21,000 طلب إلى البوابة مع سياساتنا ومن دونها، ونتعلم أي الفروق يصح أن نذكرها على أنها حقيقية وأيها ضوضاء. وفي النهاية يكون لدينا ملف نتائج من 21 سطراً، والرسوم البيانية التي يحتاجها فصل النتائج. نحتاج إلى ساعتين تقريباً، ويستغرق تشغيل السكربت نفسه نحو 10 دقائق.</p>
+<h2 id="معنى-الوسيط-و-p95-و-stdev">معنى الوسيط و p95 و stdev</h2>
+<p>زمن الاستجابة (latency) هو الوقت من إرسال الطلب حتى وصول الجواب كاملاً. ويطبع السكربت أربعة أرقام لكل دفعة. الوسيط (median) هو الزمن الأوسط بعد الترتيب. وهو رقم الطلب العادي. والمتوسط الحسابي (mean) هو المعدّل المعروف. وبضعة طلبات بطيئة ترفعه. أمّا p95 و p99 فهما الزمنان اللذان جاءت 95 و99 في المئة من الطلبات أسرع منهما، لذلك يصفان الطرف البطيء، أي الطلبات القليلة التي صادفت لحظة كان فيها الحاسوب مشغولاً بشيء آخر. ويكرر السكربت الاختبار كله خمس مرات. وتقول قيمة stdev كم يبتعد وسيط تشغيل واحد عادةً عن البقية. هذا التشتت هو الضوضاء (noise). والحمل الإضافي (overhead) هو الفرق بين متوسط قيم الوسيط في مرات التشغيل مع السياسات ومتوسطها من دونها.</p>
+<h2 id="كتابة-measurepy">كتابة <code class="nw">measure.py</code></h2>
+<p>يضبط <code class="nw">measure.py</code> الشبكة على وضع واحد، ويسجّل الدخول باسم sara، ويرسل دفعة من الطلبات إلى صفحتين من البوابة ويقيس زمن كل طلب. ثم ينتقل إلى الوضع الآخر ويفعل الشيء نفسه، ويكرر ذلك خمس مرات، ويكتب كل شيء في ملف.</p>
+<p>ننشئ <code class="nw">~/microseg/measure.py</code> في VS Code بالطريقة نفسها التي اتبعناها في <a href="ch05.html">الفصل 5</a>، ونلصق فيه هذا الملف، ثم نضغط Ctrl+S حتى تختفي النقطة المستديرة من التبويب.</p>
+<figure class="code file"><figcaption><span class="lbl">الملف: measure.py</span><button type="button" class="copy" aria-label="نسخ هذا الملف">نسخ</button></figcaption><pre dir="ltr"><code># Latency with vs. without policies. Run from ~/microseg with:  .venv/bin/python measure.py
+import csv
+import os
+import statistics
+import subprocess
+import time
+
+import requests
+
+PORTAL = &quot;http://127.0.0.1:30080&quot;
+RUNS = 5
+REQUESTS = 1000          # timed requests per endpoint per run
+WARMUP = 50              # requests sent first and thrown away
+ENDPOINTS = [&quot;/news&quot;, &quot;/api/grades&quot;]
+CONDITIONS = [&quot;no-policies&quot;, &quot;policies&quot;]
+
+
+def set_policies(condition):
+    if condition == &quot;policies&quot;:
+        subprocess.run([&quot;kubectl&quot;, &quot;apply&quot;, &quot;-f&quot;, &quot;k8s/policies/&quot;], check=True)
+    else:
+        subprocess.run([&quot;kubectl&quot;, &quot;delete&quot;, &quot;-f&quot;, &quot;k8s/policies/&quot;, &quot;--ignore-not-found&quot;], check=True)
+    time.sleep(15)       # give Cilium time to update every pod
+
+
+def login(session):
+    answer = session.post(PORTAL + &quot;/api/login&quot;, json={&quot;username&quot;: &quot;sara&quot;, &quot;password&quot;: &quot;sara2026&quot;}, timeout=10)
+    return answer.json()[&quot;token&quot;]
+
+
+def measure(session, path, token):
+    times = []
+    for i in range(WARMUP + REQUESTS):
+        start = time.perf_counter()
+        answer = session.get(PORTAL + path, headers={&quot;Authorization&quot;: &quot;Bearer &quot; + token}, timeout=10)
+        elapsed_ms = (time.perf_counter() - start) * 1000
+        answer.raise_for_status()          # stop on any error, never time a failed request
+        if i &gt;= WARMUP:
+            times.append(elapsed_ms)
+    cuts = statistics.quantiles(times, n=100)   # cuts[94] = p95, cuts[98] = p99
+    return [round(statistics.median(times), 2), round(cuts[94], 2), round(cuts[98], 2),
+            round(statistics.mean(times), 2)]
+
+
+os.makedirs(&quot;results&quot;, exist_ok=True)
+session = requests.Session()
+
+rows = []
+for run_number in range(1, RUNS + 1):
+    for condition in CONDITIONS:
+        set_policies(condition)
+        token = login(session)
+        for path in ENDPOINTS:
+            numbers = measure(session, path, token)
+            print(run_number, condition, path, &quot;median/p95/p99/mean ms:&quot;, numbers)
+            rows.append([condition, path, run_number] + numbers)
+
+with open(&quot;results/latency.csv&quot;, &quot;w&quot;, newline=&quot;&quot;) as f:
+    writer = csv.writer(f)
+    writer.writerow([&quot;condition&quot;, &quot;endpoint&quot;, &quot;run&quot;, &quot;median_ms&quot;, &quot;p95_ms&quot;, &quot;p99_ms&quot;, &quot;mean_ms&quot;])
+    writer.writerows(rows)
+
+print(&quot;\nMean of the run medians:&quot;)
+for path in ENDPOINTS:
+    result = {}
+    for condition in CONDITIONS:
+        medians = [row[3] for row in rows if row[0] == condition and row[1] == path]
+        result[condition] = statistics.mean(medians)
+        print(f&quot;  {path:12} {condition:12} {result[condition]:7.2f} ms  (stdev {statistics.stdev(medians):.2f})&quot;)
+    overhead = result[&quot;policies&quot;] - result[&quot;no-policies&quot;]
+    print(f&quot;  {path:12} overhead     {overhead:7.2f} ms  ({100 * overhead / result[&#x27;no-policies&#x27;]:.1f} %)&quot;)</code></pre></figure>
+<p>(1) يرسل <code>PORTAL = "http://127.0.0.1:30080"</code> كل طلب عبر NodePort، وهو الباب نفسه الذي يستخدمه الطلاب الحقيقيون والمهاجم.</p>
+<p>(2) تحدد <code class="nw">RUNS = 5</code> و <code class="nw">REQUESTS = 1000</code> و <code class="nw">WARMUP = 50</code> حجم الاختبار. يرسل كل تشغيل 1,050 طلباً إلى كل صفحة في كل وضع، ويرمي أول 50 من كل دفعة، فيكون المجموع 21,000 طلب. هذه الخمسون الأولى هي الإحماء. فالطلبات الأولى بعد أي تغيير في السياسات أبطأ، لأنّ الاتصالات تُفتح في تلك اللحظة والذاكرات المؤقتة تمتلئ، ولو حُسبت لجعلت السياسات تبدو أغلى مما هي عليه.</p>
+<p>(3) تسمّي <code class="nw">ENDPOINTS</code> الصفحتين. تمر <code class="nw">/news</code> من frontend إلى news، وهو مسار لا تغطيه إلا قواعد العنوان والمنفذ. وتمر <code class="nw">/api/grades</code> من frontend إلى api عبر قاعدة L7 و Envoy، ثم من api إلى auth للتحقق من رمز الدخول (token)، ومن api إلى db لجلب الدرجات. لذلك تُظهر <code class="nw">/news</code> كلفة قواعد L3/L4 وحدها، وتضيف <code class="nw">/api/grades</code> إليها قاعدة L7.</p>
+<p>(4) تشغّل <code class="nw">set_policies</code> الأمر <code class="nw">kubectl apply</code> أو <code class="nw">kubectl delete</code> على المجلد <code class="nw">k8s/policies/</code> كله، ثم تنتظر 15 ثانية حتى يحدّث Cilium كل Pod. ويجعل <code class="nw">check=True</code> السكربت يتوقف إذا أبلغ kubectl عن خطأ.</p>
+<p>(5) تسجّل <code class="nw">login</code> الدخول باسم sara وتعيد رمز الدخول الخاص بها، بالطريقة نفسها التي يتبعها <code class="nw">check-portal.sh</code>.</p>
+<p>(6) تتولى <code class="nw">measure</code> القياس. الدالة <code class="nw">time.perf_counter()</code> هي أدق ساعة في Python. ويوقف <code class="nw">answer.raise_for_status()</code> السكربت عند أي حالة خطأ، فلا يُقاس طلب فاشل كأنه طلب سريع. ولا يحتفظ <code class="nw">if i &gt;= WARMUP</code> بالزمن إلا بعد انتهاء الإحماء. أمّا <code>statistics.quantiles(times, n=100)</code> فيقسم الأزمنة المرتبة إلى 100 مجموعة متساوية، ويعيد نقاط القطع التسع والتسعين التي تفصل بينها. يعدّ Python مواقع القائمة بدءاً من 0، لذلك <code class="nw">cuts[94]</code> هي نقطة القطع الخامسة والتسعون، أي p95، و <code class="nw">cuts[98]</code> هي p99.</p>
+<p>(7) تشغّل الحلقة الرئيسية الوضعين داخل كل تشغيل، الواحد بعد الآخر. فإذا مرّت على الحاسوب دقيقة بطيئة وقعت على الوضعين معاً، ولم تضرّ أحدهما وحده.</p>
+<p>(8) تكتب الكتلة <code class="nw">with open(...)</code> الملف <code class="nw">results/latency.csv</code>، بصف واحد لكل تشغيل ووضع وصفحة. خمس مرات تشغيل في وضعين في صفحتين تعطي 20 صفاً، ومع سطر العناوين يصبح في الملف 21 سطراً. ويُكتب الملف مرة واحدة في النهاية تماماً، لذلك لا يترك التشغيل الذي يتوقف في منتصفه ملفاً جديداً.</p>
+<p>(9) يطبع الجزء الأخير، لكل صفحة ووضع، متوسط قيم الوسيط في مرات التشغيل الخمس مع قيمة stdev الخاصة بها، ثم الحمل الإضافي بالملّي ثانية وبالنسبة المئوية.</p>
+<p>(10) تنتهي <code class="nw">CONDITIONS</code> بالقيمة <code class="nw">"policies"</code>، لذلك ينتهي السكربت دائماً وسياساتنا مطبّقة.</p>
+<p>أمّا CSV، وهو اختصار comma-separated values، فجدول نصي عادي يمثل فيه كل سطر صفاً واحداً، وتفصل الفواصل بين الأعمدة. ويفتحه Excel مباشرة.</p>
+<p>نتحقق من أنّ الملف كله وصل إلى القرص، فقد يعرض VS Code نصاً لم يُحفظ بعد، أمّا الأوامر التالية فلا تقرأ إلا ما على القرص.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+wc -l measure.py</code></pre></figure>
+<p>يعدّ <code class="nw">wc -l</code> أسطر الملف.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> سطر واحد.</p>
+<p>يجب أن يكون <code class="nw">71 measure.py</code>. الرقم الأصغر معناه أنّ اللصق انقطع أو أنّ الملف لم يُحفظ. نلصق الملف كله من جديد، ونضغط Ctrl+S، ونشغّل <code class="nw">wc -l measure.py</code> مرة أخرى.</p>
+<p>ثم نتحقق من أنّ الملف مكتوب بلغة Python صحيحة.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+.venv/bin/python -m py_compile measure.py &amp;&amp; echo &quot;measure.py compiles&quot;</code></pre></figure>
+<p>يقرأ <code class="nw">-m py_compile</code> الملف ويبلغ عن أي خطأ في الصياغة دون أن يشغّله. ولا يشغّل <code class="nw">&amp;&amp;</code> الأمر <code class="nw">echo</code> إلا إذا نجح هذا الفحص.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> سطر واحد.</p>
+<p>يجب أن يكون <code class="nw">measure.py compiles</code>.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>IndentationError: unexpected indent</code></pre></figure>
+<p>السبب أنّ بعض الأسطر فقدت مسافات أو اكتسبت مسافات زائدة في أثناء اللصق، والرسالة تذكر رقم السطر. نفتح الملف في VS Code، ونحذف كل ما فيه، ونلصق الملف من جديد بالاختصار Ctrl+V ثم نحفظ.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>[Errno 2] No such file or directory: &#x27;measure.py&#x27;</code></pre></figure>
+<p>السبب أنّ الملف ليس في <code class="nw">~/microseg</code>، أو أنّ له اسماً مختلفاً. نتحقق من الاسم في قائمة الملفات في VS Code، ثم نشغّل الأمر من جديد داخل <code class="nw">~/microseg</code>.</p>
+<h2 id="تشغيل-measurepy">تشغيل <code class="nw">measure.py</code></h2>
+<p>يستغرق التشغيل نحو 10 دقائق، وكان 9 دقائق و38 ثانية على حاسوب الاختبار. وكل برنامج يعمل في أثنائه يضيف ضوضاء. لذلك نوصل الحاسوب بالشاحن، ونغلق تبويب Hubble UI وتبويب لوحة التحكم وأي نوافذ متصفح أخرى، ونترك الحاسوب حتى يعود موجّه الأوامر. أمّا برنامج لوحة التحكم نفسه فيمكن أن يبقى يعمل في طرفيته، لأنه لا يفعل شيئاً ما لم تطلب منه صفحة ذلك.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+time .venv/bin/python -u measure.py | tee ~/microseg/evidence/ch14-measure.txt</code></pre></figure>
+<p>يشغّل <code class="nw">time</code> الأمر الذي بعده، ويطبع عند انتهائه المدة التي استغرقها. و <code class="nw">.venv/bin/python</code> هو مفسّر Python الموجود داخل البيئة الافتراضية لمشروعنا، وهو الذي ثُبّتت فيه المكتبة <code class="nw">requests</code>. ويجعل <code class="nw">-u</code> مفسّر Python يطبع كل سطر حالما يجهز. فمن دونه يحبس Python أسطره كلما ذهبت مخرجاته إلى أنبوب، فلا نرى إلا أسطر kubectl حتى النهاية تماماً. أمّا <code>| tee ~/microseg/evidence/ch14-measure.txt</code> فيعرض المخرجات ويحفظ نسخة منها للتقرير.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> أسطر من <code class="nw">kubectl</code> تقول إنّ السياسات العشر حُذفت أو أُنشئت، وبينها سطر واحد لكل تشغيل ووضع وصفحة. وفي النهاية يأتي ملخص قصير.</p>
+<p>المخرجات أعلاه لا تضم إلا أسطر القياس والملخص، وهي على شاشتنا تقع بين أسطر <code class="nw">kubectl</code>. يبدأ كل سطر قياس برقم التشغيل والوضع والصفحة، تليها أربعة أرقام بالملّي ثانية بهذا الترتيب: الوسيط ثم p95 ثم p99 ثم المتوسط. الأسطر الستة الأخيرة هي الملخص، وتعطي لكل صفحة متوسط قيم الوسيط في مرات التشغيل الخمس بلا سياسات ومع السياسات، كل منهما مع stdev الخاص به، ثم الحمل الإضافي. على حاسوب الاختبار أعطت <code class="nw">/news</code> القيمة 2.66 ms بلا سياسات و2.19 ms معها، وأعطت <code class="nw">/api/grades</code> القيمتين 29.08 ms و32.23 ms. أرقامنا ستختلف، لأنها تعتمد على الحاسوب وعلى ما كان يشغّله في الوقت نفسه. وآخر ما يُطبع هو نتيجة <code class="nw">time</code>، و <code class="nw">real</code> فيها هو الزمن الفعلي المنقضي كما تقيسه الساعة.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<p>ينتهي التشغيل بعد ثانية دون أي مخرجات. الملف المحفوظ فارغ أو ناقص. نحفظه في VS Code ونتحقق من <code class="nw">wc -l measure.py</code> مرة أخرى.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>error: the path &quot;k8s/policies/&quot; does not exist</code></pre></figure>
+<p>السبب تشغيل السكربت من مجلد آخر، فلا يشير المسار النسبي <code class="nw">k8s/policies/</code> إلى أي مكان، ثم يتوقف Python مع <code class="nw">CalledProcessError</code>. نشغّل <code class="nw">cd ~/microseg</code> ونبدأ القياس من جديد.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>ModuleNotFoundError: No module named &#x27;requests&#x27;</code></pre></figure>
+<p>السبب تشغيل السكربت بالأمر <code class="nw">python3</code> بدلاً من <code class="nw">.venv/bin/python</code>، و Python الخاص بالنظام لا يضم <code class="nw">requests</code>. نستخدم الأمر كما هو مكتوب تماماً.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>requests.exceptions.HTTPError: 403 Client Error: Forbidden for url: http://127.0.0.1:30080/api/grades</code></pre></figure>
+<p>فشل أحد الطلبات فتوقف السكربت عمداً. نشغّل أولاً <code class="nw">kubectl apply -f k8s/policies/</code>، لأنّ السكربت ربما توقف والسياسات محذوفة. رمز الحالة 403 على <code class="nw">/api/grades</code> معناه أنّ قاعدة L7 في سياسة api لا تذكر <code class="nw">GET /api/grades</code> بالضبط. أمّا <code class="nw">500 Server Error</code> أو <code class="nw">KeyError: 'token'</code> فيشير إلى بوابة ليست في حالة سليمة. نشغّل <code class="nw">bash check-portal.sh</code>، ونصلح ما يبلغ عنه بمساعدة <a href="ch13.html">الفصل 13</a>، ثم نعيد القياس.</p>
+<h2 id="ملف-النتائج-صفا-صفا">ملف النتائج صفاً صفاً</h2>
+<p>يعطينا الملخص الأرقام الرئيسية. أمّا ملف CSV فيضم كل مرات التشغيل، ويُظهر مقدار تقلّب الأرقام من تشغيل إلى آخر.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>cat results/latency.csv</code></pre></figure>
+<p>يطبع <code class="nw">cat</code> محتوى الملف على الشاشة.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> سطر عناوين ثم 20 صفاً، أربعة لكل تشغيل.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>condition,endpoint,run,median_ms,p95_ms,p99_ms,mean_ms
+no-policies,/news,1,2.03,3.07,4.69,2.19
+no-policies,/api/grades,1,34.49,161.73,330.42,55.05
+policies,/news,1,2.04,2.79,3.78,2.15
+policies,/api/grades,1,29.9,69.29,202.17,37.44
+no-policies,/news,2,4.41,16.15,33.11,6.2
+no-policies,/api/grades,2,29.04,161.78,325.87,50.4
+policies,/news,2,1.83,2.72,3.72,1.97
+policies,/api/grades,2,31.06,99.76,214.31,42.44
+no-policies,/news,3,2.29,4.44,8.41,2.65
+no-policies,/api/grades,3,26.98,47.75,71.21,30.15
+policies,/news,3,2.3,3.05,4.17,2.4
+policies,/api/grades,3,36.0,115.6,230.79,48.44
+no-policies,/news,4,2.36,3.02,4.1,2.43
+no-policies,/api/grades,4,27.57,33.66,38.38,28.17
+policies,/news,4,2.23,2.69,3.15,2.27
+policies,/api/grades,4,32.51,48.21,74.71,34.76
+no-policies,/news,5,2.23,2.73,3.03,2.28
+no-policies,/api/grades,5,27.32,30.98,34.44,27.67
+policies,/news,5,2.56,3.56,5.77,2.7
+policies,/api/grades,5,31.68,37.55,44.58,32.47</code></pre></figure>
+<p>الأعمدة هي الوضع والصفحة ورقم التشغيل، ثم الوسيط و p95 و p99 والمتوسط بالملّي ثانية. لننظر في العمود <code class="nw">p95_ms</code> الخاص بالصفحة <code class="nw">/api/grades</code> بلا سياسات. في التشغيلين 1 و2 من الاختبار كانت القيمة نحو 161 ms، وفي التشغيل 5 كانت 30.98 ms، ولم يتغير شيء في العنقود (cluster) بين مرات التشغيل هذه. كان الحاسوب مشغولاً بشيء آخر لبعض الوقت. وبقيت قيم الوسيط بين 27 و36 ms تقريباً طوال ذلك. ولهذا السبب يكرر السكربت كل شيء خمس مرات ويقدّم الوسيط أولاً.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>cat: results/latency.csv: No such file or directory</code></pre></figure>
+<p>السبب أنّ السكربت توقف قبل نهايته، والملف لا يُكتب إلا بعد آخر تشغيل. نصعد في مخرجات الخطوة السابقة حتى نجد الخطأ، ونصلحه، ثم نعيد القياس.</p>
+<h2 id="الضوضاء-متى-يكون-الفرق-حقيقيا">الضوضاء: متى يكون الفرق حقيقياً</h2>
+<p>لا تتساوى قيمتا وسيط تماماً أبداً. فقبل أن نسمّي فرقاً كلفةً نقارنه بالضوضاء. يستخدم هذا الدليل قاعدة تقريبية حذرة عن قصد، وهي ليست اختبار دلالة إحصائية بالمعنى الدقيق. نأخذ القيمة الأكبر من قيمتي stdev لتلك الصفحة ونضاعفها. فإذا كان الحمل الإضافي أصغر من الناتج، نذكره على أنه ضمن حدود الضوضاء.</p>
+<p>نطبّق القاعدة على أرقام حاسوب الاختبار. في <code class="nw">/api/grades</code> كان الحمل الإضافي 3.15 ms، وأكبر قيمتي stdev كانت 3.12 ms. ضعف التشتت 6.24 ms، و3.15 ms أقل منه، فالفرق ضمن حدود الضوضاء. وفي <code class="nw">/news</code> جاء الحمل الإضافي سالباً، ناقص 0.47 ms، مع تشتت قدره 0.98 ms. السياسات لا تستطيع أن تجعل الطلب أسرع، والإشارة السالبة دليل إضافي على أننا ننظر إلى ضوضاء. إذن لم تكلّف السياسات هنا شيئاً يمكن قياسه.</p>
+<p>نفعل الشيء نفسه بأرقامنا، ونكتبه في فصل النتائج بهذا الشكل: «مع السياسات انتقل الوسيط للصفحة <code class="nw">/api/grades</code> من 29.08 ms إلى 32.23 ms. وكان التشتت بين مرات التشغيل 3.12 ms، لذلك يقع أي فرق أقل من 6.24 ms تقريباً ضمن حدود الضوضاء. والفرق المقيس 3.15 ms أقل من ذلك بفارق واضح، فلم يمكن قياس أي كلفة في زمن الاستجابة بهذا الحجم من الاختبار.» وإذا جاء أحد الفروق عندنا أكبر من ضعف تشتته، نذكره على أنه حمل إضافي مقيس، بالملّي ثانية وبالنسبة المئوية.</p>
+<p>نذكر القيمة p95 أيضاً، مع تنبيه إلى الضوضاء التي فيها. يحسب هذا الأمر متوسط العمود p95 في ملف CSV لكل وضع وصفحة.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>awk -F, &#x27;NR &gt; 1 {sum[$1 &quot; &quot; $2] += $5; n[$1 &quot; &quot; $2]++} END {for (k in sum) printf &quot;%-24s mean p95 %6.2f ms\n&quot;, k, sum[k] / n[k]}&#x27; results/latency.csv | sort</code></pre></figure>
+<p>يقرأ <code class="nw">awk</code> الملف سطراً سطراً ويشغّل برنامجاً صغيراً على كل سطر. يخبره <code class="nw">-F,</code> أنّ الأعمدة مفصولة بفواصل. ويتخطى <code class="nw">NR &gt; 1</code> السطر الأول، وهو سطر العناوين. ولكل سطر آخر يضيف <code class="nw">sum[...] += $5</code> العمود الخامس، أي p95، إلى مجموع تراكمي لذلك الوضع وتلك الصفحة، ويعدّ <code class="nw">n[...]++</code> الصفوف. يعمل <code class="nw">END</code> مرة واحدة بعد السطر الأخير، ويطبع <code class="nw">printf</code> الذي فيه كل مجموع مقسوماً على عدد صفوفه. ويرتب <code class="nw">| sort</code> الأسطر الأربعة ترتيباً أبجدياً، لأنّ awk يطبعها بلا ترتيب ثابت.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> أربعة أسطر، سطر لكل وضع وصفحة.</p>
+<p>على حاسوب الاختبار كانت p95 أقل مع السياسات في الصفحتين، 74.08 مقابل 87.18 ms في <code class="nw">/api/grades</code>. فالتشغيلان البطيئان بلا سياسات، اللذان رأيناهما في ملف CSV، رفعا ذلك المتوسط. وهذه ضوضاء أيضاً، لذلك نذكر p95 بجانب الوسيط، ونقول إنّ تشتتها بين مرات التشغيل كان أكبر من الفرق.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>awk: cannot open results/latency.csv (No such file or directory)</code></pre></figure>
+<p>السبب أنّ الأمر لم يُشغَّل داخل <code class="nw">~/microseg</code>، أو أنّ القياس لم يكتمل. نشغّل <code class="nw">cd ~/microseg</code> ونتحقق من أنّ الخطوة السابقة طبعت الملف.</p>
+<h2 id="عد-السياسات-وقواعد-l7">عدّ السياسات وقواعد L7</h2>
+<p>كلفة التجزئة تشمل أيضاً القواعد التي يجب أن تُكتب وتُصان. لذلك نعدّها.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>kubectl -n campus get cnp --no-headers | wc -l</code></pre></figure>
+<p>يحذف <code class="nw">--no-headers</code> سطر العناوين NAME و AGE و VALID. ويعدّ <code class="nw">wc -l</code> الأسطر التي تصله، سطراً لكل سياسة.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> رقم واحد.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>10</code></pre></figure>
+<p>يجب أن يكون <code class="nw">10</code>، ثلاث سياسات من <code class="nw">1-baseline.yaml</code> وسبع من <code class="nw">2-allow.yaml</code>.</p>
+<p>قواعد L7 موجودة في سياسة api، ويستطيع <code class="nw">grep</code> أن يعدّها.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>grep -c &quot;method:&quot; k8s/policies/2-allow.yaml</code></pre></figure>
+<p>لكل قاعدة HTTP في سياسة api سطر <code class="nw">method:</code> واحد بالضبط، ويعدّ <code class="nw">grep -c</code> الأسطر التي تحتوي النص.</p>
+<p>يجب أن يكون <code class="nw">3</code>، للقواعد <code class="nw">GET /api/grades</code> و <code class="nw">GET /api/profile</code> و <code class="nw">POST /api/login</code>.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<p>عدد السياسات <code class="nw">0</code>. السبب أنّ السياسات غير موجودة، فإمّا أنّ القياس توقف، بسبب خطأ أو بالضغط على Ctrl+C، في أثناء مرحلة بلا سياسات، وإمّا أنّ شيئاً حذفها بعد ذلك. نطبّقها بالأمر <code class="nw">kubectl apply -f k8s/policies/</code> ونعدّ من جديد.</p>
+<p>عدد قواعد L7 ليس <code class="nw">3</code>. السبب أنّ سياسة api عندنا تختلف عن السياسة في <a href="ch10.html">الفصل 10</a>. نقارن الملف سطراً سطراً قبل أن نكمل، لأنّ كل نتيجة في بحث التخرج تعتمد عليه.</p>
+<h2 id="ما-نذكره-في-التقرير-ومن-أين-يأتي">ما نذكره في التقرير، ومن أين يأتي</h2>
+<p>هذه هي أرقام فصل النتائج. وصفّا زمن الاستجابة يحملان القيم التي قسناها بأنفسنا.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="جدول"><table>
+<thead>
+<tr>
+<th>المقياس</th>
+<th>الشبكة المسطحة</th>
+<th>الشبكة المجزأة</th>
+<th>مصدره</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>مسارات الخدمات التي يمكن الوصول إليها</td>
+<td>36 من 36</td>
+<td>7 من 36، أي أقل بنسبة 80.6%</td>
+<td>مصفوفة لوحة التحكم، الفصلان 7 و10</td>
+</tr>
+<tr>
+<td>خطوات الهجوم التي نجحت</td>
+<td>5 من 5</td>
+<td>1 من 5</td>
+<td>الفصلان 8 و10</td>
+</tr>
+<tr>
+<td><code class="nw">/api/export</code> من الخارج</td>
+<td>200 مع جميع الدرجات</td>
+<td>403 <code class="nw">Access denied</code></td>
+<td><a href="ch10.html">الفصل 10</a></td>
+</tr>
+<tr>
+<td>فحوص البوابة</td>
+<td><code class="nw">PORTAL: 6/6 OK</code></td>
+<td><code class="nw">PORTAL: 6/6 OK</code></td>
+<td><code class="nw">check-portal.sh</code></td>
+</tr>
+<tr>
+<td>كائنات السياسات</td>
+<td>0</td>
+<td>10، في ملفين، فيها 3 قواعد L7</td>
+<td>هذا الفصل</td>
+</tr>
+<tr>
+<td>إسقاطات <code class="nw">Policy denied</code> من news بعد الهجوم</td>
+<td>لا شيء</td>
+<td>العدد الذي حصلنا عليه في <a href="ch11.html">الفصل 11</a></td>
+<td><a href="ch11.html">الفصل 11</a></td>
+</tr>
+<tr>
+<td>وسيط زمن الاستجابة في <code class="nw">/news</code></td>
+<td>القيمة التي قسناها</td>
+<td>القيمة التي قسناها</td>
+<td><code class="nw">measure.py</code></td>
+</tr>
+<tr>
+<td>وسيط زمن الاستجابة في <code class="nw">/api/grades</code></td>
+<td>القيمة التي قسناها</td>
+<td>القيمة التي قسناها</td>
+<td><code class="nw">measure.py</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>تأتي نسبة 80.6% من (36 ناقص 7) مقسوماً على 36، وهو 0.806. نقدّم المسارات التي يمكن الوصول إليها وخطوات الهجوم على أنها النتيجة الرئيسية. فحوص البوابة تثبت أنّ السياسات لم تعطّل الخدمة على المستخدمين الحقيقيين، وصفّا زمن الاستجابة يبيّنان كلفة هذه الحماية.</p>
+<h2 id="الرسوم-البيانية-للأشكال-من-9-إلى-12">الرسوم البيانية للأشكال من 9 إلى 12</h2>
+<p>يحتاج فصل النتائج إلى الأشكال من 9 إلى 12. نرسم الأشكال 10 و11 و12 في Excel على Windows من بضعة أرقام نكتبها، ونأخذ الشكل 9 لقطتي شاشة من لوحة التحكم. وإذا لم يكن Excel متوفراً، ففي LibreOffice Calc المجاني وفي Google Sheets المخطط نفسه Clustered Column وأشرطة الخطأ المخصصة، بأسماء قوائم مشابهة.</p>
+<figure class="fig"><a href="../../files/figures/fig12-ar.png"><img src="../../files/figures/web/fig12-ar.png" alt="زمن الاستجابة مع السياسات ومن دونها" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>زمن الاستجابة مع السياسات ومن دونها</figcaption></figure>
+<p>الشكل 12 هو مخطط زمن الاستجابة. نلاحظ أنّ عمودي كل زوج يقفان بارتفاع متقارب جداً، وأنّ أشرطة الخطأ في كل زوج متداخلة، وهذا هو شكل «ضمن حدود الضوضاء».</p>
+<p>لرسم مخطط زمن الاستجابة نفتح ورقة Excel جديدة ونكتب جدولاً صغيراً. نكتب في A2 النص <code class="nw">/news</code> وفي A3 النص <code class="nw">/api/grades</code>. ونكتب في B1 النص <code class="nw">No policies</code> وفي C1 النص <code class="nw">Policies</code>، ثم نكتب تحتهما قيم الوسيط الأربع من الملخص، كل قيمة في صف صفحتها. ونكتب في D1 النص <code class="nw">stdev no policies</code> وفي E1 النص <code class="nw">stdev policies</code>، ثم نكتب قيم stdev المقابلة في الخلايا من D2 إلى E3.</p>
+<p>نحدد الخلايا من A1 إلى C3، ونفتح التبويب «Insert»، وننقر أيقونة المخطط العمودي في المجموعة Charts ونختار «Clustered Column». ننظر إلى وسيلة الإيضاح (legend) تحت المخطط. فإذا ذكرت <code class="nw">/news</code> و <code class="nw">/api/grades</code> بدلاً من <code class="nw">No policies</code> و <code class="nw">Policies</code>، فالأعمدة مجمّعة حسب الوضع. ننقر المخطط، ثم ننقر «Switch Row/Column» في التبويب «Chart Design»، فتصبح الصفحتان هما المجموعتين ويأخذ كل وضع لونه الخاص.</p>
+<p>ننقر المخطط، ثم علامة الزائد بجانبه، ونؤشّر «Error Bars». ننقر السهم الصغير بجانب Error Bars ونختار «More Options». في اللوحة التي تُفتح نختار سلسلة واحدة في كل مرة من القائمة في أعلاها، ونختار «Custom» تحت Error Amount، وننقر «Specify Value». في نافذة Custom Error Bars نحذف كل ما في مربع Positive Error Value، بما في ذلك <code class="nw">={1}</code>، ثم نحدد الخلايا من D2 إلى D3 للسلسلة <code class="nw">No policies</code>، أو من E2 إلى E3 للسلسلة <code class="nw">Policies</code>. نفعل الشيء نفسه في مربع Negative Error Value وننقر «OK». وأخيراً نؤشّر «Axis Titles» في قائمة علامة الزائد، ونكتب <code class="nw">Median latency (ms)</code> في عنوان المحور العمودي.</p>
+<figure class="fig"><a href="../../files/figures/fig10-ar.png"><img src="../../files/figures/web/fig10-ar.png" alt="خطوات الهجوم التي نجحت" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>خطوات الهجوم التي نجحت</figcaption></figure>
+<p>يقارن الشكل 10 عدد خطوات الهجوم الناجحة في الشبكتين، 5 مقابل 1. نلاحظ أنّ الخطوة الوحيدة الباقية هي الثغرة الأمنية نفسها، والتجزئة لم تُصمَّم أصلاً لإصلاحها.</p>
+<figure class="fig"><a href="../../files/figures/fig11-ar.png"><img src="../../files/figures/web/fig11-ar.png" alt="المسارات التي يمكن الوصول إليها" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>المسارات التي يمكن الوصول إليها</figcaption></figure>
+<p>ويقارن الشكل 11 عدد مسارات الخدمات التي يمكن الوصول إليها في الشبكتين، 36 مقابل 7.</p>
+<p>للشكل 10 نكتب <code class="nw">Flat network</code> في A1 و <code class="nw">Segmented</code> في B1، ثم <code class="nw">5</code> في A2 و <code class="nw">1</code> في B2. وللشكل 11 نستخدم ورقة جديدة فيها التسميتان نفسهما، وتحتهما <code class="nw">36</code> و <code class="nw">7</code>. نحدد الخلايا من A1 إلى B2 وندرج مخطط Clustered Column بالطريقة نفسها. هذان المخططان لا يحتاجان إلى أشرطة خطأ.</p>
+<p>الشكل 9 هو مصفوفة قابلية الوصول (reachability matrix) في الوضعين، والجدول الملوّن في لوحة التحكم يعرضها بأفضل صورة أصلاً، لذلك نأخذه لقطتي شاشة من مصفوفة لوحة التحكم. صورة «قبل» هي التي التقطناها في <a href="ch07.html">الفصل 7</a> عند 36 من 36. ولصورة «بعد» نفتح لوحة التحكم الآن ونلتقطها عند 7 من 36. لا نحذف السياسات من أجل ذلك. فجلسة الالتقاط في <a href="ch14.html">الفصل 14</a> تعيد إنشاء الشبكة المسطحة بالطريقة الصحيحة إذا احتجنا إلى صورة «قبل» جديدة.</p>
+<figure class="fig"><a href="../../files/figures/fig09-ar.png"><img src="../../files/figures/web/fig09-ar.png" alt="مصفوفة قابلية الوصول قبل التجزئة وبعدها" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>مصفوفة قابلية الوصول قبل التجزئة وبعدها</figcaption></figure>
+<p>نلاحظ في الشكل 9 أنّ كل خلية مفتوحة في مصفوفة الشبكة المجزأة هي أحد التدفقات في جدول التدفقات الذي كتبناه في <a href="ch01.html">الفصل 1</a>.</p>
+<p class="see"><strong>ما يجب أن نراه:</strong> في مخطط زمن الاستجابة زوجان من الأعمدة بارتفاع متقارب جداً، وأشرطة خطأ متداخلة، إلا إذا تجاوز أحد الفروق عندنا قاعدة الضوضاء.</p>
+<p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
+<p>يُظهر Excel خطأً عند إغلاق نافذة Custom Error Bars. السبب أنّ <code class="nw">={1}</code> بقي في المربع، فأُضيفت الخلايا بعده. نفتح النافذة مرة أخرى، ونفرغ المربعين تماماً، ونحدد الخلايا من جديد.</p>
+<p>تقف الأرقام المكتوبة في خلاياها عند الحافة التي يقف عندها النص عادةً، ويبقى المخطط فارغاً. قرأها Excel نصاً بسبب الفاصلة العشرية. نعيد كتابتها بفاصلة Windows العشرية.</p>
+<h2 id="نقطة-التحقق">نقطة التحقق</h2>
+<p><strong>نقطة التحقق.</strong> نشغّل الأمر التالي ونقارن.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>wc -l results/latency.csv</code></pre></figure>
+<p>يجب أن تكون المخرجات <code class="nw">21 results/latency.csv</code> بالضبط، أي سطر العناوين و20 صفاً. وإذا شغّلنا القياس أكثر من مرة، نتحقق من أنّ <code class="nw">evidence/ch14-measure.txt</code> ينتهي بالملخص، أي الأسطر الستة التي تحت <code class="nw">Mean of the run medians:</code>. فالأمر <code class="nw">tee</code> يعيد كتابة هذا الملف في كل تشغيل، أمّا نتيجة <code class="nw">time</code> وأي خطأ فتذهب إلى الشاشة وحدها ولا تدخل الملف أبداً. وإذا غاب الملخص فذلك التشغيل توقف مبكراً، وما زال <code class="nw">results/latency.csv</code> من تشغيل أقدم، فنعيد القياس قبل أن نثق به.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>21 results/latency.csv</code></pre></figure>
+<p>نحفظ عملنا. المجلد <code class="nw">results/</code> مذكور في <code class="nw">.gitignore</code> فيتجاهله Git. لذلك ينسخ السطر الأول ملف CSV إلى <code class="nw">evidence/</code>، وهذا المجلد يحتفظ به Git.</p>
+<figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+cp results/latency.csv evidence/latency.csv
+git add -A &amp;&amp; git commit -m &quot;ch12: latency measurement&quot;</code></pre></figure>
+<p>يبدأ السطر الأول بالنص <code class="nw">[main</code>. وتحت عدد الملفات المتغيرة تذكر ثلاثة أسطر <code class="nw">create mode</code> الملفات <code class="nw">evidence/ch14-measure.txt</code> و <code class="nw">evidence/latency.csv</code> و <code class="nw">measure.py</code>.</p>
+<!-- OUT ids: ch14-lines, ch14-compile, ch14-measure, ch14-csv, ch14-p95, ch14-policy-count, ch14-l7-rules, ch14-csv-lines, ch14-commit --><nav class="pager" aria-label="الفصول"><a rel="prev" href="ch11.html"><span>الفصل السابق</span>الفصل 11. قراءة الأدلة في Hubble</a><a rel="next" href="ch13.html"><span>الفصل التالي</span>الفصل 13. تجاوز الأعطال دون مساعدة</a></nav></main></div>
+<footer class="foot"><div class="foot-in"><p>Kubernetes 1.36 و Cilium 1.20.5 و kind 0.33.0 على Windows 11 مع WSL 2. شغّلنا كل أمر على حاسوب حقيقي في تشرين الثاني 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">المصدر على GitHub</a></p></div></footer>
+<p class="vh" aria-live="polite" id="live"></p>
+<script type="application/json" id="i18n">{"copied": "نُسخ", "copyFail": "نضغط Ctrl+C لنسخ النص المحدد", "doneOf": "الخطوات المنجزة: {d} من {t}", "next": "الخطوة التالية: {s}", "allDone": "اكتمل المسار وأُنجزت الخطوات كلها.", "sumCount": "المنجز {d} من {t}", "cleared": "مُسحت كل العلامات.", "confirm": "هل نمسح كل العلامات في هذه الصفحة؟ تبقى الملفات والعنقود كما هي.", "stageCount": "{d} من {t}"}</script>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>
