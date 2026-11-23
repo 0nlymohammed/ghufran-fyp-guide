@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#e6ebf1">
-<meta name="color-scheme" content="light dark">
-<script>try{var t=localStorage.getItem('microseg-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
+<meta name="theme-color" content="#0d1117">
+<meta name="color-scheme" content="dark light">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('microseg-theme')==='light'?'light':'dark'}catch(e){document.documentElement.dataset.theme='dark'}</script>
 <title>Chapter 0. How to use this guide | Micro-segmentation lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,7 +24,7 @@
 <li><a href="../guide/index.html" aria-current="page">Full guide</a></li>
 <li><a href="../downloads.html">Downloads</a></li>
 <li><a href="../ar/guide/ch00.html" lang="ar" hreflang="ar" data-setlang="ar">العربية</a></li>
-<li><button type="button" class="theme" data-theme-toggle hidden>Dark</button></li>
+<li><button type="button" class="theme" data-theme-toggle hidden>Light</button></li>
 </ul></nav>
 </div></header>
 <div class="layout"><details class="rail" open><summary>Chapters</summary><nav aria-label="Chapters"><ol class="toc"><li><a href="ch00.html" aria-current="page">0. How to use this guide</a><ol class="sub"><li><a href="#what-youre-building-and-in-what-order">What you're building, and in what order</a></li><li><a href="#windows-ubuntu-and-the-two-kinds-of-command">Windows, Ubuntu and the two kinds of command</a></li><li><a href="#how-a-step-is-laid-out">How a step is laid out</a></li><li><a href="#when-your-output-doesnt-match">When your output doesn't match</a></li><li><a href="#one-rule">One rule</a></li><li><a href="#practice-step-check-that-your-laptop-can-run-the-lab">Practice step: check that your laptop can run the lab</a></li><li><a href="#tested-versions">Tested versions</a></li><li><a href="#your-project-folder-microseg-at-the-end">Your project folder, ~/microseg, at the end</a></li><li><a href="#progress-tracker">Progress tracker</a></li></ol></li><li><a href="ch01.html">1. What you will build</a></li><li><a href="ch02.html">2. Before you start</a></li><li><a href="ch03.html">3. Set up the environment</a></li><li><a href="ch04.html">4. Create the cluster</a></li><li><a href="ch05.html">5. Write the services</a></li><li><a href="ch06.html">6. Deploy the portal</a></li><li><a href="ch07.html">7. Build your dashboard</a></li><li><a href="ch08.html">8. Attack the flat network</a></li><li><a href="ch09.html">9. Design the policy</a></li><li><a href="ch10.html">10. Apply micro-segmentation</a></li><li><a href="ch11.html">11. Read the evidence in Hubble</a></li><li><a href="ch12.html">12. Measure</a></li><li><a href="ch13.html">13. Getting unstuck alone</a></li><li><a href="ch14.html">14. Evidence for your report</a></li><li><a href="ch15.html">15. Day-by-day plan</a></li><li><a href="appendix.html">Appendices</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="chapter-0-how-to-use-this-guide">Chapter 0. How to use this guide</h1>
@@ -39,9 +39,9 @@
 <h2 id="windows-ubuntu-and-the-two-kinds-of-command">Windows, Ubuntu and the two kinds of command</h2>
 <p>A terminal is a window where you type commands instead of clicking. It shows a prompt, a short line of text that means "ready, type the next command". You'll use two terminals.</p>
 <p>PowerShell is the Windows terminal. To open it, press the Windows key, type <code class="nw">powershell</code> and click <strong>Windows PowerShell</strong>. Its prompt ends in <code class="nw">&gt;</code> and looks like this, with your own folder name in place of <code class="nw">Sara</code>.</p>
-<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>PS C:\Users\Sara&gt;</code></pre></figure>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>PS C:\Users\Ghufran&gt;</code></pre></figure>
 <p>Ubuntu is a version of Linux, and WSL (Windows Subsystem for Linux) is the part of Windows that runs it next to your Windows programs. You install both in <a href="ch02.html">chapter 2</a>, which also shows you how to open the Ubuntu terminal. Its prompt ends in <code class="nw">$</code> and looks like this, with your Linux user name and your laptop's name in it.</p>
-<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>sara@LAPTOP-1234:~$</code></pre></figure>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>ghufran@LAPTOP-1234:~$</code></pre></figure>
 <p>Almost all of the project runs in Ubuntu, because Docker, the simulated cluster and Cilium all need a Linux kernel, the core of a Linux system, to run on.</p>
 <p>Every command in this guide tells you twice which window it goes into. The sentence before it names the window, as in "In PowerShell, run" or "In the Ubuntu terminal, run", and the block carries a small label in its top corner. A block labelled <code class="nw">powershell</code> goes into PowerShell. A block labelled <code class="nw">bash</code> goes into the Ubuntu terminal, since bash is the program that reads what you type there. A block labelled <code class="nw">text</code> is never a command. It holds something to read or compare, such as output, or a file or message that the step tells you to copy somewhere.</p>
 <p>Paste one block at a time. In PowerShell you paste with Ctrl+V. In the Ubuntu terminal you paste with Ctrl+Shift+V, because Ctrl+V means something else in Linux terminals. After pasting, press Enter if the command hasn't started by itself. If a warning says the text contains multiple lines, click <strong>Paste anyway</strong>. Then wait until the prompt comes back before you paste the next block. A few commands keep running until you stop them, and the step says so when that happens. Press Ctrl+C in that window to stop one and get the prompt back.</p>

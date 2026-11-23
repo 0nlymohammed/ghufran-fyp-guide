@@ -9,13 +9,13 @@
     try { localStorage.setItem('microseg-lang', a.dataset.setlang); } catch (e) { /* private mode */ }
   }));
 
-  // Theme: follows the system until the reader picks one, then the choice is remembered.
+  // Theme: dark unless the reader picks light, and the choice is remembered.
   const root = document.documentElement;
   const themeBtn = document.querySelector('[data-theme-toggle]');
   const themeMeta = document.querySelector('meta[name="theme-color"]');
   const paint = () => {
-    const dark = root.dataset.theme === 'dark';
-    if (themeMeta) themeMeta.content = dark ? '#0f1826' : '#e6ebf1';
+    const dark = root.dataset.theme !== 'light';
+    if (themeMeta) themeMeta.content = dark ? '#0d1117' : '#f4f4f4';
     if (themeBtn) {
       themeBtn.textContent = dark ? T.themeLight : T.themeDark;
       themeBtn.setAttribute('aria-label', dark ? T.toLight : T.toDark);
@@ -24,7 +24,7 @@
   if (themeBtn) {
     themeBtn.hidden = false;
     themeBtn.addEventListener('click', () => {
-      root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      root.dataset.theme = root.dataset.theme === 'light' ? 'dark' : 'light';
       try { localStorage.setItem('microseg-theme', root.dataset.theme); } catch (e) { /* private mode */ }
       paint();
     });

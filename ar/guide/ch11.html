@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#e6ebf1">
-<meta name="color-scheme" content="light dark">
-<script>try{var t=localStorage.getItem('microseg-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
+<meta name="theme-color" content="#0d1117">
+<meta name="color-scheme" content="dark light">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('microseg-theme')==='light'?'light':'dark'}catch(e){document.documentElement.dataset.theme='dark'}</script>
 <title>الفصل 11. قراءة الأدلة في Hubble | مختبر التجزئة الدقيقة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,7 +24,7 @@
 <li><a href="../../ar/guide/index.html" aria-current="page">الدليل الكامل</a></li>
 <li><a href="../../ar/downloads.html">التنزيلات</a></li>
 <li><a href="../../guide/ch11.html" lang="en" hreflang="en" data-setlang="en">English</a></li>
-<li><button type="button" class="theme" data-theme-toggle hidden>داكن</button></li>
+<li><button type="button" class="theme" data-theme-toggle hidden>فاتح</button></li>
 </ul></nav>
 </div></header>
 <div class="layout"><details class="rail" open><summary>الفصول</summary><nav aria-label="الفصول"><ol class="toc"><li><a href="ch00.html">0. كيف نستخدم هذا الدليل</a></li><li><a href="ch01.html">1. ما الذي سنبنيه</a></li><li><a href="ch02.html">2. قبل أن نبدأ</a></li><li><a href="ch03.html">3. تجهيز بيئة العمل</a></li><li><a href="ch04.html">4. إنشاء الـ cluster</a></li><li><a href="ch05.html">5. كتابة الخدمات</a></li><li><a href="ch06.html">6. نشر البوابة</a></li><li><a href="ch07.html">7. بناء لوحة التحكم</a></li><li><a href="ch08.html">8. مهاجمة الشبكة المسطحة</a></li><li><a href="ch09.html">9. تصميم السياسة</a></li><li><a href="ch10.html">10. تطبيق التجزئة الدقيقة للشبكة</a></li><li><a href="ch11.html" aria-current="page">11. قراءة الأدلة في Hubble</a><ol class="sub"><li><a href="#أولا-التحقق-من-أن-hubble-يجيب">أولاً، التحقق من أنّ Hubble يجيب</a></li><li><a href="#حركة-مرور-جديدة-الهجوم-وفحوص-البوابة">حركة مرور جديدة: الهجوم وفحوص البوابة</a></li><li><a href="#إسقاطات-pod-news-من-النظرة-الواسعة-إلى-الضيقة">إسقاطات Pod news، من النظرة الواسعة إلى الضيقة</a></li><li><a href="#سطر-واحد-من-hubble-حقلا-حقلا">سطر واحد من Hubble، حقلاً حقلاً</a></li><li><a href="#port-واحد-وهويتان">port واحد وهويتان</a></li><li><a href="#قراءة-قرار-l7">قراءة قرار L7</a></li><li><a href="#قراءة-استعلامات-dns-التي-أجراها-المهاجم">قراءة استعلامات DNS التي أجراها المهاجم</a></li><li><a href="#عد-إسقاطات-المهاجم">عدّ إسقاطات المهاجم</a></li><li><a href="#واجهة-hubble-التدفقات-نفسها-على-شكل-خريطة">واجهة Hubble: التدفقات نفسها على شكل خريطة</a></li><li><a href="#نقطة-التحقق">نقطة التحقق</a></li></ol></li><li><a href="ch12.html">12. القياس</a></li><li><a href="ch13.html">13. تجاوز الأعطال دون مساعدة</a></li><li><a href="ch14.html">14. أدلة بحث التخرج</a></li><li><a href="ch15.html">15. خطة العمل يوماً بيوم</a></li><li><a href="appendix.html">الملاحق</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="الفصل-11-قراءة-الأدلة-في-hubble">الفصل 11. قراءة الأدلة في Hubble</h1>
@@ -263,7 +263,7 @@ Nov 19 20:43:41.916: campus/news-545758c8c6-2jp4n:59859 (ID:53922) -&gt; kube-sy
 <p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
 <p>الرقم <code class="nw">0</code>. السبب أنه مضى على الهجوم أكثر من خمس دقائق. نشغّل سطر الهجوم من خطوة «حركة مرور جديدة» مرة أخرى، ثم هذا الأمر.</p>
 <h2 id="واجهة-hubble-التدفقات-نفسها-على-شكل-خريطة">واجهة Hubble: التدفقات نفسها على شكل خريطة</h2>
-<figure class="fig shot"><a href="../../files/shots/hubble.png"><img src="../../files/shots/hubble.png" alt="خريطة الخدمات في واجهة Hubble للـ namespace المسمّى campus، وتحتها التدفقات التي أُسقطت." width="1600" height="1000" loading="lazy" decoding="async"></a><figcaption>خريطة الخدمات في واجهة Hubble للـ namespace المسمّى campus، وتحتها التدفقات التي أُسقطت.</figcaption></figure>
+<figure class="fig shot" style="max-width:1600px"><a href="../../files/shots/hubble.png"><img src="../../files/shots/hubble.png" alt="خريطة الخدمات في واجهة Hubble للـ namespace المسمّى campus، وتحتها التدفقات التي أُسقطت." width="1600" height="1000" loading="lazy" decoding="async"></a><figcaption>خريطة الخدمات في واجهة Hubble للـ namespace المسمّى campus، وتحتها التدفقات التي أُسقطت.</figcaption></figure>
 <p>ترسم واجهة Hubble (Hubble UI) هذه التدفقات على شكل خريطة. شغّلناها في <a href="ch04.html">الفصل 4</a>، وهي مثل توجيه الـ port تتوقف حين تُغلق الـ terminal الخاصة بها. نشغّل <code class="nw">jobs</code> أولاً، فإذا ظهر فيه <code class="nw">cilium hubble ui</code> على أنه يعمل نتجاوز السطر الأول أدناه.</p>
 <figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>cilium hubble ui --open-browser=false &amp;
 sleep 5

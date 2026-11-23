@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#e6ebf1">
-<meta name="color-scheme" content="light dark">
-<script>try{var t=localStorage.getItem('microseg-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
+<meta name="theme-color" content="#0d1117">
+<meta name="color-scheme" content="dark light">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('microseg-theme')==='light'?'light':'dark'}catch(e){document.documentElement.dataset.theme='dark'}</script>
 <title>الفصل 6. نشر البوابة | مختبر التجزئة الدقيقة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,7 +24,7 @@
 <li><a href="../../ar/guide/index.html" aria-current="page">الدليل الكامل</a></li>
 <li><a href="../../ar/downloads.html">التنزيلات</a></li>
 <li><a href="../../guide/ch06.html" lang="en" hreflang="en" data-setlang="en">English</a></li>
-<li><button type="button" class="theme" data-theme-toggle hidden>داكن</button></li>
+<li><button type="button" class="theme" data-theme-toggle hidden>فاتح</button></li>
 </ul></nav>
 </div></header>
 <div class="layout"><details class="rail" open><summary>الفصول</summary><nav aria-label="الفصول"><ol class="toc"><li><a href="ch00.html">0. كيف نستخدم هذا الدليل</a></li><li><a href="ch01.html">1. ما الذي سنبنيه</a></li><li><a href="ch02.html">2. قبل أن نبدأ</a></li><li><a href="ch03.html">3. تجهيز بيئة العمل</a></li><li><a href="ch04.html">4. إنشاء الـ cluster</a></li><li><a href="ch05.html">5. كتابة الخدمات</a></li><li><a href="ch06.html" aria-current="page">6. نشر البوابة</a><ol class="sub"><li><a href="#الخطوة-1-التأكد-من-أن-الـ-cluster-ما-زال-يعمل">الخطوة 1. التأكد من أن الـ cluster ما زال يعمل</a></li><li><a href="#الخطوة-2-كتابة-k8sappyaml">الخطوة 2. كتابة k8s/app.yaml</a></li><li><a href="#الخطوة-3-فحص-الملف-قبل-النشر">الخطوة 3. فحص الملف قبل النشر</a></li><li><a href="#الخطوة-4-كتابة-deploysh">الخطوة 4. كتابة deploy.sh</a></li><li><a href="#الخطوة-5-نشر-البوابة">الخطوة 5. نشر البوابة</a></li><li><a href="#الخطوة-6-نظرة-على-الـ-pods">الخطوة 6. نظرة على الـ Pods</a></li><li><a href="#الخطوة-7-نظرة-على-كائنات-service-ومتغيرات-البيئة">الخطوة 7. نظرة على كائنات Service ومتغيرات البيئة</a></li><li><a href="#الخطوة-8-كتابة-check-portalsh">الخطوة 8. كتابة check-portal.sh</a></li><li><a href="#الخطوة-9-فتح-البوابة-من-windows">الخطوة 9. فتح البوابة من Windows</a></li><li><a href="#نقطة-التحقق">نقطة التحقق</a></li></ol></li><li><a href="ch07.html">7. بناء لوحة التحكم</a></li><li><a href="ch08.html">8. مهاجمة الشبكة المسطحة</a></li><li><a href="ch09.html">9. تصميم السياسة</a></li><li><a href="ch10.html">10. تطبيق التجزئة الدقيقة للشبكة</a></li><li><a href="ch11.html">11. قراءة الأدلة في Hubble</a></li><li><a href="ch12.html">12. القياس</a></li><li><a href="ch13.html">13. تجاوز الأعطال دون مساعدة</a></li><li><a href="ch14.html">14. أدلة بحث التخرج</a></li><li><a href="ch15.html">15. خطة العمل يوماً بيوم</a></li><li><a href="appendix.html">الملاحق</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="الفصل-6-نشر-البوابة">الفصل 6. نشر البوابة</h1>
@@ -682,7 +682,7 @@ PORTAL: 6/6 OK</code></pre></figure>
 <p>إذا ظهر هذا السطر فقد أجاب تسجيل الدخول من دون رمز دخول، فطبع jq الكلمة <code class="nw">null</code>، وطولها 4 محارف. لم تجد auth طالبة اسمها <code class="nw">sara</code> بكلمة المرور تلك، وهذا يشير إلى البيانات الأولية في <code class="nw">db/init.sql</code>. نقارن ملفنا بما في <a href="ch05.html">الفصل 5</a>، ثم نشغّل <code class="nw">deploy.sh</code> مرة أخرى لتُنشأ قاعدة البيانات من جديد.</p>
 <p>إذا فشل فحصا الملف الشخصي والدرجات بالعبارة <code class="nw">got ''</code>، وظهر فوقهما سطر خطأ من jq، فالسبب أن api أجابت بصفحة خطأ بدلاً من JSON. نشغّل <code>kubectl -n campus logs deploy/api</code>، وإن لم يُظهر شيئاً مفيداً نشغّل <code>kubectl -n campus logs deploy/auth</code>. وآخر سطر في رسالة Python يسمّي المشكلة. فظهور <code class="nw">KeyError: 'POSTGRES_DB'</code> يعني أن أسطر <code class="nw">envFrom</code> مفقودة من ذلك الـ Deployment في <code class="nw">app.yaml</code>.</p>
 <h2 id="الخطوة-9-فتح-البوابة-من-windows">الخطوة 9. فتح البوابة من Windows</h2>
-<figure class="fig shot"><a href="../../files/shots/portal.png"><img src="../../files/shots/portal.png" alt="البوابة بعد أن تسجّل سارة دخولها، ويظهر ملفها الشخصي ودرجتاها." width="1400" height="1350" loading="lazy" decoding="async"></a><figcaption>البوابة بعد أن تسجّل سارة دخولها، ويظهر ملفها الشخصي ودرجتاها.</figcaption></figure>
+<figure class="fig shot" style="max-width:1400px"><a href="../../files/shots/portal.png"><img src="../../files/shots/portal.png" alt="البوابة بعد أن تسجّل سارة دخولها، ويظهر ملفها الشخصي ودرجتاها." width="1400" height="1350" loading="lazy" decoding="async"></a><figcaption>البوابة بعد أن تسجّل سارة دخولها، ويظهر ملفها الشخصي ودرجتاها.</figcaption></figure>
 <p>كل ما شغّلناه حتى الآن جرى داخل WSL. لكن المهاجم في <a href="ch08.html">الفصل 8</a> يرسل طلباته من Windows PowerShell. فنتأكد أن Windows يصل إلى الـ port نفسه.</p>
 <p>نفتح PowerShell ونشغّل الأمر الآتي.</p>
 <figure class="code cmd ps"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>curl.exe -s -o NUL -w &quot;%{http_code}\n&quot; http://localhost:30080/</code></pre></figure>

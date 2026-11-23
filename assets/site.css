@@ -1,21 +1,20 @@
 /* Micro-segmentation lab guide.
-   Palette is the one used by the figures and slides: ink navy, blue for the allowed path (links, progress),
-   orange only as an edge on "something is wrong" blocks, never as text.
-   The light ground is a soft grey-blue, not white, so long reading sessions are easier on the eyes.
-   The dark theme uses the same navy as its ground. */
+   Neutral greys with one blue for the allowed path (links, progress) and orange only as an edge on
+   "something is wrong" blocks, never as text. Blue and orange are the pair used by the figures and slides.
+   Dark is the default, because long sessions on a white page tire the eyes. Light is one click away. */
 :root {
-  --paper: #e6ebf1;
-  --surface: #f1f4f8;
-  --ink: #13233f;
-  --muted: #4c586f;
-  --rule: #c3cbd8;
-  --rule-strong: #6f7c94;
-  --code: #f1f4f8;
-  --tint: #d3e5f2;
-  --blue: #0072b2;
-  --blue-ink: #00568a;
-  --orange: #d55e00;
-  --orange-tint: #f6dac8;
+  --paper: #0d1117;
+  --surface: #161b22;
+  --ink: #e6edf3;
+  --muted: #9198a1;
+  --rule: #30363d;
+  --rule-strong: #6e7681;
+  --code: #161b22;
+  --tint: #12304a;
+  --blue: #56abdf;
+  --blue-ink: #79c0ff;
+  --orange: #ee8a45;
+  --orange-tint: #3d2413;
 
   --font: "Public Sans", "Segoe UI", system-ui, sans-serif;
   --mono: "Noto Sans Mono", Consolas, "Courier New", monospace;
@@ -33,24 +32,24 @@
   --content-w: 780px;
   --measure: 68ch;
   --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
-  color-scheme: light;
-}
-html[data-theme="dark"] {
-  --paper: #0f1826;
-  --surface: #172334;
-  --ink: #e4eaf3;
-  --muted: #a3afc2;
-  --rule: #2b3a50;
-  --rule-strong: #6a7fa0;
-  --code: #172334;
-  --tint: #173a57;
-  --blue: #56abdf;
-  --blue-ink: #86c5ee;
-  --orange: #ee8a45;
-  --orange-tint: #40271a;
   color-scheme: dark;
 }
-html:not([data-theme="dark"]) .only-dark, html[data-theme="dark"] .only-light { display: none; }
+html[data-theme="light"] {
+  --paper: #f4f4f4;
+  --surface: #ffffff;
+  --ink: #1f2328;
+  --muted: #59636e;
+  --rule: #d4d4d4;
+  --rule-strong: #7d7d7d;
+  --code: #ffffff;
+  --tint: #ddeaf5;
+  --blue: #0072b2;
+  --blue-ink: #00568a;
+  --orange: #d55e00;
+  --orange-tint: #f6dac8;
+  color-scheme: light;
+}
+html[data-theme="light"] .only-dark, html:not([data-theme="light"]) .only-light { display: none; }
 
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scrollbar-color: var(--rule-strong) var(--paper); }
@@ -268,10 +267,10 @@ tbody th { font-weight: 600; }
 td.num, th.num { text-align: end; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .fig { margin: var(--s5) 0; }
 .fig a { display: block; border-radius: var(--r-surface); }
-.fig.ui img { max-width: 780px; }
 .fig img { width: 100%; height: auto; border: 1px solid var(--rule); border-radius: var(--r-surface); background: var(--surface); }
-.fig img:not(.only-light, .only-dark), html:not([data-theme="dark"]) .fig img.only-light, html[data-theme="dark"] .fig img.only-dark { display: block; }
-html[data-theme="dark"] .fig.shot img { filter: brightness(0.86); }
+.fig img:not(.only-light, .only-dark), html[data-theme="light"] .fig img.only-light, html:not([data-theme="light"]) .fig img.only-dark { display: block; }
+html:not([data-theme="light"]) .fig.shot img { filter: brightness(0.88); }
+.fig .credit { opacity: 0.85; }
 .fig figcaption { font-size: var(--text-sm); color: var(--muted); margin-top: var(--s2); }
 
 /* ---------- guide pages ---------- */

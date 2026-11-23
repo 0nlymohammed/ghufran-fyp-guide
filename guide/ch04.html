@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#e6ebf1">
-<meta name="color-scheme" content="light dark">
-<script>try{var t=localStorage.getItem('microseg-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
+<meta name="theme-color" content="#0d1117">
+<meta name="color-scheme" content="dark light">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('microseg-theme')==='light'?'light':'dark'}catch(e){document.documentElement.dataset.theme='dark'}</script>
 <title>Chapter 4. Create the cluster | Micro-segmentation lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,7 +24,7 @@
 <li><a href="../guide/index.html" aria-current="page">Full guide</a></li>
 <li><a href="../downloads.html">Downloads</a></li>
 <li><a href="../ar/guide/ch04.html" lang="ar" hreflang="ar" data-setlang="ar">العربية</a></li>
-<li><button type="button" class="theme" data-theme-toggle hidden>Dark</button></li>
+<li><button type="button" class="theme" data-theme-toggle hidden>Light</button></li>
 </ul></nav>
 </div></header>
 <div class="layout"><details class="rail" open><summary>Chapters</summary><nav aria-label="Chapters"><ol class="toc"><li><a href="ch00.html">0. How to use this guide</a></li><li><a href="ch01.html">1. What you will build</a></li><li><a href="ch02.html">2. Before you start</a></li><li><a href="ch03.html">3. Set up the environment</a></li><li><a href="ch04.html" aria-current="page">4. Create the cluster</a><ol class="sub"><li><a href="#write-kind-configyaml-the-shape-of-the-cluster">Write kind-config.yaml, the shape of the cluster</a></li><li><a href="#write-setupsh-the-one-time-setup-script">Write setup.sh, the one-time setup script</a></li><li><a href="#run-setupsh">Run setup.sh</a></li><li><a href="#check-the-nodes-and-their-tier-labels-kubectl-get-nodes">Check the nodes and their tier labels (kubectl get nodes)</a></li><li><a href="#check-ciliums-health-and-the-cluster-dns-address">Check Cilium's health and the cluster DNS address</a></li><li><a href="#connect-the-hubble-command-to-hubble-relay-port-4245">Connect the hubble command to Hubble Relay (port 4245)</a></li><li><a href="#run-ciliums-connectivity-test">Run Cilium's connectivity test</a></li><li><a href="#clean-up-after-the-test-kubectl-delete-ns">Clean up after the test (kubectl delete ns)</a></li><li><a href="#open-the-hubble-ui-port-12000">Open the Hubble UI (port 12000)</a></li><li><a href="#checkpoint">Checkpoint</a></li></ol></li><li><a href="ch05.html">5. Write the services</a></li><li><a href="ch06.html">6. Deploy the portal</a></li><li><a href="ch07.html">7. Build your dashboard</a></li><li><a href="ch08.html">8. Attack the flat network</a></li><li><a href="ch09.html">9. Design the policy</a></li><li><a href="ch10.html">10. Apply micro-segmentation</a></li><li><a href="ch11.html">11. Read the evidence in Hubble</a></li><li><a href="ch12.html">12. Measure</a></li><li><a href="ch13.html">13. Getting unstuck alone</a></li><li><a href="ch14.html">14. Evidence for your report</a></li><li><a href="ch15.html">15. Day-by-day plan</a></li><li><a href="appendix.html">Appendices</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="chapter-4-create-the-cluster">Chapter 4. Create the cluster</h1>

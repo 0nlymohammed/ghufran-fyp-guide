@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#e6ebf1">
-<meta name="color-scheme" content="light dark">
-<script>try{var t=localStorage.getItem('microseg-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
+<meta name="theme-color" content="#0d1117">
+<meta name="color-scheme" content="dark light">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('microseg-theme')==='light'?'light':'dark'}catch(e){document.documentElement.dataset.theme='dark'}</script>
 <title>الفصل 0. كيف نستخدم هذا الدليل | مختبر التجزئة الدقيقة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,7 +24,7 @@
 <li><a href="../../ar/guide/index.html" aria-current="page">الدليل الكامل</a></li>
 <li><a href="../../ar/downloads.html">التنزيلات</a></li>
 <li><a href="../../guide/ch00.html" lang="en" hreflang="en" data-setlang="en">English</a></li>
-<li><button type="button" class="theme" data-theme-toggle hidden>داكن</button></li>
+<li><button type="button" class="theme" data-theme-toggle hidden>فاتح</button></li>
 </ul></nav>
 </div></header>
 <div class="layout"><details class="rail" open><summary>الفصول</summary><nav aria-label="الفصول"><ol class="toc"><li><a href="ch00.html" aria-current="page">0. كيف نستخدم هذا الدليل</a><ol class="sub"><li><a href="#ماذا-نبني-وبأي-ترتيب">ماذا نبني، وبأي ترتيب</a></li><li><a href="#windows-وubuntu-ونوعا-الأوامر">Windows وUbuntu ونوعا الأوامر</a></li><li><a href="#كيف-تعرض-الخطوة">كيف تُعرض الخطوة</a></li><li><a href="#حين-لا-تطابق-المخرجات-ما-في-الدليل">حين لا تطابق المخرجات ما في الدليل</a></li><li><a href="#قاعدة-واحدة">قاعدة واحدة</a></li><li><a href="#خطوة-تدريبية-نتحقق-من-أن-الحاسوب-قادر-على-تشغيل-المختبر">خطوة تدريبية: نتحقق من أنّ الحاسوب قادر على تشغيل المختبر</a></li><li><a href="#الإصدارات-المختبرة">الإصدارات المختبَرة</a></li><li><a href="#مجلد-المشروع-microseg-في-شكله-النهائي">مجلد المشروع ~/microseg في شكله النهائي</a></li><li><a href="#متابعة-التقدم">متابعة التقدم</a></li></ol></li><li><a href="ch01.html">1. ما الذي سنبنيه</a></li><li><a href="ch02.html">2. قبل أن نبدأ</a></li><li><a href="ch03.html">3. تجهيز بيئة العمل</a></li><li><a href="ch04.html">4. إنشاء الـ cluster</a></li><li><a href="ch05.html">5. كتابة الخدمات</a></li><li><a href="ch06.html">6. نشر البوابة</a></li><li><a href="ch07.html">7. بناء لوحة التحكم</a></li><li><a href="ch08.html">8. مهاجمة الشبكة المسطحة</a></li><li><a href="ch09.html">9. تصميم السياسة</a></li><li><a href="ch10.html">10. تطبيق التجزئة الدقيقة للشبكة</a></li><li><a href="ch11.html">11. قراءة الأدلة في Hubble</a></li><li><a href="ch12.html">12. القياس</a></li><li><a href="ch13.html">13. تجاوز الأعطال دون مساعدة</a></li><li><a href="ch14.html">14. أدلة بحث التخرج</a></li><li><a href="ch15.html">15. خطة العمل يوماً بيوم</a></li><li><a href="appendix.html">الملاحق</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="الفصل-0-كيف-نستخدم-هذا-الدليل">الفصل 0. كيف نستخدم هذا الدليل</h1>
@@ -39,9 +39,9 @@
 <h2 id="windows-وubuntu-ونوعا-الأوامر">Windows وUbuntu ونوعا الأوامر</h2>
 <p>الـ terminal نافذة نكتب فيها الأوامر بدل النقر بالفأرة. تعرض موجّه الأوامر، وهو سطر قصير معناه «جاهز، اكتب الأمر التالي». سنستخدم 2 terminals.</p>
 <p>الـ terminal في Windows هي PowerShell. لفتحها نضغط مفتاح Windows ونكتب <code class="nw">powershell</code> ثم ننقر <strong>Windows PowerShell</strong>. ينتهي موجّهها بالرمز <code class="nw">&gt;</code> ويبدو هكذا، ويظهر فيه اسم مجلد المستخدم على حاسوبنا مكان <code class="nw">Sara</code>.</p>
-<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>PS C:\Users\Sara&gt;</code></pre></figure>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>PS C:\Users\Ghufran&gt;</code></pre></figure>
 <p>أما Ubuntu فإصدار من Linux، وWSL (Windows Subsystem for Linux) هو الجزء من Windows الذي يشغّله إلى جانب برامج Windows. نثبّت الاثنين في <a href="ch02.html">الفصل 2</a>، وهو يبيّن أيضاً كيف نفتح Ubuntu terminal. ينتهي موجّهها بالرمز <code class="nw">$</code> ويبدو هكذا، وفيه اسم مستخدم Linux واسم الحاسوب.</p>
-<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>sara@LAPTOP-1234:~$</code></pre></figure>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>ghufran@LAPTOP-1234:~$</code></pre></figure>
 <p>يعمل المشروع كله تقريباً داخل Ubuntu، لأنّ كلاً من Docker والـ cluster المُحاكى وCilium يحتاج إلى Linux kernel، أي قلب نظام التشغيل، لتعمل عليها.</p>
 <p>كل أمر في هذا الدليل يذكر مرتين النافذة التي يُكتب فيها. الجملة التي تسبقه تسمّي النافذة، مثل «في PowerShell نشغّل» أو «في Ubuntu terminal نشغّل»، وتحمل كتلة الشيفرة كلمة صغيرة في زاويتها العليا. الكتلة التي تحمل الكلمة <code class="nw">powershell</code> تُكتب في PowerShell. والتي تحمل <code class="nw">bash</code> تُكتب في Ubuntu terminal، لأنّ bash هو البرنامج الذي يقرأ ما نكتبه هناك. أما الكتلة التي تحمل <code class="nw">text</code> فليست أمراً أبداً. فيها شيء نقرؤه أو نقارن به، كالمخرجات، أو ملف أو رسالة تطلب الخطوة نسخها إلى مكان ما.</p>
 <p>نلصق كتلة واحدة في كل مرة. في PowerShell نلصق بالمفتاحين Ctrl+V. أما في Ubuntu terminal فنلصق بالمفاتيح Ctrl+Shift+V، لأنّ Ctrl+V تعني شيئاً آخر في Linux terminals. بعد اللصق نضغط Enter إذا لم يبدأ الأمر من تلقاء نفسه. وإذا ظهر تحذير يقول إنّ النص يحتوي على عدة أسطر ننقر <strong>Paste anyway</strong>. ثم ننتظر حتى يعود موجّه الأوامر قبل أن نلصق الكتلة التالية. بعض الأوامر يبقى يعمل حتى نوقفه، والخطوة تنبّه إلى ذلك حين يحدث. ولإيقاف أمر كهذا واستعادة موجّه الأوامر نضغط Ctrl+C في تلك النافذة.</p>

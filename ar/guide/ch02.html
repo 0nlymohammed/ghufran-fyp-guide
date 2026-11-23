@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#e6ebf1">
-<meta name="color-scheme" content="light dark">
-<script>try{var t=localStorage.getItem('microseg-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
+<meta name="theme-color" content="#0d1117">
+<meta name="color-scheme" content="dark light">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('microseg-theme')==='light'?'light':'dark'}catch(e){document.documentElement.dataset.theme='dark'}</script>
 <title>الفصل 2. قبل أن نبدأ | مختبر التجزئة الدقيقة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,7 +24,7 @@
 <li><a href="../../ar/guide/index.html" aria-current="page">الدليل الكامل</a></li>
 <li><a href="../../ar/downloads.html">التنزيلات</a></li>
 <li><a href="../../guide/ch02.html" lang="en" hreflang="en" data-setlang="en">English</a></li>
-<li><button type="button" class="theme" data-theme-toggle hidden>داكن</button></li>
+<li><button type="button" class="theme" data-theme-toggle hidden>فاتح</button></li>
 </ul></nav>
 </div></header>
 <div class="layout"><details class="rail" open><summary>الفصول</summary><nav aria-label="الفصول"><ol class="toc"><li><a href="ch00.html">0. كيف نستخدم هذا الدليل</a></li><li><a href="ch01.html">1. ما الذي سنبنيه</a></li><li><a href="ch02.html" aria-current="page">2. قبل أن نبدأ</a><ol class="sub"><li><a href="#الخطوة-1-نتأكد-من-أن-الـ-virtualization-مفعلة">الخطوة 1. نتأكد من أن الـ virtualization مفعّلة</a></li><li><a href="#الخطوة-2-نحدث-wsl">الخطوة 2. نحدّث WSL</a></li><li><a href="#الخطوة-3-نثبت-ubuntu-2404-وننشئ-مستخدم-linux">الخطوة 3. نثبّت Ubuntu 24.04 وننشئ مستخدم Linux</a></li><li><a href="#الخطوة-4-نفتح-ubuntu-terminal">الخطوة 4. نفتح Ubuntu terminal</a></li><li><a href="#الخطوة-5-نتحقق-من-أن-ubuntu-يعمل-تحت-wsl-2">الخطوة 5. نتحقق من أن Ubuntu يعمل تحت WSL 2</a></li><li><a href="#الخطوة-6-نثبت-vs-code-ونفتح-فيه-مجلد-المشروع">الخطوة 6. نثبّت VS Code ونفتح فيه مجلد المشروع</a></li><li><a href="#الخطوة-7-ننقل-ملفا-من-windows-إلى-ubuntu">الخطوة 7. ننقل ملفاً من Windows إلى Ubuntu</a></li><li><a href="#الخطوة-8-نهايات-الأسطر-واللصق-الآمن">الخطوة 8. نهايات الأسطر واللصق الآمن</a></li><li><a href="#الخطوة-9-نضبط-git-وننشئ-الـ-repository">الخطوة 9. نضبط Git وننشئ الـ repository</a></li><li><a href="#الخطوة-10-نحفظ-اللقطة-الأولى">الخطوة 10. نحفظ اللقطة الأولى</a></li><li><a href="#الخطوة-11-نرى-تغييرا-ثم-نتراجع-عنه">الخطوة 11. نرى تغييراً ثم نتراجع عنه</a></li><li><a href="#الخطوة-12-ننسخ-المشروع-احتياطيا-إلى-windows">الخطوة 12. ننسخ المشروع احتياطياً إلى Windows</a></li><li><a href="#نقطة-التحقق">نقطة التحقق</a></li></ol></li><li><a href="ch03.html">3. تجهيز بيئة العمل</a></li><li><a href="ch04.html">4. إنشاء الـ cluster</a></li><li><a href="ch05.html">5. كتابة الخدمات</a></li><li><a href="ch06.html">6. نشر البوابة</a></li><li><a href="ch07.html">7. بناء لوحة التحكم</a></li><li><a href="ch08.html">8. مهاجمة الشبكة المسطحة</a></li><li><a href="ch09.html">9. تصميم السياسة</a></li><li><a href="ch10.html">10. تطبيق التجزئة الدقيقة للشبكة</a></li><li><a href="ch11.html">11. قراءة الأدلة في Hubble</a></li><li><a href="ch12.html">12. القياس</a></li><li><a href="ch13.html">13. تجاوز الأعطال دون مساعدة</a></li><li><a href="ch14.html">14. أدلة بحث التخرج</a></li><li><a href="ch15.html">15. خطة العمل يوماً بيوم</a></li><li><a href="appendix.html">الملاحق</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="الفصل-2-قبل-أن-نبدأ">الفصل 2. قبل أن نبدأ</h1>
@@ -73,7 +73,7 @@ Windows version: 10.0.26200.9974</code></pre></figure>
 <p>إذا أظهر السطر الأول إصداراً أقل من <code class="nw">3.0.5.0</code>، مع أن <code class="nw">wsl --update</code> قال إن أحدث إصدار مثبّت أصلاً، نشغّل <code class="nw">wsl --update --web-download</code> في نافذة المسؤول، ثم نعيد تشغيل Windows ونتحقق مرة أخرى.</p>
 <h2 id="الخطوة-3-نثبت-ubuntu-2404-وننشئ-مستخدم-linux">الخطوة 3. نثبّت Ubuntu 24.04 وننشئ مستخدم Linux</h2>
 <p>يستطيع WSL أن يحمل عدة أنظمة Linux جنباً إلى جنب، وكل واحد منها يسمّى distro، اختصاراً لـ distribution. وUbuntu distro واحدة لها عدة إصدارات. نثبّت الإصدار نفسه الذي اختُبر عليه الدليل، Ubuntu 24.04، باسم <code class="nw">Ubuntu-24.04</code>. وأثناء التثبيت يطلب Ubuntu إنشاء مستخدم Linux، وهو الحساب الذي نعمل به داخل Ubuntu. وهذا الحساب منفصل عن حساب Windows.</p>
-<p>نختار اسم المستخدم قبل أن نبدأ. يجب أن يتكون من أحرف لاتينية صغيرة وأرقام فقط، وأن يبدأ بحرف، وألا يحتوي على مسافات، مثل <code class="nw">sara</code>. ثم نختار كلمة مرور نتذكرها. سنكتبها كثيراً، لأن Ubuntu يطلبها كلما شغّلنا أمراً مع <code class="nw">sudo</code>، وهو الذي يشغّل ذلك الأمر وحده بصلاحيات المسؤول. وكلما كتب الدليل <code class="nw">&lt;user&gt;</code> فالمقصود اسم مستخدم Linux هذا.</p>
+<p>نختار اسم المستخدم قبل أن نبدأ. يجب أن يتكون من أحرف لاتينية صغيرة وأرقام فقط، وأن يبدأ بحرف، وألا يحتوي على مسافات، مثل <code class="nw">ghufran</code>. ثم نختار كلمة مرور نتذكرها. سنكتبها كثيراً، لأن Ubuntu يطلبها كلما شغّلنا أمراً مع <code class="nw">sudo</code>، وهو الذي يشغّل ذلك الأمر وحده بصلاحيات المسؤول. وكلما كتب الدليل <code class="nw">&lt;user&gt;</code> فالمقصود اسم مستخدم Linux هذا.</p>
 <p>في نافذة PowerShell نفسها، نافذة المسؤول، نشغّل التثبيت.</p>
 <figure class="code cmd ps"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>wsl --install -d Ubuntu-24.04</code></pre></figure>
 <p>الخيار <code class="nw">--install</code> يثبّت أجزاء WSL إن كانت ناقصة ثم يثبّت distro، والجزء <code class="nw">-d Ubuntu-24.04</code> يحدد الـ distro المطلوبة. حجم التنزيل بضع مئات من الميغابايتات، فنمنحه بضع دقائق.</p>

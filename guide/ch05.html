@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#e6ebf1">
-<meta name="color-scheme" content="light dark">
-<script>try{var t=localStorage.getItem('microseg-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
+<meta name="theme-color" content="#0d1117">
+<meta name="color-scheme" content="dark light">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('microseg-theme')==='light'?'light':'dark'}catch(e){document.documentElement.dataset.theme='dark'}</script>
 <title>Chapter 5. Write the services | Micro-segmentation lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,7 +24,7 @@
 <li><a href="../guide/index.html" aria-current="page">Full guide</a></li>
 <li><a href="../downloads.html">Downloads</a></li>
 <li><a href="../ar/guide/ch05.html" lang="ar" hreflang="ar" data-setlang="ar">العربية</a></li>
-<li><button type="button" class="theme" data-theme-toggle hidden>Dark</button></li>
+<li><button type="button" class="theme" data-theme-toggle hidden>Light</button></li>
 </ul></nav>
 </div></header>
 <div class="layout"><details class="rail" open><summary>Chapters</summary><nav aria-label="Chapters"><ol class="toc"><li><a href="ch00.html">0. How to use this guide</a></li><li><a href="ch01.html">1. What you will build</a></li><li><a href="ch02.html">2. Before you start</a></li><li><a href="ch03.html">3. Set up the environment</a></li><li><a href="ch04.html">4. Create the cluster</a></li><li><a href="ch05.html" aria-current="page">5. Write the services</a><ol class="sub"><li><a href="#make-the-folders-apps-db-and-frontend">Make the folders apps, db and frontend</a></li><li><a href="#the-databases-tables-and-starting-data-dbinitsql">The database's tables and starting data, db/init.sql</a></li><li><a href="#the-login-service-appsauthpy">The login service, apps/auth.py</a></li><li><a href="#the-student-api-appsapipy">The student API, apps/api.py</a></li><li><a href="#the-news-service-appsnewspy">The news service, apps/news.py</a></li><li><a href="#the-admin-panel-appsadminpy">The admin panel, apps/admin.py</a></li><li><a href="#the-portals-web-server-frontenddefaultconf-and-frontendindexhtml">The portal's web server, frontend/default.conf and frontend/index.html</a></li><li><a href="#the-python-packages-appsrequirementstxt">The Python packages, apps/requirements.txt</a></li><li><a href="#the-image-recipes-appsdockerfile-and-appsdockerfilenews">The image recipes, apps/Dockerfile and apps/Dockerfile.news</a></li><li><a href="#fire-the-bug-at-a-throwaway-news-container">Fire the bug at a throwaway news container</a></li><li><a href="#checkpoint">Checkpoint</a></li></ol></li><li><a href="ch06.html">6. Deploy the portal</a></li><li><a href="ch07.html">7. Build your dashboard</a></li><li><a href="ch08.html">8. Attack the flat network</a></li><li><a href="ch09.html">9. Design the policy</a></li><li><a href="ch10.html">10. Apply micro-segmentation</a></li><li><a href="ch11.html">11. Read the evidence in Hubble</a></li><li><a href="ch12.html">12. Measure</a></li><li><a href="ch13.html">13. Getting unstuck alone</a></li><li><a href="ch14.html">14. Evidence for your report</a></li><li><a href="ch15.html">15. Day-by-day plan</a></li><li><a href="appendix.html">Appendices</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="chapter-5-write-the-services">Chapter 5. Write the services</h1>
@@ -41,8 +41,8 @@
 <p class="ifnot"><strong>If you see this instead</strong></p>
 <figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>The token &#x27;&amp;&amp;&#x27; is not a valid statement separator in this version.</code></pre></figure>
 <p>You pasted the command into PowerShell. Every command in this chapter goes into the Ubuntu terminal, the one whose prompt ends in <code class="nw">$</code>.</p>
-<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>bash: cd: /home/sara/microseg: No such file or directory</code></pre></figure>
-<p>Your user name appears where this shows <code class="nw">sara</code>. The project folder doesn't exist, which means a step in <a href="ch02.html">chapter 2</a> was skipped. Go back to <a href="ch02.html">chapter 2</a> and make the folder there, along with the Git setup that comes after it.</p>
+<figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>bash: cd: /home/ghufran/microseg: No such file or directory</code></pre></figure>
+<p>Your user name appears where this shows <code class="nw">ghufran</code>. The project folder doesn't exist, which means a step in <a href="ch02.html">chapter 2</a> was skipped. Go back to <a href="ch02.html">chapter 2</a> and make the folder there, along with the Git setup that comes after it.</p>
 <p>Now open the folder in VS Code the way you learned in <a href="ch02.html">chapter 2</a>, by typing <code class="nw">code .</code> in the terminal while you're in <code class="nw">~/microseg</code>. The window title must show <code class="nw">[WSL: Ubuntu-24.04]</code>.</p>
 <p>Every file in this chapter goes in the same way. In the VS Code Explorer pane on the left, right-click the folder the file belongs in, click <strong>New File...</strong>, type the file name and press Enter. An empty tab opens. Copy the whole file block from this guide, click inside the empty tab, press Ctrl+V and then Ctrl+S to save. A round dot on the tab means the file still has unsaved changes. Then look at the status bar along the bottom of the window. It must show <code class="nw">LF</code>. If it shows <code class="nw">CRLF</code>, click it, choose <strong>LF</strong> and save again. With Render Whitespace on from <a href="ch02.html">chapter 2</a>, the start of each indented line must show faint dots, not small arrows. Arrows are tab characters. If you see any, press Ctrl+Shift+P, type <code class="nw">Convert Indentation to Spaces</code>, press Enter and save.</p>
 <p>The notes under each file refer to line numbers. Those are the numbers VS Code shows in the left margin after you paste, because the guide's blocks don't number their lines.</p>

@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#e6ebf1">
-<meta name="color-scheme" content="light dark">
-<script>try{var t=localStorage.getItem('microseg-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
+<meta name="theme-color" content="#0d1117">
+<meta name="color-scheme" content="dark light">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('microseg-theme')==='light'?'light':'dark'}catch(e){document.documentElement.dataset.theme='dark'}</script>
 <title>الفصل 3. تجهيز بيئة العمل | مختبر التجزئة الدقيقة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,7 +24,7 @@
 <li><a href="../../ar/guide/index.html" aria-current="page">الدليل الكامل</a></li>
 <li><a href="../../ar/downloads.html">التنزيلات</a></li>
 <li><a href="../../guide/ch03.html" lang="en" hreflang="en" data-setlang="en">English</a></li>
-<li><button type="button" class="theme" data-theme-toggle hidden>داكن</button></li>
+<li><button type="button" class="theme" data-theme-toggle hidden>فاتح</button></li>
 </ul></nav>
 </div></header>
 <div class="layout"><details class="rail" open><summary>الفصول</summary><nav aria-label="الفصول"><ol class="toc"><li><a href="ch00.html">0. كيف نستخدم هذا الدليل</a></li><li><a href="ch01.html">1. ما الذي سنبنيه</a></li><li><a href="ch02.html">2. قبل أن نبدأ</a></li><li><a href="ch03.html" aria-current="page">3. تجهيز بيئة العمل</a><ol class="sub"><li><a href="#منح-wsl-ذاكرة-10-gb-والـ-kernel-modules-التي-يحتاجها-cilium">منح WSL ذاكرة 10 GB والـ kernel modules التي يحتاجها Cilium</a></li><li><a href="#إعادة-تشغيل-wsl-ثم-التحقق-مما-حصل-عليه">إعادة تشغيل WSL ثم التحقق مما حصل عليه</a></li><li><a href="#رفع-حدود-inotify-لـ-kind-nodes">رفع حدود inotify لـ kind nodes</a></li><li><a href="#تثبيت-curl-وjq-وpython3-venv">تثبيت curl وjq وpython3-venv</a></li><li><a href="#إضافة-docker-package-repository">إضافة Docker package repository</a></li><li><a href="#تثبيت-docker-engine-29">تثبيت Docker Engine 29</a></li><li><a href="#السماح-للمستخدم-بتشغيل-docker-من-دون-sudo">السماح للمستخدم بتشغيل Docker (من دون sudo)</a></li><li><a href="#تثبيت-kind-v0330">تثبيت kind (v0.33.0)</a></li><li><a href="#تثبيت-kubectl-v1366">تثبيت kubectl (v1.36.6)</a></li><li><a href="#تثبيت-الأمر-cilium-v0203">تثبيت الأمر cilium (v0.20.3)</a></li><li><a href="#تثبيت-الأمر-hubble-v1204">تثبيت الأمر hubble (v1.20.4)</a></li><li><a href="#إنشاء-البيئة-الافتراضية-لـ-python-venv">إنشاء البيئة الافتراضية لـ Python (.venv)</a></li><li><a href="#التحقق-من-المساحة-الفارغة-على-القرص-c">التحقق من المساحة الفارغة على القرص C</a></li><li><a href="#فحص-البيئة-كلها-check-envsh">فحص البيئة كلها (check-env.sh)</a></li><li><a href="#نقطة-التحقق">نقطة التحقق</a></li></ol></li><li><a href="ch04.html">4. إنشاء الـ cluster</a></li><li><a href="ch05.html">5. كتابة الخدمات</a></li><li><a href="ch06.html">6. نشر البوابة</a></li><li><a href="ch07.html">7. بناء لوحة التحكم</a></li><li><a href="ch08.html">8. مهاجمة الشبكة المسطحة</a></li><li><a href="ch09.html">9. تصميم السياسة</a></li><li><a href="ch10.html">10. تطبيق التجزئة الدقيقة للشبكة</a></li><li><a href="ch11.html">11. قراءة الأدلة في Hubble</a></li><li><a href="ch12.html">12. القياس</a></li><li><a href="ch13.html">13. تجاوز الأعطال دون مساعدة</a></li><li><a href="ch14.html">14. أدلة بحث التخرج</a></li><li><a href="ch15.html">15. خطة العمل يوماً بيوم</a></li><li><a href="appendix.html">الملاحق</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="الفصل-3-تجهيز-بيئة-العمل">الفصل 3. تجهيز بيئة العمل</h1>
@@ -71,7 +71,7 @@ loadKernelModules=xt_socket,xt_TPROXY,xt_mark,xt_CT,xt_set,ip_set_hash_ip,xt_com
 instanceIdleTimeout=-1</code></pre></figure>
 <p>نقارن سطر <code class="nw">loadKernelModules</code> في الناتج حرفاً حرفاً بالمقطع السابق، لأن فاصلة واحدة ناقصة تدمج اسمين في اسم واحد لا وجود له، وعندها لا تُحمَّل أيّ من الوحدتين.</p>
 <p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
-<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>Get-Content : Cannot find path &#x27;C:\Users\Sara\.wslconfig&#x27; because it does not exist.</code></pre></figure>
+<figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>Get-Content : Cannot find path &#x27;C:\Users\Ghufran\.wslconfig&#x27; because it does not exist.</code></pre></figure>
 <p>يظهر اسم المستخدم الفعلي مكان <code class="nw">Sara</code> في هذا المثال. السبب أن الملف حُفظ باسم آخر، وهو في الغالب <code class="nw">.wslconfig.txt</code>. نفتح File Explorer وننتقل إلى المجلد <code class="nw">C:\Users\&lt;WinUser&gt;</code>، ثم ننقر View ثم Show ثم File name extensions، ونغيّر اسم الملف إلى <code class="nw">.wslconfig</code>. سيسأل Windows هل نريد فعلاً تغيير اللاحقة. ننقر Yes.</p>
 <p>يُطبع الملف، لكن السطر الطويل منقسم إلى سطرين، أو يبدأ أحد الأسطر بمسافة. عندها نفتحه من جديد بالأمر <code>notepad "$env:USERPROFILE\.wslconfig"</code> في PowerShell، ونعيد النص كما هو في الأعلى تماماً، ثم نحفظه.</p>
 <h2 id="إعادة-تشغيل-wsl-ثم-التحقق-مما-حصل-عليه">إعادة تشغيل WSL ثم التحقق مما حصل عليه</h2>

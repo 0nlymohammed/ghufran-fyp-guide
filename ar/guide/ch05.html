@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#e6ebf1">
-<meta name="color-scheme" content="light dark">
-<script>try{var t=localStorage.getItem('microseg-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
+<meta name="theme-color" content="#0d1117">
+<meta name="color-scheme" content="dark light">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('microseg-theme')==='light'?'light':'dark'}catch(e){document.documentElement.dataset.theme='dark'}</script>
 <title>الفصل 5. كتابة الخدمات | مختبر التجزئة الدقيقة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,7 +24,7 @@
 <li><a href="../../ar/guide/index.html" aria-current="page">الدليل الكامل</a></li>
 <li><a href="../../ar/downloads.html">التنزيلات</a></li>
 <li><a href="../../guide/ch05.html" lang="en" hreflang="en" data-setlang="en">English</a></li>
-<li><button type="button" class="theme" data-theme-toggle hidden>داكن</button></li>
+<li><button type="button" class="theme" data-theme-toggle hidden>فاتح</button></li>
 </ul></nav>
 </div></header>
 <div class="layout"><details class="rail" open><summary>الفصول</summary><nav aria-label="الفصول"><ol class="toc"><li><a href="ch00.html">0. كيف نستخدم هذا الدليل</a></li><li><a href="ch01.html">1. ما الذي سنبنيه</a></li><li><a href="ch02.html">2. قبل أن نبدأ</a></li><li><a href="ch03.html">3. تجهيز بيئة العمل</a></li><li><a href="ch04.html">4. إنشاء الـ cluster</a></li><li><a href="ch05.html" aria-current="page">5. كتابة الخدمات</a><ol class="sub"><li><a href="#إنشاء-المجلدات-apps-وdb-وfrontend">إنشاء المجلدات apps وdb وfrontend</a></li><li><a href="#جداول-قاعدة-البيانات-وبياناتها-الأولى-dbinitsql">جداول قاعدة البيانات وبياناتها الأولى، db/init.sql</a></li><li><a href="#خدمة-تسجيل-الدخول-appsauthpy">خدمة تسجيل الدخول، apps/auth.py</a></li><li><a href="#واجهة-الطلاب-البرمجية-appsapipy">واجهة الطلاب البرمجية، apps/api.py</a></li><li><a href="#خدمة-الأخبار-appsnewspy">خدمة الأخبار، apps/news.py</a></li><li><a href="#لوحة-الإدارة-appsadminpy">لوحة الإدارة، apps/admin.py</a></li><li><a href="#خادم-الويب-للبوابة-frontenddefaultconf-وfrontendindexhtml">خادم الويب للبوابة، frontend/default.conf وfrontend/index.html</a></li><li><a href="#packages-python-appsrequirementstxt">packages Python، apps/requirements.txt</a></li><li><a href="#وصفات-الـ-images-appsdockerfile-وappsdockerfilenews">وصفات الـ images، apps/Dockerfile وapps/Dockerfile.news</a></li><li><a href="#استغلال-الثغرة-في-container-news-مؤقتة">استغلال الثغرة في container news مؤقتة</a></li><li><a href="#نقطة-التحقق">نقطة التحقق</a></li></ol></li><li><a href="ch06.html">6. نشر البوابة</a></li><li><a href="ch07.html">7. بناء لوحة التحكم</a></li><li><a href="ch08.html">8. مهاجمة الشبكة المسطحة</a></li><li><a href="ch09.html">9. تصميم السياسة</a></li><li><a href="ch10.html">10. تطبيق التجزئة الدقيقة للشبكة</a></li><li><a href="ch11.html">11. قراءة الأدلة في Hubble</a></li><li><a href="ch12.html">12. القياس</a></li><li><a href="ch13.html">13. تجاوز الأعطال دون مساعدة</a></li><li><a href="ch14.html">14. أدلة بحث التخرج</a></li><li><a href="ch15.html">15. خطة العمل يوماً بيوم</a></li><li><a href="appendix.html">الملاحق</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="الفصل-5-كتابة-الخدمات">الفصل 5. كتابة الخدمات</h1>
@@ -41,8 +41,8 @@
 <p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
 <figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>The token &#x27;&amp;&amp;&#x27; is not a valid statement separator in this version.</code></pre></figure>
 <p>معنى هذه الرسالة أنّ الأمر لُصق في PowerShell. كل أوامر هذا الفصل مكانها Ubuntu terminal، وهي الـ terminal التي ينتهي موجّه الأوامر (prompt) فيها بالرمز <code class="nw">$</code>.</p>
-<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>bash: cd: /home/sara/microseg: No such file or directory</code></pre></figure>
-<p>مكان <code class="nw">sara</code> يظهر اسم المستخدم على الحاسوب. والرسالة تعني أنّ مجلد المشروع غير موجود، أي أنّ خطوة من <a href="ch02.html">الفصل 2</a> لم تُنفَّذ. الحل العودة إلى <a href="ch02.html">الفصل 2</a> وإنشاء المجلد هناك، ومعه إعداد Git الذي يأتي بعده.</p>
+<figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>bash: cd: /home/ghufran/microseg: No such file or directory</code></pre></figure>
+<p>مكان <code class="nw">ghufran</code> يظهر اسم المستخدم على الحاسوب. والرسالة تعني أنّ مجلد المشروع غير موجود، أي أنّ خطوة من <a href="ch02.html">الفصل 2</a> لم تُنفَّذ. الحل العودة إلى <a href="ch02.html">الفصل 2</a> وإنشاء المجلد هناك، ومعه إعداد Git الذي يأتي بعده.</p>
 <p>نفتح الآن المجلد في VS Code كما تعلّمنا في <a href="ch02.html">الفصل 2</a>، فنكتب <code class="nw">code .</code> في الـ terminal ونحن داخل <code class="nw">~/microseg</code>. ويجب أن يحمل عنوان النافذة <code class="nw">[WSL: Ubuntu-24.04]</code>.</p>
 <p>كل ملفات هذا الفصل تُنشأ بالطريقة نفسها. في لوحة Explorer على يسار VS Code، ننقر بالزر الأيمن على المجلد الذي ينتمي إليه الملف، ثم ننقر <strong>New File...</strong>، ونكتب اسم الملف ونضغط Enter. يُفتح تبويب فارغ. ننسخ كتلة الملف كاملة من هذا الدليل، وننقر داخل التبويب الفارغ، ونضغط Ctrl+V ثم Ctrl+S للحفظ. النقطة المستديرة على التبويب تعني أنّ في الملف تغييرات لم تُحفظ بعد. بعدها ننظر إلى شريط الحالة أسفل النافذة، ويجب أن يُظهر <code class="nw">LF</code>. فإن أظهر <code class="nw">CRLF</code> ننقر عليه ونختار <strong>LF</strong> ثم نحفظ من جديد. وما دام خيار Render Whitespace مفعّلاً منذ <a href="ch02.html">الفصل 2</a>، يجب أن تظهر في بداية كل سطر فيه إزاحة نقاط باهتة، لا أسهم صغيرة. فالأسهم محارف جدولة (tab). إن ظهر شيء منها نضغط Ctrl+Shift+P ونكتب <code class="nw">Convert Indentation to Spaces</code> ثم نضغط Enter ونحفظ.</p>
 <p>تشير الملاحظات تحت الملفات إلى أرقام أسطر. هذه هي الأرقام التي يعرضها VS Code في الهامش الأيسر بعد اللصق، لأنّ كتل الدليل لا ترقّم أسطرها.</p>

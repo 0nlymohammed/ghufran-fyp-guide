@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#e6ebf1">
-<meta name="color-scheme" content="light dark">
-<script>try{var t=localStorage.getItem('microseg-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
+<meta name="theme-color" content="#0d1117">
+<meta name="color-scheme" content="dark light">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('microseg-theme')==='light'?'light':'dark'}catch(e){document.documentElement.dataset.theme='dark'}</script>
 <title>Chapter 7. Build your dashboard | Micro-segmentation lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,7 +24,7 @@
 <li><a href="../guide/index.html" aria-current="page">Full guide</a></li>
 <li><a href="../downloads.html">Downloads</a></li>
 <li><a href="../ar/guide/ch07.html" lang="ar" hreflang="ar" data-setlang="ar">العربية</a></li>
-<li><button type="button" class="theme" data-theme-toggle hidden>Dark</button></li>
+<li><button type="button" class="theme" data-theme-toggle hidden>Light</button></li>
 </ul></nav>
 </div></header>
 <div class="layout"><details class="rail" open><summary>Chapters</summary><nav aria-label="Chapters"><ol class="toc"><li><a href="ch00.html">0. How to use this guide</a></li><li><a href="ch01.html">1. What you will build</a></li><li><a href="ch02.html">2. Before you start</a></li><li><a href="ch03.html">3. Set up the environment</a></li><li><a href="ch04.html">4. Create the cluster</a></li><li><a href="ch05.html">5. Write the services</a></li><li><a href="ch06.html">6. Deploy the portal</a></li><li><a href="ch07.html" aria-current="page">7. Build your dashboard</a><ol class="sub"><li><a href="#step-1-write-dashboardapppy">Step 1. Write dashboard/app.py</a></li><li><a href="#step-2-check-that-apppy-compiles">Step 2. Check that app.py compiles</a></li><li><a href="#step-3-start-the-dashboard">Step 3. Start the dashboard</a></li><li><a href="#step-4-test-the-status-route">Step 4. Test the status route</a></li><li><a href="#step-5-run-one-probe-by-hand">Step 5. Run one probe by hand</a></li><li><a href="#step-6-test-the-matrix-route">Step 6. Test the matrix route</a></li><li><a href="#step-7-test-the-policy-and-drops-routes">Step 7. Test the policy and drops routes</a></li><li><a href="#step-8-write-dashboardindexhtml">Step 8. Write dashboard/index.html</a></li><li><a href="#step-9-open-the-dashboard">Step 9. Open the dashboard</a></li><li><a href="#checkpoint">Checkpoint</a></li></ol></li><li><a href="ch08.html">8. Attack the flat network</a></li><li><a href="ch09.html">9. Design the policy</a></li><li><a href="ch10.html">10. Apply micro-segmentation</a></li><li><a href="ch11.html">11. Read the evidence in Hubble</a></li><li><a href="ch12.html">12. Measure</a></li><li><a href="ch13.html">13. Getting unstuck alone</a></li><li><a href="ch14.html">14. Evidence for your report</a></li><li><a href="ch15.html">15. Day-by-day plan</a></li><li><a href="appendix.html">Appendices</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="chapter-7-build-your-dashboard">Chapter 7. Build your dashboard</h1>
@@ -565,7 +565,7 @@ loadMatrix();
 <p>(10) The last two lines, <code class="nw">loadStatus()</code> and <code class="nw">loadMatrix()</code>, run once when the page opens, so the page shows the current state without a click.</p>
 <p>The dashboard reads <code class="nw">index.html</code> from disk on every request, so you don't need to restart it after saving this file.</p>
 <h2 id="step-9-open-the-dashboard">Step 9. Open the dashboard</h2>
-<figure class="fig shot"><a href="../files/shots/dashboard-flat.png"><img src="../files/shots/dashboard-flat.png" alt="The dashboard on the flat network: 36 of 36 paths reachable and 5 of 5 attack steps succeeded." width="1500" height="1671" loading="lazy" decoding="async"></a><figcaption>The dashboard on the flat network: 36 of 36 paths reachable and 5 of 5 attack steps succeeded.</figcaption></figure>
+<figure class="fig shot" style="max-width:1500px"><a href="../files/shots/dashboard-flat.png"><img src="../files/shots/dashboard-flat.png" alt="The dashboard on the flat network: 36 of 36 paths reachable and 5 of 5 attack steps succeeded." width="1500" height="1671" loading="lazy" decoding="async"></a><figcaption>The dashboard on the flat network: 36 of 36 paths reachable and 5 of 5 attack steps succeeded.</figcaption></figure>
 <p>Check first that the back end hands out the page.</p>
 <figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>curl -s -o /dev/null -w &#x27;%{http_code}\n&#x27; localhost:5050/</code></pre></figure>
 <p><code class="nw">-o /dev/null</code> throws the page away and <code class="nw">-w '%{http_code}\n'</code> prints only the HTTP status code and a line break.</p>

@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#e6ebf1">
-<meta name="color-scheme" content="light dark">
-<script>try{var t=localStorage.getItem('microseg-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
+<meta name="theme-color" content="#0d1117">
+<meta name="color-scheme" content="dark light">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('microseg-theme')==='light'?'light':'dark'}catch(e){document.documentElement.dataset.theme='dark'}</script>
 <title>الفصل 10. تطبيق التجزئة الدقيقة للشبكة | مختبر التجزئة الدقيقة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,7 +24,7 @@
 <li><a href="../../ar/guide/index.html" aria-current="page">الدليل الكامل</a></li>
 <li><a href="../../ar/downloads.html">التنزيلات</a></li>
 <li><a href="../../guide/ch10.html" lang="en" hreflang="en" data-setlang="en">English</a></li>
-<li><button type="button" class="theme" data-theme-toggle hidden>داكن</button></li>
+<li><button type="button" class="theme" data-theme-toggle hidden>فاتح</button></li>
 </ul></nav>
 </div></header>
 <div class="layout"><details class="rail" open><summary>الفصول</summary><nav aria-label="الفصول"><ol class="toc"><li><a href="ch00.html">0. كيف نستخدم هذا الدليل</a></li><li><a href="ch01.html">1. ما الذي سنبنيه</a></li><li><a href="ch02.html">2. قبل أن نبدأ</a></li><li><a href="ch03.html">3. تجهيز بيئة العمل</a></li><li><a href="ch04.html">4. إنشاء الـ cluster</a></li><li><a href="ch05.html">5. كتابة الخدمات</a></li><li><a href="ch06.html">6. نشر البوابة</a></li><li><a href="ch07.html">7. بناء لوحة التحكم</a></li><li><a href="ch08.html">8. مهاجمة الشبكة المسطحة</a></li><li><a href="ch09.html">9. تصميم السياسة</a></li><li><a href="ch10.html" aria-current="page">10. تطبيق التجزئة الدقيقة للشبكة</a><ol class="sub"><li><a href="#البدء-من-شبكة-مسطحة-ودرجة-عمر-58">البدء من شبكة مسطحة، ودرجة عمر 58</a></li><li><a href="#كتابة-1-baselineyaml-واختباره-بتشغيل-تجريبي">كتابة 1-baseline.yaml واختباره بتشغيل تجريبي</a></li><li><a href="#تطبيق-ملف-الأساس-وحده-0-من-36">تطبيق ملف الأساس وحده: 0 من 36</a></li><li><a href="#كتابة-2-allowyaml-سياسة-واحدة-لكل-workload">كتابة 2-allow.yaml: سياسة واحدة لكل workload</a></li><li><a href="#تطبيق-2-allowyaml-10-سياسات">تطبيق 2-allow.yaml: 10 سياسات</a></li><li><a href="#البوابة-تعمل-من-جديد-66">البوابة تعمل من جديد: 6/6</a></li><li><a href="#المصفوفة-7-من-36">المصفوفة: 7 من 36</a></li><li><a href="#الهجوم-مرة-أخرى-1-من-5">الهجوم مرة أخرى: 1 من 5</a></li><li><a href="#مسار-التصدير-المنسي-يجيب-الآن-بـ-403">مسار التصدير المنسي يجيب الآن بـ 403</a></li><li><a href="#اختبار-التبديل-إزالة-ثم-إعادة-تطبيق-ثم-مقارنة">اختبار التبديل: إزالة، ثم إعادة تطبيق، ثم مقارنة</a></li><li><a href="#نقطة-التحقق">نقطة التحقق</a></li></ol></li><li><a href="ch11.html">11. قراءة الأدلة في Hubble</a></li><li><a href="ch12.html">12. القياس</a></li><li><a href="ch13.html">13. تجاوز الأعطال دون مساعدة</a></li><li><a href="ch14.html">14. أدلة بحث التخرج</a></li><li><a href="ch15.html">15. خطة العمل يوماً بيوم</a></li><li><a href="appendix.html">الملاحق</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="الفصل-10-تطبيق-التجزئة-الدقيقة-للشبكة">الفصل 10. تطبيق التجزئة الدقيقة للشبكة</h1>
@@ -437,7 +437,7 @@ PORTAL: 6/6 OK</code></pre></figure>
 <p>إذا كان العدد أكبر من 7، مثل 8، فالخلية المفتوحة الزائدة تعني خطأين أو سياسة واحدة متبقية، لأن الخلية لا تصير زرقاء إلا إذا سمح بها الطرفان كلاهما. يُشغَّل أولاً <code class="nw">kubectl -n campus get cnp</code> الذي يجب أن يسرد 10 سياسات بالضبط. وإذا سرد أكثر تُحذف الزائدة باسمها بالأمر <code class="nw">kubectl -n campus delete cnp</code> متبوعاً بذلك الاسم. وإذا سرد 10 يُبحث في لوحة التحكم عن الخلية الزرقاء غير المتوقعة، ويُتحقق من قاعدتيها كلتيهما. فخدمة الصف فيها قاعدة egress تسمح بأكثر مما قُصد، وخدمة العمود فيها قاعدة ingress تفعل الشيء نفسه. ويُبحث عن <code class="nw">matchLabels</code> تُرك فارغاً، لأن الـ selector الفارغ يطابق كل Pod.</p>
 <p>إذا كان العدد أقل من 7 وفشل فحص البوابة أيضاً، فالبداية بإصلاح البوابة باستخدام قسم الأعطال في الخطوة السابقة. القاعدة الناقصة نفسها تفسّر المشكلتين.</p>
 <h2 id="الهجوم-مرة-أخرى-1-من-5">الهجوم مرة أخرى: 1 من 5</h2>
-<figure class="fig shot"><a href="../../files/shots/dashboard-segmented.png"><img src="../../files/shots/dashboard-segmented.png" alt="لوحة التحكم بعد تفعيل التجزئة الدقيقة: 7 من 36 مساراً مفتوحة، ونجحت خطوة واحدة من خطوات الهجوم الخمس." width="1500" height="1485" loading="lazy" decoding="async"></a><figcaption>لوحة التحكم بعد تفعيل التجزئة الدقيقة: 7 من 36 مساراً مفتوحة، ونجحت خطوة واحدة من خطوات الهجوم الخمس.</figcaption></figure>
+<figure class="fig shot" style="max-width:1500px"><a href="../../files/shots/dashboard-segmented.png"><img src="../../files/shots/dashboard-segmented.png" alt="لوحة التحكم بعد تفعيل التجزئة الدقيقة: 7 من 36 مساراً مفتوحة، ونجحت خطوة واحدة من خطوات الهجوم الخمس." width="1500" height="1485" loading="lazy" decoding="async"></a><figcaption>لوحة التحكم بعد تفعيل التجزئة الدقيقة: 7 من 36 مساراً مفتوحة، ونجحت خطوة واحدة من خطوات الهجوم الخمس.</figcaption></figure>
 <p>نشغّل هجوم <a href="ch08.html">الفصل 8</a> مرة أخرى، من دون أي تغيير، على الشبكة المجزأة.</p>
 <p>في لوحة التحكم ننقر «Run attack» (شغّل الهجوم). يستغرق الهجوم هذه المرة نحو 18 ثانية، لأن الخطوات المحجوبة تنتظر انتهاء مهلها. ويجب أن يكون نص الملخص «1 of 5 attack steps succeeded». ثم نحفظ الناتج الكامل لكل خطوة دليلاً.</p>
 <figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>curl -s -X POST localhost:5050/api/attack | jq -r &#x27;.[] | &quot;--- &quot; + .step + &quot;\n&quot; + .output&#x27; | tee ~/microseg/evidence/ch12-attack-segmented.txt</code></pre></figure>
