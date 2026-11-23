@@ -14,4 +14,4 @@ What is in this repository:
 
 Tested versions: Windows 11, WSL 3.0.5, Ubuntu 24.04, Docker Engine 29, kind 0.33.0 with Kubernetes 1.36.4, Cilium 1.20.5, cilium CLI 0.20.3, hubble CLI 1.20.4.
 
-Screenshot credits: the Task Manager picture is from Docker's documentation (Apache 2.0). The PowerShell search, Run as administrator and Ubuntu user-name pictures are from Microsoft Learn (CC BY 4.0), cropped. The other screenshots were taken on the test laptop.
+Screenshot credits: the Task Manager and Snipping Tool pictures are from Microsoft Support. The PowerShell search, Run as administrator and Ubuntu user-name pictures are from Microsoft Learn (CC BY 4.0), cropped. The other screenshots were taken on the test laptop.
