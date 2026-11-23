@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#ffffff">
-<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#e6ebf1">
+<meta name="color-scheme" content="light dark">
+<script>try{var t=localStorage.getItem('microseg-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
 <title>الفصل 9. تصميم السياسة | مختبر التجزئة الدقيقة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,6 +24,7 @@
 <li><a href="../../ar/guide/index.html" aria-current="page">الدليل الكامل</a></li>
 <li><a href="../../ar/downloads.html">التنزيلات</a></li>
 <li><a href="../../guide/ch09.html" lang="en" hreflang="en" data-setlang="en">English</a></li>
+<li><button type="button" class="theme" data-theme-toggle hidden>داكن</button></li>
 </ul></nav>
 </div></header>
 <div class="layout"><details class="rail" open><summary>الفصول</summary><nav aria-label="الفصول"><ol class="toc"><li><a href="ch00.html">0. كيف نستخدم هذا الدليل</a></li><li><a href="ch01.html">1. ما الذي سنبنيه</a></li><li><a href="ch02.html">2. قبل أن نبدأ</a></li><li><a href="ch03.html">3. تجهيز بيئة العمل</a></li><li><a href="ch04.html">4. إنشاء العنقود</a></li><li><a href="ch05.html">5. كتابة الخدمات</a></li><li><a href="ch06.html">6. نشر البوابة</a></li><li><a href="ch07.html">7. بناء لوحة التحكم</a></li><li><a href="ch08.html">8. مهاجمة الشبكة المسطحة</a></li><li><a href="ch09.html" aria-current="page">9. تصميم السياسة</a><ol class="sub"><li><a href="#هل-الشبكة-مسطحة-وهل-hubble-متصل">هل الشبكة مسطحة، وهل Hubble متصل؟</a></li><li><a href="#تشغيل-البوابة-بكل-وظائفها-مرتين">تشغيل البوابة بكل وظائفها، مرتين</a></li><li><a href="#من-اتصل-بمن-في-hubble">من اتصل بمن، في Hubble</a></li><li><a href="#مسارات-http-في-سجل-nginx">مسارات HTTP في سجل nginx</a></li><li><a href="#كتابة-جدول-التدفقات-ما-يبقى-مفتوحا">كتابة جدول التدفقات (ما يبقى مفتوحاً)</a></li><li><a href="#كتابة-جدول-المنع-ما-يبقى-مغلقا">كتابة جدول المنع (ما يبقى مغلقاً)</a></li><li><a href="#إذنان-لكل-اتصال-تأشيرة-الخروج-وتأشيرة-الدخول">إذنان لكل اتصال: تأشيرة الخروج وتأشيرة الدخول</a></li><li><a href="#نقطة-التحقق">نقطة التحقق</a></li></ol></li><li><a href="ch10.html">10. تطبيق التجزئة الدقيقة للشبكة</a></li><li><a href="ch11.html">11. قراءة الأدلة في Hubble</a></li><li><a href="ch12.html">12. القياس</a></li><li><a href="ch13.html">13. تجاوز الأعطال دون مساعدة</a></li><li><a href="ch14.html">14. أدلة بحث التخرج</a></li><li><a href="ch15.html">15. خطة العمل يوماً بيوم</a></li><li><a href="appendix.html">الملاحق</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="الفصل-9-تصميم-السياسة">الفصل 9. تصميم السياسة</h1>
@@ -99,7 +101,7 @@ bash ~/microseg/check-portal.sh</code></pre></figure>
 <figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>code: command not found</code></pre></figure>
 <p>تُغلق في هذه الحالة كل نوافذ Ubuntu ثم يُفتح Ubuntu من جديد، فهذا يعيد تحميل المسار الذي ضبطته إضافة WSL في VS Code. وإذا استمر الفشل فالمرجع قسم VS Code في <a href="ch02.html">الفصل 2</a>.</p>
 <p>إذا وُجد أكثر من ثماني تركيبات أو أقل، فلا يُملأ الجدول من <a href="ch01.html">الفصل 1</a> لتتوافق الأرقام. الحل العودة إلى خطوة Hubble، وقراءة قسم أعطالها، وجمع التدفقات من جديد. فالاتصال الناقص هنا يصير بوابة معطلة في <a href="ch10.html">الفصل 10</a>.</p>
-<figure class="fig"><a href="../../files/figures/fig04-ar.png"><img src="../../files/figures/web/fig04-ar.png" alt="خريطة التدفقات المسموح بها" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>خريطة التدفقات المسموح بها</figcaption></figure>
+<figure class="fig"><a href="../../files/figures/fig04-ar.png"><img class="only-light" src="../../files/figures/site/fig04-ar-light.png" alt="الشكل 4. خريطة التدفقات المسموح بها" width="1600" height="900" loading="lazy" decoding="async"><img class="only-dark" src="../../files/figures/site/fig04-ar-dark.png" alt="الشكل 4. خريطة التدفقات المسموح بها" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>الشكل 4. خريطة التدفقات المسموح بها</figcaption></figure>
 <p>يرسم الشكل 4 صفوفنا الثمانية أسهماً بين الخدمات. لا يخرج أي سهم من news أو db، وops هي الخدمة الوحيدة التي يدخل منها سهم إلى admin.</p>
 <h2 id="كتابة-جدول-المنع-ما-يبقى-مغلقا">كتابة جدول المنع (ما يبقى مغلقاً)</h2>
 <p>جدول المنع هو النصف الآخر من التصميم: ما يبقى مغلقاً، ولماذا. يغلق الرفض الافتراضي هذه المسارات من دون قاعدة تذكرها بالاسم، فلا تظهر في أي ملف سياسة. يكتبها هذا الجدول، وكل صف فيه مربوط بخطوة الهجوم التي يوقفها.</p>
@@ -170,7 +172,7 @@ bash ~/microseg/check-portal.sh</code></pre></figure>
 </tbody>
 </table></div>
 <p>ويحتفظ كل Pod أيضاً بتأشيرة خروج إضافية، إلى kube-dns على المنفذ 53، لتبقى أسماء الخدمات قابلة للتحويل إلى عناوين. هذه القاعدة تغطي كل الـ Pods دفعة واحدة، وسنكتبها في ملف الأساس (baseline).</p>
-<figure class="fig"><a href="../../files/figures/fig07-ar.png"><img src="../../files/figures/web/fig07-ar.png" alt="من جدول التدفقات إلى السياسة" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>من جدول التدفقات إلى السياسة</figcaption></figure>
+<figure class="fig"><a href="../../files/figures/fig07-ar.png"><img class="only-light" src="../../files/figures/site/fig07-ar-light.png" alt="الشكل 7. من جدول التدفقات إلى السياسة" width="1600" height="900" loading="lazy" decoding="async"><img class="only-dark" src="../../files/figures/site/fig07-ar-dark.png" alt="الشكل 7. من جدول التدفقات إلى السياسة" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>الشكل 7. من جدول التدفقات إلى السياسة</figcaption></figure>
 <p>يتتبع الشكل 7 صفاً واحداً من جدول التدفقات وهو يتحول إلى قاعدتين. نصف الحركة الصادرة يذهب إلى سياسة المتصل، ونصف الحركة الواردة إلى سياسة الطرف الذي يُتصل به.</p>
 <h2 id="نقطة-التحقق">نقطة التحقق</h2>
 <p>نستخرج المصدر والوجهة والمنفذ من كل صف في جدول التدفقات ونرتبها، لنقارنها بمفتاح الإجابة حرفاً بحرف.</p>
@@ -193,7 +195,7 @@ world|frontend|80</code></pre></figure>
 <!-- OUT ids: ch11-start, ch11-portal-traffic, ch11-flows, ch11-nginx-log, ch11-checkpoint --><nav class="pager" aria-label="الفصول"><a rel="prev" href="ch08.html"><span>الفصل السابق</span>الفصل 8. مهاجمة الشبكة المسطحة</a><a rel="next" href="ch10.html"><span>الفصل التالي</span>الفصل 10. تطبيق التجزئة الدقيقة للشبكة</a></nav></main></div>
 <footer class="foot"><div class="foot-in"><p>Kubernetes 1.36 و Cilium 1.20.5 و kind 0.33.0 على Windows 11 مع WSL 2. شغّلنا كل أمر على حاسوب حقيقي في تشرين الثاني 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">المصدر على GitHub</a></p></div></footer>
 <p class="vh" aria-live="polite" id="live"></p>
-<script type="application/json" id="i18n">{"copied": "نُسخ", "copyFail": "نضغط Ctrl+C لنسخ النص المحدد", "doneOf": "الخطوات المنجزة: {d} من {t}", "next": "الخطوة التالية: {s}", "allDone": "اكتمل المسار وأُنجزت الخطوات كلها.", "sumCount": "المنجز {d} من {t}", "cleared": "مُسحت كل العلامات.", "confirm": "هل نمسح كل العلامات في هذه الصفحة؟ تبقى الملفات والعنقود كما هي.", "stageCount": "{d} من {t}"}</script>
+<script type="application/json" id="i18n">{"copied": "نُسخ", "copyFail": "نضغط Ctrl+C لنسخ النص المحدد", "doneOf": "الخطوات المنجزة: {d} من {t}", "next": "الخطوة التالية: {s}", "allDone": "اكتمل المسار وأُنجزت الخطوات كلها.", "sumCount": "المنجز {d} من {t}", "cleared": "مُسحت كل العلامات.", "confirm": "هل نمسح كل العلامات في هذه الصفحة؟ تبقى الملفات والعنقود كما هي.", "stageCount": "{d} من {t}", "themeDark": "داكن", "themeLight": "فاتح", "toDark": "التبديل إلى المظهر الداكن", "toLight": "التبديل إلى المظهر الفاتح"}</script>
 <script src="../../assets/site.js" defer></script>
 </body>
 </html>

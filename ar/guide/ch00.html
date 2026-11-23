@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#ffffff">
-<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#e6ebf1">
+<meta name="color-scheme" content="light dark">
+<script>try{var t=localStorage.getItem('microseg-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
 <title>الفصل 0. كيف نستخدم هذا الدليل | مختبر التجزئة الدقيقة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,13 +24,14 @@
 <li><a href="../../ar/guide/index.html" aria-current="page">الدليل الكامل</a></li>
 <li><a href="../../ar/downloads.html">التنزيلات</a></li>
 <li><a href="../../guide/ch00.html" lang="en" hreflang="en" data-setlang="en">English</a></li>
+<li><button type="button" class="theme" data-theme-toggle hidden>داكن</button></li>
 </ul></nav>
 </div></header>
 <div class="layout"><details class="rail" open><summary>الفصول</summary><nav aria-label="الفصول"><ol class="toc"><li><a href="ch00.html" aria-current="page">0. كيف نستخدم هذا الدليل</a><ol class="sub"><li><a href="#ماذا-نبني-وبأي-ترتيب">ماذا نبني، وبأي ترتيب</a></li><li><a href="#windows-وubuntu-ونوعا-الأوامر">Windows وUbuntu ونوعا الأوامر</a></li><li><a href="#كيف-تعرض-الخطوة">كيف تُعرض الخطوة</a></li><li><a href="#حين-لا-تطابق-المخرجات-ما-في-الدليل">حين لا تطابق المخرجات ما في الدليل</a></li><li><a href="#قاعدة-واحدة">قاعدة واحدة</a></li><li><a href="#خطوة-تدريبية-نتحقق-من-أن-الحاسوب-قادر-على-تشغيل-المختبر">خطوة تدريبية: نتحقق من أنّ الحاسوب قادر على تشغيل المختبر</a></li><li><a href="#الإصدارات-المختبرة">الإصدارات المختبَرة</a></li><li><a href="#مجلد-المشروع-microseg-في-شكله-النهائي">مجلد المشروع ~/microseg في شكله النهائي</a></li><li><a href="#متابعة-التقدم">متابعة التقدم</a></li></ol></li><li><a href="ch01.html">1. ما الذي سنبنيه</a></li><li><a href="ch02.html">2. قبل أن نبدأ</a></li><li><a href="ch03.html">3. تجهيز بيئة العمل</a></li><li><a href="ch04.html">4. إنشاء العنقود</a></li><li><a href="ch05.html">5. كتابة الخدمات</a></li><li><a href="ch06.html">6. نشر البوابة</a></li><li><a href="ch07.html">7. بناء لوحة التحكم</a></li><li><a href="ch08.html">8. مهاجمة الشبكة المسطحة</a></li><li><a href="ch09.html">9. تصميم السياسة</a></li><li><a href="ch10.html">10. تطبيق التجزئة الدقيقة للشبكة</a></li><li><a href="ch11.html">11. قراءة الأدلة في Hubble</a></li><li><a href="ch12.html">12. القياس</a></li><li><a href="ch13.html">13. تجاوز الأعطال دون مساعدة</a></li><li><a href="ch14.html">14. أدلة بحث التخرج</a></li><li><a href="ch15.html">15. خطة العمل يوماً بيوم</a></li><li><a href="appendix.html">الملاحق</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="الفصل-0-كيف-نستخدم-هذا-الدليل">الفصل 0. كيف نستخدم هذا الدليل</h1>
 <p>ينقلنا هذا الدليل من حاسوب محمول عادي يعمل بنظام Windows إلى مختبر عامل للتجزئة الدقيقة للشبكة (Micro-segmentation)، مع نتائج مقيسة والأدلة التي يحتاجها بحث التخرج. سنبني المختبر من دون أحد نرجع إليه، لذلك تذكر كل خطوة ما نكتبه وما يجب أن يظهر على الشاشة، وتعطي الحل للأخطاء التي يُرجَّح أن نصادفها. نقرأ هذا الفصل قبل غيره. يستغرق نحو 15 دقيقة، وينتهي بخطوة حقيقية نتحقق فيها من أنّ الحاسوب يتسع للمختبر.</p>
 <h2 id="ماذا-نبني-وبأي-ترتيب">ماذا نبني، وبأي ترتيب</h2>
 <p>نبني موقعاً جامعياً اسمه «بوابة الحرم الجامعي» (Campus Portal) من ست خدمات صغيرة تعمل على Kubernetes، وهو نظام يشغّل البرامج على عدة أجهزة ويُبقيها عاملة. وكل هذه الأجهزة محاكاة داخل الحاسوب المحمول نفسه. نهاجم البوابة أولاً كما يفعل متسلل حقيقي، فيصل الهجوم إلى قاعدة بيانات الدرجات وإلى لوحة الإدارة. ثم نضيف سياسات الشبكة (network policies) في Cilium، وهي قواعد تحدد من يحق له أن يتحدث إلى من، ونعيد الهجوم نفسه. هذه المرة يتوقف بعد الخطوة الأولى. ونتيجة بحث التخرج هي الفرق المقيس بين هاتين المحاولتين.</p>
-<figure class="fig"><a href="../../files/figures/fig08-ar.png"><img src="../../files/figures/web/fig08-ar.png" alt="خطة البناء" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>خطة البناء</figcaption></figure>
+<figure class="fig"><a href="../../files/figures/fig08-ar.png"><img class="only-light" src="../../files/figures/site/fig08-ar-light.png" alt="الشكل 8. خطة البناء" width="1600" height="900" loading="lazy" decoding="async"><img class="only-dark" src="../../files/figures/site/fig08-ar-dark.png" alt="الشكل 8. خطة البناء" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>الشكل 8. خطة البناء</figcaption></figure>
 <p>يعرض الشكل 8 خطة البناء. نهاجم الشبكة المسطحة (flat network) في <a href="ch08.html">الفصل 8</a>، قبل أن يضيف <a href="ch10.html">الفصل 10</a> أي سياسة، فتبقى لدينا دائماً نتيجة «قبل» نقارن بها.</p>
 <p>يستغرق البناء كله نحو 33 إلى 41 ساعة. بمعدل 6 إلى 8 ساعات يومياً يعني ذلك سبعة أيام عمل ويوماً احتياطياً، أما بمعدل 3 إلى 4 ساعات يومياً فيستغرق قرابة الضعف. والخطة يوماً بيوم في <a href="ch15.html">الفصل 15</a>.</p>
 <p>لن نقرأ الفصول بترتيبها الحرفي. في اليوم الأول نقرأ هذا الفصل، ثم ننجز الفصول 2 و3 و4. <a href="ch04.html">الفصل 4</a> هو الذي يخبرنا هل يعمل Cilium على هذا الحاسوب، وهذا أهم ما نحتاج إلى معرفته في أبكر وقت ممكن. بمعدل 6 إلى 8 ساعات يومياً نعرف الجواب مساء اليوم الأول، وبمعدل 3 إلى 4 ساعات نعرفه في نهاية اليوم الثاني. وإذا رفض Cilium العمل فالملحق A ينقل المختبر إلى آلة افتراضية تعمل بنظام Ubuntu، أي حاسوب مُحاكى يعمل داخل الحاسوب الحقيقي، ويبقى باقي الدليل صالحاً. أما <a href="ch01.html">الفصل 1</a>، وهو المختبر على الورق، فموعده اليوم الثاني. وإذا أوقفتنا كلمة في الفصول 2 إلى 4 نبحث عنها في المسرد في الملحق D.</p>
@@ -332,7 +334,7 @@ operable program or batch file.</code></pre></figure>
 <!-- OUT ids: ch00-userprofile, ch00-ram-gb, ch00-logical-cpus --><nav class="pager" aria-label="الفصول"><a rel="next" href="ch01.html"><span>الفصل التالي</span>الفصل 1. ما الذي سنبنيه</a></nav></main></div>
 <footer class="foot"><div class="foot-in"><p>Kubernetes 1.36 و Cilium 1.20.5 و kind 0.33.0 على Windows 11 مع WSL 2. شغّلنا كل أمر على حاسوب حقيقي في تشرين الثاني 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">المصدر على GitHub</a></p></div></footer>
 <p class="vh" aria-live="polite" id="live"></p>
-<script type="application/json" id="i18n">{"copied": "نُسخ", "copyFail": "نضغط Ctrl+C لنسخ النص المحدد", "doneOf": "الخطوات المنجزة: {d} من {t}", "next": "الخطوة التالية: {s}", "allDone": "اكتمل المسار وأُنجزت الخطوات كلها.", "sumCount": "المنجز {d} من {t}", "cleared": "مُسحت كل العلامات.", "confirm": "هل نمسح كل العلامات في هذه الصفحة؟ تبقى الملفات والعنقود كما هي.", "stageCount": "{d} من {t}"}</script>
+<script type="application/json" id="i18n">{"copied": "نُسخ", "copyFail": "نضغط Ctrl+C لنسخ النص المحدد", "doneOf": "الخطوات المنجزة: {d} من {t}", "next": "الخطوة التالية: {s}", "allDone": "اكتمل المسار وأُنجزت الخطوات كلها.", "sumCount": "المنجز {d} من {t}", "cleared": "مُسحت كل العلامات.", "confirm": "هل نمسح كل العلامات في هذه الصفحة؟ تبقى الملفات والعنقود كما هي.", "stageCount": "{d} من {t}", "themeDark": "داكن", "themeLight": "فاتح", "toDark": "التبديل إلى المظهر الداكن", "toLight": "التبديل إلى المظهر الفاتح"}</script>
 <script src="../../assets/site.js" defer></script>
 </body>
 </html>

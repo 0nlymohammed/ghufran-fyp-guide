@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#ffffff">
-<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#e6ebf1">
+<meta name="color-scheme" content="light dark">
+<script>try{var t=localStorage.getItem('microseg-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
 <title>الملاحق | مختبر التجزئة الدقيقة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,6 +24,7 @@
 <li><a href="../../ar/guide/index.html" aria-current="page">الدليل الكامل</a></li>
 <li><a href="../../ar/downloads.html">التنزيلات</a></li>
 <li><a href="../../guide/appendix.html" lang="en" hreflang="en" data-setlang="en">English</a></li>
+<li><button type="button" class="theme" data-theme-toggle hidden>داكن</button></li>
 </ul></nav>
 </div></header>
 <div class="layout"><details class="rail" open><summary>الفصول</summary><nav aria-label="الفصول"><ol class="toc"><li><a href="ch00.html">0. كيف نستخدم هذا الدليل</a></li><li><a href="ch01.html">1. ما الذي سنبنيه</a></li><li><a href="ch02.html">2. قبل أن نبدأ</a></li><li><a href="ch03.html">3. تجهيز بيئة العمل</a></li><li><a href="ch04.html">4. إنشاء العنقود</a></li><li><a href="ch05.html">5. كتابة الخدمات</a></li><li><a href="ch06.html">6. نشر البوابة</a></li><li><a href="ch07.html">7. بناء لوحة التحكم</a></li><li><a href="ch08.html">8. مهاجمة الشبكة المسطحة</a></li><li><a href="ch09.html">9. تصميم السياسة</a></li><li><a href="ch10.html">10. تطبيق التجزئة الدقيقة للشبكة</a></li><li><a href="ch11.html">11. قراءة الأدلة في Hubble</a></li><li><a href="ch12.html">12. القياس</a></li><li><a href="ch13.html">13. تجاوز الأعطال دون مساعدة</a></li><li><a href="ch14.html">14. أدلة بحث التخرج</a></li><li><a href="ch15.html">15. خطة العمل يوماً بيوم</a></li><li><a href="appendix.html" aria-current="page">الملاحق</a><ol class="sub"><li><a href="#الملحق-a-الخطة-البديلة-آلة-افتراضية-بنظام-ubuntu">الملحق A. الخطة البديلة، آلة افتراضية بنظام Ubuntu</a></li><li><a href="#الملحق-b-بطاقة-الأوامر-في-صفحة-واحدة">الملحق B. بطاقة الأوامر في صفحة واحدة</a></li><li><a href="#الملحق-c-فهرس-الملفات">الملحق C. فهرس الملفات</a></li><li><a href="#الملحق-d-مسرد-المصطلحات">الملحق D. مسرد المصطلحات</a></li></ol></li></ol></nav></details><main id="main" class="content chapter"><h1 id="الملاحق">الملاحق</h1>
@@ -558,7 +560,7 @@ wsl --shutdown</code></pre></figure>
 <!-- OUT ids: appC-wc-lines --><nav class="pager" aria-label="الفصول"><a rel="prev" href="ch15.html"><span>الفصل السابق</span>الفصل 15. خطة العمل يوماً بيوم</a></nav></main></div>
 <footer class="foot"><div class="foot-in"><p>Kubernetes 1.36 و Cilium 1.20.5 و kind 0.33.0 على Windows 11 مع WSL 2. شغّلنا كل أمر على حاسوب حقيقي في تشرين الثاني 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">المصدر على GitHub</a></p></div></footer>
 <p class="vh" aria-live="polite" id="live"></p>
-<script type="application/json" id="i18n">{"copied": "نُسخ", "copyFail": "نضغط Ctrl+C لنسخ النص المحدد", "doneOf": "الخطوات المنجزة: {d} من {t}", "next": "الخطوة التالية: {s}", "allDone": "اكتمل المسار وأُنجزت الخطوات كلها.", "sumCount": "المنجز {d} من {t}", "cleared": "مُسحت كل العلامات.", "confirm": "هل نمسح كل العلامات في هذه الصفحة؟ تبقى الملفات والعنقود كما هي.", "stageCount": "{d} من {t}"}</script>
+<script type="application/json" id="i18n">{"copied": "نُسخ", "copyFail": "نضغط Ctrl+C لنسخ النص المحدد", "doneOf": "الخطوات المنجزة: {d} من {t}", "next": "الخطوة التالية: {s}", "allDone": "اكتمل المسار وأُنجزت الخطوات كلها.", "sumCount": "المنجز {d} من {t}", "cleared": "مُسحت كل العلامات.", "confirm": "هل نمسح كل العلامات في هذه الصفحة؟ تبقى الملفات والعنقود كما هي.", "stageCount": "{d} من {t}", "themeDark": "داكن", "themeLight": "فاتح", "toDark": "التبديل إلى المظهر الداكن", "toLight": "التبديل إلى المظهر الفاتح"}</script>
 <script src="../../assets/site.js" defer></script>
 </body>
 </html>

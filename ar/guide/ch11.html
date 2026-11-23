@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#ffffff">
-<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#e6ebf1">
+<meta name="color-scheme" content="light dark">
+<script>try{var t=localStorage.getItem('microseg-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
 <title>الفصل 11. قراءة الأدلة في Hubble | مختبر التجزئة الدقيقة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,6 +24,7 @@
 <li><a href="../../ar/guide/index.html" aria-current="page">الدليل الكامل</a></li>
 <li><a href="../../ar/downloads.html">التنزيلات</a></li>
 <li><a href="../../guide/ch11.html" lang="en" hreflang="en" data-setlang="en">English</a></li>
+<li><button type="button" class="theme" data-theme-toggle hidden>داكن</button></li>
 </ul></nav>
 </div></header>
 <div class="layout"><details class="rail" open><summary>الفصول</summary><nav aria-label="الفصول"><ol class="toc"><li><a href="ch00.html">0. كيف نستخدم هذا الدليل</a></li><li><a href="ch01.html">1. ما الذي سنبنيه</a></li><li><a href="ch02.html">2. قبل أن نبدأ</a></li><li><a href="ch03.html">3. تجهيز بيئة العمل</a></li><li><a href="ch04.html">4. إنشاء العنقود</a></li><li><a href="ch05.html">5. كتابة الخدمات</a></li><li><a href="ch06.html">6. نشر البوابة</a></li><li><a href="ch07.html">7. بناء لوحة التحكم</a></li><li><a href="ch08.html">8. مهاجمة الشبكة المسطحة</a></li><li><a href="ch09.html">9. تصميم السياسة</a></li><li><a href="ch10.html">10. تطبيق التجزئة الدقيقة للشبكة</a></li><li><a href="ch11.html" aria-current="page">11. قراءة الأدلة في Hubble</a><ol class="sub"><li><a href="#أولا-التحقق-من-أن-hubble-يجيب">أولاً، التحقق من أنّ Hubble يجيب</a></li><li><a href="#حركة-مرور-جديدة-الهجوم-وفحوص-البوابة">حركة مرور جديدة: الهجوم وفحوص البوابة</a></li><li><a href="#إسقاطات-pod-news-من-النظرة-الواسعة-إلى-الضيقة">إسقاطات Pod news، من النظرة الواسعة إلى الضيقة</a></li><li><a href="#سطر-واحد-من-hubble-حقلا-حقلا">سطر واحد من Hubble، حقلاً حقلاً</a></li><li><a href="#منفذ-واحد-وهويتان">منفذ واحد وهويتان</a></li><li><a href="#قراءة-قرار-l7">قراءة قرار L7</a></li><li><a href="#قراءة-استعلامات-dns-التي-أجراها-المهاجم">قراءة استعلامات DNS التي أجراها المهاجم</a></li><li><a href="#عد-إسقاطات-المهاجم">عدّ إسقاطات المهاجم</a></li><li><a href="#واجهة-hubble-التدفقات-نفسها-على-شكل-خريطة">واجهة Hubble: التدفقات نفسها على شكل خريطة</a></li><li><a href="#نقطة-التحقق">نقطة التحقق</a></li></ol></li><li><a href="ch12.html">12. القياس</a></li><li><a href="ch13.html">13. تجاوز الأعطال دون مساعدة</a></li><li><a href="ch14.html">14. أدلة بحث التخرج</a></li><li><a href="ch15.html">15. خطة العمل يوماً بيوم</a></li><li><a href="appendix.html">الملاحق</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="الفصل-11-قراءة-الأدلة-في-hubble">الفصل 11. قراءة الأدلة في Hubble</h1>
@@ -194,7 +196,7 @@ Nov 19 20:43:45.632: campus/admin-766cddb668-gr2k8:42818 (ID:5410) -&gt; campus/
 Nov 19 20:43:45.637: campus/admin-766cddb668-gr2k8:42818 (ID:5410) -&gt; campus/db-887596757-wzmtj:5432 (ID:13907) to-endpoint FORWARDED (TCP Flags: ACK)</code></pre></figure>
 <p>نبحث عن سطر مصدره، بعد الطابع الزمني مباشرة، هو <code class="nw">campus/api-</code>، ويحمل <code class="nw">-&gt; campus/db-</code> و <code class="nw">to-endpoint FORWARDED</code>. السهم <code class="nw">-&gt;</code> يقول إنه طلب، والعبارة <code class="nw">to-endpoint</code> تقول إنّ الحزمة سُلّمت إلى Pod الوجهة، و <code class="nw">FORWARDED</code> هو الحكم. ثم نقارن أرقام هويته بأسطر news فوقه. رقم هوية الوجهة هو 13907 نفسه في الحالتين، أمّا رقم هوية المصدر فيختلف، فهو 53922 عند news و 6935 عند api. أرقامنا ستختلف، لكنّ النمط يجب أن يكون واحداً، فرقم هوية الوجهة ثابت في كل الأسطر، وخلف كل حكم من الحكمين رقم مصدر مختلف.</p>
 <p>لا يتوقف اتصال api عند SYN. تُظهر أسطره اللاحقة <code class="nw">ACK</code> و <code class="nw">ACK, PSH</code> و <code class="nw">ACK, FIN</code>، وهي بقية محادثة TCP عادية. يؤكد ACK الاستلام، ويميّز PSH الحزم التي تحمل بيانات (تسجيل الدخول إلى PostgreSQL والاستعلام)، وينهي FIN الاتصال. لا يطبع Hubble سطراً لكل حزمة، وإنما يطبعه حين تتغير الأعلام. وتُظهر أسطر admin كذلك سطري القرار الخاصين بها، <code>policy-verdict:L3-L4 EGRESS ALLOWED</code> و <code>policy-verdict:L3-L4 INGRESS ALLOWED</code>. تعني <code class="nw">L3-L4</code> أنّ قاعدة عنوان ومنفذ طابقت، مرة عند خروج الحزمة من admin ومرة عند دخولها إلى db. وسبب وجود حركة admin أنّ آخر فحص من فحوص البوابة يطلب من ops فتح لوحة الإدارة، و admin يقرأ قائمة الطلاب من db.</p>
-<figure class="fig"><a href="../../files/figures/fig06-ar.png"><img src="../../files/figures/web/fig06-ar.png" alt="كيف يقرر Cilium" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>كيف يقرر Cilium</figcaption></figure>
+<figure class="fig"><a href="../../files/figures/fig06-ar.png"><img class="only-light" src="../../files/figures/site/fig06-ar-light.png" alt="الشكل 6. كيف يقرر Cilium" width="1600" height="900" loading="lazy" decoding="async"><img class="only-dark" src="../../files/figures/site/fig06-ar-dark.png" alt="الشكل 6. كيف يقرر Cilium" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>الشكل 6. كيف يقرر Cilium</figcaption></figure>
 <p>يبين الشكل 6 كيف يقرر Cilium. نلاحظ أنّ الفحص يجري عند واجهة الشبكة التي يملكها Pod نفسه، وعلى أساس رقم الهوية، لذلك قد يحصل مرسلان يطرقان المنفذ نفسه على جوابين مختلفين.</p>
 <p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
 <p>كل الأسطر تقول <code class="nw">DROPPED</code> ولا يقول أي منها <code class="nw">FORWARDED</code>. السبب أنه لم تصل أي حركة مشروعة إلى db مؤخراً. نشغّل <code class="nw">bash check-portal.sh</code> ونعيد الأمر.</p>
@@ -261,6 +263,7 @@ Nov 19 20:43:41.916: campus/news-545758c8c6-2jp4n:59859 (ID:53922) -&gt; kube-sy
 <p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
 <p>الرقم <code class="nw">0</code>. السبب أنه مضى على الهجوم أكثر من خمس دقائق. نشغّل سطر الهجوم من خطوة «حركة مرور جديدة» مرة أخرى، ثم هذا الأمر.</p>
 <h2 id="واجهة-hubble-التدفقات-نفسها-على-شكل-خريطة">واجهة Hubble: التدفقات نفسها على شكل خريطة</h2>
+<figure class="fig shot"><a href="../../files/shots/hubble.png"><img src="../../files/shots/hubble.png" alt="خريطة الخدمات في واجهة Hubble لمساحة الأسماء campus، وتحتها التدفقات التي أُسقطت." width="1600" height="1000" loading="lazy" decoding="async"></a><figcaption>خريطة الخدمات في واجهة Hubble لمساحة الأسماء campus، وتحتها التدفقات التي أُسقطت.</figcaption></figure>
 <p>ترسم واجهة Hubble (Hubble UI) هذه التدفقات على شكل خريطة. شغّلناها في <a href="ch04.html">الفصل 4</a>، وهي مثل توجيه المنفذ تتوقف حين تُغلق طرفيتها. نشغّل <code class="nw">jobs</code> أولاً، فإذا ظهر فيه <code class="nw">cilium hubble ui</code> على أنه يعمل نتجاوز السطر الأول أدناه.</p>
 <figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>cilium hubble ui --open-browser=false &amp;
 sleep 5
@@ -291,7 +294,7 @@ hubble observe --from-pod campus/api --verdict DROPPED --since 30s | wc -l</code
 <!-- OUT ids: ch13-ready, ch13-fresh-traffic, ch13-drops-namespace, ch13-drops-from-news, ch13-one-line-json, ch13-to-db, ch13-http-only, ch13-export, ch13-l7-export, ch13-dns-news, ch13-drops-count-news, ch13-hubble-ui, ch13-api-drops-after-portal, ch13-commit --><nav class="pager" aria-label="الفصول"><a rel="prev" href="ch10.html"><span>الفصل السابق</span>الفصل 10. تطبيق التجزئة الدقيقة للشبكة</a><a rel="next" href="ch12.html"><span>الفصل التالي</span>الفصل 12. القياس</a></nav></main></div>
 <footer class="foot"><div class="foot-in"><p>Kubernetes 1.36 و Cilium 1.20.5 و kind 0.33.0 على Windows 11 مع WSL 2. شغّلنا كل أمر على حاسوب حقيقي في تشرين الثاني 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">المصدر على GitHub</a></p></div></footer>
 <p class="vh" aria-live="polite" id="live"></p>
-<script type="application/json" id="i18n">{"copied": "نُسخ", "copyFail": "نضغط Ctrl+C لنسخ النص المحدد", "doneOf": "الخطوات المنجزة: {d} من {t}", "next": "الخطوة التالية: {s}", "allDone": "اكتمل المسار وأُنجزت الخطوات كلها.", "sumCount": "المنجز {d} من {t}", "cleared": "مُسحت كل العلامات.", "confirm": "هل نمسح كل العلامات في هذه الصفحة؟ تبقى الملفات والعنقود كما هي.", "stageCount": "{d} من {t}"}</script>
+<script type="application/json" id="i18n">{"copied": "نُسخ", "copyFail": "نضغط Ctrl+C لنسخ النص المحدد", "doneOf": "الخطوات المنجزة: {d} من {t}", "next": "الخطوة التالية: {s}", "allDone": "اكتمل المسار وأُنجزت الخطوات كلها.", "sumCount": "المنجز {d} من {t}", "cleared": "مُسحت كل العلامات.", "confirm": "هل نمسح كل العلامات في هذه الصفحة؟ تبقى الملفات والعنقود كما هي.", "stageCount": "{d} من {t}", "themeDark": "داكن", "themeLight": "فاتح", "toDark": "التبديل إلى المظهر الداكن", "toLight": "التبديل إلى المظهر الفاتح"}</script>
 <script src="../../assets/site.js" defer></script>
 </body>
 </html>

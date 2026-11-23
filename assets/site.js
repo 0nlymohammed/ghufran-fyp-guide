@@ -9,6 +9,31 @@
     try { localStorage.setItem('microseg-lang', a.dataset.setlang); } catch (e) { /* private mode */ }
   }));
 
+  // Theme: follows the system until the reader picks one, then the choice is remembered.
+  const root = document.documentElement;
+  const themeBtn = document.querySelector('[data-theme-toggle]');
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+  const paint = () => {
+    const dark = root.dataset.theme === 'dark';
+    if (themeMeta) themeMeta.content = dark ? '#0f1826' : '#e6ebf1';
+    if (themeBtn) {
+      themeBtn.textContent = dark ? T.themeLight : T.themeDark;
+      themeBtn.setAttribute('aria-label', dark ? T.toLight : T.toDark);
+    }
+  };
+  if (themeBtn) {
+    themeBtn.hidden = false;
+    themeBtn.addEventListener('click', () => {
+      root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      try { localStorage.setItem('microseg-theme', root.dataset.theme); } catch (e) { /* private mode */ }
+      paint();
+    });
+  }
+  paint();
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'microseg-theme' && e.newValue) { root.dataset.theme = e.newValue; paint(); }
+  });
+
   // Copy buttons.
   document.querySelectorAll('.copy').forEach((btn) => {
     const original = btn.textContent;

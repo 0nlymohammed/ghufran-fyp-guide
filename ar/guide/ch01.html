@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#ffffff">
-<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#e6ebf1">
+<meta name="color-scheme" content="light dark">
+<script>try{var t=localStorage.getItem('microseg-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
 <title>الفصل 1. ما الذي سنبنيه | مختبر التجزئة الدقيقة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,13 +24,14 @@
 <li><a href="../../ar/guide/index.html" aria-current="page">الدليل الكامل</a></li>
 <li><a href="../../ar/downloads.html">التنزيلات</a></li>
 <li><a href="../../guide/ch01.html" lang="en" hreflang="en" data-setlang="en">English</a></li>
+<li><button type="button" class="theme" data-theme-toggle hidden>داكن</button></li>
 </ul></nav>
 </div></header>
 <div class="layout"><details class="rail" open><summary>الفصول</summary><nav aria-label="الفصول"><ol class="toc"><li><a href="ch00.html">0. كيف نستخدم هذا الدليل</a></li><li><a href="ch01.html" aria-current="page">1. ما الذي سنبنيه</a><ol class="sub"><li><a href="#أين-يعمل-كل-شيء-طبقة-فوق-طبقة">أين يعمل كل شيء، طبقة فوق طبقة</a></li><li><a href="#بنية-البوابة">بنية البوابة</a></li><li><a href="#البرامج-السبعة">البرامج السبعة</a></li><li><a href="#التدفقات-الثمانية-المسموح-بها">التدفقات الثمانية المسموح بها</a></li><li><a href="#قاعدة-البيانات">قاعدة البيانات</a></li><li><a href="#واجهة-api-نقطة-نهاية-بعد-أخرى">واجهة API، نقطة نهاية بعد أخرى</a></li><li><a href="#فحوص-البوابة-الستة">فحوص البوابة الستة</a></li><li><a href="#نقطة-التحقق-نكتب-جدول-التدفقات-من-الذاكرة">نقطة التحقق: نكتب جدول التدفقات من الذاكرة</a></li></ol></li><li><a href="ch02.html">2. قبل أن نبدأ</a></li><li><a href="ch03.html">3. تجهيز بيئة العمل</a></li><li><a href="ch04.html">4. إنشاء العنقود</a></li><li><a href="ch05.html">5. كتابة الخدمات</a></li><li><a href="ch06.html">6. نشر البوابة</a></li><li><a href="ch07.html">7. بناء لوحة التحكم</a></li><li><a href="ch08.html">8. مهاجمة الشبكة المسطحة</a></li><li><a href="ch09.html">9. تصميم السياسة</a></li><li><a href="ch10.html">10. تطبيق التجزئة الدقيقة للشبكة</a></li><li><a href="ch11.html">11. قراءة الأدلة في Hubble</a></li><li><a href="ch12.html">12. القياس</a></li><li><a href="ch13.html">13. تجاوز الأعطال دون مساعدة</a></li><li><a href="ch14.html">14. أدلة بحث التخرج</a></li><li><a href="ch15.html">15. خطة العمل يوماً بيوم</a></li><li><a href="appendix.html">الملاحق</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="الفصل-1-ما-الذي-سنبنيه">الفصل 1. ما الذي سنبنيه</h1>
 <p>لا نكتب في هذا الفصل أي أمر، فهو جولة في المختبر على الورق. وفي نهايته يجب أن نستطيع رسم برامج البوابة السبعة على عُقدها، وأن نكتب من الذاكرة التدفقات الشبكية (flows) الثمانية التي تبقى مفتوحة بعد تفعيل التجزئة الدقيقة للشبكة (micro-segmentation). هذا الرسم هو نقطة التحقق. نخصص للفصل نحو 45 دقيقة.</p>
 <h2 id="أين-يعمل-كل-شيء-طبقة-فوق-طبقة">أين يعمل كل شيء، طبقة فوق طبقة</h2>
 <p>يعمل كل ما في المختبر على حاسوب محمول واحد هو حاسوبنا، في طبقات بعضها فوق بعض. يشغّل Windows 11 نظام WSL 2، وهو آلة افتراضية (virtual machine) خفيفة فيها نواة Linux حقيقية، ويعمل Ubuntu 24.04 داخلها. ويشغّل Ubuntu برنامج Docker Engine، وفيه ثلاث حاويات (containers) تتظاهر كل واحدة منها بأنها حاسوب كامل. هذه الحاويات هي عُقد Kubernetes الثلاث (nodes) في مختبرنا، <code class="nw">kind-control-plane</code> و<code class="nw">kind-worker</code> و<code class="nw">kind-worker2</code>، وعليها تعمل Pods البوابة في مساحة الأسماء (namespace) <code class="nw">campus</code>، إلى جانب الـPods الخاصة بـCilium في مساحة الأسماء <code class="nw">kube-system</code>.</p>
-<figure class="fig"><a href="../../files/figures/fig02-ar.png"><img src="../../files/figures/web/fig02-ar.png" alt="أين يعمل كل جزء" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>أين يعمل كل جزء</figcaption></figure>
+<figure class="fig"><a href="../../files/figures/fig02-ar.png"><img class="only-light" src="../../files/figures/site/fig02-ar-light.png" alt="الشكل 2. أين يعمل كل جزء" width="1600" height="900" loading="lazy" decoding="async"><img class="only-dark" src="../../files/figures/site/fig02-ar-dark.png" alt="الشكل 2. أين يعمل كل جزء" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>الشكل 2. أين يعمل كل جزء</figcaption></figure>
 <p>في الشكل 2 ننظر إلى موقع <code class="nw">kubectl</code> و<code class="nw">cilium</code> و<code class="nw">hubble</code>. هذه الأدوات تعمل في Ubuntu نفسه، خارج العنقود (cluster)، وتمدّ يدها إليه من هناك.</p>
 <p>ليس كل برنامج في هذا المشروع داخل العنقود. يبيّن الجدول ما سنفتحه أو نشغّله، وأين يعمل كل منها.</p>
 <div class="table-wrap" tabindex="0" role="region" aria-label="جدول"><table>
@@ -78,7 +80,7 @@
 <p>يستمع ربط المنافذ على العنوان <code class="nw">127.0.0.1</code> وحده، وهو العنوان الذي يستخدمه الجهاز للإشارة إلى نفسه، فلا يستطيع غيرنا من المتصلين بشبكة Wi-Fi نفسها أن يفتح بوابتنا.</p>
 <h2 id="بنية-البوابة">بنية البوابة</h2>
 <p>للبوابة باب واحد فقط من الخارج، هو NodePort 30080 على <code class="nw">kind-worker</code>. أما بقية البرامج فلكل منها اسم ومنفذ لا يعملان إلا داخل العنقود.</p>
-<figure class="fig"><a href="../../files/figures/fig03-ar.png"><img src="../../files/figures/web/fig03-ar.png" alt="بنية بوابة الحرم الجامعي" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>بنية بوابة الحرم الجامعي</figcaption></figure>
+<figure class="fig"><a href="../../files/figures/fig03-ar.png"><img class="only-light" src="../../files/figures/site/fig03-ar-light.png" alt="الشكل 3. بنية بوابة الحرم الجامعي" width="1600" height="900" loading="lazy" decoding="async"><img class="only-dark" src="../../files/figures/site/fig03-ar-dark.png" alt="الشكل 3. بنية بوابة الحرم الجامعي" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>الشكل 3. بنية بوابة الحرم الجامعي</figcaption></figure>
 <p>يضع الشكل 3 الـPods السبعة على العقدتين العاملتين، ويدخل إليها سهم واحد عند NodePort 30080. ولا يعمل أي منها على العقدة <code class="nw">kind-control-plane</code>.</p>
 <p>يعمل frontend وnews، وهما الجزء المواجه للجمهور من البوابة، على <code class="nw">kind-worker</code>، أما الخمسة الأخرى (api وauth وdb وadmin وops) فتعمل على <code class="nw">kind-worker2</code>. وسما العقدتين (node labels) <code class="nw">tier=frontend</code> و<code class="nw">tier=backend</code> هما ما يحدد هذا التوزيع. ومكان الـPod وحده لا يمنح أي اتصال ولا يمنعه.</p>
 <p>تقع كل كائنات Kubernetes الخاصة بالبوابة في مساحة الأسماء <code class="nw">campus</code>، وهي من أربعة أنواع.</p>
@@ -196,7 +198,7 @@
 <p>لـops كائن Deployment وليس له Service، لأن أحداً لا يستدعيه. هو يستدعي غيره فقط.</p>
 <h2 id="التدفقات-الثمانية-المسموح-بها">التدفقات الثمانية المسموح بها</h2>
 <p>التدفق الشبكي نوع واحد من الاتصالات يسمح به المختبر، من برنامج إلى آخر على منفذ واحد. بعد تفعيل التجزئة يسمح المختبر بالتدفقات الثمانية المذكورة أدناه بالضبط، ويرفض كل ما عداها. سنعود إلى هذا الجدول مرتين أخريين. <a href="ch09.html">فالفصل 9</a> يعيد بناءه مما يسجّله Hubble، <a href="ch10.html">والفصل 10</a> يحوّل كل صف فيه إلى قواعد سياسة.</p>
-<figure class="fig"><a href="../../files/figures/fig04-ar.png"><img src="../../files/figures/web/fig04-ar.png" alt="خريطة التدفقات المسموح بها" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>خريطة التدفقات المسموح بها</figcaption></figure>
+<figure class="fig"><a href="../../files/figures/fig04-ar.png"><img class="only-light" src="../../files/figures/site/fig04-ar-light.png" alt="الشكل 4. خريطة التدفقات المسموح بها" width="1600" height="900" loading="lazy" decoding="async"><img class="only-dark" src="../../files/figures/site/fig04-ar-dark.png" alt="الشكل 4. خريطة التدفقات المسموح بها" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>الشكل 4. خريطة التدفقات المسموح بها</figcaption></figure>
 <p>في الشكل 4 يمثّل كل سهم تدفقاً واحداً مسموحاً به، ولا يبدأ أي سهم عند news أو عند db.</p>
 <div class="table-wrap" tabindex="0" role="region" aria-label="جدول"><table>
 <thead>
@@ -535,7 +537,7 @@
 <!-- OUT ids: none --><nav class="pager" aria-label="الفصول"><a rel="prev" href="ch00.html"><span>الفصل السابق</span>الفصل 0. كيف نستخدم هذا الدليل</a><a rel="next" href="ch02.html"><span>الفصل التالي</span>الفصل 2. قبل أن نبدأ</a></nav></main></div>
 <footer class="foot"><div class="foot-in"><p>Kubernetes 1.36 و Cilium 1.20.5 و kind 0.33.0 على Windows 11 مع WSL 2. شغّلنا كل أمر على حاسوب حقيقي في تشرين الثاني 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">المصدر على GitHub</a></p></div></footer>
 <p class="vh" aria-live="polite" id="live"></p>
-<script type="application/json" id="i18n">{"copied": "نُسخ", "copyFail": "نضغط Ctrl+C لنسخ النص المحدد", "doneOf": "الخطوات المنجزة: {d} من {t}", "next": "الخطوة التالية: {s}", "allDone": "اكتمل المسار وأُنجزت الخطوات كلها.", "sumCount": "المنجز {d} من {t}", "cleared": "مُسحت كل العلامات.", "confirm": "هل نمسح كل العلامات في هذه الصفحة؟ تبقى الملفات والعنقود كما هي.", "stageCount": "{d} من {t}"}</script>
+<script type="application/json" id="i18n">{"copied": "نُسخ", "copyFail": "نضغط Ctrl+C لنسخ النص المحدد", "doneOf": "الخطوات المنجزة: {d} من {t}", "next": "الخطوة التالية: {s}", "allDone": "اكتمل المسار وأُنجزت الخطوات كلها.", "sumCount": "المنجز {d} من {t}", "cleared": "مُسحت كل العلامات.", "confirm": "هل نمسح كل العلامات في هذه الصفحة؟ تبقى الملفات والعنقود كما هي.", "stageCount": "{d} من {t}", "themeDark": "داكن", "themeLight": "فاتح", "toDark": "التبديل إلى المظهر الداكن", "toLight": "التبديل إلى المظهر الفاتح"}</script>
 <script src="../../assets/site.js" defer></script>
 </body>
 </html>

@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#ffffff">
-<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#e6ebf1">
+<meta name="color-scheme" content="light dark">
+<script>try{var t=localStorage.getItem('microseg-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
 <title>Chapter 9. Design the policy | Micro-segmentation lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,6 +24,7 @@
 <li><a href="../guide/index.html" aria-current="page">Full guide</a></li>
 <li><a href="../downloads.html">Downloads</a></li>
 <li><a href="../ar/guide/ch09.html" lang="ar" hreflang="ar" data-setlang="ar">العربية</a></li>
+<li><button type="button" class="theme" data-theme-toggle hidden>Dark</button></li>
 </ul></nav>
 </div></header>
 <div class="layout"><details class="rail" open><summary>Chapters</summary><nav aria-label="Chapters"><ol class="toc"><li><a href="ch00.html">0. How to use this guide</a></li><li><a href="ch01.html">1. What you will build</a></li><li><a href="ch02.html">2. Before you start</a></li><li><a href="ch03.html">3. Set up the environment</a></li><li><a href="ch04.html">4. Create the cluster</a></li><li><a href="ch05.html">5. Write the services</a></li><li><a href="ch06.html">6. Deploy the portal</a></li><li><a href="ch07.html">7. Build your dashboard</a></li><li><a href="ch08.html">8. Attack the flat network</a></li><li><a href="ch09.html" aria-current="page">9. Design the policy</a><ol class="sub"><li><a href="#is-the-lab-flat-and-is-hubble-connected">Is the lab flat, and is Hubble connected?</a></li><li><a href="#make-the-portal-do-its-whole-job-twice">Make the portal do its whole job, twice</a></li><li><a href="#read-who-connected-to-whom-in-hubble">Read who connected to whom, in Hubble</a></li><li><a href="#read-the-http-paths-in-nginxs-log">Read the HTTP paths in nginx's log</a></li><li><a href="#write-the-flow-table-what-stays-open">Write the flow table (what stays open)</a></li><li><a href="#write-the-deny-table-what-stays-closed">Write the deny table (what stays closed)</a></li><li><a href="#two-permissions-per-connection-exit-visa-and-entry-visa">Two permissions per connection: exit visa and entry visa</a></li><li><a href="#checkpoint">Checkpoint</a></li></ol></li><li><a href="ch10.html">10. Apply micro-segmentation</a></li><li><a href="ch11.html">11. Read the evidence in Hubble</a></li><li><a href="ch12.html">12. Measure</a></li><li><a href="ch13.html">13. Getting unstuck alone</a></li><li><a href="ch14.html">14. Evidence for your report</a></li><li><a href="ch15.html">15. Day-by-day plan</a></li><li><a href="appendix.html">Appendices</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="chapter-9-design-the-policy">Chapter 9. Design the policy</h1>
@@ -99,7 +101,7 @@ bash ~/microseg/check-portal.sh</code></pre></figure>
 <figure class="code out bad"><figcaption><span class="lbl">Output when something is wrong</span></figcaption><pre dir="ltr"><code>code: command not found</code></pre></figure>
 <p>Close every Ubuntu window and open Ubuntu again, which reloads the path set up by VS Code's WSL extension. If it still fails, go back to the VS Code part of <a href="ch02.html">chapter 2</a>.</p>
 <p>You found more or fewer than eight combinations. Don't fill in the table from <a href="ch01.html">chapter 1</a> to make the numbers agree. Go back to the Hubble step, read its failure block, and collect the flows again. A missing connection here becomes a broken portal in <a href="ch10.html">chapter 10</a>.</p>
-<figure class="fig"><a href="../files/figures/fig04-en.png"><img src="../files/figures/web/fig04-en.png" alt="Allowed-flow map" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>Allowed-flow map</figcaption></figure>
+<figure class="fig"><a href="../files/figures/fig04-en.png"><img class="only-light" src="../files/figures/site/fig04-en-light.png" alt="Figure 4. Allowed-flow map" width="1600" height="900" loading="lazy" decoding="async"><img class="only-dark" src="../files/figures/site/fig04-en-dark.png" alt="Figure 4. Allowed-flow map" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>Figure 4. Allowed-flow map</figcaption></figure>
 <p>Figure 4 draws your eight rows as arrows between the services. No arrow leaves news or db, and ops is the only service with an arrow into admin.</p>
 <h2 id="write-the-deny-table-what-stays-closed">Write the deny table (what stays closed)</h2>
 <p>The deny table is the other half of the design: what stays closed, and why. Default deny closes these paths without any rule naming them, so they don't appear in any policy file. This table writes them down, with each row tied to the attack step it stops.</p>
@@ -170,7 +172,7 @@ bash ~/microseg/check-portal.sh</code></pre></figure>
 </tbody>
 </table></div>
 <p>Every pod also keeps one more exit visa, to kube-dns on port 53, so service names still turn into addresses. That rule covers every pod at once, and you'll write it in the baseline file.</p>
-<figure class="fig"><a href="../files/figures/fig07-en.png"><img src="../files/figures/web/fig07-en.png" alt="From flow table to policy" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>From flow table to policy</figcaption></figure>
+<figure class="fig"><a href="../files/figures/fig07-en.png"><img class="only-light" src="../files/figures/site/fig07-en-light.png" alt="Figure 7. From flow table to policy" width="1600" height="900" loading="lazy" decoding="async"><img class="only-dark" src="../files/figures/site/fig07-en-dark.png" alt="Figure 7. From flow table to policy" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>Figure 7. From flow table to policy</figcaption></figure>
 <p>Figure 7 follows one row of the flow table as it becomes two rules. The egress half goes in the caller's policy and the ingress half in the callee's.</p>
 <h2 id="checkpoint">Checkpoint</h2>
 <p>Pull the source, destination and port out of every row of your flow table and sort them, so you can compare them with the answer key letter for letter.</p>
@@ -193,7 +195,7 @@ world|frontend|80</code></pre></figure>
 <!-- OUT ids: ch11-start, ch11-portal-traffic, ch11-flows, ch11-nginx-log, ch11-checkpoint --><nav class="pager" aria-label="Chapters"><a rel="prev" href="ch08.html"><span>Previous chapter</span>Chapter 8. Attack the flat network</a><a rel="next" href="ch10.html"><span>Next chapter</span>Chapter 10. Apply micro-segmentation</a></nav></main></div>
 <footer class="foot"><div class="foot-in"><p>Kubernetes 1.36, Cilium 1.20.5 and kind 0.33.0 on Windows 11 with WSL 2. Every command was run on a real laptop in November 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">Source on GitHub</a></p></div></footer>
 <p class="vh" aria-live="polite" id="live"></p>
-<script type="application/json" id="i18n">{"copied": "Copied", "copyFail": "Press Ctrl+C to copy the selected text", "doneOf": "{d} of {t} steps done", "next": "Next step: {s}", "allDone": "All {t} steps done.", "sumCount": "{d} of {t} done", "cleared": "All ticks cleared.", "confirm": "Clear every tick on this page? Your files and your cluster stay as they are.", "stageCount": "{d} of {t}"}</script>
+<script type="application/json" id="i18n">{"copied": "Copied", "copyFail": "Press Ctrl+C to copy the selected text", "doneOf": "{d} of {t} steps done", "next": "Next step: {s}", "allDone": "All {t} steps done.", "sumCount": "{d} of {t} done", "cleared": "All ticks cleared.", "confirm": "Clear every tick on this page? Your files and your cluster stay as they are.", "stageCount": "{d} of {t}", "themeDark": "Dark", "themeLight": "Light", "toDark": "Switch to the dark theme", "toLight": "Switch to the light theme"}</script>
 <script src="../assets/site.js" defer></script>
 </body>
 </html>

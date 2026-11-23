@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#ffffff">
-<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#e6ebf1">
+<meta name="color-scheme" content="light dark">
+<script>try{var t=localStorage.getItem('microseg-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
 <title>الفصل 8. مهاجمة الشبكة المسطحة | مختبر التجزئة الدقيقة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,6 +24,7 @@
 <li><a href="../../ar/guide/index.html" aria-current="page">الدليل الكامل</a></li>
 <li><a href="../../ar/downloads.html">التنزيلات</a></li>
 <li><a href="../../guide/ch08.html" lang="en" hreflang="en" data-setlang="en">English</a></li>
+<li><button type="button" class="theme" data-theme-toggle hidden>داكن</button></li>
 </ul></nav>
 </div></header>
 <div class="layout"><details class="rail" open><summary>الفصول</summary><nav aria-label="الفصول"><ol class="toc"><li><a href="ch00.html">0. كيف نستخدم هذا الدليل</a></li><li><a href="ch01.html">1. ما الذي سنبنيه</a></li><li><a href="ch02.html">2. قبل أن نبدأ</a></li><li><a href="ch03.html">3. تجهيز بيئة العمل</a></li><li><a href="ch04.html">4. إنشاء العنقود</a></li><li><a href="ch05.html">5. كتابة الخدمات</a></li><li><a href="ch06.html">6. نشر البوابة</a></li><li><a href="ch07.html">7. بناء لوحة التحكم</a></li><li><a href="ch08.html" aria-current="page">8. مهاجمة الشبكة المسطحة</a><ol class="sub"><li><a href="#هل-المختبر-يعمل-وهل-ما-زالت-الشبكة-مسطحة">هل المختبر يعمل، وهل ما زالت الشبكة مسطحة؟</a></li><li><a href="#تشغيل-لوحة-التحكم-على-المنفذ-5050">تشغيل لوحة التحكم على المنفذ 5050</a></li><li><a href="#اختبار-المنفذ-30080-من-windows">اختبار المنفذ 30080 من Windows</a></li><li><a href="#التوقع-أولا-ثم-الهجوم">التوقع أولاً، ثم الهجوم</a></li><li><a href="#درجة-عمر-قبل-الهجوم">درجة عمر قبل الهجوم</a></li><li><a href="#شكل-أمر-الهجوم">شكل أمر الهجوم</a></li><li><a href="#الخطوة-1-t1190-تشغيل-أمر-داخل-news">الخطوة 1. T1190، تشغيل أمر داخل news</a></li><li><a href="#الخطوة-2-t1046-اكتشاف-الخدمات-الأخرى">الخطوة 2. T1046، اكتشاف الخدمات الأخرى</a></li><li><a href="#الخطوة-3-t1078001-الدخول-إلى-قاعدة-البيانات-بالحساب-الافتراضي">الخطوة 3. T1078.001، الدخول إلى قاعدة البيانات بالحساب الافتراضي</a></li><li><a href="#الخطوة-4-t1565001-تغيير-درجة-عمر">الخطوة 4. T1565.001، تغيير درجة عمر</a></li><li><a href="#الخطوة-5-ta0008-فتح-لوحة-الإدارة">الخطوة 5. TA0008، فتح لوحة الإدارة</a></li><li><a href="#باب-آخر-مفتوح-مسار-التصدير-المنسي">باب آخر مفتوح: مسار التصدير المنسي</a></li><li><a href="#تشغيل-الخطوات-الخمس-من-لوحة-التحكم">تشغيل الخطوات الخمس من لوحة التحكم</a></li><li><a href="#مشاهدة-الهجوم-على-خريطة-الخدمات-في-hubble">مشاهدة الهجوم على خريطة الخدمات في Hubble</a></li><li><a href="#إرجاع-درجة-عمر">إرجاع درجة عمر</a></li><li><a href="#نقطة-التحقق">نقطة التحقق</a></li></ol></li><li><a href="ch09.html">9. تصميم السياسة</a></li><li><a href="ch10.html">10. تطبيق التجزئة الدقيقة للشبكة</a></li><li><a href="ch11.html">11. قراءة الأدلة في Hubble</a></li><li><a href="ch12.html">12. القياس</a></li><li><a href="ch13.html">13. تجاوز الأعطال دون مساعدة</a></li><li><a href="ch14.html">14. أدلة بحث التخرج</a></li><li><a href="ch15.html">15. خطة العمل يوماً بيوم</a></li><li><a href="appendix.html">الملاحق</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="الفصل-8-مهاجمة-الشبكة-المسطحة">الفصل 8. مهاجمة الشبكة المسطحة</h1>
@@ -67,7 +69,7 @@ Port 5050 is in use by another program. Either identify and stop that program, o
 <p>أما الخطأ الأحمر الذي يبدأ بـ <code class="nw">Invoke-WebRequest :</code> فمعناه أن الأمر كُتب <code class="nw">curl</code> من دون <code class="nw">.exe</code> في آخره. تكفي إعادة كتابة الأمر بالصيغة <code class="nw">curl.exe</code> كاملة.</p>
 <h2 id="التوقع-أولا-ثم-الهجوم">التوقع أولاً، ثم الهجوم</h2>
 <p>قبل الهجوم نكتب توقعين على الورق: كم مساراً من المسارات الـ 36 في مصفوفة قابلية الوصول (reachability matrix) في لوحة التحكم نتوقع أن يكون مفتوحاً، وكم ستصبح درجة عمر بعد الخطوة 4.</p>
-<figure class="fig"><a href="../../files/figures/fig05-ar.png"><img src="../../files/figures/web/fig05-ar.png" alt="سلسلة الهجوم قبل التجزئة وبعدها" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>سلسلة الهجوم قبل التجزئة وبعدها</figcaption></figure>
+<figure class="fig"><a href="../../files/figures/fig05-ar.png"><img class="only-light" src="../../files/figures/site/fig05-ar-light.png" alt="الشكل 5. سلسلة الهجوم قبل التجزئة وبعدها" width="1600" height="900" loading="lazy" decoding="async"><img class="only-dark" src="../../files/figures/site/fig05-ar-dark.png" alt="الشكل 5. سلسلة الهجوم قبل التجزئة وبعدها" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>الشكل 5. سلسلة الهجوم قبل التجزئة وبعدها</figcaption></figure>
 <p>يبيّن الشكل 5 سلسلة الهجوم على الشبكة المسطحة وعلى الشبكة المجزأة، والسهم الأول وحده يدخل من الباب العام، أما كل سهم بعده فيبدأ من داخل Pod خدمة news.</p>
 <h2 id="درجة-عمر-قبل-الهجوم">درجة عمر قبل الهجوم</h2>
 <p>نسجّل درجة عمر قبل الهجوم، ليكون لدينا ما نقارن به النتيجة بعده.</p>
@@ -196,6 +198,7 @@ Connection: keep-alive
 <figure class="code out bad"><figcaption><span class="lbl">المخرجات عند وجود خطأ</span></figcaption><pre dir="ltr"><code>HTTP/1.1 404 NOT FOUND</code></pre></figure>
 <p>معنى ذلك أن <code class="nw">apps/api.py</code> لا يحتوي المسار <code class="nw">/api/export</code> أصلاً. يُقارَن الملف بما في <a href="ch05.html">الفصل 5</a>، ثم يُشغَّل <code class="nw">bash ~/microseg/deploy.sh</code> لإعادة بناء الصورة. وهذا يعيد قاعدة البيانات إلى حالتها الأولى أيضاً، فيجب إعادة هجوم هذا الفصل من الخطوة 1.</p>
 <h2 id="تشغيل-الخطوات-الخمس-من-لوحة-التحكم">تشغيل الخطوات الخمس من لوحة التحكم</h2>
+<figure class="fig shot"><a href="../../files/shots/dashboard-flat.png"><img src="../../files/shots/dashboard-flat.png" alt="لوحة التحكم على الشبكة المسطحة: 36 من 36 مساراً مفتوحة، ونجحت خطوات الهجوم الخمس كلها." width="1500" height="1671" loading="lazy" decoding="async"></a><figcaption>لوحة التحكم على الشبكة المسطحة: 36 من 36 مساراً مفتوحة، ونجحت خطوات الهجوم الخمس كلها.</figcaption></figure>
 <p>ترسل لوحة التحكم الحمولات الخمس نفسها بنقرة واحدة، عبر منفذ NodePort نفسه، أي 30080. وتقرر أيضاً بالنيابة عنا هل نجحت كل خطوة، فنحصل على عدد نضعه في جدول النتائج.</p>
 <p>نفتح <code class="nw">http://localhost:5050</code> في متصفح Windows ونبحث عن القسم «Attack from the news pod» (الهجوم من Pod خدمة news). ننقر الزر «Run attack» (شغّل الهجوم). يعرض سطر الملخص «Running 5 steps (up to 30 seconds)...» أثناء العمل، أي أن الخطوات الخمس جارية وقد تستغرق حتى 30 ثانية. وعلى الشبكة المسطحة ينتهي خلال ثوانٍ قليلة.</p>
 <p>تعدّ لوحة التحكم الخطوة ناجحة إذا ظهر نص إثباتها في الرد: <code class="nw">uid=</code> للخطوة 1، و<code class="nw">succeeded</code> للخطوة 2، و<code class="nw">(4 rows)</code> للخطوة 3، و<code class="nw">UPDATE 1</code> للخطوة 4، و<code class="nw">password_hash</code> للخطوة 5. إنها السلاسل نفسها التي بحثنا عنها يدوياً. تُنفَّذ الخطوة 4 مرة أخرى أيضاً، لكن كتابة 95 فوق 95 لا تغيّر شيئاً.</p>
@@ -272,7 +275,7 @@ deployment &quot;db&quot; successfully rolled out
 <!-- OUT ids: ch10-precheck, ch10-dashboard-start, ch10-windows-portal, ch10-grade-before, ch10-step1, ch10-step2, ch10-step3, ch10-step4, ch10-step5, ch10-export-flat, ch10-dashboard-attack-flat, ch10-grade-after, ch10-hubble-ui, ch10-reset-db, ch10-checkpoint --><nav class="pager" aria-label="الفصول"><a rel="prev" href="ch07.html"><span>الفصل السابق</span>الفصل 7. بناء لوحة التحكم</a><a rel="next" href="ch09.html"><span>الفصل التالي</span>الفصل 9. تصميم السياسة</a></nav></main></div>
 <footer class="foot"><div class="foot-in"><p>Kubernetes 1.36 و Cilium 1.20.5 و kind 0.33.0 على Windows 11 مع WSL 2. شغّلنا كل أمر على حاسوب حقيقي في تشرين الثاني 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">المصدر على GitHub</a></p></div></footer>
 <p class="vh" aria-live="polite" id="live"></p>
-<script type="application/json" id="i18n">{"copied": "نُسخ", "copyFail": "نضغط Ctrl+C لنسخ النص المحدد", "doneOf": "الخطوات المنجزة: {d} من {t}", "next": "الخطوة التالية: {s}", "allDone": "اكتمل المسار وأُنجزت الخطوات كلها.", "sumCount": "المنجز {d} من {t}", "cleared": "مُسحت كل العلامات.", "confirm": "هل نمسح كل العلامات في هذه الصفحة؟ تبقى الملفات والعنقود كما هي.", "stageCount": "{d} من {t}"}</script>
+<script type="application/json" id="i18n">{"copied": "نُسخ", "copyFail": "نضغط Ctrl+C لنسخ النص المحدد", "doneOf": "الخطوات المنجزة: {d} من {t}", "next": "الخطوة التالية: {s}", "allDone": "اكتمل المسار وأُنجزت الخطوات كلها.", "sumCount": "المنجز {d} من {t}", "cleared": "مُسحت كل العلامات.", "confirm": "هل نمسح كل العلامات في هذه الصفحة؟ تبقى الملفات والعنقود كما هي.", "stageCount": "{d} من {t}", "themeDark": "داكن", "themeLight": "فاتح", "toDark": "التبديل إلى المظهر الداكن", "toLight": "التبديل إلى المظهر الفاتح"}</script>
 <script src="../../assets/site.js" defer></script>
 </body>
 </html>

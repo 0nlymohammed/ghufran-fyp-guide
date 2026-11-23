@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#ffffff">
-<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#e6ebf1">
+<meta name="color-scheme" content="light dark">
+<script>try{var t=localStorage.getItem('microseg-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
 <title>Chapter 6. Deploy the portal | Micro-segmentation lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,6 +24,7 @@
 <li><a href="../guide/index.html" aria-current="page">Full guide</a></li>
 <li><a href="../downloads.html">Downloads</a></li>
 <li><a href="../ar/guide/ch06.html" lang="ar" hreflang="ar" data-setlang="ar">العربية</a></li>
+<li><button type="button" class="theme" data-theme-toggle hidden>Dark</button></li>
 </ul></nav>
 </div></header>
 <div class="layout"><details class="rail" open><summary>Chapters</summary><nav aria-label="Chapters"><ol class="toc"><li><a href="ch00.html">0. How to use this guide</a></li><li><a href="ch01.html">1. What you will build</a></li><li><a href="ch02.html">2. Before you start</a></li><li><a href="ch03.html">3. Set up the environment</a></li><li><a href="ch04.html">4. Create the cluster</a></li><li><a href="ch05.html">5. Write the services</a></li><li><a href="ch06.html" aria-current="page">6. Deploy the portal</a><ol class="sub"><li><a href="#step-1-check-that-the-cluster-is-still-running">Step 1. Check that the cluster is still running</a></li><li><a href="#step-2-write-k8sappyaml">Step 2. Write k8s/app.yaml</a></li><li><a href="#step-3-check-the-file-before-you-deploy">Step 3. Check the file before you deploy</a></li><li><a href="#step-4-write-deploysh">Step 4. Write deploy.sh</a></li><li><a href="#step-5-deploy-the-portal">Step 5. Deploy the portal</a></li><li><a href="#step-6-look-at-the-pods">Step 6. Look at the pods</a></li><li><a href="#step-7-look-at-the-services-and-the-environment-variables">Step 7. Look at the Services and the environment variables</a></li><li><a href="#step-8-write-check-portalsh">Step 8. Write check-portal.sh</a></li><li><a href="#step-9-open-the-portal-from-windows">Step 9. Open the portal from Windows</a></li><li><a href="#checkpoint">Checkpoint</a></li></ol></li><li><a href="ch07.html">7. Build your dashboard</a></li><li><a href="ch08.html">8. Attack the flat network</a></li><li><a href="ch09.html">9. Design the policy</a></li><li><a href="ch10.html">10. Apply micro-segmentation</a></li><li><a href="ch11.html">11. Read the evidence in Hubble</a></li><li><a href="ch12.html">12. Measure</a></li><li><a href="ch13.html">13. Getting unstuck alone</a></li><li><a href="ch14.html">14. Evidence for your report</a></li><li><a href="ch15.html">15. Day-by-day plan</a></li><li><a href="appendix.html">Appendices</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="chapter-6-deploy-the-portal">Chapter 6. Deploy the portal</h1>
@@ -591,7 +593,7 @@ frontend-6d755c977c-rzsg7   1/1     Running   0          22s   10.244.2.64    ki
 news-545758c8c6-2jp4n       1/1     Running   0          22s   10.244.2.131   kind-worker    &lt;none&gt;           &lt;none&gt;
 ops-56f8b77f6d-hs2zr        1/1     Running   0          22s   10.244.1.140   kind-worker2   &lt;none&gt;           &lt;none&gt;</code></pre></figure>
 <p>In the NODE column, frontend and news must be on <code class="nw">kind-worker</code>. Admin, api, auth, db and ops must all be on <code class="nw">kind-worker2</code>. The IP addresses on kind-worker start with one prefix and those on kind-worker2 with another, because each node hands out addresses from its own range.</p>
-<figure class="fig"><a href="../files/figures/fig03-en.png"><img src="../files/figures/web/fig03-en.png" alt="Campus Portal architecture" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>Campus Portal architecture</figcaption></figure>
+<figure class="fig"><a href="../files/figures/fig03-en.png"><img class="only-light" src="../files/figures/site/fig03-en-light.png" alt="Figure 3. Campus Portal architecture" width="1600" height="900" loading="lazy" decoding="async"><img class="only-dark" src="../files/figures/site/fig03-en-dark.png" alt="Figure 3. Campus Portal architecture" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>Figure 3. Campus Portal architecture</figcaption></figure>
 <p>Figure 3 is the same picture drawn as boxes. Notice that the only way in from Windows is port 30080 on kind-worker, which leads to frontend and nowhere else.</p>
 <p class="ifnot"><strong>If you see this instead</strong></p>
 <p>A pod's STATUS column says <code class="nw">ErrImageNeverPull</code>. Run <code class="nw">kubectl -n campus describe pod</code> followed by that pod's name, and the Events list at the bottom holds a line like this one.</p>
@@ -680,6 +682,7 @@ PORTAL: 6/6 OK</code></pre></figure>
 <p>The login answered without a token. jq then printed the word <code class="nw">null</code>, which is 4 characters long. Auth found no student <code class="nw">sara</code> with that password, which points at the seed data in <code class="nw">db/init.sql</code>. Compare your file with <a href="ch05.html">chapter 5</a>, then run <code class="nw">deploy.sh</code> again so the database is created fresh.</p>
 <p>The profile and grades checks fail with <code class="nw">got ''</code>, and a jq error line sits above them. The api pod answered with an error page instead of JSON. Run <code>kubectl -n campus logs deploy/api</code>, and if that shows nothing useful, <code>kubectl -n campus logs deploy/auth</code>. Python names the problem on the last line of its message. <code class="nw">KeyError: 'POSTGRES_DB'</code> means the <code class="nw">envFrom</code> lines are missing from that Deployment in <code class="nw">app.yaml</code>.</p>
 <h2 id="step-9-open-the-portal-from-windows">Step 9. Open the portal from Windows</h2>
+<figure class="fig shot"><a href="../files/shots/portal.png"><img src="../files/shots/portal.png" alt="The portal after Sara logs in, with her profile and her two grades." width="1400" height="1350" loading="lazy" decoding="async"></a><figcaption>The portal after Sara logs in, with her profile and her two grades.</figcaption></figure>
 <p>Everything so far ran inside WSL. The attacker in <a href="ch08.html">chapter 8</a> sends his requests from Windows PowerShell, so check that Windows reaches the same port.</p>
 <p>Open PowerShell and run this.</p>
 <figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>curl.exe -s -o NUL -w &quot;%{http_code}\n&quot; http://localhost:30080/</code></pre></figure>
@@ -710,7 +713,7 @@ PORTAL: 6/6 OK</code></pre></figure>
 <!-- OUT ids: ch08-nodes, ch08-dryrun, ch08-deploy, ch08-pods, ch08-pods-wide, ch08-svc, ch08-env-ports, ch08-cnp-none, ch08-check-portal, ch08-curl-portal-windows, ch08-checkpoint, ch08-commit --><nav class="pager" aria-label="Chapters"><a rel="prev" href="ch05.html"><span>Previous chapter</span>Chapter 5. Write the services</a><a rel="next" href="ch07.html"><span>Next chapter</span>Chapter 7. Build your dashboard</a></nav></main></div>
 <footer class="foot"><div class="foot-in"><p>Kubernetes 1.36, Cilium 1.20.5 and kind 0.33.0 on Windows 11 with WSL 2. Every command was run on a real laptop in November 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">Source on GitHub</a></p></div></footer>
 <p class="vh" aria-live="polite" id="live"></p>
-<script type="application/json" id="i18n">{"copied": "Copied", "copyFail": "Press Ctrl+C to copy the selected text", "doneOf": "{d} of {t} steps done", "next": "Next step: {s}", "allDone": "All {t} steps done.", "sumCount": "{d} of {t} done", "cleared": "All ticks cleared.", "confirm": "Clear every tick on this page? Your files and your cluster stay as they are.", "stageCount": "{d} of {t}"}</script>
+<script type="application/json" id="i18n">{"copied": "Copied", "copyFail": "Press Ctrl+C to copy the selected text", "doneOf": "{d} of {t} steps done", "next": "Next step: {s}", "allDone": "All {t} steps done.", "sumCount": "{d} of {t} done", "cleared": "All ticks cleared.", "confirm": "Clear every tick on this page? Your files and your cluster stay as they are.", "stageCount": "{d} of {t}", "themeDark": "Dark", "themeLight": "Light", "toDark": "Switch to the dark theme", "toLight": "Switch to the light theme"}</script>
 <script src="../assets/site.js" defer></script>
 </body>
 </html>

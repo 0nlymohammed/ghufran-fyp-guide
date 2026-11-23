@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#ffffff">
-<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#e6ebf1">
+<meta name="color-scheme" content="light dark">
+<script>try{var t=localStorage.getItem('microseg-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
 <title>Chapter 7. Build your dashboard | Micro-segmentation lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,6 +24,7 @@
 <li><a href="../guide/index.html" aria-current="page">Full guide</a></li>
 <li><a href="../downloads.html">Downloads</a></li>
 <li><a href="../ar/guide/ch07.html" lang="ar" hreflang="ar" data-setlang="ar">العربية</a></li>
+<li><button type="button" class="theme" data-theme-toggle hidden>Dark</button></li>
 </ul></nav>
 </div></header>
 <div class="layout"><details class="rail" open><summary>Chapters</summary><nav aria-label="Chapters"><ol class="toc"><li><a href="ch00.html">0. How to use this guide</a></li><li><a href="ch01.html">1. What you will build</a></li><li><a href="ch02.html">2. Before you start</a></li><li><a href="ch03.html">3. Set up the environment</a></li><li><a href="ch04.html">4. Create the cluster</a></li><li><a href="ch05.html">5. Write the services</a></li><li><a href="ch06.html">6. Deploy the portal</a></li><li><a href="ch07.html" aria-current="page">7. Build your dashboard</a><ol class="sub"><li><a href="#step-1-write-dashboardapppy">Step 1. Write dashboard/app.py</a></li><li><a href="#step-2-check-that-apppy-compiles">Step 2. Check that app.py compiles</a></li><li><a href="#step-3-start-the-dashboard">Step 3. Start the dashboard</a></li><li><a href="#step-4-test-the-status-route">Step 4. Test the status route</a></li><li><a href="#step-5-run-one-probe-by-hand">Step 5. Run one probe by hand</a></li><li><a href="#step-6-test-the-matrix-route">Step 6. Test the matrix route</a></li><li><a href="#step-7-test-the-policy-and-drops-routes">Step 7. Test the policy and drops routes</a></li><li><a href="#step-8-write-dashboardindexhtml">Step 8. Write dashboard/index.html</a></li><li><a href="#step-9-open-the-dashboard">Step 9. Open the dashboard</a></li><li><a href="#checkpoint">Checkpoint</a></li></ol></li><li><a href="ch08.html">8. Attack the flat network</a></li><li><a href="ch09.html">9. Design the policy</a></li><li><a href="ch10.html">10. Apply micro-segmentation</a></li><li><a href="ch11.html">11. Read the evidence in Hubble</a></li><li><a href="ch12.html">12. Measure</a></li><li><a href="ch13.html">13. Getting unstuck alone</a></li><li><a href="ch14.html">14. Evidence for your report</a></li><li><a href="ch15.html">15. Day-by-day plan</a></li><li><a href="appendix.html">Appendices</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="chapter-7-build-your-dashboard">Chapter 7. Build your dashboard</h1>
@@ -313,7 +315,7 @@ Port 5050 is in use by another program. Either identify and stop that program, o
 <p>The dashboard answered with an error page instead of JSON, because the route's Python code crashed. Look at the dashboard's terminal. A traceback is the block Python prints when it crashes, starting with <code>Traceback (most recent call last):</code>, and its last line names the error. <code>FileNotFoundError: [Errno 2] No such file or directory: 'kubectl'</code> means the program can't find kubectl. Click into the dashboard's terminal and press Ctrl+C to stop it, then run <code class="nw">which kubectl</code> there. If it prints nothing, go back to the kubectl install in <a href="ch03.html">chapter 3</a>. If it prints a path, start the dashboard again with the step 3 command from that same terminal, and repeat the curl.</p>
 <h2 id="step-5-run-one-probe-by-hand">Step 5. Run one probe by hand</h2>
 <p>Each probe has to start inside the source pod, because Cilium checks a connection at the network interface of the pod it leaves from, as Figure 6 shows. <code class="nw">kubectl exec</code> is how you run a command there.</p>
-<figure class="fig"><a href="../files/figures/fig06-en.png"><img src="../files/figures/web/fig06-en.png" alt="How Cilium decides" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>How Cilium decides</figcaption></figure>
+<figure class="fig"><a href="../files/figures/fig06-en.png"><img class="only-light" src="../files/figures/site/fig06-en-light.png" alt="Figure 6. How Cilium decides" width="1600" height="900" loading="lazy" decoding="async"><img class="only-dark" src="../files/figures/site/fig06-en-dark.png" alt="Figure 6. How Cilium decides" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>Figure 6. How Cilium decides</figcaption></figure>
 <p>In Figure 6, notice that the check sits on each pod's own network interface, so a connection is judged by the pod it leaves from and the pod it arrives at.</p>
 <p>Run one probe by hand to see what <code class="nw">probe_from</code> does for a single cell, news to db.</p>
 <figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus exec deploy/news -- bash -c &quot;timeout 2 bash -c &#x27;echo &gt; /dev/tcp/db/5432&#x27;&quot;; echo &quot;exit code $?&quot;</code></pre></figure>
@@ -563,6 +565,7 @@ loadMatrix();
 <p>(10) The last two lines, <code class="nw">loadStatus()</code> and <code class="nw">loadMatrix()</code>, run once when the page opens, so the page shows the current state without a click.</p>
 <p>The dashboard reads <code class="nw">index.html</code> from disk on every request, so you don't need to restart it after saving this file.</p>
 <h2 id="step-9-open-the-dashboard">Step 9. Open the dashboard</h2>
+<figure class="fig shot"><a href="../files/shots/dashboard-flat.png"><img src="../files/shots/dashboard-flat.png" alt="The dashboard on the flat network: 36 of 36 paths reachable and 5 of 5 attack steps succeeded." width="1500" height="1671" loading="lazy" decoding="async"></a><figcaption>The dashboard on the flat network: 36 of 36 paths reachable and 5 of 5 attack steps succeeded.</figcaption></figure>
 <p>Check first that the back end hands out the page.</p>
 <figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>curl -s -o /dev/null -w &#x27;%{http_code}\n&#x27; localhost:5050/</code></pre></figure>
 <p><code class="nw">-o /dev/null</code> throws the page away and <code class="nw">-w '%{http_code}\n'</code> prints only the HTTP status code and a line break.</p>
@@ -586,7 +589,7 @@ loadMatrix();
 <!-- OUT ids: ch09-compile, ch09-start, ch09-status, ch09-status-pods, ch09-probe-by-hand, ch09-matrix-flat, ch09-matrix-flat-full, ch09-policies-remove, ch09-hubble-status, ch09-drops, ch09-index, ch09-checkpoint, ch09-commit --><nav class="pager" aria-label="Chapters"><a rel="prev" href="ch06.html"><span>Previous chapter</span>Chapter 6. Deploy the portal</a><a rel="next" href="ch08.html"><span>Next chapter</span>Chapter 8. Attack the flat network</a></nav></main></div>
 <footer class="foot"><div class="foot-in"><p>Kubernetes 1.36, Cilium 1.20.5 and kind 0.33.0 on Windows 11 with WSL 2. Every command was run on a real laptop in November 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">Source on GitHub</a></p></div></footer>
 <p class="vh" aria-live="polite" id="live"></p>
-<script type="application/json" id="i18n">{"copied": "Copied", "copyFail": "Press Ctrl+C to copy the selected text", "doneOf": "{d} of {t} steps done", "next": "Next step: {s}", "allDone": "All {t} steps done.", "sumCount": "{d} of {t} done", "cleared": "All ticks cleared.", "confirm": "Clear every tick on this page? Your files and your cluster stay as they are.", "stageCount": "{d} of {t}"}</script>
+<script type="application/json" id="i18n">{"copied": "Copied", "copyFail": "Press Ctrl+C to copy the selected text", "doneOf": "{d} of {t} steps done", "next": "Next step: {s}", "allDone": "All {t} steps done.", "sumCount": "{d} of {t} done", "cleared": "All ticks cleared.", "confirm": "Clear every tick on this page? Your files and your cluster stay as they are.", "stageCount": "{d} of {t}", "themeDark": "Dark", "themeLight": "Light", "toDark": "Switch to the dark theme", "toLight": "Switch to the light theme"}</script>
 <script src="../assets/site.js" defer></script>
 </body>
 </html>

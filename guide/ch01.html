@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#ffffff">
-<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#e6ebf1">
+<meta name="color-scheme" content="light dark">
+<script>try{var t=localStorage.getItem('microseg-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
 <title>Chapter 1. What you will build | Micro-segmentation lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,13 +24,14 @@
 <li><a href="../guide/index.html" aria-current="page">Full guide</a></li>
 <li><a href="../downloads.html">Downloads</a></li>
 <li><a href="../ar/guide/ch01.html" lang="ar" hreflang="ar" data-setlang="ar">العربية</a></li>
+<li><button type="button" class="theme" data-theme-toggle hidden>Dark</button></li>
 </ul></nav>
 </div></header>
 <div class="layout"><details class="rail" open><summary>Chapters</summary><nav aria-label="Chapters"><ol class="toc"><li><a href="ch00.html">0. How to use this guide</a></li><li><a href="ch01.html" aria-current="page">1. What you will build</a><ol class="sub"><li><a href="#where-everything-runs-layer-by-layer">Where everything runs, layer by layer</a></li><li><a href="#the-portals-architecture">The portal's architecture</a></li><li><a href="#the-7-programs">The 7 programs</a></li><li><a href="#the-8-allowed-flows">The 8 allowed flows</a></li><li><a href="#the-database">The database</a></li><li><a href="#the-api-endpoint-by-endpoint">The API, endpoint by endpoint</a></li><li><a href="#the-portals-six-checks">The portal's six checks</a></li><li><a href="#checkpoint-write-the-flow-table-from-memory">Checkpoint: write the flow table from memory</a></li></ol></li><li><a href="ch02.html">2. Before you start</a></li><li><a href="ch03.html">3. Set up the environment</a></li><li><a href="ch04.html">4. Create the cluster</a></li><li><a href="ch05.html">5. Write the services</a></li><li><a href="ch06.html">6. Deploy the portal</a></li><li><a href="ch07.html">7. Build your dashboard</a></li><li><a href="ch08.html">8. Attack the flat network</a></li><li><a href="ch09.html">9. Design the policy</a></li><li><a href="ch10.html">10. Apply micro-segmentation</a></li><li><a href="ch11.html">11. Read the evidence in Hubble</a></li><li><a href="ch12.html">12. Measure</a></li><li><a href="ch13.html">13. Getting unstuck alone</a></li><li><a href="ch14.html">14. Evidence for your report</a></li><li><a href="ch15.html">15. Day-by-day plan</a></li><li><a href="appendix.html">Appendices</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="chapter-1-what-you-will-build">Chapter 1. What you will build</h1>
 <p>You type no commands in this chapter. It's the lab on paper, and by the end you should be able to sketch the portal's 7 programs on their nodes and write down, without looking, the 8 flows between them that stay open once segmentation is on. That sketch is the checkpoint. Plan on about 45 minutes.</p>
 <h2 id="where-everything-runs-layer-by-layer">Where everything runs, layer by layer</h2>
 <p>Everything in the lab runs on your one laptop, stacked in layers. Windows 11 runs WSL 2, a light virtual machine with a real Linux kernel, and Ubuntu 24.04 lives inside it. Ubuntu runs Docker Engine, which holds three containers that each pretend to be a whole machine. Those containers are your three Kubernetes nodes, <code class="nw">kind-control-plane</code>, <code class="nw">kind-worker</code> and <code class="nw">kind-worker2</code>, and they run the pods of the portal in the namespace <code class="nw">campus</code>, next to Cilium's own pods in the namespace <code class="nw">kube-system</code>.</p>
-<figure class="fig"><a href="../files/figures/fig02-en.png"><img src="../files/figures/web/fig02-en.png" alt="Where everything runs" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>Where everything runs</figcaption></figure>
+<figure class="fig"><a href="../files/figures/fig02-en.png"><img class="only-light" src="../files/figures/site/fig02-en-light.png" alt="Figure 2. Where everything runs" width="1600" height="900" loading="lazy" decoding="async"><img class="only-dark" src="../files/figures/site/fig02-en-dark.png" alt="Figure 2. Where everything runs" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>Figure 2. Where everything runs</figcaption></figure>
 <p>In Figure 2, look at where <code class="nw">kubectl</code>, <code class="nw">cilium</code> and <code class="nw">hubble</code> sit. They run in Ubuntu itself, outside the cluster, and reach into it from there.</p>
 <p>Not every program in this project lives inside the cluster. The table lists what you'll open or run and where it lives.</p>
 <div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
@@ -78,7 +80,7 @@
 <p>The port mapping listens on <code class="nw">127.0.0.1</code> only, the address a machine uses for itself, so other people on your Wi-Fi can't open your portal.</p>
 <h2 id="the-portals-architecture">The portal's architecture</h2>
 <p>The portal has exactly one door from the outside, NodePort 30080 on <code class="nw">kind-worker</code>. Every other program has a name and a port that work only inside the cluster.</p>
-<figure class="fig"><a href="../files/figures/fig03-en.png"><img src="../files/figures/web/fig03-en.png" alt="Campus Portal architecture" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>Campus Portal architecture</figcaption></figure>
+<figure class="fig"><a href="../files/figures/fig03-en.png"><img class="only-light" src="../files/figures/site/fig03-en-light.png" alt="Figure 3. Campus Portal architecture" width="1600" height="900" loading="lazy" decoding="async"><img class="only-dark" src="../files/figures/site/fig03-en-dark.png" alt="Figure 3. Campus Portal architecture" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>Figure 3. Campus Portal architecture</figcaption></figure>
 <p>Figure 3 puts the seven pods on their two worker nodes, with one arrow coming in at NodePort 30080. The node <code class="nw">kind-control-plane</code> runs none of them.</p>
 <p>The frontend and news pods, the public-facing part of the portal, run on <code class="nw">kind-worker</code>, and the other five (api, auth, db, admin and ops) run on <code class="nw">kind-worker2</code>. The node labels <code class="nw">tier=frontend</code> and <code class="nw">tier=backend</code> decide that placement. Placement alone neither grants nor blocks any connection.</p>
 <p>All of the portal's Kubernetes objects live in the namespace <code class="nw">campus</code>, and there are four kinds of them.</p>
@@ -196,7 +198,7 @@
 <p>Ops has a Deployment but no Service, because nothing ever calls it. It only makes calls.</p>
 <h2 id="the-8-allowed-flows">The 8 allowed flows</h2>
 <p>A flow is one kind of connection the lab allows, from one program to another on one port. Once segmentation is on, the lab allows exactly the 8 flows below and refuses everything else. You'll use this table twice more. <a href="ch09.html">Chapter 9</a> rebuilds it from what Hubble records, and <a href="ch10.html">chapter 10</a> turns each row into policy rules.</p>
-<figure class="fig"><a href="../files/figures/fig04-en.png"><img src="../files/figures/web/fig04-en.png" alt="Allowed-flow map" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>Allowed-flow map</figcaption></figure>
+<figure class="fig"><a href="../files/figures/fig04-en.png"><img class="only-light" src="../files/figures/site/fig04-en-light.png" alt="Figure 4. Allowed-flow map" width="1600" height="900" loading="lazy" decoding="async"><img class="only-dark" src="../files/figures/site/fig04-en-dark.png" alt="Figure 4. Allowed-flow map" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>Figure 4. Allowed-flow map</figcaption></figure>
 <p>In Figure 4 each arrow is one allowed flow, and no arrow starts at news or at db.</p>
 <div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
 <thead>
@@ -535,7 +537,7 @@
 <!-- OUT ids: none --><nav class="pager" aria-label="Chapters"><a rel="prev" href="ch00.html"><span>Previous chapter</span>Chapter 0. How to use this guide</a><a rel="next" href="ch02.html"><span>Next chapter</span>Chapter 2. Before you start</a></nav></main></div>
 <footer class="foot"><div class="foot-in"><p>Kubernetes 1.36, Cilium 1.20.5 and kind 0.33.0 on Windows 11 with WSL 2. Every command was run on a real laptop in November 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">Source on GitHub</a></p></div></footer>
 <p class="vh" aria-live="polite" id="live"></p>
-<script type="application/json" id="i18n">{"copied": "Copied", "copyFail": "Press Ctrl+C to copy the selected text", "doneOf": "{d} of {t} steps done", "next": "Next step: {s}", "allDone": "All {t} steps done.", "sumCount": "{d} of {t} done", "cleared": "All ticks cleared.", "confirm": "Clear every tick on this page? Your files and your cluster stay as they are.", "stageCount": "{d} of {t}"}</script>
+<script type="application/json" id="i18n">{"copied": "Copied", "copyFail": "Press Ctrl+C to copy the selected text", "doneOf": "{d} of {t} steps done", "next": "Next step: {s}", "allDone": "All {t} steps done.", "sumCount": "{d} of {t} done", "cleared": "All ticks cleared.", "confirm": "Clear every tick on this page? Your files and your cluster stay as they are.", "stageCount": "{d} of {t}", "themeDark": "Dark", "themeLight": "Light", "toDark": "Switch to the dark theme", "toLight": "Switch to the light theme"}</script>
 <script src="../assets/site.js" defer></script>
 </body>
 </html>

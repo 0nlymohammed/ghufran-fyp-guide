@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#ffffff">
-<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#e6ebf1">
+<meta name="color-scheme" content="light dark">
+<script>try{var t=localStorage.getItem('microseg-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
 <title>الفصل 7. بناء لوحة التحكم | مختبر التجزئة الدقيقة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,6 +24,7 @@
 <li><a href="../../ar/guide/index.html" aria-current="page">الدليل الكامل</a></li>
 <li><a href="../../ar/downloads.html">التنزيلات</a></li>
 <li><a href="../../guide/ch07.html" lang="en" hreflang="en" data-setlang="en">English</a></li>
+<li><button type="button" class="theme" data-theme-toggle hidden>داكن</button></li>
 </ul></nav>
 </div></header>
 <div class="layout"><details class="rail" open><summary>الفصول</summary><nav aria-label="الفصول"><ol class="toc"><li><a href="ch00.html">0. كيف نستخدم هذا الدليل</a></li><li><a href="ch01.html">1. ما الذي سنبنيه</a></li><li><a href="ch02.html">2. قبل أن نبدأ</a></li><li><a href="ch03.html">3. تجهيز بيئة العمل</a></li><li><a href="ch04.html">4. إنشاء العنقود</a></li><li><a href="ch05.html">5. كتابة الخدمات</a></li><li><a href="ch06.html">6. نشر البوابة</a></li><li><a href="ch07.html" aria-current="page">7. بناء لوحة التحكم</a><ol class="sub"><li><a href="#الخطوة-1-كتابة-dashboardapppy">الخطوة 1. كتابة dashboard/app.py</a></li><li><a href="#الخطوة-2-التحقق-من-أن-apppy-يترجم-compile">الخطوة 2. التحقق من أن app.py يُترجَم (Compile)</a></li><li><a href="#الخطوة-3-تشغيل-لوحة-التحكم">الخطوة 3. تشغيل لوحة التحكم</a></li><li><a href="#الخطوة-4-اختبار-نقطة-نهاية-الحالة">الخطوة 4. اختبار نقطة نهاية الحالة</a></li><li><a href="#الخطوة-5-تشغيل-فحص-واحد-يدويا">الخطوة 5. تشغيل فحص واحد يدوياً</a></li><li><a href="#الخطوة-6-اختبار-نقطة-نهاية-المصفوفة">الخطوة 6. اختبار نقطة نهاية المصفوفة</a></li><li><a href="#الخطوة-7-اختبار-نقطتي-نهاية-السياسات-والإسقاطات">الخطوة 7. اختبار نقطتي نهاية السياسات والإسقاطات</a></li><li><a href="#الخطوة-8-كتابة-dashboardindexhtml">الخطوة 8. كتابة dashboard/index.html</a></li><li><a href="#الخطوة-9-فتح-لوحة-التحكم">الخطوة 9. فتح لوحة التحكم</a></li><li><a href="#نقطة-التحقق">نقطة التحقق</a></li></ol></li><li><a href="ch08.html">8. مهاجمة الشبكة المسطحة</a></li><li><a href="ch09.html">9. تصميم السياسة</a></li><li><a href="ch10.html">10. تطبيق التجزئة الدقيقة للشبكة</a></li><li><a href="ch11.html">11. قراءة الأدلة في Hubble</a></li><li><a href="ch12.html">12. القياس</a></li><li><a href="ch13.html">13. تجاوز الأعطال دون مساعدة</a></li><li><a href="ch14.html">14. أدلة بحث التخرج</a></li><li><a href="ch15.html">15. خطة العمل يوماً بيوم</a></li><li><a href="appendix.html">الملاحق</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="الفصل-7-بناء-لوحة-التحكم">الفصل 7. بناء لوحة التحكم</h1>
@@ -313,7 +315,7 @@ Port 5050 is in use by another program. Either identify and stop that program, o
 <p>إذا ظهرت هذه الرسالة فلوحة التحكم أجابت بصفحة خطأ بدلاً من JSON، لأن كود Python في نقطة النهاية انهار. ننظر في طرفية لوحة التحكم. وتقرير التتبع هو الكتلة التي تطبعها Python عند الانهيار، ويبدأ بـ <code>Traceback (most recent call last):</code>، وسطره الأخير يسمّي الخطأ. فظهور <code>FileNotFoundError: [Errno 2] No such file or directory: 'kubectl'</code> يعني أن البرنامج لا يجد kubectl. ننقر داخل طرفية لوحة التحكم ونضغط Ctrl+C لإيقافها، ثم نشغّل <code class="nw">which kubectl</code> هناك. فإن لم يطبع شيئاً نعود إلى تثبيت kubectl في <a href="ch03.html">الفصل 3</a>. وإن طبع مساراً نشغّل لوحة التحكم من جديد بأمر الخطوة 3 من الطرفية نفسها، ونكرر أمر curl.</p>
 <h2 id="الخطوة-5-تشغيل-فحص-واحد-يدويا">الخطوة 5. تشغيل فحص واحد يدوياً</h2>
 <p>يجب أن يبدأ كل فحص من داخل الـ Pod المصدر، لأن Cilium يتحقق من الاتصال عند واجهة الشبكة (Network interface) في الـ Pod الذي يخرج منه، كما يبيّن الشكل 6. و<code class="nw">kubectl exec</code> هو وسيلتنا لتشغيل أمر هناك.</p>
-<figure class="fig"><a href="../../files/figures/fig06-ar.png"><img src="../../files/figures/web/fig06-ar.png" alt="كيف يقرر Cilium" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>كيف يقرر Cilium</figcaption></figure>
+<figure class="fig"><a href="../../files/figures/fig06-ar.png"><img class="only-light" src="../../files/figures/site/fig06-ar-light.png" alt="الشكل 6. كيف يقرر Cilium" width="1600" height="900" loading="lazy" decoding="async"><img class="only-dark" src="../../files/figures/site/fig06-ar-dark.png" alt="الشكل 6. كيف يقرر Cilium" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>الشكل 6. كيف يقرر Cilium</figcaption></figure>
 <p>نلاحظ في الشكل 6 أن Cilium يفرض السياسة على واجهة الشبكة في كل Pod، لذلك يُحكم على الاتصال بحسب الـ Pod الذي يخرج منه والـ Pod الذي يصل إليه.</p>
 <p>نشغّل فحصاً واحداً يدوياً لنرى ما تفعله <code class="nw">probe_from</code> لخلية واحدة، من news إلى db.</p>
 <figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>kubectl -n campus exec deploy/news -- bash -c &quot;timeout 2 bash -c &#x27;echo &gt; /dev/tcp/db/5432&#x27;&quot;; echo &quot;exit code $?&quot;</code></pre></figure>
@@ -563,6 +565,7 @@ loadMatrix();
 <p>(10) يعمل السطران الأخيران، <code class="nw">loadStatus()</code> و<code class="nw">loadMatrix()</code>، مرة واحدة عند فتح الصفحة، فتعرض الصفحة الحالة الراهنة من دون أي نقرة.</p>
 <p>تقرأ لوحة التحكم <code class="nw">index.html</code> من القرص مع كل طلب، لذلك لا نحتاج إلى إعادة تشغيلها بعد حفظ هذا الملف.</p>
 <h2 id="الخطوة-9-فتح-لوحة-التحكم">الخطوة 9. فتح لوحة التحكم</h2>
+<figure class="fig shot"><a href="../../files/shots/dashboard-flat.png"><img src="../../files/shots/dashboard-flat.png" alt="لوحة التحكم على الشبكة المسطحة: 36 من 36 مساراً مفتوحة، ونجحت خطوات الهجوم الخمس كلها." width="1500" height="1671" loading="lazy" decoding="async"></a><figcaption>لوحة التحكم على الشبكة المسطحة: 36 من 36 مساراً مفتوحة، ونجحت خطوات الهجوم الخمس كلها.</figcaption></figure>
 <p>نتأكد أولاً أن الواجهة الخلفية تقدّم الصفحة.</p>
 <figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>curl -s -o /dev/null -w &#x27;%{http_code}\n&#x27; localhost:5050/</code></pre></figure>
 <p>يتخلّص <code class="nw">-o /dev/null</code> من الصفحة، ويطبع <code class="nw">-w '%{http_code}\n'</code> رمز حالة HTTP وحده متبوعاً بسطر جديد.</p>
@@ -586,7 +589,7 @@ loadMatrix();
 <!-- OUT ids: ch09-compile, ch09-start, ch09-status, ch09-status-pods, ch09-probe-by-hand, ch09-matrix-flat, ch09-matrix-flat-full, ch09-policies-remove, ch09-hubble-status, ch09-drops, ch09-index, ch09-checkpoint, ch09-commit --><nav class="pager" aria-label="الفصول"><a rel="prev" href="ch06.html"><span>الفصل السابق</span>الفصل 6. نشر البوابة</a><a rel="next" href="ch08.html"><span>الفصل التالي</span>الفصل 8. مهاجمة الشبكة المسطحة</a></nav></main></div>
 <footer class="foot"><div class="foot-in"><p>Kubernetes 1.36 و Cilium 1.20.5 و kind 0.33.0 على Windows 11 مع WSL 2. شغّلنا كل أمر على حاسوب حقيقي في تشرين الثاني 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">المصدر على GitHub</a></p></div></footer>
 <p class="vh" aria-live="polite" id="live"></p>
-<script type="application/json" id="i18n">{"copied": "نُسخ", "copyFail": "نضغط Ctrl+C لنسخ النص المحدد", "doneOf": "الخطوات المنجزة: {d} من {t}", "next": "الخطوة التالية: {s}", "allDone": "اكتمل المسار وأُنجزت الخطوات كلها.", "sumCount": "المنجز {d} من {t}", "cleared": "مُسحت كل العلامات.", "confirm": "هل نمسح كل العلامات في هذه الصفحة؟ تبقى الملفات والعنقود كما هي.", "stageCount": "{d} من {t}"}</script>
+<script type="application/json" id="i18n">{"copied": "نُسخ", "copyFail": "نضغط Ctrl+C لنسخ النص المحدد", "doneOf": "الخطوات المنجزة: {d} من {t}", "next": "الخطوة التالية: {s}", "allDone": "اكتمل المسار وأُنجزت الخطوات كلها.", "sumCount": "المنجز {d} من {t}", "cleared": "مُسحت كل العلامات.", "confirm": "هل نمسح كل العلامات في هذه الصفحة؟ تبقى الملفات والعنقود كما هي.", "stageCount": "{d} من {t}", "themeDark": "داكن", "themeLight": "فاتح", "toDark": "التبديل إلى المظهر الداكن", "toLight": "التبديل إلى المظهر الفاتح"}</script>
 <script src="../../assets/site.js" defer></script>
 </body>
 </html>

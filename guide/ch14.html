@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#ffffff">
-<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#e6ebf1">
+<meta name="color-scheme" content="light dark">
+<script>try{var t=localStorage.getItem('microseg-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
 <title>Chapter 14. Evidence for your report | Micro-segmentation lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,6 +24,7 @@
 <li><a href="../guide/index.html" aria-current="page">Full guide</a></li>
 <li><a href="../downloads.html">Downloads</a></li>
 <li><a href="../ar/guide/ch14.html" lang="ar" hreflang="ar" data-setlang="ar">العربية</a></li>
+<li><button type="button" class="theme" data-theme-toggle hidden>Dark</button></li>
 </ul></nav>
 </div></header>
 <div class="layout"><details class="rail" open><summary>Chapters</summary><nav aria-label="Chapters"><ol class="toc"><li><a href="ch00.html">0. How to use this guide</a></li><li><a href="ch01.html">1. What you will build</a></li><li><a href="ch02.html">2. Before you start</a></li><li><a href="ch03.html">3. Set up the environment</a></li><li><a href="ch04.html">4. Create the cluster</a></li><li><a href="ch05.html">5. Write the services</a></li><li><a href="ch06.html">6. Deploy the portal</a></li><li><a href="ch07.html">7. Build your dashboard</a></li><li><a href="ch08.html">8. Attack the flat network</a></li><li><a href="ch09.html">9. Design the policy</a></li><li><a href="ch10.html">10. Apply micro-segmentation</a></li><li><a href="ch11.html">11. Read the evidence in Hubble</a></li><li><a href="ch12.html">12. Measure</a></li><li><a href="ch13.html">13. Getting unstuck alone</a></li><li><a href="ch14.html" aria-current="page">14. Evidence for your report</a><ol class="sub"><li><a href="#where-each-piece-goes-thesis-chapters-2-to-5">Where each piece goes: thesis chapters 2 to 5</a></li><li><a href="#design-material-nothing-to-capture">Design material: nothing to capture</a></li><li><a href="#the-evidence-list-e01-to-e33">The evidence list, E01 to E33</a></li><li><a href="#capture-rules">Capture rules</a></li><li><a href="#set-up-a-terminal-look-for-screenshots">Set up a terminal look for screenshots</a></li><li><a href="#make-the-two-evidence-folders-ubuntu-and-windows">Make the two evidence folders (Ubuntu and Windows)</a></li><li><a href="#capture-a-terminal-output">Capture a terminal output</a></li><li><a href="#capture-a-powershell-output">Capture a PowerShell output</a></li><li><a href="#capture-a-browser-page">Capture a browser page</a></li><li><a href="#before-the-capture-session-start-the-helpers">Before the capture session: start the helpers</a></li><li><a href="#the-capture-session-part-by-part">The capture session, part by part</a></li><li><a href="#copy-the-windows-captures-across-into-the-project">Copy the Windows captures across, into the project</a></li><li><a href="#checkpoint">Checkpoint</a></li></ol></li><li><a href="ch15.html">15. Day-by-day plan</a></li><li><a href="appendix.html">Appendices</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="chapter-14-evidence-for-your-report">Chapter 14. Evidence for your report</h1>
@@ -591,7 +593,7 @@ ls ~/microseg/evidence</code></pre></figure>
 <!-- OUT ids: ch16-mkdir-evidence, ch16-windows-folder, ch16-tee-nodes, ch16-ps-step1, ch16-ps-step2, ch16-ps-step3, ch16-ps-step4, ch16-ps-step5, ch16-helpers-check, ch16-flat-state, ch16-reset-before-baseline, ch16-baseline-state, ch16-segmented-state, ch16-toggle, ch16-reset-db, ch16-copy, ch16-evidence-check, ch16-commit --><nav class="pager" aria-label="Chapters"><a rel="prev" href="ch13.html"><span>Previous chapter</span>Chapter 13. Getting unstuck alone</a><a rel="next" href="ch15.html"><span>Next chapter</span>Chapter 15. Day-by-day plan</a></nav></main></div>
 <footer class="foot"><div class="foot-in"><p>Kubernetes 1.36, Cilium 1.20.5 and kind 0.33.0 on Windows 11 with WSL 2. Every command was run on a real laptop in November 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">Source on GitHub</a></p></div></footer>
 <p class="vh" aria-live="polite" id="live"></p>
-<script type="application/json" id="i18n">{"copied": "Copied", "copyFail": "Press Ctrl+C to copy the selected text", "doneOf": "{d} of {t} steps done", "next": "Next step: {s}", "allDone": "All {t} steps done.", "sumCount": "{d} of {t} done", "cleared": "All ticks cleared.", "confirm": "Clear every tick on this page? Your files and your cluster stay as they are.", "stageCount": "{d} of {t}"}</script>
+<script type="application/json" id="i18n">{"copied": "Copied", "copyFail": "Press Ctrl+C to copy the selected text", "doneOf": "{d} of {t} steps done", "next": "Next step: {s}", "allDone": "All {t} steps done.", "sumCount": "{d} of {t} done", "cleared": "All ticks cleared.", "confirm": "Clear every tick on this page? Your files and your cluster stay as they are.", "stageCount": "{d} of {t}", "themeDark": "Dark", "themeLight": "Light", "toDark": "Switch to the dark theme", "toLight": "Switch to the light theme"}</script>
 <script src="../assets/site.js" defer></script>
 </body>
 </html>

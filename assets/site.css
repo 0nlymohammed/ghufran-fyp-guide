@@ -1,18 +1,21 @@
 /* Micro-segmentation lab guide.
-   Palette is the one used by the figures and slides: ink navy on white, blue for the allowed path
-   (links, progress), orange only as an edge on "something is wrong" blocks, never as text. */
+   Palette is the one used by the figures and slides: ink navy, blue for the allowed path (links, progress),
+   orange only as an edge on "something is wrong" blocks, never as text.
+   The light ground is a soft grey-blue, not white, so long reading sessions are easier on the eyes.
+   The dark theme uses the same navy as its ground. */
 :root {
-  --paper: #ffffff;
+  --paper: #e6ebf1;
+  --surface: #f1f4f8;
   --ink: #13233f;
-  --muted: #56627a;
-  --rule: #d5dae2;
-  --rule-strong: #b4bccb;
-  --code: #f4f6f9;
-  --tint: #e1eef7;
+  --muted: #4c586f;
+  --rule: #c3cbd8;
+  --rule-strong: #6f7c94;
+  --code: #f1f4f8;
+  --tint: #d3e5f2;
   --blue: #0072b2;
-  --blue-ink: #005a8c;
+  --blue-ink: #00568a;
   --orange: #d55e00;
-  --orange-tint: #fbe7d9;
+  --orange-tint: #f6dac8;
 
   --font: "Public Sans", "Segoe UI", system-ui, sans-serif;
   --mono: "Noto Sans Mono", Consolas, "Courier New", monospace;
@@ -32,6 +35,22 @@
   --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
   color-scheme: light;
 }
+html[data-theme="dark"] {
+  --paper: #0f1826;
+  --surface: #172334;
+  --ink: #e4eaf3;
+  --muted: #a3afc2;
+  --rule: #2b3a50;
+  --rule-strong: #6a7fa0;
+  --code: #172334;
+  --tint: #173a57;
+  --blue: #56abdf;
+  --blue-ink: #86c5ee;
+  --orange: #ee8a45;
+  --orange-tint: #40271a;
+  color-scheme: dark;
+}
+html:not([data-theme="dark"]) .only-dark, html[data-theme="dark"] .only-light { display: none; }
 
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scrollbar-color: var(--rule-strong) var(--paper); }
@@ -84,7 +103,9 @@ code { font-family: var(--mono); font-size: 0.88em; background: var(--code); bor
 .top ul { display: flex; flex-wrap: wrap; gap: 2px; list-style: none; margin: 0; padding: 0; }
 .top li { margin: 0; }
 .top nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--s3); color: var(--ink); text-decoration: none; border-radius: var(--r-control); }
-.top nav a:hover { background: var(--code); }
+.top nav a:hover, .theme:hover { background: var(--code); }
+.theme { min-height: 36px; margin-inline-start: var(--s2); padding: 0 var(--s3); background: none; color: var(--ink); border: 1px solid var(--rule-strong); border-radius: var(--r-control); cursor: pointer; }
+.top li:has(.theme) { display: flex; align-items: center; }
 .top nav a[aria-current="page"] { box-shadow: inset 0 -3px 0 var(--blue); border-radius: 0; font-weight: 600; }
 .top nav a[lang="ar"] { font-family: "Noto Sans Arabic", var(--font); }
 .top nav a[lang="en"] { font-family: var(--font); }
@@ -223,7 +244,10 @@ tbody th { font-weight: 600; }
 @media (min-width: 700px) { table.dl tbody th { min-width: 11rem; white-space: nowrap; } }
 td.num, th.num { text-align: end; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .fig { margin: var(--s5) 0; }
-.fig img { display: block; width: 100%; height: auto; border: 1px solid var(--rule); border-radius: var(--r-surface); }
+.fig a { display: block; border-radius: var(--r-surface); }
+.fig img { width: 100%; height: auto; border: 1px solid var(--rule); border-radius: var(--r-surface); background: var(--surface); }
+.fig img:not(.only-light, .only-dark), html:not([data-theme="dark"]) .fig img.only-light, html[data-theme="dark"] .fig img.only-dark { display: block; }
+html[data-theme="dark"] .fig.shot img { filter: brightness(0.86); }
 .fig figcaption { font-size: var(--text-sm); color: var(--muted); margin-top: var(--s2); }
 
 /* ---------- guide pages ---------- */
@@ -255,6 +279,7 @@ td.num, th.num { text-align: end; white-space: nowrap; font-variant-numeric: tab
 @media (max-width: 420px) {
   .content code.nw { white-space: normal; }
   .top nav a { padding: 0 6px; font-size: 0.9375rem; }
+  .theme { padding: 0 var(--s2); font-size: 0.9375rem; margin-inline-start: 4px; }
   .top ul { gap: 0; }
 }
 

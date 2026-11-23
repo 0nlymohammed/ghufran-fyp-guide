@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#ffffff">
-<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#e6ebf1">
+<meta name="color-scheme" content="light dark">
+<script>try{var t=localStorage.getItem('microseg-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
 <title>الفصل 10. تطبيق التجزئة الدقيقة للشبكة | مختبر التجزئة الدقيقة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,6 +24,7 @@
 <li><a href="../../ar/guide/index.html" aria-current="page">الدليل الكامل</a></li>
 <li><a href="../../ar/downloads.html">التنزيلات</a></li>
 <li><a href="../../guide/ch10.html" lang="en" hreflang="en" data-setlang="en">English</a></li>
+<li><button type="button" class="theme" data-theme-toggle hidden>داكن</button></li>
 </ul></nav>
 </div></header>
 <div class="layout"><details class="rail" open><summary>الفصول</summary><nav aria-label="الفصول"><ol class="toc"><li><a href="ch00.html">0. كيف نستخدم هذا الدليل</a></li><li><a href="ch01.html">1. ما الذي سنبنيه</a></li><li><a href="ch02.html">2. قبل أن نبدأ</a></li><li><a href="ch03.html">3. تجهيز بيئة العمل</a></li><li><a href="ch04.html">4. إنشاء العنقود</a></li><li><a href="ch05.html">5. كتابة الخدمات</a></li><li><a href="ch06.html">6. نشر البوابة</a></li><li><a href="ch07.html">7. بناء لوحة التحكم</a></li><li><a href="ch08.html">8. مهاجمة الشبكة المسطحة</a></li><li><a href="ch09.html">9. تصميم السياسة</a></li><li><a href="ch10.html" aria-current="page">10. تطبيق التجزئة الدقيقة للشبكة</a><ol class="sub"><li><a href="#البدء-من-شبكة-مسطحة-ودرجة-عمر-58">البدء من شبكة مسطحة، ودرجة عمر 58</a></li><li><a href="#كتابة-1-baselineyaml-واختباره-بتشغيل-تجريبي">كتابة 1-baseline.yaml واختباره بتشغيل تجريبي</a></li><li><a href="#تطبيق-ملف-الأساس-وحده-0-من-36">تطبيق ملف الأساس وحده: 0 من 36</a></li><li><a href="#كتابة-2-allowyaml-سياسة-واحدة-لكل-حمل-عمل">كتابة 2-allow.yaml: سياسة واحدة لكل حمل عمل</a></li><li><a href="#تطبيق-2-allowyaml-10-سياسات">تطبيق 2-allow.yaml: 10 سياسات</a></li><li><a href="#البوابة-تعمل-من-جديد-66">البوابة تعمل من جديد: 6/6</a></li><li><a href="#المصفوفة-7-من-36">المصفوفة: 7 من 36</a></li><li><a href="#الهجوم-مرة-أخرى-1-من-5">الهجوم مرة أخرى: 1 من 5</a></li><li><a href="#مسار-التصدير-المنسي-يجيب-الآن-بـ-403">مسار التصدير المنسي يجيب الآن بـ 403</a></li><li><a href="#اختبار-التبديل-إزالة-ثم-إعادة-تطبيق-ثم-مقارنة">اختبار التبديل: إزالة، ثم إعادة تطبيق، ثم مقارنة</a></li><li><a href="#نقطة-التحقق">نقطة التحقق</a></li></ol></li><li><a href="ch11.html">11. قراءة الأدلة في Hubble</a></li><li><a href="ch12.html">12. القياس</a></li><li><a href="ch13.html">13. تجاوز الأعطال دون مساعدة</a></li><li><a href="ch14.html">14. أدلة بحث التخرج</a></li><li><a href="ch15.html">15. خطة العمل يوماً بيوم</a></li><li><a href="appendix.html">الملاحق</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="الفصل-10-تطبيق-التجزئة-الدقيقة-للشبكة">الفصل 10. تطبيق التجزئة الدقيقة للشبكة</h1>
@@ -359,7 +361,7 @@ spec:
 <p>(4) تحت <code class="nw">egress</code> قاعدتا <code class="nw">toEndpoints</code> هما تأشيرتا الخروج لـ api، إلى auth على 5001 وإلى db على 5432.</p>
 <p>ننظر الآن إلى ما تتركه السياسات الأخرى، لأن الفجوات جزء من التصميم. لا قسم <code class="nw">egress</code> في سياسة news، فتبقى news على الرفض الافتراضي للحركة الصادرة الذي فرضه ملف الأساس، ولا تصل إلا إلى DNS. وسياسة db بلا حركة صادرة أيضاً. ولا قسم <code class="nw">ingress</code> في سياسة ops، فلا يحق لأي شيء الاتصال بـ ops. أما سياسة frontend فهي الوحيدة التي تستخدم <code class="nw">fromEntities: world</code> لتسمح للزوار القادمين من خارج العنقود بالدخول على المنفذ 80.</p>
 <p>نحفظ الملف بـ Ctrl+S.</p>
-<figure class="fig"><a href="../../files/figures/fig06-ar.png"><img src="../../files/figures/web/fig06-ar.png" alt="كيف يقرر Cilium" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>كيف يقرر Cilium</figcaption></figure>
+<figure class="fig"><a href="../../files/figures/fig06-ar.png"><img class="only-light" src="../../files/figures/site/fig06-ar-light.png" alt="الشكل 6. كيف يقرر Cilium" width="1600" height="900" loading="lazy" decoding="async"><img class="only-dark" src="../../files/figures/site/fig06-ar-dark.png" alt="الشكل 6. كيف يقرر Cilium" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>الشكل 6. كيف يقرر Cilium</figcaption></figure>
 <p>يتتبع الشكل 6 اتصالاً واحداً عبر فحوص Cilium: فحص الحركة الصادرة عند واجهة شبكة المتصل، ثم فحص الحركة الواردة عند واجهة شبكة الطرف المُتصَل به. واتصال frontend إلى api هو الوحيد الذي ينعطف عبر Envoy.</p>
 <p>قبل تطبيق ملف السماح نتأكد من أن الملفين في المكان الذي تتوقعه أوامر هذا الفصل.</p>
 <figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>ls ~/microseg/k8s/policies</code></pre></figure>
@@ -428,13 +430,14 @@ PORTAL: 6/6 OK</code></pre></figure>
 <figure class="code out"><figcaption><span class="lbl">المخرجات</span></figcaption><pre dir="ltr"><code>{&quot;open&quot;:7,&quot;total&quot;:36}</code></pre></figure>
 <p>يجب أن يكون الناتج <code class="nw">{"open":7,"total":36}</code>. والخلايا الزرقاء السبع في لوحة التحكم هي frontend إلى news، وfrontend إلى api، وapi إلى auth، وapi إلى db، وauth إلى db، وadmin إلى db، وops إلى admin. إنها جدول التدفقات بلا صف world، لأن العالم الخارجي ليس واحداً من مصادر المصفوفة السبعة. وكل خلية أخرى برتقالية، وصف news برتقالي من أوله إلى آخره.</p>
 <p>الانتقال من 36 مساراً مفتوحاً إلى 7 يزيل 29 منها، أي أن المسارات التي يستطيع المهاجم استخدامها صارت أقل بنسبة 80.6%.</p>
-<figure class="fig"><a href="../../files/figures/fig09-ar.png"><img src="../../files/figures/web/fig09-ar.png" alt="مصفوفة قابلية الوصول قبل التجزئة وبعدها" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>مصفوفة قابلية الوصول قبل التجزئة وبعدها</figcaption></figure>
+<figure class="fig"><a href="../../files/figures/fig09-ar.png"><img class="only-light" src="../../files/figures/site/fig09-ar-light.png" alt="الشكل 9. مصفوفة قابلية الوصول قبل التجزئة وبعدها" width="1600" height="900" loading="lazy" decoding="async"><img class="only-dark" src="../../files/figures/site/fig09-ar-dark.png" alt="الشكل 9. مصفوفة قابلية الوصول قبل التجزئة وبعدها" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>الشكل 9. مصفوفة قابلية الوصول قبل التجزئة وبعدها</figcaption></figure>
 <p>يضع الشكل 9 المصفوفتين جنباً إلى جنب. وصف news، وهو نقطة انطلاق المهاجم، ينتقل من الأزرق كله إلى البرتقالي كله.</p>
 <p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
 <p>إذا بقي العدد 36 فالسياسات غير سارية. يُشغَّل <code class="nw">kubectl -n campus get cnp</code> فإذا طبع <code>No resources found in campus namespace.</code> يُطبَّق الملفان من جديد بدءاً من أول هذا الفصل.</p>
 <p>إذا كان العدد أكبر من 7، مثل 8، فالخلية المفتوحة الزائدة تعني خطأين أو سياسة واحدة متبقية، لأن الخلية لا تصير زرقاء إلا إذا سمح بها الطرفان كلاهما. يُشغَّل أولاً <code class="nw">kubectl -n campus get cnp</code> الذي يجب أن يسرد 10 سياسات بالضبط. وإذا سرد أكثر تُحذف الزائدة باسمها بالأمر <code class="nw">kubectl -n campus delete cnp</code> متبوعاً بذلك الاسم. وإذا سرد 10 يُبحث في لوحة التحكم عن الخلية الزرقاء غير المتوقعة، ويُتحقق من قاعدتيها كلتيهما. فخدمة الصف فيها قاعدة حركة صادرة تسمح بأكثر مما قُصد، وخدمة العمود فيها قاعدة حركة واردة تفعل الشيء نفسه. ويُبحث عن <code class="nw">matchLabels</code> تُرك فارغاً، لأن المُحدِّد الفارغ يطابق كل Pod.</p>
 <p>إذا كان العدد أقل من 7 وفشل فحص البوابة أيضاً، فالبداية بإصلاح البوابة باستخدام قسم الأعطال في الخطوة السابقة. القاعدة الناقصة نفسها تفسّر المشكلتين.</p>
 <h2 id="الهجوم-مرة-أخرى-1-من-5">الهجوم مرة أخرى: 1 من 5</h2>
+<figure class="fig shot"><a href="../../files/shots/dashboard-segmented.png"><img src="../../files/shots/dashboard-segmented.png" alt="لوحة التحكم بعد تفعيل التجزئة الدقيقة: 7 من 36 مساراً مفتوحة، ونجحت خطوة واحدة من خطوات الهجوم الخمس." width="1500" height="1485" loading="lazy" decoding="async"></a><figcaption>لوحة التحكم بعد تفعيل التجزئة الدقيقة: 7 من 36 مساراً مفتوحة، ونجحت خطوة واحدة من خطوات الهجوم الخمس.</figcaption></figure>
 <p>نشغّل هجوم <a href="ch08.html">الفصل 8</a> مرة أخرى، من دون أي تغيير، على الشبكة المجزأة.</p>
 <p>في لوحة التحكم ننقر «Run attack» (شغّل الهجوم). يستغرق الهجوم هذه المرة نحو 18 ثانية، لأن الخطوات المحجوبة تنتظر انتهاء مهلها. ويجب أن يكون نص الملخص «1 of 5 attack steps succeeded». ثم نحفظ الناتج الكامل لكل خطوة دليلاً.</p>
 <figure class="code cmd"><figcaption><span class="lbl">طرفية Ubuntu</span><button type="button" class="copy" aria-label="نسخ هذا الأمر">نسخ</button></figcaption><pre dir="ltr"><code>curl -s -X POST localhost:5050/api/attack | jq -r &#x27;.[] | &quot;--- &quot; + .step + &quot;\n&quot; + .output&#x27; | tee ~/microseg/evidence/ch12-attack-segmented.txt</code></pre></figure>
@@ -481,7 +484,7 @@ curl: (28) Connection timed out after 3001 milliseconds</code></pre></figure>
   3 |          2 | Network Security |    58
 (1 row)</code></pre></figure>
 <p>يجب أن تبقى القيمة في عمود الدرجة <code class="nw">58</code>.</p>
-<figure class="fig"><a href="../../files/figures/fig10-ar.png"><img src="../../files/figures/web/fig10-ar.png" alt="خطوات الهجوم التي نجحت" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>خطوات الهجوم التي نجحت</figcaption></figure>
+<figure class="fig"><a href="../../files/figures/fig10-ar.png"><img class="only-light" src="../../files/figures/site/fig10-ar-light.png" alt="الشكل 10. خطوات الهجوم التي نجحت" width="1600" height="900" loading="lazy" decoding="async"><img class="only-dark" src="../../files/figures/site/fig10-ar-dark.png" alt="الشكل 10. خطوات الهجوم التي نجحت" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>الشكل 10. خطوات الهجوم التي نجحت</figcaption></figure>
 <p>يقارن الشكل 10 الهجوم على الشبكتين. الخطوة الوحيدة التي نجت هي الخطوة التي لا تغادر Pod خدمة news أبداً.</p>
 <p class="ifnot"><strong>إذا ظهر شيء آخر</strong></p>
 <p>إذا قال الملخص «5 of 5 attack steps succeeded» وكانت الدرجة 95، فالسياسات غير سارية. يُشغَّل <code class="nw">kubectl -n campus get cnp</code> ويُطبَّق الملفان إن كانا غائبين، وتُرجَع درجة عمر كما في <a href="ch08.html">الفصل 8</a>، ثم يُعاد الهجوم.</p>
@@ -564,7 +567,7 @@ kubectl -n campus exec deploy/db -- psql -U postgres -d campus -c &quot;SELECT *
 <!-- OUT ids: ch12-start, ch12-dryrun, ch12-apply-baseline, ch12-matrix-baseline, ch12-portal-baseline, ch12-ls-policies, ch12-apply-allow, ch12-cnp-list, ch12-portal-segmented, ch12-matrix-segmented, ch12-attack-segmented-output, ch12-grade-unchanged, ch12-export-403, ch12-toggle-remove, ch12-toggle-apply, ch12-grade-after-toggle, ch12-checkpoint --><nav class="pager" aria-label="الفصول"><a rel="prev" href="ch09.html"><span>الفصل السابق</span>الفصل 9. تصميم السياسة</a><a rel="next" href="ch11.html"><span>الفصل التالي</span>الفصل 11. قراءة الأدلة في Hubble</a></nav></main></div>
 <footer class="foot"><div class="foot-in"><p>Kubernetes 1.36 و Cilium 1.20.5 و kind 0.33.0 على Windows 11 مع WSL 2. شغّلنا كل أمر على حاسوب حقيقي في تشرين الثاني 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">المصدر على GitHub</a></p></div></footer>
 <p class="vh" aria-live="polite" id="live"></p>
-<script type="application/json" id="i18n">{"copied": "نُسخ", "copyFail": "نضغط Ctrl+C لنسخ النص المحدد", "doneOf": "الخطوات المنجزة: {d} من {t}", "next": "الخطوة التالية: {s}", "allDone": "اكتمل المسار وأُنجزت الخطوات كلها.", "sumCount": "المنجز {d} من {t}", "cleared": "مُسحت كل العلامات.", "confirm": "هل نمسح كل العلامات في هذه الصفحة؟ تبقى الملفات والعنقود كما هي.", "stageCount": "{d} من {t}"}</script>
+<script type="application/json" id="i18n">{"copied": "نُسخ", "copyFail": "نضغط Ctrl+C لنسخ النص المحدد", "doneOf": "الخطوات المنجزة: {d} من {t}", "next": "الخطوة التالية: {s}", "allDone": "اكتمل المسار وأُنجزت الخطوات كلها.", "sumCount": "المنجز {d} من {t}", "cleared": "مُسحت كل العلامات.", "confirm": "هل نمسح كل العلامات في هذه الصفحة؟ تبقى الملفات والعنقود كما هي.", "stageCount": "{d} من {t}", "themeDark": "داكن", "themeLight": "فاتح", "toDark": "التبديل إلى المظهر الداكن", "toLight": "التبديل إلى المظهر الفاتح"}</script>
 <script src="../../assets/site.js" defer></script>
 </body>
 </html>
