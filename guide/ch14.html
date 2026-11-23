@@ -375,12 +375,12 @@
 <p>The colours changed in the Ubuntu tab but not in PowerShell. Each profile has its own appearance. Repeat the steps for the Windows PowerShell profile.</p>
 <h2 id="make-the-two-evidence-folders-ubuntu-and-windows">Make the two evidence folders (Ubuntu and Windows)</h2>
 <p>Text outputs from Ubuntu go straight into <code class="nw">~/microseg/evidence</code>. Screenshots and PowerShell outputs are made on the Windows side, so they need a Windows folder first, and you copy them across at the end of the session. Make the Ubuntu folder first.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>ls -d ~/microseg/k8s &amp;&amp; mkdir -p ~/microseg/evidence &amp;&amp; ls -d ~/microseg/evidence</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>ls -d ~/microseg/k8s &amp;&amp; mkdir -p ~/microseg/evidence &amp;&amp; ls -d ~/microseg/evidence</code></pre></figure>
 <p><code class="nw">ls -d</code> prints a folder's own name instead of listing what is inside it, and it fails when the folder doesn't exist. The first <code class="nw">ls -d</code> checks that you're in the Ubuntu that holds your project, since <code class="nw">~/microseg/k8s</code> has been there since <a href="ch06.html">chapter 6</a>. <code class="nw">&amp;&amp;</code> runs the next command only if the one before it worked. <code class="nw">mkdir -p</code> creates the evidence folder, and does nothing if it already exists. The last <code class="nw">ls -d</code> prints the new folder.</p>
 <p><strong>You should see</strong> two lines, the full path of the k8s folder and then that of the evidence folder.</p>
 <p>Both paths start with <code class="nw">/home/</code>, followed by your own Linux user name and <code class="nw">/microseg</code>.</p>
 <p>Now open PowerShell and make the Windows folder.</p>
-<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>New-Item -ItemType Directory -Force &quot;$HOME\microseg-evidence&quot;</code></pre></figure>
+<figure class="code cmd ps"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>New-Item -ItemType Directory -Force &quot;$HOME\microseg-evidence&quot;</code></pre></figure>
 <p><code class="nw">New-Item -ItemType Directory</code> creates a folder. <code class="nw">-Force</code> stops it from failing when the folder is already there. <code class="nw">$HOME</code> is your Windows user folder, <code class="nw">C:\Users\&lt;WinUser&gt;</code>, so the new folder is <code>C:\Users\&lt;WinUser&gt;\microseg-evidence</code>. It sits outside Documents on purpose, because on many laptops OneDrive moves Documents somewhere else.</p>
 <p><strong>You should see</strong> a short table describing the new folder.</p>
 <p>The column that matters is Name, which must read <code class="nw">microseg-evidence</code>. Your date and time will differ.</p>
@@ -392,7 +392,7 @@ operable program or batch file.</code></pre></figure>
 <p>You're in Command Prompt, not PowerShell. Close it, open Windows PowerShell and run the command there.</p>
 <h2 id="capture-a-terminal-output">Capture a terminal output</h2>
 <p>Every Ubuntu capture uses the same wrapper around the command you want to record. The example below captures E03, the node list. E03 is the one capture you can make the first time you read this chapter, because the node list looks the same in every state of the lab.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>clear; { date; kubectl get nodes -L tier; date; } 2&gt;&amp;1 | tee ~/microseg/evidence/E03-nodes.txt</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>clear; { date; kubectl get nodes -L tier; date; } 2&gt;&amp;1 | tee ~/microseg/evidence/E03-nodes.txt</code></pre></figure>
 <p><code class="nw">clear</code> empties the terminal so the screenshot holds only this capture. The braces <code class="nw">{ ... }</code> make a brace group, which runs several commands as one so their output travels on together. Inside it, <code class="nw">date</code> prints the date and time, <code class="nw">kubectl get nodes -L tier</code> prints the nodes, and the second <code class="nw">date</code> prints the time again once the command has finished. Each command inside the braces ends with <code class="nw">;</code>, and the space after <code class="nw">{</code> is required. <code class="nw">2&gt;&amp;1</code> adds standard error to the output. Standard error is the second output channel a program uses for error messages, and without this part, errors would show on screen but be missing from the file. The <code class="nw">|</code> passes everything to <code class="nw">tee</code>, a program that prints what it receives and writes the same text into a file, so you see the output and save it in one go.</p>
 <p><strong>You should see</strong> the date, then the three nodes, then the date again.</p>
 <p>Your dates and the AGE column differ. All three nodes must say <code class="nw">Ready</code> and the TIER column must read <code class="nw">frontend</code> for kind-worker and <code class="nw">backend</code> for kind-worker2.</p>
@@ -408,7 +408,7 @@ operable program or batch file.</code></pre></figure>
 <h2 id="capture-a-powershell-output">Capture a PowerShell output</h2>
 <p>The attack steps are sent from Windows, so their evidence comes from PowerShell. Read this section now, but don't run these blocks yet. You run them in part 2 of the capture session as E13 and in part 4 as E22. Run now, they would attack the lab in whatever state it's in and change Omar's grade.</p>
 <p>PowerShell's own way of saving output writes a text format that looks broken in Ubuntu, so these captures let <code class="nw">curl.exe</code> save the answer itself with <code class="nw">-o</code> and then show the saved file with <code class="nw">Get-Content</code>. A variable called <code class="nw">$id</code> holds the evidence ID, which lets you run the same five blocks twice, once on the flat network as E13 and once on the segmented network as E22. Paste one block at a time and take a screenshot after each one, saving it as <code class="nw">E13-step1</code>, <code class="nw">E13-step2</code> and so on.</p>
-<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd &quot;$HOME\microseg-evidence&quot;
+<figure class="code cmd ps"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd &quot;$HOME\microseg-evidence&quot;
 $id = &quot;E13&quot;
 Clear-Host; Get-Date
 curl.exe -s http://localhost:30080/news/check-image --data-urlencode &quot;url=x; id; hostname&quot; -o &quot;$id-step1.txt&quot;
@@ -417,25 +417,25 @@ Get-Content &quot;$id-step1.txt&quot;</code></pre></figure>
 <p><strong>You should see</strong> the date, then the answer of the news service.</p>
 <p>The line that matters starts with <code class="nw">uid=1000(app)</code>. The last line, the pod's name, ends in different letters on your laptop.</p>
 <p>Next comes the scan, attack step 2, which this block saves as <code class="nw">E13-step2.txt</code>.</p>
-<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>Clear-Host; Get-Date
+<figure class="code cmd ps"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>Clear-Host; Get-Date
 curl.exe -s http://localhost:30080/news/check-image --data-urlencode &quot;url=x; env | grep SERVICE_PORT= | sort; nc -zv -w 2 frontend 80; nc -zv -w 2 api 8080; nc -zv -w 2 auth 5001; nc -zv -w 2 db 5432; nc -zv -w 2 admin 5002&quot; -o &quot;$id-step2.txt&quot;
 Get-Content &quot;$id-step2.txt&quot;</code></pre></figure>
 <p><strong>You should see</strong> the service ports from the environment, then one result line per scanned service.</p>
 <p>On the flat network all five scan lines contain <code class="nw">succeeded</code>.</p>
 <p>Step 3 logs in to the database with the default password.</p>
-<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>Clear-Host; Get-Date
+<figure class="code cmd ps"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>Clear-Host; Get-Date
 curl.exe -s http://localhost:30080/news/check-image --data-urlencode &quot;url=x; PGCONNECT_TIMEOUT=3 PGPASSWORD=postgres psql -h db -U postgres -d campus -c &#x27;SELECT id, username, full_name FROM students&#x27;&quot; -o &quot;$id-step3.txt&quot;
 Get-Content &quot;$id-step3.txt&quot;</code></pre></figure>
 <p><strong>You should see</strong> the four students in a small table.</p>
 <p>The line under the table must read <code class="nw">(4 rows)</code>.</p>
 <p>Step 4 changes Omar's grade.</p>
-<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>Clear-Host; Get-Date
+<figure class="code cmd ps"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>Clear-Host; Get-Date
 curl.exe -s http://localhost:30080/news/check-image --data-urlencode &quot;url=x; PGCONNECT_TIMEOUT=3 PGPASSWORD=postgres psql -h db -U postgres -d campus -c &#x27;UPDATE grades SET grade = 95 WHERE id = 3&#x27; -c &#x27;SELECT * FROM grades WHERE id = 3&#x27;&quot; -o &quot;$id-step4.txt&quot;
 Get-Content &quot;$id-step4.txt&quot;</code></pre></figure>
 <p><strong>You should see</strong> <code class="nw">UPDATE 1</code>, then Omar's grade row.</p>
 <p>The grade column of the row must show 95.</p>
 <p>The last block reads the admin panel, attack step 5.</p>
-<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>Clear-Host; Get-Date
+<figure class="code cmd ps"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>Clear-Host; Get-Date
 curl.exe -s http://localhost:30080/news/check-image --data-urlencode &quot;url=x; curl -sS --max-time 3 http://admin:5002/users&quot; -o &quot;$id-step5.txt&quot;
 Get-Content &quot;$id-step5.txt&quot;</code></pre></figure>
 <p><strong>You should see</strong> the four users from the admin panel, each with a <code class="nw">password_hash</code>.</p>
@@ -453,7 +453,7 @@ Get-Content &quot;$id-step5.txt&quot;</code></pre></figure>
 <h2 id="before-the-capture-session-start-the-helpers">Before the capture session: start the helpers</h2>
 <p>The session uses the dashboard, Hubble and the Hubble UI, so start all three first, each in its own Ubuntu tab. If you started <code>cilium hubble port-forward &amp;</code> or <code>cilium hubble ui --open-browser=false &amp;</code> in <a href="ch11.html">chapter 11</a> and that terminal is still open, run <code class="nw">jobs</code> there first. <code class="nw">jobs</code> lists the commands that terminal runs in the background. A helper listed as <code class="nw">Running</code> is still working, so skip its tab below, or stop it with <code class="nw">kill %1</code>, using the number <code class="nw">jobs</code> shows in square brackets, and start it again here.</p>
 <p>To open a tab, click the small arrow next to the + at the top of Windows Terminal and pick your Ubuntu profile. In the first new tab run <code class="nw">cilium hubble port-forward</code>, in the second run <code>cilium hubble ui --open-browser=false</code>, and in the third run <code>cd ~/microseg/dashboard &amp;&amp; ../.venv/bin/python app.py</code>. As in <a href="ch04.html">chapter 4</a>, <code class="nw">--open-browser=false</code> stops the Hubble UI helper from looking for a browser inside Ubuntu, where there is none. Leave all three running and do the captures in a fourth tab. Then check that the helpers answer.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>curl -s -o /dev/null -w &#x27;%{http_code}\n&#x27; http://127.0.0.1:5050/
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>curl -s -o /dev/null -w &#x27;%{http_code}\n&#x27; http://127.0.0.1:5050/
 hubble status</code></pre></figure>
 <p>The first line asks the dashboard for its page and prints only the HTTP status code. <code class="nw">-o /dev/null</code> throws the page away and <code class="nw">-w '%{http_code}\n'</code> prints the code. <code class="nw">hubble status</code> asks Hubble Relay whether it can see every node.</p>
 <p><strong>You should see</strong> <code class="nw">200</code>, then Hubble's status.</p>
@@ -476,7 +476,7 @@ hubble status</code></pre></figure>
 <p>E06. Run <code>clear; { date; kubectl -n campus get pods -o wide; date; } 2&gt;&amp;1 | tee ~/microseg/evidence/E06-pods.txt</code> and screenshot it as <code class="nw">E06-pods</code>. Seven pods must show <code class="nw">1/1</code> and <code class="nw">Running</code>, with frontend and news on kind-worker.</p>
 <h3 id="part-2-the-flat-network">Part 2, the flat network</h3>
 <p>Remove every policy and reset the database, so the lab starts from the state <a href="ch08.html">chapter 8</a> attacked.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl delete -f ~/microseg/k8s/policies/ --ignore-not-found
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl delete -f ~/microseg/k8s/policies/ --ignore-not-found
 kubectl -n campus rollout restart deployment/db
 kubectl -n campus rollout status deployment/db --timeout=120s
 sleep 10</code></pre></figure>
@@ -496,7 +496,7 @@ sleep 10</code></pre></figure>
 <p>E18. Open the Hubble UI, choose the <code class="nw">campus</code> namespace and screenshot the service map as <code class="nw">E18-hubble-map-flat</code>. If the map shows no line from news to db, click "Run attack" in the dashboard once more and wait a few seconds.</p>
 <h3 id="part-3-the-baseline-policies-alone">Part 3, the baseline policies alone</h3>
 <p>Part 2's attacks left Omar's grade at 95, so put it back to 58 before the segmented run. Without this reset, E25 at the end of part 4 would show 95 even though the segmented attack changed nothing.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus rollout restart deployment/db
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus rollout restart deployment/db
 kubectl -n campus rollout status deployment/db --timeout=120s</code></pre></figure>
 <p>The first line restarts the database pod, which reloads the seed data. The second waits until the new pod is ready.</p>
 <p><strong>You should see</strong> the restart and the wait.</p>
@@ -506,7 +506,7 @@ Waiting for deployment &quot;db&quot; rollout to finish: 1 old replicas are pend
 deployment &quot;db&quot; successfully rolled out</code></pre></figure>
 <p>The last line must say <code class="nw">successfully rolled out</code>.</p>
 <p>Now apply only the default-deny baseline. This proves default deny works before anything is allowed.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl apply -f ~/microseg/k8s/policies/1-baseline.yaml
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl apply -f ~/microseg/k8s/policies/1-baseline.yaml
 sleep 10</code></pre></figure>
 <p><code class="nw">kubectl apply -f</code> creates the three policies in the file. <code class="nw">sleep 10</code> waits for Cilium to update the pods.</p>
 <p><strong>You should see</strong> one line per policy.</p>
@@ -517,7 +517,7 @@ ciliumnetworkpolicy.cilium.io/allow-kubelet-probes created</code></pre></figure>
 <p>E19. Reload the dashboard with F5 and check that the Policies line reads <code class="nw">ON (3 policies)</code>. Wait for <code class="nw">0 of 36 paths reachable</code> and screenshot the page as <code class="nw">E19-baseline-only</code>. Then run <code>clear; { date; curl -s localhost:5050/api/matrix; echo; bash ~/microseg/check-portal.sh; date; } 2&gt;&amp;1 | tee ~/microseg/evidence/E19-baseline-only.txt</code>. The matrix line must contain <code class="nw">"open":0</code>, every portal check must print FAIL and the last line before the closing date must read <code class="nw">PORTAL: 0/6 OK</code>. The last check, <code class="nw">ops can open the admin panel</code>, also prints <code>command terminated with exit code 28</code>, which is expected here.</p>
 <h3 id="part-4-the-segmented-network">Part 4, the segmented network</h3>
 <p>Apply the second file to allow the eight designed flows.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl apply -f ~/microseg/k8s/policies/2-allow.yaml
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl apply -f ~/microseg/k8s/policies/2-allow.yaml
 sleep 10</code></pre></figure>
 <p><strong>You should see</strong> one line for each of the seven per-workload policies.</p>
 <figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>ciliumnetworkpolicy.cilium.io/frontend created
@@ -546,7 +546,7 @@ ciliumnetworkpolicy.cilium.io/ops created</code></pre></figure>
 <p>E31. <a href="ch12.html">Chapter 12</a> saved the output of <code class="nw">measure.py</code> as <code>~/microseg/evidence/ch14-measure.txt</code>. Move it into place with <code>mv ~/microseg/evidence/ch14-measure.txt ~/microseg/evidence/E31-measure.txt</code>. Then run <code>clear; date; tail -n 12 ~/microseg/evidence/E31-measure.txt; date</code> and screenshot it as <code class="nw">E31-measure</code>. <code class="nw">tail -n 12</code> prints the last 12 lines of the file, which hold the end of the measurement lines and the summary under <code class="nw">Mean of the run medians:</code>. This command has no <code class="nw">tee</code>, because the .txt already exists and <code class="nw">tee</code> would overwrite it. If <code class="nw">mv</code> says <code class="nw">cannot stat</code>, the <a href="ch12.html">chapter 12</a> file isn't there. Then run <code>cd ~/microseg &amp;&amp; clear; { date; .venv/bin/python -u measure.py; date; } 2&gt;&amp;1 | tee ~/microseg/evidence/E31-measure.txt</code> instead, which takes about 10 minutes and rewrites <code class="nw">results/latency.csv</code>. <code class="nw">-u</code> makes Python print each run as it finishes, so lines appear as you go. If nothing shows for more than a minute, check that you typed <code class="nw">-u</code>. The script switches the policies off and on during the run and leaves them applied. Screenshot the summary at the end as <code class="nw">E31-measure</code>.</p>
 <h3 id="part-5-the-toggle-test">Part 5, the toggle test</h3>
 <p>The toggle test shows that only the policies change the result. It removes the policies, runs the attack and the matrix, puts the policies back and runs both again, all inside one capture.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>clear; { date
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>clear; { date
 kubectl delete -f ~/microseg/k8s/policies/ --ignore-not-found
 sleep 10
 curl -s -X POST localhost:5050/api/attack | jq -r &#x27;[.[] | select(.success)] | length | &quot;attack: \(.) of 5 succeeded&quot;&#x27;
@@ -563,14 +563,14 @@ date
 <p class="ifnot"><strong>If you see this instead</strong></p>
 <p>Some of the four result lines are missing, or one of them is replaced by a message that mentions <code class="nw">parse error</code>. The dashboard didn't answer properly, so <code class="nw">jq</code> had nothing it could read. Check the dashboard tab for a Python error and rerun the helper check above.</p>
 <p>The first attack in the toggle changed Omar's grade again, so reset the database.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus rollout restart deployment/db
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus rollout restart deployment/db
 kubectl -n campus rollout status deployment/db --timeout=120s</code></pre></figure>
 <p><strong>You should see</strong> the restart and the wait.</p>
 <p>The last line must say <code class="nw">successfully rolled out</code>.</p>
 <p>E33. Run <code>clear; { date; git -C ~/microseg log --oneline; date; } 2&gt;&amp;1 | tee ~/microseg/evidence/E33-git-log.txt</code> and screenshot it as <code class="nw">E33-git-log</code>. <code class="nw">git -C ~/microseg</code> runs Git in the project folder wherever your terminal is. You get one line per chapter commit, newest first.</p>
 <h2 id="copy-the-windows-captures-across-into-the-project">Copy the Windows captures across, into the project</h2>
 <p>Screenshots and PowerShell outputs are still in the Windows folder. Copy them next to the Ubuntu text files, replacing <code class="nw">&lt;WinUser&gt;</code> with your Windows user name as <a href="ch00.html">chapter 0</a> explains.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cp /mnt/c/Users/&lt;WinUser&gt;/microseg-evidence/* ~/microseg/evidence/
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cp /mnt/c/Users/&lt;WinUser&gt;/microseg-evidence/* ~/microseg/evidence/
 ls ~/microseg/evidence</code></pre></figure>
 <p><code class="nw">/mnt/c</code> is drive C: as Ubuntu sees it. <code class="nw">cp</code> with <code class="nw">*</code> copies every file in the Windows folder into <code class="nw">~/microseg/evidence</code>. <code class="nw">ls</code> lists the result.</p>
 <p><strong>You should see</strong> every evidence file, in name order.</p>
@@ -582,12 +582,12 @@ ls ~/microseg/evidence</code></pre></figure>
 <p>Your Windows user name is spelled differently. Run <code class="nw">ls /mnt/c/Users</code> to see the exact folder names, then copy again with yours.</p>
 <h2 id="checkpoint">Checkpoint</h2>
 <p>Check that every evidence ID has its files. Every ID needs a .png, and every ID except the four browser-only rows, E08, E09, E18 and E30, also needs a .txt.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg/evidence &amp;&amp; missing=0; for n in $(seq -w 1 33); do ls E$n-*.png &gt;/dev/null 2&gt;&amp;1 || { echo &quot;missing E$n png&quot;; missing=$((missing + 1)); }; case $n in 08|09|18|30) ;; *) ls E$n-*.txt &gt;/dev/null 2&gt;&amp;1 || { echo &quot;missing E$n txt&quot;; missing=$((missing + 1)); } ;; esac; done; echo &quot;$missing missing&quot;; ls E*.png | wc -l; ls E*.txt | wc -l</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg/evidence &amp;&amp; missing=0; for n in $(seq -w 1 33); do ls E$n-*.png &gt;/dev/null 2&gt;&amp;1 || { echo &quot;missing E$n png&quot;; missing=$((missing + 1)); }; case $n in 08|09|18|30) ;; *) ls E$n-*.txt &gt;/dev/null 2&gt;&amp;1 || { echo &quot;missing E$n txt&quot;; missing=$((missing + 1)); } ;; esac; done; echo &quot;$missing missing&quot;; ls E*.png | wc -l; ls E*.txt | wc -l</code></pre></figure>
 <p><code class="nw">seq -w 1 33</code> counts from 01 to 33 with two digits. For each number, <code class="nw">ls E$n-*.png</code> looks for a screenshot that starts with that ID, and <code class="nw">&gt;/dev/null 2&gt;&amp;1</code> hides what <code class="nw">ls</code> prints. <code class="nw">||</code> runs the part in braces only when <code class="nw">ls</code> found nothing, and that part prints the missing ID and adds one to the count. <code class="nw">case</code> skips the .txt check for 08, 09, 18 and 30 and checks every other ID for a .txt the same way. At the end the command prints the count, then the number of .png files, then the number of .txt files.</p>
 <p><strong>Checkpoint.</strong> The output must be exactly three lines, <code class="nw">0 missing</code>, then <code class="nw">41</code>, then <code class="nw">37</code>.</p>
 <p>The 41 is one screenshot for each of the 31 IDs with a single file, plus five each for E13 and E22. The 37 counts the text files the same way, without the four browser-only rows. If a <code class="nw">missing</code> line appears, go back to the part of the capture session that holds that ID. If a count is higher, a file was saved twice under different names, so run <code class="nw">ls</code> and delete the extra one.</p>
 <p>Save the evidence in Git.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; git add -A &amp;&amp; git commit -m &quot;ch14: evidence for the report&quot;</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; git add -A &amp;&amp; git commit -m &quot;ch14: evidence for the report&quot;</code></pre></figure>
 <p><strong>You should see</strong> a commit summary.</p>
 <p>The number of files changed depends on how many captures you made.</p>
 <!-- OUT ids: ch16-mkdir-evidence, ch16-windows-folder, ch16-tee-nodes, ch16-ps-step1, ch16-ps-step2, ch16-ps-step3, ch16-ps-step4, ch16-ps-step5, ch16-helpers-check, ch16-flat-state, ch16-reset-before-baseline, ch16-baseline-state, ch16-segmented-state, ch16-toggle, ch16-reset-db, ch16-copy, ch16-evidence-check, ch16-commit --><nav class="pager" aria-label="Chapters"><a rel="prev" href="ch13.html"><span>Previous chapter</span>Chapter 13. Getting unstuck alone</a><a rel="next" href="ch15.html"><span>Next chapter</span>Chapter 15. Day-by-day plan</a></nav></main></div>

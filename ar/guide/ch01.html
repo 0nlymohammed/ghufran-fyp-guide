@@ -27,13 +27,13 @@
 <li><button type="button" class="theme" data-theme-toggle hidden>داكن</button></li>
 </ul></nav>
 </div></header>
-<div class="layout"><details class="rail" open><summary>الفصول</summary><nav aria-label="الفصول"><ol class="toc"><li><a href="ch00.html">0. كيف نستخدم هذا الدليل</a></li><li><a href="ch01.html" aria-current="page">1. ما الذي سنبنيه</a><ol class="sub"><li><a href="#أين-يعمل-كل-شيء-طبقة-فوق-طبقة">أين يعمل كل شيء، طبقة فوق طبقة</a></li><li><a href="#بنية-البوابة">بنية البوابة</a></li><li><a href="#البرامج-السبعة">البرامج السبعة</a></li><li><a href="#التدفقات-الثمانية-المسموح-بها">التدفقات الثمانية المسموح بها</a></li><li><a href="#قاعدة-البيانات">قاعدة البيانات</a></li><li><a href="#واجهة-api-نقطة-نهاية-بعد-أخرى">واجهة API، نقطة نهاية بعد أخرى</a></li><li><a href="#فحوص-البوابة-الستة">فحوص البوابة الستة</a></li><li><a href="#نقطة-التحقق-نكتب-جدول-التدفقات-من-الذاكرة">نقطة التحقق: نكتب جدول التدفقات من الذاكرة</a></li></ol></li><li><a href="ch02.html">2. قبل أن نبدأ</a></li><li><a href="ch03.html">3. تجهيز بيئة العمل</a></li><li><a href="ch04.html">4. إنشاء العنقود</a></li><li><a href="ch05.html">5. كتابة الخدمات</a></li><li><a href="ch06.html">6. نشر البوابة</a></li><li><a href="ch07.html">7. بناء لوحة التحكم</a></li><li><a href="ch08.html">8. مهاجمة الشبكة المسطحة</a></li><li><a href="ch09.html">9. تصميم السياسة</a></li><li><a href="ch10.html">10. تطبيق التجزئة الدقيقة للشبكة</a></li><li><a href="ch11.html">11. قراءة الأدلة في Hubble</a></li><li><a href="ch12.html">12. القياس</a></li><li><a href="ch13.html">13. تجاوز الأعطال دون مساعدة</a></li><li><a href="ch14.html">14. أدلة بحث التخرج</a></li><li><a href="ch15.html">15. خطة العمل يوماً بيوم</a></li><li><a href="appendix.html">الملاحق</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="الفصل-1-ما-الذي-سنبنيه">الفصل 1. ما الذي سنبنيه</h1>
-<p>لا نكتب في هذا الفصل أي أمر، فهو جولة في المختبر على الورق. وفي نهايته يجب أن نستطيع رسم برامج البوابة السبعة على عُقدها، وأن نكتب من الذاكرة التدفقات الشبكية (flows) الثمانية التي تبقى مفتوحة بعد تفعيل التجزئة الدقيقة للشبكة (micro-segmentation). هذا الرسم هو نقطة التحقق. نخصص للفصل نحو 45 دقيقة.</p>
+<div class="layout"><details class="rail" open><summary>الفصول</summary><nav aria-label="الفصول"><ol class="toc"><li><a href="ch00.html">0. كيف نستخدم هذا الدليل</a></li><li><a href="ch01.html" aria-current="page">1. ما الذي سنبنيه</a><ol class="sub"><li><a href="#أين-يعمل-كل-شيء-طبقة-فوق-طبقة">أين يعمل كل شيء، طبقة فوق طبقة</a></li><li><a href="#بنية-البوابة">بنية البوابة</a></li><li><a href="#البرامج-السبعة">البرامج السبعة</a></li><li><a href="#التدفقات-الثمانية-المسموح-بها">التدفقات الثمانية المسموح بها</a></li><li><a href="#قاعدة-البيانات">قاعدة البيانات</a></li><li><a href="#واجهة-api-endpoint-بعد-أخرى">واجهة API، endpoint بعد أخرى</a></li><li><a href="#فحوص-البوابة-الستة">فحوص البوابة الستة</a></li><li><a href="#نقطة-التحقق-نكتب-جدول-التدفقات-من-الذاكرة">نقطة التحقق: نكتب جدول التدفقات من الذاكرة</a></li></ol></li><li><a href="ch02.html">2. قبل أن نبدأ</a></li><li><a href="ch03.html">3. تجهيز بيئة العمل</a></li><li><a href="ch04.html">4. إنشاء الـ cluster</a></li><li><a href="ch05.html">5. كتابة الخدمات</a></li><li><a href="ch06.html">6. نشر البوابة</a></li><li><a href="ch07.html">7. بناء لوحة التحكم</a></li><li><a href="ch08.html">8. مهاجمة الشبكة المسطحة</a></li><li><a href="ch09.html">9. تصميم السياسة</a></li><li><a href="ch10.html">10. تطبيق التجزئة الدقيقة للشبكة</a></li><li><a href="ch11.html">11. قراءة الأدلة في Hubble</a></li><li><a href="ch12.html">12. القياس</a></li><li><a href="ch13.html">13. تجاوز الأعطال دون مساعدة</a></li><li><a href="ch14.html">14. أدلة بحث التخرج</a></li><li><a href="ch15.html">15. خطة العمل يوماً بيوم</a></li><li><a href="appendix.html">الملاحق</a></li></ol></nav></details><main id="main" class="content chapter"><h1 id="الفصل-1-ما-الذي-سنبنيه">الفصل 1. ما الذي سنبنيه</h1>
+<p>لا نكتب في هذا الفصل أي أمر، فهو جولة في المختبر على الورق. وفي نهايته يجب أن نستطيع رسم برامج البوابة السبعة على الـ nodes الخاصة بها، وأن نكتب من الذاكرة التدفقات الشبكية (flows) الثمانية التي تبقى مفتوحة بعد تفعيل التجزئة الدقيقة للشبكة (micro-segmentation). هذا الرسم هو نقطة التحقق. نخصص للفصل نحو 45 دقيقة.</p>
 <h2 id="أين-يعمل-كل-شيء-طبقة-فوق-طبقة">أين يعمل كل شيء، طبقة فوق طبقة</h2>
-<p>يعمل كل ما في المختبر على حاسوب محمول واحد هو حاسوبنا، في طبقات بعضها فوق بعض. يشغّل Windows 11 نظام WSL 2، وهو آلة افتراضية (virtual machine) خفيفة فيها نواة Linux حقيقية، ويعمل Ubuntu 24.04 داخلها. ويشغّل Ubuntu برنامج Docker Engine، وفيه ثلاث حاويات (containers) تتظاهر كل واحدة منها بأنها حاسوب كامل. هذه الحاويات هي عُقد Kubernetes الثلاث (nodes) في مختبرنا، <code class="nw">kind-control-plane</code> و<code class="nw">kind-worker</code> و<code class="nw">kind-worker2</code>، وعليها تعمل Pods البوابة في مساحة الأسماء (namespace) <code class="nw">campus</code>، إلى جانب الـPods الخاصة بـCilium في مساحة الأسماء <code class="nw">kube-system</code>.</p>
+<p>يعمل كل ما في المختبر على حاسوب محمول واحد هو حاسوبنا، في طبقات بعضها فوق بعض. يشغّل Windows 11 نظام WSL 2، وهو VM خفيفة فيها Linux kernel حقيقية، ويعمل Ubuntu 24.04 داخلها. ويشغّل Ubuntu برنامج Docker Engine، وفيه 3 containers تتظاهر كل واحدة منها بأنها حاسوب كامل. هذه الـ containers هي الـ Kubernetes nodes الثلاث في مختبرنا، <code class="nw">kind-control-plane</code> و<code class="nw">kind-worker</code> و<code class="nw">kind-worker2</code>، وعليها تعمل Pods البوابة في الـ namespace <code class="nw">campus</code>، إلى جانب الـPods الخاصة بـCilium في الـ namespace <code class="nw">kube-system</code>.</p>
 <figure class="fig"><a href="../../files/figures/fig02-ar.png"><img class="only-light" src="../../files/figures/site/fig02-ar-light.png" alt="الشكل 2. أين يعمل كل جزء" width="1600" height="900" loading="lazy" decoding="async"><img class="only-dark" src="../../files/figures/site/fig02-ar-dark.png" alt="الشكل 2. أين يعمل كل جزء" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>الشكل 2. أين يعمل كل جزء</figcaption></figure>
-<p>في الشكل 2 ننظر إلى موقع <code class="nw">kubectl</code> و<code class="nw">cilium</code> و<code class="nw">hubble</code>. هذه الأدوات تعمل في Ubuntu نفسه، خارج العنقود (cluster)، وتمدّ يدها إليه من هناك.</p>
-<p>ليس كل برنامج في هذا المشروع داخل العنقود. يبيّن الجدول ما سنفتحه أو نشغّله، وأين يعمل كل منها.</p>
+<p>في الشكل 2 ننظر إلى موقع <code class="nw">kubectl</code> و<code class="nw">cilium</code> و<code class="nw">hubble</code>. هذه الأدوات تعمل في Ubuntu نفسه، خارج الـ cluster، وتمدّ يدها إليه من هناك.</p>
+<p>ليس كل برنامج في هذا المشروع داخل الـ cluster. يبيّن الجدول ما سنفتحه أو نشغّله، وأين يعمل كل منها.</p>
 <div class="table-wrap" tabindex="0" role="region" aria-label="جدول"><table>
 <thead>
 <tr>
@@ -45,23 +45,23 @@
 <tbody>
 <tr>
 <td>بوابة الحرم الجامعي (Campus Portal)</td>
-<td>سبعة Pods في مساحة الأسماء <code class="nw">campus</code></td>
-<td><code class="nw">http://localhost:30080</code> في متصفح Windows، أو من طرفية Ubuntu (terminal)</td>
+<td>سبعة Pods في الـ namespace <code class="nw">campus</code></td>
+<td><code class="nw">http://localhost:30080</code> في متصفح Windows، أو من Ubuntu terminal</td>
 </tr>
 <tr>
 <td>واجهة Hubble (Hubble UI)</td>
-<td>الـPods الخاصة بـCilium، وتُفتح بالأمر <code class="nw">cilium hubble ui</code> في طرفية Ubuntu</td>
+<td>الـPods الخاصة بـCilium، وتُفتح بالأمر <code class="nw">cilium hubble ui</code> في Ubuntu terminal</td>
 <td><code class="nw">http://localhost:12000</code></td>
 </tr>
 <tr>
 <td>لوحة التحكم (dashboard) التي نبنيها <a href="ch07.html">(الفصل 7</a>)</td>
-<td>برنامج Python في Ubuntu، خارج العنقود</td>
+<td>برنامج Python في Ubuntu، خارج الـ cluster</td>
 <td><code class="nw">http://localhost:5050</code></td>
 </tr>
 <tr>
 <td><code class="nw">kubectl</code> و<code class="nw">cilium</code> و<code class="nw">hubble</code></td>
 <td>Ubuntu</td>
-<td>طرفية Ubuntu</td>
+<td>Ubuntu terminal</td>
 </tr>
 <tr>
 <td>أوامر الهجوم الخمسة <a href="ch08.html">(الفصل 8</a>)</td>
@@ -70,20 +70,20 @@
 </tr>
 </tbody>
 </table></div>
-<p>يستطيع متصفح Windows أن يفتح <code class="nw">localhost:30080</code> بفضل خطوتَي تمرير. ربط المنافذ قاعدة تمرّر الاتصالات الواصلة إلى منفذ (port) في جهاز ما إلى منفذ في جهاز آخر. لدى Docker ربط منافذ يمرّر المنفذ 30080 في Ubuntu إلى المنفذ 30080 في الحاوية <code class="nw">kind-worker</code>، أما WSL فيمرّر منافذ <code class="nw">localhost</code> من Windows إلى Ubuntu. ولو تتبّعنا طلباً واحداً من المتصفح إلى البوابة لوجدناه يمر بالمراحل التالية.</p>
+<p>يستطيع متصفح Windows أن يفتح <code class="nw">localhost:30080</code> بفضل خطوتَي تمرير. ربط الـ ports قاعدة تمرّر الاتصالات الواصلة إلى port في جهاز ما إلى port في جهاز آخر. لدى Docker ربط ports يمرّر الـ port 30080 في Ubuntu إلى الـ port 30080 في الـ container <code class="nw">kind-worker</code>، أما WSL فيمرّر الـ ports على <code class="nw">localhost</code> من Windows إلى Ubuntu. ولو تتبّعنا طلباً واحداً من المتصفح إلى البوابة لوجدناه يمر بالمراحل التالية.</p>
 <ol>
 <li>يتصل المتصفح بـ<code class="nw">localhost:30080</code> على Windows.</li>
-<li>يسلّم WSL الاتصال إلى Ubuntu، وما زال على المنفذ 30080.</li>
-<li>يمرّره ربط المنافذ في Docker، وهو الربط الذي يطلبه الملف <code class="nw">kind-config.yaml</code>، إلى المنفذ 30080 على العقدة <code class="nw">kind-worker</code>.</li>
-<li>على العقدة <code class="nw">kind-worker</code> يكون المنفذ 30080 هو منفذ NodePort التابع للـService المسمّى <code class="nw">frontend</code>، لذلك يمرّر Kubernetes الاتصال إلى الـPod الخاص بـfrontend على المنفذ 80.</li>
+<li>يسلّم WSL الاتصال إلى Ubuntu، وما زال على الـ port 30080.</li>
+<li>يمرّره ربط الـ ports في Docker، وهو الربط الذي يطلبه الملف <code class="nw">kind-config.yaml</code>، إلى الـ port 30080 على الـ node <code class="nw">kind-worker</code>.</li>
+<li>على الـ node <code class="nw">kind-worker</code> يكون الـ port 30080 هو الـ NodePort التابع للـService المسمّى <code class="nw">frontend</code>، لذلك يمرّر Kubernetes الاتصال إلى الـPod الخاص بـfrontend على الـ port 80.</li>
 </ol>
-<p>يستمع ربط المنافذ على العنوان <code class="nw">127.0.0.1</code> وحده، وهو العنوان الذي يستخدمه الجهاز للإشارة إلى نفسه، فلا يستطيع غيرنا من المتصلين بشبكة Wi-Fi نفسها أن يفتح بوابتنا.</p>
+<p>يستمع ربط الـ ports على العنوان <code class="nw">127.0.0.1</code> وحده، وهو العنوان الذي يستخدمه الجهاز للإشارة إلى نفسه، فلا يستطيع غيرنا من المتصلين بشبكة Wi-Fi نفسها أن يفتح بوابتنا.</p>
 <h2 id="بنية-البوابة">بنية البوابة</h2>
-<p>للبوابة باب واحد فقط من الخارج، هو NodePort 30080 على <code class="nw">kind-worker</code>. أما بقية البرامج فلكل منها اسم ومنفذ لا يعملان إلا داخل العنقود.</p>
+<p>للبوابة باب واحد فقط من الخارج، هو NodePort 30080 على <code class="nw">kind-worker</code>. أما بقية البرامج فلكل منها اسم وport لا يعملان إلا داخل الـ cluster.</p>
 <figure class="fig"><a href="../../files/figures/fig03-ar.png"><img class="only-light" src="../../files/figures/site/fig03-ar-light.png" alt="الشكل 3. بنية بوابة الحرم الجامعي" width="1600" height="900" loading="lazy" decoding="async"><img class="only-dark" src="../../files/figures/site/fig03-ar-dark.png" alt="الشكل 3. بنية بوابة الحرم الجامعي" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>الشكل 3. بنية بوابة الحرم الجامعي</figcaption></figure>
-<p>يضع الشكل 3 الـPods السبعة على العقدتين العاملتين، ويدخل إليها سهم واحد عند NodePort 30080. ولا يعمل أي منها على العقدة <code class="nw">kind-control-plane</code>.</p>
-<p>يعمل frontend وnews، وهما الجزء المواجه للجمهور من البوابة، على <code class="nw">kind-worker</code>، أما الخمسة الأخرى (api وauth وdb وadmin وops) فتعمل على <code class="nw">kind-worker2</code>. وسما العقدتين (node labels) <code class="nw">tier=frontend</code> و<code class="nw">tier=backend</code> هما ما يحدد هذا التوزيع. ومكان الـPod وحده لا يمنح أي اتصال ولا يمنعه.</p>
-<p>تقع كل كائنات Kubernetes الخاصة بالبوابة في مساحة الأسماء <code class="nw">campus</code>، وهي من أربعة أنواع.</p>
+<p>يضع الشكل 3 الـPods السبعة على الـ worker nodes الاثنتين، ويدخل إليها سهم واحد عند NodePort 30080. ولا يعمل أي منها على الـ node <code class="nw">kind-control-plane</code>.</p>
+<p>يعمل frontend وnews، وهما الجزء المواجه للجمهور من البوابة، على <code class="nw">kind-worker</code>، أما الخمسة الأخرى (api وauth وdb وadmin وops) فتعمل على <code class="nw">kind-worker2</code>. الـ node labels <code class="nw">tier=frontend</code> و<code class="nw">tier=backend</code> هما ما يحدد هذا التوزيع. ومكان الـPod وحده لا يمنح أي اتصال ولا يمنعه.</p>
+<p>تقع كل كائنات Kubernetes الخاصة بالبوابة في الـ namespace <code class="nw">campus</code>، وهي من أربعة أنواع.</p>
 <div class="table-wrap" tabindex="0" role="region" aria-label="جدول"><table>
 <thead>
 <tr>
@@ -110,7 +110,7 @@
 <td>Service</td>
 <td>6</td>
 <td>frontend وnews وapi وauth وdb وadmin</td>
-<td>اسم ثابت ومنفذ ثابت لكل برنامج يستدعيه برنامج آخر</td>
+<td>اسم ثابت وport ثابت لكل برنامج يستدعيه برنامج آخر</td>
 </tr>
 <tr>
 <td>Deployment</td>
@@ -120,18 +120,18 @@
 </tr>
 </tbody>
 </table></div>
-<p>الـConfigMap كائن في Kubernetes يحمل ملفات أو إعدادات ويسلّمها إلى Pod، فيراها الـPod ملفات عادية. بهذا يعمل nginx وPostgreSQL من صور حاويات (container images) جاهزة، وتُضاف ملفاتنا إليها من الخارج. والـSecret هو الفكرة نفسها لكلمات المرور.</p>
+<p>الـConfigMap كائن في Kubernetes يحمل ملفات أو إعدادات ويسلّمها إلى Pod، فيراها الـPod ملفات عادية. بهذا يعمل nginx وPostgreSQL من container images جاهزة، وتُضاف ملفاتنا إليها من الخارج. والـSecret هو الفكرة نفسها لكلمات المرور.</p>
 <p>يحمل الـSecret المسمّى <code class="nw">db-credentials</code> القيم <code class="nw">POSTGRES_USER=postgres</code> و<code class="nw">POSTGRES_PASSWORD=postgres</code> و<code class="nw">POSTGRES_DB=campus</code>. يقرأ Pod قاعدة البيانات db هذا الـSecret ليهيّئ نفسه، وتقرؤه البرامج api وauth وadmin لتسجّل الدخول إلى قاعدة البيانات. أما news فلا يحصل عليه أبداً. وكلمة المرور الشائعة <code class="nw">postgres</code> موجودة عن قصد، لأن المتسلل يخمّنها في الخطوة 3 من الهجوم.</p>
 <p>يحمل الملف <code class="nw">k8s/app.yaml</code> الـSecret والـServices والـDeployments. أما كائنا الـConfigMap فينشئهما <code class="nw">deploy.sh</code> مباشرة من الملفات الموجودة في <code class="nw">frontend/</code> و<code class="nw">db/</code>. نكتب <code class="nw">k8s/app.yaml</code> و<code class="nw">deploy.sh</code> في <a href="ch06.html">الفصل 6</a>، والملفات التي في <code class="nw">frontend/</code> و<code class="nw">db/</code> في <a href="ch05.html">الفصل 5</a>.</p>
 <h2 id="البرامج-السبعة">البرامج السبعة</h2>
-<p>أربعة من البرامج مكتوبة بلغة Python باستخدام Flask، وهي مكتبة Python صغيرة لبناء خدمات الويب. ويشغّل كلاً منها gunicorn، وهو برنامج يشغّل خدمة Flask على هيئة خادم ويب ويُبقي منها نسختين جاهزتين للطلبات. تحمل الصورة <code class="nw">campus-app:1.0</code> البرامج الأربعة كلها. يعمل منها api وauth وadmin، ويختار الـDeployment الخاص بكل منها البرنامج الذي يشغّله. ويستخدمها ops أيضاً، مكاناً نشغّل فيه الأوامر. أما news فله صورته الخاصة، <code class="nw">campus-news:1.0</code>، وهي <code class="nw">campus-app:1.0</code> مضافاً إليها أداتا المهاجم <code class="nw">psql</code> و<code class="nw">nc</code>. ويعمل frontend وdb من صور جاهزة.</p>
+<p>أربعة من البرامج مكتوبة بلغة Python باستخدام Flask، وهي مكتبة Python صغيرة لبناء خدمات الويب. ويشغّل كلاً منها gunicorn، وهو برنامج يشغّل خدمة Flask على هيئة خادم ويب ويُبقي منها نسختين جاهزتين للطلبات. تحمل الـ image <code class="nw">campus-app:1.0</code> البرامج الأربعة كلها. يعمل منها api وauth وadmin، ويختار الـDeployment الخاص بكل منها البرنامج الذي يشغّله. ويستخدمها ops أيضاً، مكاناً نشغّل فيه الأوامر. أما news فله الـ image الخاصة به، <code class="nw">campus-news:1.0</code>، وهي <code class="nw">campus-app:1.0</code> مضافاً إليها أداتا المهاجم <code class="nw">psql</code> و<code class="nw">nc</code>. ويعمل frontend وdb من images جاهزة.</p>
 <div class="table-wrap" tabindex="0" role="region" aria-label="جدول"><table>
 <thead>
 <tr>
 <th>البرنامج</th>
-<th>الصورة</th>
-<th>المنفذ</th>
-<th>العقدة</th>
+<th>الـ image</th>
+<th>الـ port</th>
+<th>الـ node</th>
 <th>ما يفعله</th>
 <th>من يستدعيه بعد التجزئة</th>
 </tr>
@@ -197,7 +197,7 @@
 </table></div>
 <p>لـops كائن Deployment وليس له Service، لأن أحداً لا يستدعيه. هو يستدعي غيره فقط.</p>
 <h2 id="التدفقات-الثمانية-المسموح-بها">التدفقات الثمانية المسموح بها</h2>
-<p>التدفق الشبكي نوع واحد من الاتصالات يسمح به المختبر، من برنامج إلى آخر على منفذ واحد. بعد تفعيل التجزئة يسمح المختبر بالتدفقات الثمانية المذكورة أدناه بالضبط، ويرفض كل ما عداها. سنعود إلى هذا الجدول مرتين أخريين. <a href="ch09.html">فالفصل 9</a> يعيد بناءه مما يسجّله Hubble، <a href="ch10.html">والفصل 10</a> يحوّل كل صف فيه إلى قواعد سياسة.</p>
+<p>التدفق الشبكي نوع واحد من الاتصالات يسمح به المختبر، من برنامج إلى آخر على port واحد. بعد تفعيل التجزئة يسمح المختبر بالتدفقات الثمانية المذكورة أدناه بالضبط، ويرفض كل ما عداها. سنعود إلى هذا الجدول مرتين أخريين. <a href="ch09.html">فالفصل 9</a> يعيد بناءه مما يسجّله Hubble، <a href="ch10.html">والفصل 10</a> يحوّل كل صف فيه إلى قواعد سياسة.</p>
 <figure class="fig"><a href="../../files/figures/fig04-ar.png"><img class="only-light" src="../../files/figures/site/fig04-ar-light.png" alt="الشكل 4. خريطة التدفقات المسموح بها" width="1600" height="900" loading="lazy" decoding="async"><img class="only-dark" src="../../files/figures/site/fig04-ar-dark.png" alt="الشكل 4. خريطة التدفقات المسموح بها" width="1600" height="900" loading="lazy" decoding="async"></a><figcaption>الشكل 4. خريطة التدفقات المسموح بها</figcaption></figure>
 <p>في الشكل 4 يمثّل كل سهم تدفقاً واحداً مسموحاً به، ولا يبدأ أي سهم عند news أو عند db.</p>
 <div class="table-wrap" tabindex="0" role="region" aria-label="جدول"><table>
@@ -206,7 +206,7 @@
 <th>#</th>
 <th>من</th>
 <th>إلى</th>
-<th>المنفذ</th>
+<th>الـ port</th>
 <th>قاعدة إضافية</th>
 <th>لماذا تحتاجه البوابة</th>
 </tr>
@@ -279,8 +279,8 @@
 </tbody>
 </table></div>
 <p>التدفق 2 هو الوحيد الذي له قاعدة على طبقة التطبيقات (الطبقة السابعة، L7)، وهي المكتوبة في عمود القاعدة الإضافية. يقرأ Envoy كل طلب يمر في هذا التدفق ويسمح بثلاثة أنواع منها فقط. وكل ما عداها، ومنه <code class="nw">/api/export</code>، يعود بالرد <code class="nw">403 Forbidden</code>.</p>
-<p>هناك نوعان آخران من الحركة مسموح بهما، ولا يُعدّان من التدفقات الثمانية. يحق لكل Pod أن يسأل kube-dns، خدمة DNS في العنقود، عن العناوين على المنفذ 53، لأن البرامج يجد بعضها بعضاً بالاسم، مثل <code class="nw">api.campus.svc.cluster.local</code>. هذا هو الاسم الكامل الذي يعطيه Kubernetes للـService: اسمه، ثم مساحة الأسماء، ثم <code class="nw">svc.cluster.local</code>. وداخل مساحة الأسماء يعمل الاسم القصير <code class="nw">api</code> أيضاً، وهو الذي تستخدمه ملفات المشروع، فلا نكتب الصيغة الطويلة أبداً. ويحق للعقدة كذلك أن تصل إلى كل Pod لإجراء فحوص الجاهزية المشروحة بعد جدول الـAPI. والأمران كلاهما مضبوطان في <code class="nw">k8s/policies/1-baseline.yaml</code>.</p>
-<p>يحتاج كل صف من الصفوف 2 حتى 8 إلى قاعدتين: قاعدة حركة صادرة (egress) في سياسة البرنامج الذي يبدأ الاتصال، وقاعدة حركة واردة (ingress) في سياسة البرنامج الذي يستقبله. أما الصف 1 فتكفيه قاعدة واحدة، هي قاعدة الحركة الواردة في سياسة frontend، لأن <code class="nw">world</code> ليس Pod وليست له سياسة خاصة به. يبدأ الصف 1 من المتصفح، خارج العنقود. ومصفوفة قابلية الوصول (reachability matrix) في لوحة التحكم في <a href="ch07.html">الفصل 7</a> لا تعدّ إلا المسارات التي تبدأ من Pod، لذلك تغطي التدفقات من 2 إلى 8، وتُظهر بعد التجزئة 7 مسارات مفتوحة من أصل 36.</p>
+<p>هناك نوعان آخران من الحركة مسموح بهما، ولا يُعدّان من التدفقات الثمانية. يحق لكل Pod أن يسأل kube-dns، خدمة DNS في الـ cluster، عن العناوين على الـ port 53، لأن البرامج يجد بعضها بعضاً بالاسم، مثل <code class="nw">api.campus.svc.cluster.local</code>. هذا هو الاسم الكامل الذي يعطيه Kubernetes للـService: اسمه، ثم الـ namespace، ثم <code class="nw">svc.cluster.local</code>. وداخل الـ namespace يعمل الاسم القصير <code class="nw">api</code> أيضاً، وهو الذي تستخدمه ملفات المشروع، فلا نكتب الصيغة الطويلة أبداً. ويحق للـ node كذلك أن تصل إلى كل Pod لإجراء فحوص الجاهزية المشروحة بعد جدول الـAPI. والأمران كلاهما مضبوطان في <code class="nw">k8s/policies/1-baseline.yaml</code>.</p>
+<p>يحتاج كل صف من الصفوف 2 حتى 8 إلى قاعدتين: قاعدة egress في سياسة البرنامج الذي يبدأ الاتصال، وقاعدة ingress في سياسة البرنامج الذي يستقبله. أما الصف 1 فتكفيه قاعدة واحدة، هي قاعدة الـ ingress في سياسة frontend، لأن <code class="nw">world</code> ليس Pod وليست له سياسة خاصة به. يبدأ الصف 1 من المتصفح، خارج الـ cluster. ومصفوفة قابلية الوصول (reachability matrix) في لوحة التحكم في <a href="ch07.html">الفصل 7</a> لا تعدّ إلا المسارات التي تبدأ من Pod، لذلك تغطي التدفقات من 2 إلى 8، وتُظهر بعد التجزئة 7 مسارات مفتوحة من أصل 36.</p>
 <p>كل ما ليس في الجدول مرفوض. لا يفتح news أي اتصال سوى استعلامات DNS، وكذلك قاعدة البيانات. يصل frontend إلى api لكنه لا يصل إلى auth ولا db ولا admin، ولا يفتح لوحة الإدارة إلا ops، ولا يستطيع أي Pod أن يصل إلى الإنترنت. ويدوّن <a href="ch09.html">الفصل 9</a> هذا الرفض في جدول المنع.</p>
 <h2 id="قاعدة-البيانات">قاعدة البيانات</h2>
 <p>في قاعدة البيانات <code class="nw">campus</code> ثلاثة جداول. ولغة SQL هي اللغة التي ننشئ بها الجداول ونطرح بها الأسئلة على قاعدة البيانات. الجدول بيانات مرتّبة في خانات، والعمود حقل واحد مسمّى فيه، مثل <code class="nw">username</code>، والصف سجل واحد، مثل طالب واحد. والمفتاح الأساسي هو العمود الذي تختلف قيمته من صف إلى آخر، فيدل على صف واحد بعينه. أما المفتاح الأجنبي فعمود يحمل المفتاح الأساسي لجدول آخر، وبه تشير الدرجة إلى الطالب الذي تخصه. وتعني <code class="nw">SERIAL</code> أن قاعدة البيانات ترقّم الصفوف الجديدة بنفسها، 1 ثم 2 ثم 3 وهكذا.</p>
@@ -428,14 +428,14 @@
 </tbody>
 </table></div>
 <p>ننظر إلى صف الدرجات رقم 3. قيمة <code class="nw">id</code> فيه 3، وقيمة <code class="nw">student_id</code> فيه 2، والطالب 2 هو عمر، فهذه درجته في Network Security، وهي 58. تشغّل الخطوة 4 من الهجوم الأمر <code>UPDATE grades SET grade = 95 WHERE id = 3</code>، وهو يختار صف الدرجات الذي قيمة <code class="nw">id</code> فيه 3. ولا يمسّ الطالب 3، لينا. في كلٍّ من الجدولين صفٌّ قيمة <code class="nw">id</code> فيه 3، فلا نخلط بينهما.</p>
-<p>يبدأ جدول <code class="nw">sessions</code> فارغاً، وكل تسجيل دخول يضيف إليه صفاً. يحتفظ Pod قاعدة البيانات ببياناته داخل حاويته، من دون وحدة تخزين دائمة (persistent volume) تبقى بعد إعادة التشغيل. لذلك حين نعيد تشغيل Pod قاعدة البيانات ترجع كل درجة إلى قيمتها الأولى، وتضيع كل تسجيلات الدخول. ويستخدم <a href="ch08.html">الفصل 8</a> هذه الخاصية لإرجاع المختبر إلى حالته الأولى بعد الهجوم.</p>
-<h2 id="واجهة-api-نقطة-نهاية-بعد-أخرى">واجهة API، نقطة نهاية بعد أخرى</h2>
-<p>نقطة النهاية طريقة (method) ومسار يجيب عنهما برنامج ما، مثل GET <code class="nw">/api/grades</code>. تجيب معظم نقاط النهاية هنا بصيغة JSON، وهي صيغة نصية للبيانات تبدو هكذا <code class="nw">{"token": "..."}</code>، فالأسماء بين علامتي تنصيص والقيم بعد النقطتين. ورمز الدخول سلسلة عشوائية طويلة يعطيها auth حين تكون كلمة المرور صحيحة. نرسله مع كل طلب لاحق في ترويسة، والترويسة سطر مسمّى من المعلومات الإضافية يُرسل مع طلب HTTP قبل جسمه. نص هذه الترويسة <code>Authorization: Bearer &lt;token&gt;</code>، وهي تثبت أننا سجّلنا الدخول سابقاً. ورموز الدخول التي يصدرها auth طولها 32 محرفاً ست عشرياً. ورمز الحالة 401 في HTTP معناه أن المرسل لم يُثبت هويته بعد، وتجيب به عدة نقاط نهاية في الجدول.</p>
+<p>يبدأ جدول <code class="nw">sessions</code> فارغاً، وكل تسجيل دخول يضيف إليه صفاً. يحتفظ Pod قاعدة البيانات ببياناته داخل الـ container الخاصة به، من دون وحدة تخزين دائمة (persistent volume) تبقى بعد إعادة التشغيل. لذلك حين نعيد تشغيل Pod قاعدة البيانات ترجع كل درجة إلى قيمتها الأولى، وتضيع كل تسجيلات الدخول. ويستخدم <a href="ch08.html">الفصل 8</a> هذه الخاصية لإرجاع المختبر إلى حالته الأولى بعد الهجوم.</p>
+<h2 id="واجهة-api-endpoint-بعد-أخرى">واجهة API، endpoint بعد أخرى</h2>
+<p>الـ endpoint طريقة (method) ومسار يجيب عنهما برنامج ما، مثل GET <code class="nw">/api/grades</code>. تجيب معظم الـ endpoints هنا بصيغة JSON، وهي صيغة نصية للبيانات تبدو هكذا <code class="nw">{"token": "..."}</code>، فالأسماء بين علامتي تنصيص والقيم بعد النقطتين. ورمز الدخول سلسلة عشوائية طويلة يعطيها auth حين تكون كلمة المرور صحيحة. نرسله مع كل طلب لاحق في ترويسة، والترويسة سطر مسمّى من المعلومات الإضافية يُرسل مع طلب HTTP قبل جسمه. نص هذه الترويسة <code>Authorization: Bearer &lt;token&gt;</code>، وهي تثبت أننا سجّلنا الدخول سابقاً. ورموز الدخول التي يصدرها auth طولها 32 محرفاً ست عشرياً. ورمز الحالة 401 في HTTP معناه أن المرسل لم يُثبت هويته بعد، وتجيب به عدة endpoints في الجدول.</p>
 <div class="table-wrap" tabindex="0" role="region" aria-label="جدول"><table>
 <thead>
 <tr>
 <th>البرنامج</th>
-<th>نقطة النهاية</th>
+<th>الـ endpoint</th>
 <th>ما تحتاجه</th>
 <th>ما تجيب به</th>
 </tr>
@@ -469,7 +469,7 @@
 <td>news</td>
 <td>POST <code class="nw">/news/check-image</code></td>
 <td>حقل نموذج اسمه <code class="nw">url</code></td>
-<td>نص عادي يبدأ بـ<code class="nw">HTTP status of image:</code>. وهذه هي نقطة النهاية التي فيها ثغرة حقن الأوامر</td>
+<td>نص عادي يبدأ بـ<code class="nw">HTTP status of image:</code>. وهذه هي الـ endpoint التي فيها ثغرة حقن الأوامر</td>
 </tr>
 <tr>
 <td>api</td>
@@ -493,7 +493,7 @@
 <td>api</td>
 <td>GET <code class="nw">/api/export</code></td>
 <td>لا شيء على الإطلاق</td>
-<td>كل درجة لكل طالب مع اسمه الكامل. نقطة نهاية قديمة للتنقيح (debug) لم يحذفها أحد</td>
+<td>كل درجة لكل طالب مع اسمه الكامل. endpoint قديمة للتنقيح (debug) لم يحذفها أحد</td>
 </tr>
 <tr>
 <td>auth</td>
@@ -511,7 +511,7 @@
 <td>admin</td>
 <td>GET <code class="nw">/</code></td>
 <td>لا شيء</td>
-<td>سطر نصي واحد يذكر نقطة النهاية <code class="nw">/users</code></td>
+<td>سطر نصي واحد يذكر الـ endpoint <code class="nw">/users</code></td>
 </tr>
 <tr>
 <td>admin</td>
@@ -521,23 +521,23 @@
 </tr>
 <tr>
 <td>db</td>
-<td>المنفذ 5432</td>
+<td>الـ port 5432</td>
 <td>اسم مستخدم وكلمة مرور</td>
 <td>بروتوكول PostgreSQL الخاص، الذي يستخدمه <code class="nw">psql</code> وبرامج Python</td>
 </tr>
 </tbody>
 </table></div>
-<p>ويجيب news وapi وauth وadmin وfrontend أيضاً عن GET <code class="nw">/healthz</code> بالنص <code class="nw">ok</code>. نقطة النهاية هذه مخصصة لفحص الجاهزية، وهو فحص يكرره Kubernetes من العقدة ليقرر هل صار الـPod جاهزاً لاستقبال الحركة. وإلى أن ينجح الفحص يظهر الـPod بالقيمة <code class="nw">0/1</code> في عمود READY، ولا يرسل إليه الـService شيئاً. أما Pod قاعدة البيانات فيشغّل فحص PostgreSQL الخاص، <code class="nw">pg_isready</code>، بدلاً من طلب HTTP.</p>
-<p>ثلاث نقاط نهاية في ذلك الجدول هي مواضع الضعف التي يستغلها الهجوم في <a href="ch08.html">الفصل 8</a>. فالمسار POST <code class="nw">/news/check-image</code> هو مدخل المهاجم. والمسار GET <code class="nw">/api/export</code> يكشف كل الدرجات لأي سائل. أما GET <code class="nw">/users</code> في admin فيسلّم هاشات كلمات المرور كلها، لأن اللوحة تفترض أن من يصل إليها لا بد أن يكون من الداخل.</p>
+<p>ويجيب news وapi وauth وadmin وfrontend أيضاً عن GET <code class="nw">/healthz</code> بالنص <code class="nw">ok</code>. الـ endpoint هذه مخصصة لفحص الجاهزية، وهو فحص يكرره Kubernetes من الـ node ليقرر هل صار الـPod جاهزاً لاستقبال الحركة. وإلى أن ينجح الفحص يظهر الـPod بالقيمة <code class="nw">0/1</code> في عمود READY، ولا يرسل إليه الـService شيئاً. أما Pod قاعدة البيانات فيشغّل فحص PostgreSQL الخاص، <code class="nw">pg_isready</code>، بدلاً من طلب HTTP.</p>
+<p>3 endpoints في ذلك الجدول هي مواضع الضعف التي يستغلها الهجوم في <a href="ch08.html">الفصل 8</a>. فالمسار POST <code class="nw">/news/check-image</code> هو مدخل المهاجم. والمسار GET <code class="nw">/api/export</code> يكشف كل الدرجات لأي سائل. أما GET <code class="nw">/users</code> في admin فيسلّم هاشات كلمات المرور كلها، لأن اللوحة تفترض أن من يصل إليها لا بد أن يكون من الداخل.</p>
 <h2 id="فحوص-البوابة-الستة">فحوص البوابة الستة</h2>
 <p>يختبر <code class="nw">check-portal.sh</code>، الذي نكتبه في <a href="ch06.html">الفصل 6</a>، البوابة كما يستخدمها الطالب، بستة فحوص. فهو يتحقق من أن الصفحة تُحمَّل، وأن قائمة الأخبار فيها 3 عناصر، وأن sara تستطيع تسجيل الدخول وتحصل على رمز دخول من 32 محرفاً، وأن ملفها الشخصي يذكر Sara Ahmed، وأنها ترى درجتين. أما الفحص السادس فيرسل طلباً من ops إلى لوحة الإدارة، ويتوقع أن يجد في الجواب 4 مستخدمين. وحين تنجح الفحوص الستة يطبع <code class="nw">PORTAL: 6/6 OK</code>، ونشغّله بعد كل تغيير في السياسات لنثبت أن المستخدمين الحقيقيين ما زالوا يصلون.</p>
 <h2 id="نقطة-التحقق-نكتب-جدول-التدفقات-من-الذاكرة">نقطة التحقق: نكتب جدول التدفقات من الذاكرة</h2>
-<p><strong>نقطة التحقق.</strong> نغلق هذا الدليل أو نقلب الورقة على وجهها حتى لا نرى الجدول. نرسم في الدفتر جدولاً أعمدته «من» و«إلى» و«المنفذ» و«قاعدة إضافية»، ثم نكتب فيه كل تدفق يسمح به المختبر بعد التجزئة، من دون DNS وفحوص الجاهزية. بعدها نقارن جدولنا بالجدول الموجود في قسم «التدفقات الثمانية المسموح بها». يطابق جدولنا الأصل حين يكون فيه 8 صفوف بالضبط، بالقيم نفسها في «من» و«إلى» و«المنفذ». في الصف 1 تُحسب 80 مطابقة، وكذلك «80 عبر 30080»، أما 30080 وحدها فلا، لأن السياسة مكتوبة للمنفذ 80 على الـPod. ويبقى عمود القاعدة الإضافية فارغاً في كل الصفوف إلا صف frontend إلى api، وفيه الطلبات الثلاثة المسموح بها، GET <code class="nw">/api/grades</code> وGET <code class="nw">/api/profile</code> وPOST <code class="nw">/api/login</code>. وإذا اختلف أي صف، نبحث في عمود «لماذا تحتاجه البوابة» عن سبب الحاجة إلى ذلك التدفق أو عدمها. ثم نأخذ استراحة عشر دقائق ونعيد المحاولة حتى نكتب الصفوف الثمانية كلها من دون أن ننظر.</p>
-<p>لم نغيّر أي ملف في هذا الفصل، لذلك لا يوجد ما نودعه في Git.</p>
+<p><strong>نقطة التحقق.</strong> نغلق هذا الدليل أو نقلب الورقة على وجهها حتى لا نرى الجدول. نرسم في الدفتر جدولاً أعمدته «من» و«إلى» و«الـ port» و«قاعدة إضافية»، ثم نكتب فيه كل تدفق يسمح به المختبر بعد التجزئة، من دون DNS وفحوص الجاهزية. بعدها نقارن جدولنا بالجدول الموجود في قسم «التدفقات الثمانية المسموح بها». يطابق جدولنا الأصل حين يكون فيه 8 صفوف بالضبط، بالقيم نفسها في «من» و«إلى» و«الـ port». في الصف 1 تُحسب 80 مطابقة، وكذلك «80 عبر 30080»، أما 30080 وحدها فلا، لأن السياسة مكتوبة للـ port 80 على الـPod. ويبقى عمود القاعدة الإضافية فارغاً في كل الصفوف إلا صف frontend إلى api، وفيه الطلبات الثلاثة المسموح بها، GET <code class="nw">/api/grades</code> وGET <code class="nw">/api/profile</code> وPOST <code class="nw">/api/login</code>. وإذا اختلف أي صف، نبحث في عمود «لماذا تحتاجه البوابة» عن سبب الحاجة إلى ذلك التدفق أو عدمها. ثم نأخذ استراحة عشر دقائق ونعيد المحاولة حتى نكتب الصفوف الثمانية كلها من دون أن ننظر.</p>
+<p>لم نغيّر أي ملف في هذا الفصل، لذلك لا يوجد ما نعمل له commit في Git.</p>
 <!-- OUT ids: none --><nav class="pager" aria-label="الفصول"><a rel="prev" href="ch00.html"><span>الفصل السابق</span>الفصل 0. كيف نستخدم هذا الدليل</a><a rel="next" href="ch02.html"><span>الفصل التالي</span>الفصل 2. قبل أن نبدأ</a></nav></main></div>
 <footer class="foot"><div class="foot-in"><p>Kubernetes 1.36 و Cilium 1.20.5 و kind 0.33.0 على Windows 11 مع WSL 2. شغّلنا كل أمر على حاسوب حقيقي في تشرين الثاني 2026.</p><p><a href="https://github.com/0nlymohammed/ghufran-fyp-guide">المصدر على GitHub</a></p></div></footer>
 <p class="vh" aria-live="polite" id="live"></p>
-<script type="application/json" id="i18n">{"copied": "نُسخ", "copyFail": "نضغط Ctrl+C لنسخ النص المحدد", "doneOf": "الخطوات المنجزة: {d} من {t}", "next": "الخطوة التالية: {s}", "allDone": "اكتمل المسار وأُنجزت الخطوات كلها.", "sumCount": "المنجز {d} من {t}", "cleared": "مُسحت كل العلامات.", "confirm": "هل نمسح كل العلامات في هذه الصفحة؟ تبقى الملفات والعنقود كما هي.", "stageCount": "{d} من {t}", "themeDark": "داكن", "themeLight": "فاتح", "toDark": "التبديل إلى المظهر الداكن", "toLight": "التبديل إلى المظهر الفاتح"}</script>
+<script type="application/json" id="i18n">{"copied": "نُسخ", "copyFail": "نضغط Ctrl+C لنسخ النص المحدد", "doneOf": "الخطوات المنجزة: {d} من {t}", "next": "الخطوة التالية: {s}", "allDone": "اكتمل المسار وأُنجزت الخطوات كلها.", "sumCount": "المنجز {d} من {t}", "cleared": "مُسحت كل العلامات.", "confirm": "هل نمسح كل العلامات في هذه الصفحة؟ تبقى الملفات والـ cluster كما هي.", "stageCount": "{d} من {t}", "themeDark": "داكن", "themeLight": "فاتح", "toDark": "التبديل إلى المظهر الداكن", "toLight": "التبديل إلى المظهر الفاتح"}</script>
 <script src="../../assets/site.js" defer></script>
 </body>
 </html>

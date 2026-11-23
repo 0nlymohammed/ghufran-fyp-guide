@@ -206,6 +206,20 @@ html:lang(ar) .toc .sub a { font-size: 0.9375rem; }
 .extra > h2 { margin-top: var(--s3); }
 
 .ifnot { border-inline-start: 3px solid var(--orange); padding-inline-start: var(--s3); }
+details.ifnot { margin: 0 0 var(--s4); max-width: var(--measure); }
+details.ifnot > summary { display: flex; align-items: center; gap: var(--s2); min-height: 44px; cursor: pointer; color: var(--blue-ink); font-weight: 600; list-style: none; }
+details.ifnot > summary::-webkit-details-marker { display: none; }
+details.ifnot > summary::before { content: ""; flex-shrink: 0; width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; margin-inline: 2px 4px; }
+html[dir="ltr"] details.ifnot > summary::before { transform: rotate(-45deg); }
+html[dir="rtl"] details.ifnot > summary::before { transform: rotate(135deg); }
+html[dir] details.ifnot[open] > summary::before { transform: rotate(45deg) translateY(-2px); }
+details.ifnot > summary:hover { text-decoration: underline; text-underline-offset: 0.18em; }
+details.ifnot > p { margin: 0 0 var(--s2); font-size: 0.9375rem; }
+.step ol { margin-bottom: var(--s3); }
+.step ol li { margin-bottom: var(--s1); padding-inline-start: var(--s1); }
+.step ol li::marker { font-weight: 700; color: var(--blue-ink); font-variant-numeric: tabular-nums; }
+.see { font-weight: 400; }
+.see > strong:first-child { color: var(--blue-ink); }
 
 /* ---------- code ---------- */
 .code { margin: var(--s3) 0 var(--s5); border: 1px solid var(--rule); border-radius: var(--r-surface); background: var(--code); overflow: hidden; }
@@ -221,6 +235,15 @@ html[dir="rtl"] .code figcaption { padding: 2px var(--s3) 2px var(--s1); }
   font-family: var(--mono); font-size: 0.875rem; line-height: 1.55; tab-size: 4; font-variant-ligatures: none;
 }
 .code pre code { background: none; padding: 0; font-size: inherit; border-radius: 0; }
+/* The bar is the colour of the real window: PowerShell blue, Ubuntu aubergine. Same in both themes. */
+.code.cmd.ps figcaption { background: #012456; border-bottom-color: #012456; }
+.code.cmd.sh figcaption { background: #300a24; border-bottom-color: #300a24; }
+.code.cmd.ps .lbl, .code.cmd.sh .lbl { color: #ffffff; }
+.code.cmd.ps .copy, .code.cmd.sh .copy { background: transparent; color: #ffffff; border-color: rgba(255, 255, 255, 0.55); }
+.code.cmd.ps .copy:hover, .code.cmd.sh .copy:hover { border-color: #ffffff; background: rgba(255, 255, 255, 0.12); }
+.code.cmd.ps .copy:focus-visible, .code.cmd.sh .copy:focus-visible { outline-color: #ffffff; outline-offset: -4px; }
+.code.cmd.ps .copy[data-state="done"], .code.cmd.sh .copy[data-state="done"] { background: #ffffff; color: #13233f; border-color: #ffffff; }
+.code mark { background: var(--tint); color: inherit; box-shadow: 0 0 0 2px var(--tint), 0 2px 0 2px var(--blue); border-radius: 1px; }
 .code.out { background: var(--paper); }
 .code.out .lbl { font-weight: 400; color: var(--muted); }
 .code.out figcaption { min-height: 32px; border-bottom-style: dotted; }
@@ -245,6 +268,7 @@ tbody th { font-weight: 600; }
 td.num, th.num { text-align: end; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .fig { margin: var(--s5) 0; }
 .fig a { display: block; border-radius: var(--r-surface); }
+.fig.ui img { max-width: 780px; }
 .fig img { width: 100%; height: auto; border: 1px solid var(--rule); border-radius: var(--r-surface); background: var(--surface); }
 .fig img:not(.only-light, .only-dark), html:not([data-theme="dark"]) .fig img.only-light, html[data-theme="dark"] .fig img.only-dark { display: block; }
 html[data-theme="dark"] .fig.shot img { filter: brightness(0.86); }
@@ -290,10 +314,12 @@ html[data-theme="dark"] .fig.shot img { filter: brightness(0.86); }
   .route li.partial .mk { border-color: Highlight; }
   .route li.done .mk { border-color: Highlight; background: Highlight; }
   .code.bad, .ifnot { border-inline-start-color: CanvasText; }
+  .code.cmd.ps figcaption, .code.cmd.sh figcaption { forced-color-adjust: none; }
+  .code mark { forced-color-adjust: none; background: Highlight; color: HighlightText; box-shadow: none; }
 }
 
 @media print {
-  .top, .rail, .progress, .tick, .copy, .foot, .pager { display: none !important; }
+  .top, .rail, .progress, .tick, .copy, .foot, .pager, .theme { display: none !important; }
   .layout { display: block; }
   .code pre, .code.file pre { max-height: none; overflow: visible; white-space: pre-wrap; }
 }

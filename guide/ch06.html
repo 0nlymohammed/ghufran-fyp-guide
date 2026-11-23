@@ -32,7 +32,7 @@
 <h2 id="step-1-check-that-the-cluster-is-still-running">Step 1. Check that the cluster is still running</h2>
 <p>The cluster you built in <a href="ch04.html">chapter 4</a> has to be up before you can put anything on it. After Windows restarts it sometimes isn't, and one command tells you.</p>
 <p>Open the Ubuntu terminal.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl get nodes -L tier</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl get nodes -L tier</code></pre></figure>
 <p><code class="nw">kubectl get nodes</code> lists the cluster's nodes. <code class="nw">-L tier</code> adds a column that shows each node's <code class="nw">tier</code> label, which is the label that decides where your pods may run.</p>
 <p><strong>You should see</strong> three nodes.</p>
 <figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>NAME                 STATUS   ROLES           AGE     VERSION   TIER
@@ -49,7 +49,7 @@ kind-worker2         Ready    &lt;none&gt;          5m      v1.36.4   backend</c
 <p><code class="nw">k8s/app.yaml</code> is a manifest, a text file that describes the objects you want to exist, and Kubernetes keeps working until what runs in the cluster matches the file. It describes the whole portal in 14 objects: one Secret, six Services and seven Deployments.</p>
 <p>The file is written in YAML, a text format where indentation shows what belongs to what. Each level is indented by two spaces, and tabs aren't allowed at all, since a single tab anywhere breaks the whole file. A line that starts with <code class="nw">-</code> is one item of a list. In this file a list's items sit at the same indentation as the key above them, as in <code class="nw">ports:</code> followed by <code class="nw">- port: 5000</code>, and that is correct. A line holding only <code class="nw">---</code> ends one object and starts the next, which is how one file can hold 14 of them.</p>
 <p>In the Ubuntu terminal, make the folder and open a new empty file in VS Code.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>mkdir -p ~/microseg/k8s
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>mkdir -p ~/microseg/k8s
 code ~/microseg/k8s/app.yaml</code></pre></figure>
 <p><code class="nw">mkdir -p ~/microseg/k8s</code> creates the <code class="nw">k8s</code> folder inside your project, and <code class="nw">-p</code> keeps it quiet if the folder is already there. <code class="nw">code</code> opens the file in VS Code, which creates it the first time you save.</p>
 <p><strong>You should see</strong> VS Code open an empty tab named <code class="nw">app.yaml</code>, and no output in the terminal. Paste the file below into it and save with Ctrl+S. Check that the VS Code status bar at the bottom right shows <code class="nw">LF</code>, as in <a href="ch02.html">chapter 2</a>.</p>
@@ -472,7 +472,7 @@ spec:
 <p><code class="nw">sleep infinity</code> keeps the container alive while doing nothing. Ops stands for the IT team's maintenance machine, and you run commands inside it with <code class="nw">kubectl exec</code>. When Kubernetes stops a pod it first asks politely and waits 30 seconds before forcing it. <code class="nw">sleep</code> runs as the container's first process and has no handler for the polite request, so Linux never delivers it. <code>terminationGracePeriodSeconds: 1</code> cuts the wait to one second, and <code class="nw">deploy.sh</code> doesn't hang each time it deletes the namespace.</p>
 <h2 id="step-3-check-the-file-before-you-deploy">Step 3. Check the file before you deploy</h2>
 <p>A paste that lost one space shifts a line to the wrong level, and you'd rather find that now than after a five-minute build. A dry run sends the file through kubectl's checks without creating anything.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; kubectl apply --dry-run=client -f k8s/app.yaml</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; kubectl apply --dry-run=client -f k8s/app.yaml</code></pre></figure>
 <p><code class="nw">kubectl apply -f k8s/app.yaml</code> would create every object in the file. <code class="nw">--dry-run=client</code> makes kubectl read and check the file on your side and print what it would do, while changing nothing in the cluster.</p>
 <p><strong>You should see</strong> 14 lines, one per object, each ending in <code class="nw">created (dry run)</code>.</p>
 <p>The order is the order of the file, the Secret first, then the six Services, then the seven Deployments. If you've deployed before, the lines end in <code class="nw">unchanged (dry run)</code> or <code class="nw">configured (dry run)</code> instead. That's fine too, as long as no line says <code class="nw">error</code>.</p>
@@ -484,7 +484,7 @@ spec:
 <h2 id="step-4-write-deploysh">Step 4. Write deploy.sh</h2>
 <p>Deploying takes 14 commands in a fixed order, and you'll repeat it every time you want a clean start. <code class="nw">deploy.sh</code> holds them so you never type them by hand.</p>
 <p>Open a new file in VS Code.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>code ~/microseg/deploy.sh</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>code ~/microseg/deploy.sh</code></pre></figure>
 <p><strong>You should see</strong> VS Code open an empty tab named <code class="nw">deploy.sh</code>. Paste the script below, save it and check for <code class="nw">LF</code> in the status bar again.</p>
 <figure class="code file"><figcaption><span class="lbl">File: deploy.sh</span><button type="button" class="copy" aria-label="Copy this file">Copy</button></figcaption><pre dir="ltr"><code>#!/bin/bash
 # Build, load and (re)deploy the app. Deletes namespace campus first, so the DB is reset
@@ -522,7 +522,7 @@ kubectl -n campus get pods -o wide</code></pre></figure>
 <p><code>kubectl -n campus get pods -o wide</code> prints the pods and where they landed.</p>
 <h2 id="step-5-deploy-the-portal">Step 5. Deploy the portal</h2>
 <p>Run the script, which takes a few minutes. Most of that goes into the image steps, even though the build reuses the layers from <a href="ch05.html">chapter 5</a>.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>bash ~/microseg/deploy.sh</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>bash ~/microseg/deploy.sh</code></pre></figure>
 <p><code class="nw">bash</code> runs the script, and the path works from any folder.</p>
 <p><strong>You should see</strong> Docker's build display, which redraws itself in place and ends with lines starting <code class="nw">=&gt;</code>, then the lines below. They're the last 32 lines of the output.</p>
 <figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>namespace/campus created
@@ -568,7 +568,7 @@ ops-56f8b77f6d-hs2zr        1/1     Running   0          21s   10.244.1.140   ki
 <p>The script stopped during a <code class="nw">docker build</code> line. That's the same build you ran in <a href="ch05.html">chapter 5</a>, so the error and its fix are in that chapter's failure list.</p>
 <h2 id="step-6-look-at-the-pods">Step 6. Look at the pods</h2>
 <p>The script's table is a snapshot from the moment it finished. Ask for the pods again to confirm they stayed up.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus get pods</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus get pods</code></pre></figure>
 <p><code class="nw">-n campus</code> looks inside the <code class="nw">campus</code> namespace. Without it kubectl looks in <code class="nw">default</code>, which is empty.</p>
 <p><strong>You should see</strong> seven pods.</p>
 <figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>NAME                        READY   STATUS    RESTARTS   AGE
@@ -581,7 +581,7 @@ news-545758c8c6-2jp4n       1/1     Running   0          22s
 ops-56f8b77f6d-hs2zr        1/1     Running   0          22s</code></pre></figure>
 <p>READY says how many containers in the pod are ready out of how many there are, and it must read <code class="nw">1/1</code> for all seven. STATUS must read <code class="nw">Running</code>. RESTARTS should be <code class="nw">0</code>. A number that keeps growing means trouble: the program inside is crashing and Kubernetes keeps restarting it.</p>
 <p>Now look at where each pod runs.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus get pods -o wide</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus get pods -o wide</code></pre></figure>
 <p><code class="nw">-o wide</code> adds the pod's IP address and its node.</p>
 <p>You should see the same seven pods with two more columns that matter.</p>
 <figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>NAME                        READY   STATUS    RESTARTS   AGE   IP             NODE           NOMINATED NODE   READINESS GATES
@@ -605,7 +605,7 @@ ops-56f8b77f6d-hs2zr        1/1     Running   0          22s   10.244.1.140   ki
 <p>The frontend pod shows <code class="nw">CrashLoopBackOff</code>, or stays at <code class="nw">0/1</code>. Run <code>kubectl -n campus logs deploy/frontend</code> to read what nginx printed. A line such as <code>nginx: [emerg] unknown directive "proxy_pas" in /etc/nginx/conf.d/default.conf:19</code> means <code class="nw">frontend/default.conf</code> has a typo, and the word and the line number name it. Fix the file, then run <code class="nw">deploy.sh</code> again, since only <code class="nw">deploy.sh</code> rebuilds the ConfigMap from your files.</p>
 <h2 id="step-7-look-at-the-services-and-the-environment-variables">Step 7. Look at the Services and the environment variables</h2>
 <p>The Services are what the pods use to find each other, and the attacker uses them too.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus get svc</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus get svc</code></pre></figure>
 <p><code class="nw">svc</code> means services.</p>
 <p><strong>You should see</strong> six Services.</p>
 <figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>NAME       TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
@@ -617,19 +617,19 @@ frontend   NodePort    10.96.181.104   &lt;none&gt;        80:30080/TCP   22s
 news       ClusterIP   10.96.176.161   &lt;none&gt;        5000/TCP       22s</code></pre></figure>
 <p>Five have the TYPE <code class="nw">ClusterIP</code> and one port each. Frontend has the TYPE <code class="nw">NodePort</code>, and its PORT(S) column reads <code class="nw">80:30080/TCP</code>, meaning port 80 inside the cluster and 30080 on the node. CLUSTER-IP addresses start with <code class="nw">10.96.</code> and the rest differs on your laptop.</p>
 <p>Next, look at the variables Kubernetes put into the news pod, the ones the attacker reads in <a href="ch08.html">chapter 8</a>.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus exec deploy/news -- env | grep SERVICE_PORT= | sort</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus exec deploy/news -- env | grep SERVICE_PORT= | sort</code></pre></figure>
 <p><code>kubectl -n campus exec deploy/news --</code> runs the command that follows inside a pod of the news Deployment. <code class="nw">env</code> prints every environment variable of that pod. Back in WSL, <code class="nw">grep SERVICE_PORT=</code> keeps the lines that hold a Service's port and <code class="nw">sort</code> puts them in alphabetical order.</p>
 <p>You should see seven lines.</p>
 <p>There's one line for each of the six Services, from <code class="nw">ADMIN_SERVICE_PORT=5002</code> to <code class="nw">NEWS_SERVICE_PORT=5000</code>, and one for <code class="nw">KUBERNETES_SERVICE_PORT=443</code>, the cluster's own API. If one of your six Services is missing, the Services were created after the pods. Run <code class="nw">deploy.sh</code> again, without changing the order of objects in <code class="nw">app.yaml</code>.</p>
 <p>Last, confirm the network is still flat, with no policies in the namespace.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus get ciliumnetworkpolicies</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus get ciliumnetworkpolicies</code></pre></figure>
 <p><strong>You should see</strong> one line.</p>
 <figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>No resources found in campus namespace.</code></pre></figure>
 <p><code>No resources found in campus namespace.</code> means zero policy objects, which is the flat network you'll attack in <a href="ch08.html">chapter 8</a>. <code class="nw">deploy.sh</code> deleted the namespace, so any policy you may have tried early is gone too.</p>
 <h2 id="step-8-write-check-portalsh">Step 8. Write check-portal.sh</h2>
 <p>You need a fast way to prove the portal still works for real users. In <a href="ch10.html">chapter 10</a> you'll add the policies, and a policy that blocks the attacker must not block Sara. This script runs the same six things a real user and the IT team do, and counts how many worked.</p>
 <p>Open a new file in VS Code.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>code ~/microseg/check-portal.sh</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>code ~/microseg/check-portal.sh</code></pre></figure>
 <p><strong>You should see</strong> VS Code open an empty tab named <code class="nw">check-portal.sh</code>. Paste the script below and save it.</p>
 <figure class="code file"><figcaption><span class="lbl">File: check-portal.sh</span><button type="button" class="copy" aria-label="Copy this file">Copy</button></figcaption><pre dir="ltr"><code>#!/bin/bash
 # Checks that the portal still works for real users. Run from WSL:  bash ~/microseg/check-portal.sh
@@ -665,7 +665,7 @@ echo &quot;PORTAL: $passed/6 OK&quot;</code></pre></figure>
 <p>(7) The next two checks send that token in an <code class="nw">Authorization</code> header and ask for Sara's profile and grades. Her full name must be <code class="nw">Sara Ahmed</code>, and she must have 2 grades.</p>
 <p>(8) The last check runs <code class="nw">curl</code> inside the ops pod and asks the admin panel for its user list, which must hold 4 users. Nothing outside the cluster can reach admin, so the check goes in through ops, the one pod that is supposed to reach it.</p>
 <p>Now run it.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>bash ~/microseg/check-portal.sh</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>bash ~/microseg/check-portal.sh</code></pre></figure>
 <p><strong>You should see</strong> six lines that start with <code class="nw">OK</code> and a count at the end.</p>
 <figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>OK    portal page loads
 OK    news list has 3 items
@@ -685,7 +685,7 @@ PORTAL: 6/6 OK</code></pre></figure>
 <figure class="fig shot"><a href="../files/shots/portal.png"><img src="../files/shots/portal.png" alt="The portal after Sara logs in, with her profile and her two grades." width="1400" height="1350" loading="lazy" decoding="async"></a><figcaption>The portal after Sara logs in, with her profile and her two grades.</figcaption></figure>
 <p>Everything so far ran inside WSL. The attacker in <a href="ch08.html">chapter 8</a> sends his requests from Windows PowerShell, so check that Windows reaches the same port.</p>
 <p>Open PowerShell and run this.</p>
-<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>curl.exe -s -o NUL -w &quot;%{http_code}\n&quot; http://localhost:30080/</code></pre></figure>
+<figure class="code cmd ps"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>curl.exe -s -o NUL -w &quot;%{http_code}\n&quot; http://localhost:30080/</code></pre></figure>
 <p><code class="nw">curl.exe</code> is the curl program that comes with Windows 11. In Windows PowerShell, <code class="nw">curl</code> without <code class="nw">.exe</code> runs a different PowerShell command with different options, so always type the <code class="nw">.exe</code>. <code class="nw">-o NUL</code> throws the page away, since <code class="nw">NUL</code> is the Windows name for nowhere. <code class="nw">-w "%{http_code}\n"</code> prints the status code, and curl itself turns the <code class="nw">\n</code> into a line break so the next prompt starts on a new line.</p>
 <p><strong>You should see</strong> one number.</p>
 <p>It must be <code class="nw">200</code>. <code class="nw">localhost</code> works on both sides because WSL passes port 30080 from Ubuntu on to Windows.</p>
@@ -695,19 +695,19 @@ PORTAL: 6/6 OK</code></pre></figure>
 <p class="ifnot"><strong>If you see this instead</strong></p>
 <p>The page says <code class="nw">Login failed</code> under the button. The username or password doesn't match. The password is <code class="nw">sara2026</code>, all lowercase, and a password manager may have filled in something else.</p>
 <p>The browser says it can't reach the page or that localhost refused to connect, while <code class="nw">check-portal.sh</code> passes in WSL. Run the <code class="nw">curl.exe</code> command above again. If it prints <code class="nw">000</code>, WSL isn't passing the port on to Windows. Open <code class="nw">.wslconfig</code> from PowerShell and check that it still has the line <code class="nw">localhostForwarding=true</code>, as in <a href="ch03.html">chapter 3</a>.</p>
-<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>notepad &quot;$env:USERPROFILE\.wslconfig&quot;</code></pre></figure>
+<figure class="code cmd ps"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>notepad &quot;$env:USERPROFILE\.wslconfig&quot;</code></pre></figure>
 <p>If you had to add or fix that line, save the file. Whether you changed it or not, restart WSL so the setting is read again.</p>
-<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>wsl --shutdown</code></pre></figure>
+<figure class="code cmd ps"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>wsl --shutdown</code></pre></figure>
 <p><code class="nw">wsl --shutdown</code> stops Ubuntu and the cluster with it. Open Ubuntu again, go back to step 1 of this chapter to start the nodes, and run the <code class="nw">curl.exe</code> command once more.</p>
 <p>If you had closed every Ubuntu window, Windows may have stopped Ubuntu and the cluster with it. Open Ubuntu again, wait a minute and check the pods. If kubectl says the connection was refused, start the nodes as in step 1.</p>
 <p>The announcements list is empty but login works. The news pod isn't ready. Check it with <code class="nw">kubectl -n campus get pods</code> and work through the pod failures in step 6.</p>
 <h2 id="checkpoint">Checkpoint</h2>
 <p>Run the portal check once more and keep only its last line.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>bash ~/microseg/check-portal.sh | tail -n 1</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>bash ~/microseg/check-portal.sh | tail -n 1</code></pre></figure>
 <p><code class="nw">tail -n 1</code> prints only the last line of what comes before the <code class="nw">|</code>.</p>
 <p>It must read exactly <code class="nw">PORTAL: 6/6 OK</code>. Together with the pod list earlier, which showed seven pods <code class="nw">1/1 Running</code> with frontend and news on kind-worker, that's this chapter's checkpoint. Don't start <a href="ch07.html">chapter 7</a> until both match.</p>
 <p>Save your work in Git.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; git add -A &amp;&amp; git commit -m &quot;ch06: deploy the portal&quot;</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg &amp;&amp; git add -A &amp;&amp; git commit -m &quot;ch06: deploy the portal&quot;</code></pre></figure>
 <p><code class="nw">git add -A</code> stages every new and changed file, and <code class="nw">git commit -m</code> saves them as one snapshot with the message after <code class="nw">-m</code>.</p>
 <p>The first line starts with <code class="nw">[main</code> and a short code that differs on your laptop, followed by your message. The next line counts the files changed, which is 3 if your last commit came at the end of <a href="ch05.html">chapter 5</a>, for <code class="nw">k8s/app.yaml</code>, <code class="nw">deploy.sh</code> and <code class="nw">check-portal.sh</code>. The <code class="nw">images</code> folder isn't in it, because <code class="nw">.gitignore</code> leaves it out.</p>
 <!-- OUT ids: ch08-nodes, ch08-dryrun, ch08-deploy, ch08-pods, ch08-pods-wide, ch08-svc, ch08-env-ports, ch08-cnp-none, ch08-check-portal, ch08-curl-portal-windows, ch08-checkpoint, ch08-commit --><nav class="pager" aria-label="Chapters"><a rel="prev" href="ch05.html"><span>Previous chapter</span>Chapter 5. Write the services</a><a rel="next" href="ch07.html"><span>Next chapter</span>Chapter 7. Build your dashboard</a></nav></main></div>

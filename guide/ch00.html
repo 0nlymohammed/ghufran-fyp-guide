@@ -58,7 +58,7 @@
 <h3 id="placeholders-words-in-angle-brackets">Placeholders: words in angle brackets</h3>
 <p>A few commands contain a placeholder, a word in angle brackets such as <code class="nw">&lt;WinUser&gt;</code>, which stands for a value only you know. Replace the whole placeholder, brackets included, with your own value. Everything outside the angle brackets is typed exactly as shown, spaces and capital letters included.</p>
 <p><code class="nw">&lt;WinUser&gt;</code> means the name of your folder under <code class="nw">C:\Users</code>, which isn't always the name Windows greets you with. When Windows was set up with a Microsoft account, the folder often gets a shortened name. In PowerShell, run this to read it.</p>
-<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>$env:USERPROFILE</code></pre></figure>
+<figure class="code cmd ps"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>$env:USERPROFILE</code></pre></figure>
 <figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>C:\Users\ASUS</code></pre></figure>
 <p>That's the folder on the laptop the guide was tested on. Yours prints a line such as <code class="nw">C:\Users\sarak</code>, and the part after the last backslash, here <code class="nw">sarak</code>, is your <code class="nw">&lt;WinUser&gt;</code>. The path <code>/mnt/c/Users/&lt;WinUser&gt;/Downloads</code> then becomes <code class="nw">/mnt/c/Users/sarak/Downloads</code>.</p>
 <h3 id="files-you-paste-files-you-type">Files you paste, files you type</h3>
@@ -79,13 +79,13 @@
 <h2 id="practice-step-check-that-your-laptop-can-run-the-lab">Practice step: check that your laptop can run the lab</h2>
 <p>The lab runs three simulated machines, the seven programs that make up the portal (the six services plus a small helper) and Cilium, all at the same time. In <a href="ch03.html">chapter 3</a> you hand about 10 GB of memory and 4 processors to WSL, the virtual machine that Ubuntu runs in. A smaller laptop can't run it, and it's better to find that out today than halfway through day 2. This is also your first step written in the five-part layout, so read it through once before you type anything.</p>
 <p>In PowerShell, run this command to read how much memory your laptop has.</p>
-<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>[math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 1)</code></pre></figure>
+<figure class="code cmd ps"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>[math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 1)</code></pre></figure>
 <p><code>Get-CimInstance Win32_ComputerSystem</code> asks Windows for facts about the computer. <code class="nw">.TotalPhysicalMemory</code> picks out the memory size, which Windows reports in bytes. <code class="nw">/ 1GB</code> turns the bytes into gigabytes. <code class="nw">[math]::Round(</code> together with <code class="nw">, 1)</code> at the end rounds the answer to one decimal place.</p>
 <p><strong>You should see</strong> a single number on one line.</p>
 <figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>15.9</code></pre></figure>
 <p>That's the value from the laptop the guide was tested on. Yours must be 13.5 or more. A laptop sold with 16 GB prints a number a little under 16, because the graphics chip and the firmware keep a slice of memory for themselves.</p>
 <p>Now count the processors. In PowerShell, run this.</p>
-<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>(Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors</code></pre></figure>
+<figure class="code cmd ps"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>(Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors</code></pre></figure>
 <p><code class="nw">NumberOfLogicalProcessors</code> counts the processor threads Windows can hand work to. Ubuntu sees the same kind of count as its number of CPUs.</p>
 <p><strong>You should see</strong> one whole number.</p>
 <figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>12</code></pre></figure>

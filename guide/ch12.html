@@ -117,13 +117,13 @@ for path in ENDPOINTS:
 <p>(10) <code class="nw">CONDITIONS</code> ends with <code class="nw">"policies"</code>, so the script always finishes with your policies applied.</p>
 <p>CSV, short for comma-separated values, is a plain text table where each line is one row and commas separate the columns. Excel opens it directly.</p>
 <p>Check that the whole file landed on disk. VS Code can show text that isn't saved yet, while the commands below read only what's on disk.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
 wc -l measure.py</code></pre></figure>
 <p><code class="nw">wc -l</code> counts the lines in the file.</p>
 <p><strong>You should see</strong> one line.</p>
 <p>It must read <code class="nw">71 measure.py</code>. A smaller number means the paste was cut short or the file wasn't saved. Paste the whole file again, press Ctrl+S and run <code class="nw">wc -l measure.py</code> once more.</p>
 <p>Then check that the file is valid Python.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
 .venv/bin/python -m py_compile measure.py &amp;&amp; echo &quot;measure.py compiles&quot;</code></pre></figure>
 <p><code class="nw">-m py_compile</code> reads the file and reports any syntax error without running it. The <code class="nw">&amp;&amp;</code> runs the <code class="nw">echo</code> only if that check passed.</p>
 <p><strong>You should see</strong> one line.</p>
@@ -135,7 +135,7 @@ wc -l measure.py</code></pre></figure>
 <p>The file isn't in <code class="nw">~/microseg</code>, or it has a different name. Check the name in VS Code's file list, then run the command again from <code class="nw">~/microseg</code>.</p>
 <h2 id="run-measurepy">Run <code class="nw">measure.py</code></h2>
 <p>The run takes about 10 minutes, 9 minutes 38 seconds on the test laptop. Every program that uses the processor during that time adds noise. Plug the laptop in. Close the Hubble UI tab, the dashboard tab and any other browser windows, and leave the laptop alone until the prompt comes back. The dashboard program itself can keep running in its terminal, because it does nothing unless a page asks it to.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
 time .venv/bin/python -u measure.py | tee ~/microseg/evidence/ch14-measure.txt</code></pre></figure>
 <p><code class="nw">time</code> runs the command after it and prints how long it took when it ends. <code class="nw">.venv/bin/python</code> is the Python inside your project's virtual environment, the one that has <code class="nw">requests</code> installed. <code class="nw">-u</code> makes Python print each line the moment it's ready. Without it, Python holds back its own lines whenever its output goes into a pipe, and you'd see only kubectl's lines until the very end. <code>| tee ~/microseg/evidence/ch14-measure.txt</code> shows the output and saves a copy for your report.</p>
 <p><strong>You should see</strong> <code class="nw">kubectl</code> lines saying the ten policies were deleted or created, and between them one line for each run, condition and page. At the end comes a short summary.</p>
@@ -150,7 +150,7 @@ time .venv/bin/python -u measure.py | tee ~/microseg/evidence/ch14-measure.txt</
 <p>A request failed and the script stopped on purpose. First run <code class="nw">kubectl apply -f k8s/policies/</code>, because the script may have stopped with the policies removed. A 403 on <code class="nw">/api/grades</code> means the L7 rule in your api policy doesn't list <code class="nw">GET /api/grades</code> exactly. A <code class="nw">500 Server Error</code> or a <code class="nw">KeyError: 'token'</code> points at a portal that isn't healthy. Run <code class="nw">bash check-portal.sh</code>, fix whatever it reports with the help of <a href="ch13.html">chapter 13</a>, and run the measurement again.</p>
 <h2 id="the-results-file-row-by-row">The results file, row by row</h2>
 <p>The summary gives you the headline numbers. The CSV holds every run, and it shows you how much the numbers wander from one run to the next.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cat results/latency.csv</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cat results/latency.csv</code></pre></figure>
 <p><code class="nw">cat</code> prints a file's contents to the screen.</p>
 <p><strong>You should see</strong> a header line and then 20 rows, four for each run.</p>
 <figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>condition,endpoint,run,median_ms,p95_ms,p99_ms,mean_ms
@@ -183,7 +183,7 @@ policies,/api/grades,5,31.68,37.55,44.58,32.47</code></pre></figure>
 <p>Work through it with the test laptop's numbers. For <code class="nw">/api/grades</code> the overhead was 3.15 ms, and the larger of the two stdev values was 3.12 ms. Twice the spread is 6.24 ms, and 3.15 ms is less than that, so the difference is within noise. For <code class="nw">/news</code> the overhead came out negative, minus 0.47 ms, with a spread of 0.98 ms. Policies can't make a request faster, and the negative sign is one more hint that you're looking at noise. On this laptop, then, the policies had no cost that could be measured.</p>
 <p>Do the same with your own numbers, and write it into your results chapter in this shape: "With policies, the median for <code class="nw">/api/grades</code> went from 29.08 ms to 32.23 ms. The run-to-run spread was 3.12 ms, so any difference under about 6.24 ms is within noise. The measured 3.15 ms is well under that, so no latency cost could be measured at this scale." If one of your differences does come out larger than twice its spread, report it as a measured overhead, in milliseconds and in percent.</p>
 <p>Report the p95 too, with a warning about its noise. This command averages the p95 column of the CSV for each condition and page.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>awk -F, &#x27;NR &gt; 1 {sum[$1 &quot; &quot; $2] += $5; n[$1 &quot; &quot; $2]++} END {for (k in sum) printf &quot;%-24s mean p95 %6.2f ms\n&quot;, k, sum[k] / n[k]}&#x27; results/latency.csv | sort</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>awk -F, &#x27;NR &gt; 1 {sum[$1 &quot; &quot; $2] += $5; n[$1 &quot; &quot; $2]++} END {for (k in sum) printf &quot;%-24s mean p95 %6.2f ms\n&quot;, k, sum[k] / n[k]}&#x27; results/latency.csv | sort</code></pre></figure>
 <p><code class="nw">awk</code> reads a file line by line and runs a small program on each line. <code class="nw">-F,</code> tells it the columns are separated by commas. <code class="nw">NR &gt; 1</code> skips line 1, the header. For every other line, <code class="nw">sum[...] += $5</code> adds column 5, the p95, to a running total for that condition and page, and <code class="nw">n[...]++</code> counts the rows. <code class="nw">END</code> runs once after the last line, and its <code class="nw">printf</code> prints each total divided by its count. <code class="nw">| sort</code> puts the four lines in alphabetical order, since awk prints them in no fixed order.</p>
 <p><strong>You should see</strong> four lines, one per condition and page.</p>
 <p>On the test laptop the p95 was lower with policies for both pages, 74.08 against 87.18 ms for <code class="nw">/api/grades</code>. The two slow runs without policies, which you saw in the CSV, pulled that average up. That's noise too, so report the p95 next to the median and say that its run-to-run spread was larger than the difference.</p>
@@ -192,13 +192,13 @@ policies,/api/grades,5,31.68,37.55,44.58,32.47</code></pre></figure>
 <p>You're not in <code class="nw">~/microseg</code>, or the measurement didn't finish. Run <code class="nw">cd ~/microseg</code> and check that the previous step printed the file.</p>
 <h2 id="count-the-policies-and-l7-rules">Count the policies and L7 rules</h2>
 <p>The cost of segmentation also includes the rules someone has to write and maintain. Count them.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus get cnp --no-headers | wc -l</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>kubectl -n campus get cnp --no-headers | wc -l</code></pre></figure>
 <p><code class="nw">--no-headers</code> leaves out the NAME, AGE and VALID heading line. <code class="nw">wc -l</code> counts the lines it receives, one per policy.</p>
 <p><strong>You should see</strong> one number.</p>
 <figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>10</code></pre></figure>
 <p>It must be <code class="nw">10</code>, three from <code class="nw">1-baseline.yaml</code> and seven from <code class="nw">2-allow.yaml</code>.</p>
 <p>The L7 rules sit in the api policy, and <code class="nw">grep</code> can count them.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>grep -c &quot;method:&quot; k8s/policies/2-allow.yaml</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>grep -c &quot;method:&quot; k8s/policies/2-allow.yaml</code></pre></figure>
 <p>Every HTTP rule in the api policy has exactly one <code class="nw">method:</code> line, and <code class="nw">grep -c</code> counts the lines that contain the text.</p>
 <p>It must be <code class="nw">3</code>, for <code class="nw">GET /api/grades</code>, <code class="nw">GET /api/profile</code> and <code class="nw">POST /api/login</code>.</p>
 <p class="ifnot"><strong>If you see this instead</strong></p>
@@ -288,11 +288,11 @@ policies,/api/grades,5,31.68,37.55,44.58,32.47</code></pre></figure>
 <p>The numbers you typed sit at the left edge of their cells and the chart stays empty. Excel read them as text because of the decimal separator. Retype them with the decimal separator your Windows uses.</p>
 <h2 id="checkpoint">Checkpoint</h2>
 <p><strong>Checkpoint.</strong> Run this and compare.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>wc -l results/latency.csv</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>wc -l results/latency.csv</code></pre></figure>
 <p>The output must be exactly <code class="nw">21 results/latency.csv</code>, the header plus 20 rows. If you ran the measurement more than once, check that <code class="nw">evidence/ch14-measure.txt</code> ends with the summary, the six lines under <code class="nw">Mean of the run medians:</code>. <code class="nw">tee</code> rewrites that file on every run, and the <code class="nw">time</code> result and any error go only to the screen, never into the file. If the summary is missing, that run stopped early and <code class="nw">results/latency.csv</code> is still from an older run, so run the measurement again before you trust it.</p>
 <figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>21 results/latency.csv</code></pre></figure>
 <p>Save your work. The <code class="nw">results/</code> folder is listed in <code class="nw">.gitignore</code>, so Git skips it, and the first line copies the CSV into <code class="nw">evidence/</code>, which Git keeps.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
 cp results/latency.csv evidence/latency.csv
 git add -A &amp;&amp; git commit -m &quot;ch12: latency measurement&quot;</code></pre></figure>
 <p>The first line starts with <code class="nw">[main</code>. Below the count of changed files, three <code class="nw">create mode</code> lines name <code class="nw">evidence/ch14-measure.txt</code>, <code class="nw">evidence/latency.csv</code> and <code class="nw">measure.py</code>.</p>

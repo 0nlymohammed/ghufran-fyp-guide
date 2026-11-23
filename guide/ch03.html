@@ -56,7 +56,7 @@ instanceIdleTimeout=-1</code></pre></figure>
 <p>(8) <code class="nw">[general]</code> starts the section with settings for WSL as a whole.</p>
 <p>(9) <code class="nw">instanceIdleTimeout=-1</code> keeps Ubuntu running after you close its last terminal window. Without it, WSL stops Ubuntu a short while after the last window closes, and Docker, your cluster and the dashboard stop with it.</p>
 <p>Now check from PowerShell that Windows sees the file under the right name. Open Windows PowerShell and run this.</p>
-<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>Get-Content &quot;$env:USERPROFILE\.wslconfig&quot;</code></pre></figure>
+<figure class="code cmd ps"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>Get-Content &quot;$env:USERPROFILE\.wslconfig&quot;</code></pre></figure>
 <p><code class="nw">Get-Content</code> prints a text file. <code class="nw">$env:USERPROFILE</code> is PowerShell's name for your Windows user folder, the same folder <code class="nw">%USERPROFILE%</code> opened in Notepad.</p>
 <p><strong>You should see</strong> the text you pasted, line for line.</p>
 <figure class="code file"><figcaption><span class="lbl">File: .wslconfig</span><button type="button" class="copy" aria-label="Copy this file">Copy</button></figcaption><pre dir="ltr"><code>[wsl2]
@@ -76,7 +76,7 @@ instanceIdleTimeout=-1</code></pre></figure>
 <p>The file prints, but the long line is broken in two, or a line starts with a space. Open it again with <code>notepad "$env:USERPROFILE\.wslconfig"</code> in PowerShell, put the text back exactly as shown above and save.</p>
 <h2 id="restart-wsl-then-check-what-it-got">Restart WSL, then check what it got</h2>
 <p>WSL reads <code class="nw">.wslconfig</code> only when its virtual machine starts. Close every Ubuntu terminal and every VS Code window that is connected to Ubuntu, then stop the whole virtual machine from PowerShell.</p>
-<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>wsl --shutdown
+<figure class="code cmd ps"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>wsl --shutdown
 wsl --list --running</code></pre></figure>
 <p><code class="nw">wsl --shutdown</code> stops every running Linux distribution and the virtual machine they share. <code class="nw">wsl --list --running</code> lists the distributions that are still running, and after a shutdown there should be none.</p>
 <p><strong>You should see</strong> one line saying that no distribution is running.</p>
@@ -84,7 +84,7 @@ wsl --list --running</code></pre></figure>
 <p class="ifnot"><strong>If you see this instead</strong></p>
 <p>The second command still lists <code class="nw">Ubuntu-24.04</code>. A VS Code window or a terminal you forgot has reconnected to Ubuntu and started it again. Close it, wait ten seconds and run both commands once more.</p>
 <p>Now open Ubuntu again the way <a href="ch02.html">chapter 2</a> showed you. Check that the virtual machine got its memory and processors.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>free -h
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>free -h
 nproc</code></pre></figure>
 <p><code class="nw">free -h</code> shows memory, and <code class="nw">-h</code> prints it in human sizes such as <code class="nw">Gi</code> instead of bytes. <code class="nw">nproc</code> prints the number of processors Ubuntu can use.</p>
 <p><strong>You should see</strong> a small memory table followed by a single number.</p>
@@ -97,7 +97,7 @@ Swap:          4.0Gi          0B       4.0Gi
 <p>The total on the <code class="nw">Mem:</code> line is about <code class="nw">7.8Gi</code> instead of <code class="nw">9.7Gi</code>. WSL didn't read your file. Either its name is wrong (go back to the previous step and run the <code class="nw">Get-Content</code> check) or WSL wasn't fully stopped. Close every Ubuntu and VS Code window, run <code class="nw">wsl --shutdown</code> again, wait ten seconds and reopen Ubuntu.</p>
 <p><code class="nw">nproc</code> prints a number below 4. Your laptop has fewer than 4 processor threads, which <a href="ch00.html">chapter 0</a> asked you to check. The lab can't run on this machine.</p>
 <p>Next, check that the kernel modules were loaded.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>lsmod | grep -E &quot;^(xt_socket|xt_TPROXY|cls_bpf|sch_ingress)&quot;</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>lsmod | grep -E &quot;^(xt_socket|xt_TPROXY|cls_bpf|sch_ingress)&quot;</code></pre></figure>
 <p><code class="nw">lsmod</code> lists every loaded kernel module, one per line. The <code class="nw">|</code> symbol, called a pipe, sends that list into <code class="nw">grep</code>, which keeps only matching lines. <code class="nw">-E</code> lets the pattern use <code class="nw">|</code> to mean "or", and <code class="nw">^</code> means the name must sit at the start of the line. So the command keeps the lines for four of the modules from your file.</p>
 <p><strong>You should see</strong> four lines, one per module, each starting with the module's name.</p>
 <figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>cls_bpf                20480  0
@@ -108,7 +108,7 @@ xt_socket              12288  0</code></pre></figure>
 <p class="ifnot"><strong>If you see this instead</strong></p>
 <p>You get no output at all, or fewer than four lines. Look at the <code class="nw">loadKernelModules</code> line in <code class="nw">.wslconfig</code> again for a typo or a line break, fix it, run <code class="nw">wsl --shutdown</code> in PowerShell and reopen Ubuntu.</p>
 <p>Last, check that systemd is running. Systemd is the first program Linux runs at boot, and it launches and supervises background services. One of those services will be Docker's daemon, a program that runs in the background and waits for requests. Ubuntu 24.04 on WSL switches systemd on by default, and these two commands confirm it.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>ps -p 1 -o comm=
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>ps -p 1 -o comm=
 cat /etc/wsl.conf</code></pre></figure>
 <p><code class="nw">ps</code> lists running programs. <code class="nw">-p 1</code> picks process number 1, the first program the system started, and <code class="nw">-o comm=</code> prints only its name, with the <code class="nw">=</code> removing the column heading. <code class="nw">cat</code> prints a file. <code class="nw">/etc/wsl.conf</code> is the settings file that WSL reads for this one distribution, Ubuntu, while <code class="nw">.wslconfig</code> on the Windows side configures the whole virtual machine.</p>
 <p><strong>You should see</strong> <code class="nw">systemd</code> on the first line, then the contents of <code class="nw">/etc/wsl.conf</code>.</p>
@@ -123,7 +123,7 @@ default=student</code></pre></figure>
 <p>The first line reads <code class="nw">init</code> instead of <code class="nw">systemd</code>, and <code class="nw">/etc/wsl.conf</code> has no <code class="nw">systemd=true</code> line. Open the file with <code class="nw">sudo nano /etc/wsl.conf</code>, add the two lines <code class="nw">[boot]</code> and <code class="nw">systemd=true</code> at the end, press Ctrl+O and Enter to save, then Ctrl+X to leave. Run <code class="nw">wsl --shutdown</code> in PowerShell, reopen Ubuntu and check again.</p>
 <h2 id="raise-the-inotify-limits-for-kinds-nodes">Raise the inotify limits for kind's nodes</h2>
 <p>Inotify is the Linux feature that lets a program ask to be told when a file changes. Every kind node runs its own systemd and its own Kubernetes agent, and each of them watches many files. Ubuntu's default limits are sized for one ordinary computer, and three nodes running side by side use them up, after which a node never finishes starting. kind's documentation names this as a known problem and gives these two values.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>echo -e &quot;fs.inotify.max_user_watches=524288\nfs.inotify.max_user_instances=512&quot; | sudo tee /etc/sysctl.d/99-kind.conf
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>echo -e &quot;fs.inotify.max_user_watches=524288\nfs.inotify.max_user_instances=512&quot; | sudo tee /etc/sysctl.d/99-kind.conf
 sudo sysctl --system &gt;/dev/null
 sysctl fs.inotify.max_user_watches fs.inotify.max_user_instances</code></pre></figure>
 <p>The first line writes the new settings to a file. <code class="nw">echo -e</code> prints its text and turns <code class="nw">\n</code> into a line break, so the text becomes two lines, one setting each. The pipe hands those lines to <code>sudo tee /etc/sysctl.d/99-kind.conf</code>, which writes them into that file and also prints them. You need <code class="nw">tee</code> here because files under <code class="nw">/etc</code> belong to the administrator: in <code class="nw">sudo echo ... &gt; file</code>, the <code class="nw">&gt;</code> part would run without administrator rights and fail. Files in <code class="nw">/etc/sysctl.d/</code> are read again at every start, so the setting survives restarts.</p>
@@ -140,7 +140,7 @@ fs.inotify.max_user_instances = 512</code></pre></figure>
 <p>sudo asked for your password and read one of the pasted lines as the password, or the password was mistyped. Press Ctrl+C to stop, run <code class="nw">sudo true</code> on its own, type your password, then paste the block again.</p>
 <h2 id="install-curl-jq-and-python3-venv">Install curl, jq and python3-venv</h2>
 <p>Ubuntu installs software as packages, ready-made bundles that its package manager, apt, downloads from a repository, a server that hosts packages. This step installs four packages that later steps need.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>sudo apt-get update -qq
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>sudo apt-get update -qq
 sudo apt-get install -y -qq ca-certificates curl jq python3-venv &gt;/dev/null
 jq --version</code></pre></figure>
 <p><code class="nw">sudo apt-get update</code> refreshes apt's list of which packages and versions exist. <code class="nw">-qq</code> makes it very quiet. <code class="nw">apt-get install -y</code> installs the packages named after it, and <code class="nw">-y</code> answers "yes" to the question about disk space for you.</p>
@@ -155,7 +155,7 @@ jq --version</code></pre></figure>
 <h2 id="add-dockers-package-repository">Add Docker's package repository</h2>
 <p>Docker Engine is the free Docker program for Linux that builds images and runs containers. Ubuntu's own repository carries an older Docker under another name, so you add Docker's own repository to apt. Apt checks every package from it against Docker's signing key, a public key that proves a package was published by Docker and wasn't altered on the way.</p>
 <p>If Docker Desktop is installed on your Windows, deal with it first. Docker Desktop is a separate Windows program that can put its own <code class="nw">docker</code> command into your Ubuntu, and then your commands reach its engine instead of the one you're about to install. Open Docker Desktop, go to Settings, then Resources, then WSL integration. Untick "Enable integration with my default WSL distro" at the top of that page, because Ubuntu-24.04 is probably your default distribution and that box keeps the integration on whatever the list below it says. Then switch Ubuntu-24.04 off in the list and click "Apply &amp; restart" (some versions label it "Apply"). You don't need to uninstall Docker Desktop, but don't use it for this project. A check later in this chapter confirms which engine answers.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>sudo install -m 0755 -d /etc/apt/keyrings
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>sudo install -m 0755 -d /etc/apt/keyrings
 sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
 sudo chmod a+r /etc/apt/keyrings/docker.asc
 sudo tee /etc/apt/sources.list.d/docker.sources &lt;&lt;EOT
@@ -190,7 +190,7 @@ EOT: command not found</code></pre></figure>
 <p>sudo's 15 minutes ran out, the password question swallowed some of the pasted lines, and bash then ran the file's lines as commands. Press Ctrl+C, run <code class="nw">sudo true</code>, type your password and paste the whole block again. It rewrites the file from the start.</p>
 <h2 id="install-docker-engine-29">Install Docker Engine 29</h2>
 <p>Now apt can fetch Docker from Docker's own repository.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>sudo apt-get update -qq
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>sudo apt-get update -qq
 DOCKER_VERSION=5:29.10.0-1~ubuntu.24.04~noble
 sudo apt-get install -y -qq docker-ce=$DOCKER_VERSION docker-ce-cli=$DOCKER_VERSION containerd.io docker-buildx-plugin docker-compose-plugin &gt;/dev/null
 sudo docker version --format &#x27;docker client {{.Client.Version}} server {{.Server.Version}}&#x27;</code></pre></figure>
@@ -209,15 +209,15 @@ sudo docker version --format &#x27;docker client {{.Client.Version}} server {{.S
 <p>The daemon didn't start, almost always because systemd isn't running. Go back to the systemd check earlier in this chapter.</p>
 <h2 id="let-your-user-run-docker-no-sudo">Let your user run Docker (no sudo)</h2>
 <p>Every Docker command talks to the daemon through a special file, <code class="nw">/var/run/docker.sock</code>, and only members of the <code class="nw">docker</code> group may use it. A group is a named list of users that share a permission. kind, <code class="nw">setup.sh</code> and <code class="nw">deploy.sh</code> call Docker as your user, so your user joins that group.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>sudo usermod -aG docker &quot;$USER&quot;</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>sudo usermod -aG docker &quot;$USER&quot;</code></pre></figure>
 <p><code class="nw">usermod</code> changes a user account. <code class="nw">-G docker</code> names the group, <code class="nw">-a</code> means "add to the groups I'm already in" instead of replacing them, and <code class="nw">"$USER"</code> is your own user name. The command prints nothing.</p>
 <p>Linux reads a user's groups when a session starts, so the change only counts in a fresh session. Close every Ubuntu window, then run this in PowerShell.</p>
-<figure class="code cmd"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>wsl --terminate Ubuntu-24.04</code></pre></figure>
+<figure class="code cmd ps"><figcaption><span class="lbl">PowerShell</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>wsl --terminate Ubuntu-24.04</code></pre></figure>
 <p><code class="nw">wsl --terminate</code> stops one distribution and leaves the virtual machine running. You need it here because <code class="nw">instanceIdleTimeout=-1</code> keeps Ubuntu alive after its windows close, so closing them alone doesn't start a fresh session.</p>
 <p><strong>You should see</strong> one line confirming that the operation completed.</p>
 <figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>The operation completed successfully.</code></pre></figure>
 <p>Open Ubuntu again and run Docker's own test container without <code class="nw">sudo</code>.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>docker run --rm hello-world</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>docker run --rm hello-world</code></pre></figure>
 <p><code class="nw">docker run</code> starts a container from an image, here Docker's tiny test image <code class="nw">hello-world</code>. Docker downloads the image first because it isn't on your laptop yet. <code class="nw">--rm</code> deletes the container once it finishes.</p>
 <p><strong>You should see</strong> the download lines, then a short greeting from Docker.</p>
 <figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>Unable to find image &#x27;hello-world:latest&#x27; locally
@@ -256,14 +256,14 @@ For more examples and ideas, visit:
 <p>The install step failed earlier without you noticing. Don't follow the suggestion Ubuntu prints under that line, because it installs a different Docker. Run the "Install Docker Engine 29" step again and look for any line starting with <code class="nw">E:</code>.</p>
 <h3 id="check-that-ubuntus-own-docker-answers">Check that Ubuntu's own Docker answers</h3>
 <p>If Docker Desktop's WSL integration is still switched on, your <code class="nw">docker</code> commands reach Docker Desktop's engine, with a different version and different settings. Check which engine answers, even if you've never installed Docker Desktop.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>docker info --format &quot;{{.OperatingSystem}}&quot;</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>docker info --format &quot;{{.OperatingSystem}}&quot;</code></pre></figure>
 <p><code class="nw">docker info</code> describes the engine that answered, and <code class="nw">--format</code> picks out the operating system it runs on.</p>
 <p><strong>You should see</strong> one line naming an operating system.</p>
 <figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>Ubuntu 24.04.5 LTS</code></pre></figure>
 <p>The line must start with <code class="nw">Ubuntu 24.04</code>. If it reads <code class="nw">Docker Desktop</code> instead, switch off Docker Desktop's WSL integration for Ubuntu-24.04 as described at the start of "Add Docker's package repository", including the "Enable integration with my default WSL distro" box at the top of that page. Then run <code class="nw">wsl --terminate Ubuntu-24.04</code> in PowerShell, reopen Ubuntu and run the check again.</p>
 <h2 id="install-kind-v0330">Install kind (v0.33.0)</h2>
 <p>kind ("Kubernetes in Docker") builds a Kubernetes cluster out of Docker containers, one container per node. It's a single binary, a ready-to-run program file, so you download it and put it in a folder where bash finds commands. Before you install it, you check its checksum, a fingerprint computed from every byte of the file. The kind project publishes the expected fingerprint next to each download, and if a single byte differs, for example because the download was cut short, the fingerprints don't match.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~
 curl -fsSLO https://kind.sigs.k8s.io/dl/v0.33.0/kind-linux-amd64
 curl -fsSLO https://kind.sigs.k8s.io/dl/v0.33.0/kind-linux-amd64.sha256sum
 sha256sum --check kind-linux-amd64.sha256sum &amp;&amp; sudo install -m 0755 kind-linux-amd64 /usr/local/bin/kind &amp;&amp; rm kind-linux-amd64 kind-linux-amd64.sha256sum
@@ -285,7 +285,7 @@ sha256sum: WARNING: 1 computed checksum did NOT match</code></pre></figure>
 <p>The version number in the address is mistyped. Copy the block again from this page.</p>
 <h2 id="install-kubectl-v1366">Install kubectl (v1.36.6)</h2>
 <p>kubectl is the command you use to talk to Kubernetes: to create things, list them, read logs and run commands inside pods. Its version should be close to the cluster's Kubernetes version, which is 1.36 in this guide.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~
 curl -fsSLO https://dl.k8s.io/release/v1.36.6/bin/linux/amd64/kubectl
 curl -fsSLO https://dl.k8s.io/release/v1.36.6/bin/linux/amd64/kubectl.sha256
 echo &quot;$(cat kubectl.sha256)  kubectl&quot; | sha256sum --check &amp;&amp; sudo install -m 0755 kubectl /usr/local/bin/kubectl &amp;&amp; rm kubectl kubectl.sha256
@@ -304,7 +304,7 @@ sha256sum: WARNING: 1 computed checksum did NOT match</code></pre></figure>
 <p>The first <code class="nw">curl</code> line failed, so there's no file to check. Scroll up for a <code class="nw">curl:</code> error, fix the connection and run the block again.</p>
 <h2 id="install-the-cilium-command-v0203">Install the cilium command (v0.20.3)</h2>
 <p>The cilium command installs Cilium into a cluster and reports on its health. Cilium itself runs inside the cluster from <a href="ch04.html">chapter 4</a> on, and this command is how you install and inspect it from Ubuntu.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~
 V=v0.20.3
 curl -fsSL --remote-name-all https://github.com/cilium/cilium-cli/releases/download/$V/cilium-linux-amd64.tar.gz{,.sha256sum}
 sha256sum --check cilium-linux-amd64.tar.gz.sha256sum &amp;&amp; sudo tar xzfC cilium-linux-amd64.tar.gz /usr/local/bin &amp;&amp; rm cilium-linux-amd64.tar.gz*
@@ -328,7 +328,7 @@ sha256sum: WARNING: 1 computed checksum did NOT match</code></pre></figure>
 <p>GitHub has no file at that address, almost always because the version was retyped with a typo. Copy the block again from this page and run it.</p>
 <h2 id="install-the-hubble-command-v1204">Install the hubble command (v1.20.4)</h2>
 <p>The hubble command reads Hubble's record of every connection in the cluster. You'll use it to prove which connections your policies dropped.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~
 V=v1.20.4
 curl -fsSL --remote-name-all https://github.com/cilium/hubble/releases/download/$V/hubble-linux-amd64.tar.gz{,.sha256sum}
 sha256sum --check hubble-linux-amd64.tar.gz.sha256sum &amp;&amp; sudo tar xzfC hubble-linux-amd64.tar.gz /usr/local/bin &amp;&amp; rm hubble-linux-amd64.tar.gz*
@@ -340,7 +340,7 @@ hubble v1.20.4@HEAD-3e268bb compiled with go1.27.3 on linux/amd64</code></pre></
 <p>The version line must start with <code class="nw">hubble v1.20.4</code>. If the check line says <code class="nw">FAILED</code>, or curl reports error 404, the causes and the fixes are the same as for the cilium command.</p>
 <h2 id="create-the-python-virtual-environment-venv">Create the Python virtual environment (<code class="nw">.venv</code>)</h2>
 <p>Your dashboard (<a href="ch07.html">chapter 7</a>) and the latency test (<a href="ch12.html">chapter 12</a>) run with Python directly in Ubuntu and need two packages, Flask for the web pages and Requests for sending HTTP requests. Ubuntu 24.04 refuses to install packages into its own system Python, because they could break programs that Ubuntu itself depends on. So you create a virtual environment, a private copy of Python in a folder of its own, and install the packages there with pip, Python's package installer.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>python3 -m venv ~/microseg/.venv
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>python3 -m venv ~/microseg/.venv
 ~/microseg/.venv/bin/pip install flask==3.1.0 requests==2.32.3
 ~/microseg/.venv/bin/pip list | grep -iE &quot;^(flask|requests) &quot;</code></pre></figure>
 <p><code>python3 -m venv ~/microseg/.venv</code> creates the environment in the hidden folder <code class="nw">.venv</code> inside your project. The dot at the start of the name hides it from a plain <code class="nw">ls</code>, and the <code class="nw">.gitignore</code> file from <a href="ch02.html">chapter 2</a> already keeps it out of Git. The second line runs the pip that belongs to that environment, so the packages go into <code class="nw">.venv</code> and nowhere else. <code class="nw">==</code> pins the exact versions the guide was tested with. The last line asks the environment's pip for its list of installed packages, and <code class="nw">grep -iE</code> keeps the two lines that start with <code class="nw">flask</code> or <code class="nw">requests</code>, where <code class="nw">-i</code> ignores the difference between capital and small letters.</p>
@@ -403,13 +403,13 @@ requests           2.32.3</code></pre></figure>
 <p>The <code class="nw">python3-venv</code> package is missing. Run <code>sudo apt-get install -y python3-venv</code>, delete the half-made folder with <code class="nw">rm -rf ~/microseg/.venv</code> and run both lines again.</p>
 <h2 id="check-the-free-space-on-drive-c">Check the free space on drive C:</h2>
 <p>Ubuntu keeps all of its files in one virtual disk file on drive C:, and that file grows as the cluster downloads images. A full build needs about 10 GB more than you have used so far. If C: fills up in the middle of <a href="ch04.html">chapter 4</a>, Ubuntu switches its disk to read-only and every command starts failing, so check the space now.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>df -h /mnt/c</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>df -h /mnt/c</code></pre></figure>
 <p><code class="nw">df</code> shows how much space a drive has, <code class="nw">-h</code> prints the sizes in GB instead of bytes, and <code class="nw">/mnt/c</code> is drive C: as Ubuntu sees it.</p>
 <p>The command prints one line for <code class="nw">C:\</code> with four sizes. Look at the <code class="nw">Avail</code> column.</p>
 <p>It must show at least <code class="nw">15G</code>. If it shows less, free space on Windows before you go on. Empty the Recycle Bin, delete large files you no longer need from Downloads, and in Windows Settings open System, then Storage, then Temporary files and remove them. Then run <code class="nw">df -h /mnt/c</code> again.</p>
 <h2 id="check-the-whole-environment-check-envsh">Check the whole environment (<code class="nw">check-env.sh</code>)</h2>
 <p>The last step is a script that tests everything you set up, one line per check, so an install that failed without you noticing shows up here as <code class="nw">FAIL</code> and not as a confusing error in <a href="ch04.html">chapter 4</a>. Open a new file for it in VS Code from the Ubuntu terminal.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>code ~/microseg/check-env.sh</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>code ~/microseg/check-env.sh</code></pre></figure>
 <p><code class="nw">code</code> followed by a file path opens that file in VS Code, connected to your Ubuntu. The file doesn't exist yet, so VS Code shows an empty editor with <code class="nw">check-env.sh</code> on its tab and creates the file when you save. Paste the file below into the empty editor. Look at the status bar at the bottom right. It must show <code class="nw">LF</code>, as <a href="ch02.html">chapter 2</a> explained. If it shows <code class="nw">CRLF</code>, click it and choose <code class="nw">LF</code>. Then press Ctrl+S.</p>
 <figure class="code file"><figcaption><span class="lbl">File: check-env.sh</span><button type="button" class="copy" aria-label="Copy this file">Copy</button></figcaption><pre dir="ltr"><code>#!/bin/bash
 # Checks that the lab environment is ready. Run from WSL:  bash ~/microseg/check-env.sh
@@ -530,7 +530,7 @@ echo &quot;$passed of $total checks passed&quot;</code></pre></figure>
 </tbody>
 </table></div>
 <p>Run the script.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
 bash check-env.sh</code></pre></figure>
 <p><code class="nw">bash check-env.sh</code> runs the file with bash. It doesn't need to be marked as runnable for that.</p>
 <p><strong>You should see</strong> fourteen lines starting with <code class="nw">OK</code> and a count at the end.</p>
@@ -558,12 +558,12 @@ OK    python venv has flask
 <p>The file was saved somewhere else, or under another name. Run <code class="nw">ls ~/microseg</code> and look for it. If it was saved as <code class="nw">check-env.sh.txt</code>, rename it with <code>mv ~/microseg/check-env.sh.txt ~/microseg/check-env.sh</code>. <code class="nw">mv</code> moves or renames a file, and it takes the old name first and the new name second. If the file isn't in <code class="nw">~/microseg</code> at all, create it again with <code class="nw">code ~/microseg/check-env.sh</code>.</p>
 <h2 id="checkpoint">Checkpoint</h2>
 <p>Run the script once more and print only its last line.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>bash ~/microseg/check-env.sh | tail -n 1</code></pre></figure>
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>bash ~/microseg/check-env.sh | tail -n 1</code></pre></figure>
 <p><code class="nw">tail -n 1</code> keeps only the last line of what it receives.</p>
 <figure class="code out"><figcaption><span class="lbl">Output</span></figcaption><pre dir="ltr"><code>14 of 14 checks passed</code></pre></figure>
 <p>It must read exactly <code class="nw">14 of 14 checks passed</code>. Don't start <a href="ch04.html">chapter 4</a> until it does.</p>
 <p>Save this state in Git.</p>
-<figure class="code cmd"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
+<figure class="code cmd sh"><figcaption><span class="lbl">Ubuntu terminal</span><button type="button" class="copy" aria-label="Copy this command">Copy</button></figcaption><pre dir="ltr"><code>cd ~/microseg
 git add -A
 git commit -m &quot;ch03: environment ready&quot;</code></pre></figure>
 <p><code class="nw">git add -A</code> stages every new and changed file in the project, here <code class="nw">check-env.sh</code>. The <code class="nw">.venv</code> folder is left out because <code class="nw">.gitignore</code> names it. <code class="nw">git commit -m</code> saves the snapshot with the message after <code class="nw">-m</code>. Git answers with a line that contains <code class="nw">main</code>, a short commit code and your message, followed by <code class="nw">1 file changed</code>.</p>
